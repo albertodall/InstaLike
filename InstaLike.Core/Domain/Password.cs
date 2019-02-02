@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
@@ -7,6 +9,8 @@ namespace InstaLike.Core.Domain
     public class Password : ValueObject
     {
         private const byte MinimumPasswordLength = 6;
+        private const byte SaltSize = 16;
+        private const byte HashSize = 20;
 
         public virtual string Value { get; }
 
@@ -30,7 +34,7 @@ namespace InstaLike.Core.Domain
                 return Result.Fail<Password>("Password is too short. Minimum allowed length is 6 characters. ");
             }
 
-            return Result.Ok(new Password(password));
+            return Result.Ok(new Password(HashPassword(password)));
 
         }
 
@@ -52,6 +56,28 @@ namespace InstaLike.Core.Domain
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
+        }
+
+        private static string HashPassword(string password)
+        {
+            string encryptedPassword = string.Empty;
+
+            byte[] salt;
+            using (var csp = new RNGCryptoServiceProvider())
+            {
+                csp.GetBytes(salt = new byte[SaltSize]);
+            }
+
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000))
+            {
+                byte[] hash = pbkdf2.GetBytes(HashSize);
+                byte[] hashBytes = new byte[SaltSize + HashSize];
+                Array.Copy(salt, 0, hashBytes, 0, SaltSize);
+                Array.Copy(hash, 0, hashBytes, SaltSize, HashSize);
+                encryptedPassword = Convert.ToBase64String(hashBytes);
+            }
+
+            return encryptedPassword;
         }
     }
 }

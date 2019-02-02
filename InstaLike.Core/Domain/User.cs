@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Services;
 
 namespace InstaLike.Core.Domain
 {
@@ -23,7 +22,6 @@ namespace InstaLike.Core.Domain
             _email = email ?? throw new ArgumentNullException(nameof(email)) ;
             FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
             LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
-            
         }
 
         private string _nickName;
@@ -47,19 +45,18 @@ namespace InstaLike.Core.Domain
         public virtual Email Email => (Email)_email;
 
         public virtual Picture ProfilePicture { get; protected set; }
-        public virtual string Bio { get; protected set; }
+        public virtual string Biography { get; protected set; }
         public virtual DateTimeOffset RegistrationDate { get; protected set; }
         public virtual IReadOnlyList<User> Followers => _followers.ToList();
         public virtual IReadOnlyList<User> Following => _following.ToList();
 
-        public virtual Result SetPassword(string password, IPasswordEncryptionService encryptor)
+        public virtual Result ChangePassword(string password)
         {
             var passwordResult = Password.Create(password);
             if (passwordResult.IsFailure)
             {
                 return Result.Fail(passwordResult.Error);
             }
-            _password = encryptor.Encrypt(passwordResult.Value);
             return Result.Ok();
         }
     }
