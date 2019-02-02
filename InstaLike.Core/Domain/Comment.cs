@@ -7,15 +7,15 @@ namespace InstaLike.Core.Domain
         protected Comment()
         { }
 
-        public Comment(Post post, User user, string commentText)
+        public Comment(Post post, User user, string text)
         {
             Post = post;
             User = User;
-            CommentText = commentText ?? throw new ArgumentNullException(nameof(commentText));
+            Text = text ?? throw new ArgumentNullException(nameof(text));
         }
 
         public virtual Post Post { get; }
         public virtual User User { get; }
-        public virtual string CommentText { get; }
+        public virtual string Text { get; }
     }
 }

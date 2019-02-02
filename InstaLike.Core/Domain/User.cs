@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Services;
 
@@ -6,8 +8,14 @@ namespace InstaLike.Core.Domain
 {
     public class User : EntityBase<int>
     {
+        private readonly IList<User> _followers;
+        private readonly IList<User> _following;
+
         protected User()
-        { }
+        {
+            _followers = new List<User>();
+            _following = new List<User>();
+        }
 
         public User(string nickName, string firstName, string lastName, Email email)
         {
@@ -39,10 +47,10 @@ namespace InstaLike.Core.Domain
         public virtual Email Email => (Email)_email;
 
         public virtual Picture ProfilePicture { get; protected set; }
-
         public virtual string Bio { get; protected set; }
-
         public virtual DateTimeOffset RegistrationDate { get; protected set; }
+        public virtual IReadOnlyList<User> Followers => _followers.ToList();
+        public virtual IReadOnlyList<User> Following => _following.ToList();
 
         public virtual Result SetPassword(string password, IPasswordEncryptionService encryptor)
         {

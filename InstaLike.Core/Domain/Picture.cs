@@ -32,6 +32,7 @@ namespace InstaLike.Core.Domain
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Identifier;
+            yield return FileName;
             yield return RawBytes;
         }
     }

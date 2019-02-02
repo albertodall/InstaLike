@@ -27,7 +27,7 @@ namespace InstaLike.Core.Domain
 
             if (password.Length < MinimumPasswordLength)
             {
-                return Result.Fail<Password>("Password is too short. Minimum allowed lenght is 6 characters. ");
+                return Result.Fail<Password>("Password is too short. Minimum allowed length is 6 characters. ");
             }
 
             return Result.Ok(new Password(password));
@@ -46,7 +46,7 @@ namespace InstaLike.Core.Domain
 
         public override string ToString()
         {
-            return Enumerable.Repeat('*', MinimumPasswordLength).ToString(); ;
+            return Enumerable.Repeat('*', MinimumPasswordLength).ToString();
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
