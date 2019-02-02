@@ -7,7 +7,6 @@ namespace InstaLike.Core.Domain
     public class Picture : ValueObject
     {
         public virtual Guid Identifier { get; }
-        public virtual string FileName { get; }
         public virtual byte[] RawBytes { get; }
 
         protected Picture()
@@ -32,7 +31,6 @@ namespace InstaLike.Core.Domain
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Identifier;
-            yield return FileName;
             yield return RawBytes;
         }
     }

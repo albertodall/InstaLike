@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpFunctionalExtensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,5 +33,22 @@ namespace InstaLike.Core.Domain
         public virtual IReadOnlyList<Comment> Comments => _comments.ToList();
 
         public virtual IReadOnlyList<Like> Likes => _likes.ToList();
+
+        public void Like(User user)
+        {
+            if (!Likes.Any(like => like.User == user))
+            {
+                _likes.Add(new Like(this, user));
+            }
+        }
+
+        public void RemoveLike(User user)
+        {
+            var likeToRemove = Likes.FirstOrDefault(like => like.User == user);
+            if (likeToRemove != null)
+            {
+                _likes.Remove(likeToRemove);
+            }
+        }
     }
 }
