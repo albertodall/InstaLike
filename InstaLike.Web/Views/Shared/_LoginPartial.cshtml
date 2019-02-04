@@ -2,28 +2,28 @@
 {
     <ul>
         <li class="btn_share">
-            <a href="@Url.Action("Pubblica", "Post")" title="Condividi una foto">
-                Condividi una foto
+            <a href="@Url.Action("Publish", "Post")" title="Share your picture">
+                Share your picture
             </a>
         </li>
         <li class="btn_alert">
-            <a href="@Url.Action("Index", "Notifiche")" title="Notifiche">
+            <a href="@Url.Action("Index", "Notifications")" title="Notifications">
                 Notifiche
-                @{ var conteggioNotifiche = Html.Action("Conteggio", "Notifiche").ToString(); }
-                @if (int.Parse(conteggioNotifiche) > 0)
+                @*@{ var notificationsCount = Html.Action("Count", "Notifications").ToString(); }
+                @if (int.Parse(notificationsCount) > 0)
                 {
-                    <span> (@conteggioNotifiche)</span>
-                }
+                    <span> (@notificatiosCount)</span>
+                }*@
             </a>
         </li>
         <li class="btn_user">
-            <a href="@Url.Action("ProfiloUtente", "Account", new { id = User.Identity.Name })" title="Profilo utente">
-                Profilo utente
+            <a href="@Url.Action("Profile", "Account", new { id = User.Identity.Name })" title="User profile">
+                User profile
             </a>
         </li>
         <li class="btn_logout">
-            <a href="@Url.Action("Logout", "Account")" title="Disconnetti">
-                Disconnetti
+            <a href="@Url.Action("Logout", "Account")" title="Logout">
+                Logout
             </a>
         </li>
     </ul>
@@ -32,10 +32,10 @@ else
 {
     <ul>
         <li class="btn_register">
-            <a href="@Url.Action("Registrati", "Account")" title="Registrati">Registrati</a>
+            <a href="@Url.Action("Register", "Account")" title="Registrati">Register</a>
         </li>
         <li class="btn_login">
-            <a href="@Url.Action("Login", "Account")" title="Accedi">Accedi</a>
+            <a href="@Url.Action("Login", "Account")" title="Accedi">Login</a>
         </li>
     </ul>
 }

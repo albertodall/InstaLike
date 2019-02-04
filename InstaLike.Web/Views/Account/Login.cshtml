@@ -1,0 +1,37 @@
+﻿@using InstaLike.Web.Models
+
+@model LoginModel
+
+@{
+    ViewBag.Title = "Login to InstaLike";
+}
+
+<div>
+    <h2>Login to InstaLike</h2>
+
+    <form method="post" asp-controller="Account" asp-action="Login" asp-antiforgery="true" asp-route-returnurl="@ViewBag.ReturnUrl">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div class="form_login">
+            <div>
+                <label asp-for="Username"></label>
+                <input asp-for="Username" type="text" placeholder="Username" />
+                <span asp-validation-for="Username"></span>
+            </div>
+            <div>
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" placeholder="Password" />
+                <span asp-validation-for="Password"></span>
+            </div>
+            <div>
+                <label asp-for="RememberMe"></label>
+                <input asp-for="RememberMe" type="checkbox" />
+                <span asp-validation-for="RememberMe"></span>
+            </div>
+            <button type="submit">Login</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

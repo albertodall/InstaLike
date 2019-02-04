@@ -1,0 +1,8 @@
+﻿namespace InstaLike.Web.Models
+{
+    public class PostThumbnailModel
+    {
+        public int PostID { get; set; }
+        public byte[] Picture { get; set; }
+    }
+}
