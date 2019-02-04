@@ -1,0 +1,41 @@
+﻿@if (User.Identity.IsAuthenticated)
+{
+    <ul>
+        <li class="btn_share">
+            <a href="@Url.Action("Pubblica", "Post")" title="Condividi una foto">
+                Condividi una foto
+            </a>
+        </li>
+        <li class="btn_alert">
+            <a href="@Url.Action("Index", "Notifiche")" title="Notifiche">
+                Notifiche
+                @{ var conteggioNotifiche = Html.Action("Conteggio", "Notifiche").ToString(); }
+                @if (int.Parse(conteggioNotifiche) > 0)
+                {
+                    <span> (@conteggioNotifiche)</span>
+                }
+            </a>
+        </li>
+        <li class="btn_user">
+            <a href="@Url.Action("ProfiloUtente", "Account", new { id = User.Identity.Name })" title="Profilo utente">
+                Profilo utente
+            </a>
+        </li>
+        <li class="btn_logout">
+            <a href="@Url.Action("Logout", "Account")" title="Disconnetti">
+                Disconnetti
+            </a>
+        </li>
+    </ul>
+}
+else
+{
+    <ul>
+        <li class="btn_register">
+            <a href="@Url.Action("Registrati", "Account")" title="Registrati">Registrati</a>
+        </li>
+        <li class="btn_login">
+            <a href="@Url.Action("Login", "Account")" title="Accedi">Accedi</a>
+        </li>
+    </ul>
+}

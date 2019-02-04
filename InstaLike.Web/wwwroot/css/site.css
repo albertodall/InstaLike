@@ -1,0 +1,844 @@
+﻿body {
+    margin: 20px;
+    padding: 0;
+    font-family: sans-serif, Tahoma;
+    font-size: 12px;
+    background-color: #25537c;
+}
+
+header {
+    height: 100px;
+    margin-bottom: 10px;
+    background-image: url(../Images/InstaLike-logo.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+    header a {
+        display: block;
+        height: 100px;
+    }
+
+footer {
+    text-align: center;
+    font-size: 11px;
+    color: #CCC;
+    padding-top: 20px;
+    clear: both;
+}
+
+.main {
+    width: 600px;
+    padding: 20px 40px;
+    margin: 0 auto;
+    background-color: #FFF;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.body-contenuto {
+    padding: 20px 0;
+}
+
+    .body-contenuto h2 {
+        color: #4685c2;
+        text-transform: uppercase;
+        border-bottom: 1px dashed #4685c2;
+    }
+
+input[type=text],
+input[type=password],
+input[type=email],
+select {
+    max-width: 280px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    box-sizing: border-box;
+    padding: 0 10px;
+}
+
+textarea {
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    box-sizing: border-box;
+    padding: 5px;
+    width: 100%;
+    min-height: 200px;
+    margin: 10px 0;
+    display: block;
+}
+
+.msg {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #ffffcc;
+    padding: 20px;
+    border: 1px solid #ebe5b6;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.validation-summary-errors ul {
+    list-style-type: none;
+    margin: 10px 0;
+    padding: 0;
+}
+
+.validation-summary-errors li {
+    color: red;
+    font-style: italic;
+    background-image: url(../Images/icon_warning.png);
+    background-position: 0 top;
+    background-size: 14px;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+/*CLASSI x USERLOGIN*/
+.user {
+    padding: 1px;
+}
+
+    .user ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        text-align: center;
+    }
+
+    .user li {
+        display: inline-block;
+    }
+
+    .user a {
+        height: 32px;
+        line-height: 32px;
+        margin: 3px;
+        border-radius: 3px;
+        border: 1px solid #CCC;
+        display: block;
+        text-decoration: none;
+        padding: 0 10px 0 40px;
+        background-repeat: no-repeat;
+        background-position: 10px center;
+        background-size: 20px;
+        font-size: 11px;
+        color: black;
+    }
+
+    .user .btn_share a {
+        background-image: url(../Images/icon_photo.png);
+    }
+
+    .user .btn_alert a {
+        background-image: url(../Images/icon_alert.png);
+    }
+
+    .user .btn_user a {
+        background-image: url(../Images/icon_user.png);
+    }
+
+    .user .btn_logout a {
+        background-image: url(../Images/icon_logout.png);
+    }
+
+    .user .btn_login a {
+        background-image: url(../Images/icon_login.png);
+    }
+
+    .user .btn_register a {
+        background-image: url(../Images/icon_register.png);
+    }
+
+/*CLASSI x POST*/
+.posts > div {
+    margin-bottom: 40px;
+}
+
+.posts .image-timeline {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    border: 10px solid #FFF;
+    box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
+    margin: 10px 0;
+}
+
+.posts .author {
+    margin: 5px 0;
+    position: relative;
+    padding-left: 40px;
+    min-height: 30px;
+    color: #AAA;
+}
+
+    .posts .author img {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+    }
+
+    .posts .author a {
+        display: block;
+        text-decoration: none;
+        font-weight: bold;
+        color: #000;
+    }
+
+.posts .post-likes button {
+    border: 1px solid #CCC;
+    background-color: #FFF;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 3px;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    background-image: url(../Images/icon_heart_empty.png);
+    font-size: 11px;
+    color: black;
+}
+
+.posts .post-likes strong {
+    padding: 0 10px;
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.posts .post-likes .post-piaciuto {
+    opacity: 0.4;
+    background-image: url(../Images/icon_heart.png);
+}
+
+.posts .commento-autore-post {
+    padding: 10px;
+    background-color: #d8ecff;
+    margin-bottom: 20px;
+    font-style: italic;
+    margin-right: 40px;
+    border-radius: 10px;
+    position: relative;
+}
+
+    .posts .commento-autore-post::before {
+        position: absolute;
+        left: -6px;
+        top: -6px;
+        content: "";
+        width: 0;
+        height: 0;
+        border-top: 6px solid transparent;
+        border-right: 12px solid #d8ecff;
+        border-bottom: 6px solid transparent;
+        transform: rotate(45deg);
+    }
+
+.posts .commenti-post {
+    padding: 0;
+    padding-left: 40px;
+    margin: 0;
+    list-style-type: none;
+}
+
+    .posts .commenti-post li {
+        display: block;
+        background-color: #e6f1fb;
+        border-radius: 10px;
+        margin: 10px 0 15px 0;
+        padding: 10px;
+        position: relative;
+    }
+
+        .posts .commenti-post li::before {
+            position: absolute;
+            right: -6px;
+            bottom: -6px;
+            content: "";
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-left: 12px solid #e6f1fb;
+            border-bottom: 6px solid transparent;
+            transform: rotate(45deg);
+        }
+
+    .posts .commenti-post a {
+        background-color: #e6f1fb;
+        display: block;
+        text-decoration: none;
+        color: #000;
+        padding: 5px 10px 0 10px;
+        position: absolute;
+        border-radius: 5px;
+        top: -10px;
+        left: 0;
+    }
+
+    .posts .commenti-post span {
+        font-size: 11px;
+        opacity: 0.6;
+    }
+
+    .posts .commenti-post li.nascosto {
+        display: none;
+    }
+
+        .posts .commenti-post li.nascosto.mostra-tutti {
+            display: block;
+        }
+
+.posts .visualizza-tutti-commenti {
+    height: 32px;
+    line-height: 32px;
+    margin: 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    background-color: #FFF;
+    float: right;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    background-image: url(../Images/icon_show.png);
+    font-size: 11px;
+}
+
+.posts input[type=text] {
+    height: 32px;
+    line-height: 32px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    box-sizing: border-box;
+    padding: 0 10px;
+}
+
+.post-dettaglio .author {
+    margin: 5px 0;
+    position: relative;
+    padding-left: 40px;
+    min-height: 30px;
+    color: #AAA;
+}
+
+    .post-dettaglio .author img {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+    }
+
+    .post-dettaglio .author a {
+        display: block;
+        text-decoration: none;
+        font-weight: bold;
+        color: #000;
+    }
+
+.post-dettaglio .immagine-post {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    border: 10px solid #FFF;
+    box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
+    margin: 10px 0;
+}
+
+.post-dettaglio .post-likes button {
+    border: 1px solid #CCC;
+    background-color: #FFF;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 3px;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    background-image: url(../Images/icon_heart_empty.png);
+    font-size: 11px;
+    color: black;
+}
+
+.post-dettaglio .post-likes strong {
+    padding: 0 10px;
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.post-dettaglio .post-likes .post-piaciuto {
+    opacity: 0.4;
+    background-image: url(../Images/icon_heart.png);
+}
+
+.post-dettaglio .commento-autore-post {
+    padding: 10px;
+    background-color: #d8ecff;
+    margin-bottom: 20px;
+    font-style: italic;
+    margin-right: 40px;
+    border-radius: 10px;
+    position: relative;
+}
+
+    .post-dettaglio .commento-autore-post::before {
+        position: absolute;
+        left: -6px;
+        top: -6px;
+        content: "";
+        width: 0;
+        height: 0;
+        border-top: 6px solid transparent;
+        border-right: 12px solid #d8ecff;
+        border-bottom: 6px solid transparent;
+        transform: rotate(45deg);
+    }
+
+.post-dettaglio .commenti-post {
+    padding: 0;
+    padding-left: 40px;
+    margin: 0;
+    list-style-type: none;
+}
+
+    .post-dettaglio .commenti-post li {
+        display: block;
+        background-color: #e6f1fb;
+        border-radius: 10px;
+        margin: 10px 0 15px 0;
+        padding: 10px;
+        position: relative;
+    }
+
+        .post-dettaglio .commenti-post li::before {
+            position: absolute;
+            right: -6px;
+            bottom: -6px;
+            content: "";
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-left: 12px solid #e6f1fb;
+            border-bottom: 6px solid transparent;
+            transform: rotate(45deg);
+        }
+
+    .post-dettaglio .commenti-post a {
+        background-color: #e6f1fb;
+        display: block;
+        text-decoration: none;
+        color: #000;
+        padding: 5px 10px 0 10px;
+        position: absolute;
+        border-radius: 5px;
+        top: -10px;
+        left: 0;
+    }
+
+    .post-dettaglio .commenti-post span {
+        font-size: 11px;
+        opacity: 0.6;
+    }
+
+    .post-dettaglio .commenti-post li.nascosto {
+        display: none;
+    }
+
+        .post-dettaglio .commenti-post li.nascosto.mostra-tutti {
+            display: block;
+        }
+
+.post-dettaglio .visualizza-tutti-commenti {
+    height: 32px;
+    line-height: 32px;
+    margin: 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    background-color: #FFF;
+    float: right;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    background-image: url(../Images/icon_show.png);
+    font-size: 11px;
+}
+
+/*CLASSI x NOTIFICHE*/
+.alerts > div {
+    margin-bottom: 20px;
+    position: relative;
+    padding-left: 40px;
+    min-height: 30px;
+}
+
+    .alerts > div img {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+    }
+
+    .alerts > div a {
+        color: #000;
+        font-weight: bold;
+        text-decoration: none;
+        background-color: #e6f1fb;
+        border-radius: 3px;
+        padding: 3px 5px;
+        margin-right: 5px;
+    }
+
+    .alerts > div time {
+        font-size: 11px;
+        opacity: 0.6;
+    }
+
+    .alerts > div p {
+        padding: 0;
+    }
+
+
+.form_reg > DIV {
+    margin-bottom: 10px;
+}
+
+    .form_reg > DIV label {
+        display: block;
+        padding-bottom: 3px;
+    }
+
+    .form_reg > DIV span {
+        display: block;
+        color: red;
+        font-style: italic;
+        background-image: url(../Images/icon_warning.png);
+        background-position: 0 top;
+        background-size: 14px;
+        background-repeat: no-repeat;
+        padding-left: 20px;
+        margin-top: 5px;
+    }
+
+.form_reg input[type=submit] {
+    height: 32px;
+    line-height: 32px;
+    margin: 20px 3px 3px 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    background-color: #FFF;
+    background-image: url(../Images/icon_floppy.png);
+}
+
+.form_login > DIV {
+    margin-bottom: 10px;
+}
+
+.form_login button[type=submit] {
+    height: 32px;
+    line-height: 32px;
+    margin: 20px 3px 3px 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    background-color: #FFF;
+    background-image: url(../Images/icon_login.png);
+}
+
+.form_login > DIV span span {
+    display: block;
+    color: red;
+    font-style: italic;
+    background-image: url(../Images/icon_warning.png);
+    background-position: 0 top;
+    background-size: 14px;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+.form_post > DIV {
+    margin-bottom: 10px;
+}
+
+.form_post button[type=submit] {
+    height: 32px;
+    line-height: 32px;
+    margin: 20px 3px 3px 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    background-color: #FFF;
+    background-image: url(../Images/icon_send.png);
+}
+
+.form_post > DIV span {
+    display: block;
+    color: red;
+    font-style: italic;
+    background-image: url(../Images/icon_warning.png);
+    background-position: 0 top;
+    background-size: 14px;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+/*CLASSI x POPUP*/
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    background: rgba(0,0,0,.70);
+    display: none;
+}
+
+.popup-attivo {
+    z-index: 100;
+    display: block;
+}
+
+.popup-chiudi {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    z-index: 200;
+    width: 30px;
+    text-align: center;
+    color: #000;
+}
+
+.popup-contenuto {
+    background: #fff;
+    border-radius: 5px;
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    right: 10%;
+    bottom: 10%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+    .popup-contenuto h1 {
+        color: #4685c2;
+        font-size: 2em;
+    }
+
+
+/*USERS LIST*/
+.user_list {
+    float: left;
+    width: 100%;
+}
+
+    .user_list DIV {
+        float: left;
+        width: 150px;
+        text-align: center;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        padding-left: 10px;
+    }
+
+        .user_list DIV img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .user_list DIV a {
+            display: block;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+/*USER DETAILS*/
+.profilo-images {
+    width: 100%;
+    float: left;
+}
+
+    .profilo-images A {
+        float: left;
+        width: calc(25% - 2px);
+        padding-bottom: 20%;
+        border: 1px solid #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profilo-images IMG {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+    }
+
+.profilo-posts {
+    width: 100%;
+    float: left;
+    padding: 20px 0;
+}
+
+    .profilo-posts ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 5px 0;
+        border: 1px solid #CCC;
+        float: left;
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 5px;
+    }
+
+    .profilo-posts LI a {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .profilo-posts LI {
+        float: left;
+        width: 33%;
+        font-size: 25px;
+        font-weight: bold;
+        text-align: center;
+        box-sizing: border-box;
+        border-left: 1px solid #CCC;
+    }
+
+        .profilo-posts LI:first-child {
+            border: 0;
+        }
+
+        .profilo-posts LI label {
+            display: block;
+            font-size: 11px;
+            opacity: 0.6;
+        }
+
+.profilo-info img {
+    width: 100px;
+    height: 100px;
+    display: block;
+    float: left;
+    border-radius: 50%;
+    margin-right: 20px;
+    box-shadow: rgba(0,0,0,0.5) 0 0 10px;
+}
+
+.profilo-info .profilo-details h1 {
+    margin: 0;
+    color: #4685c2;
+}
+
+.profilo-info .profilo-details p {
+    font-style: italic;
+    margin: 0;
+    padding: 5px 0;
+}
+
+.profilo-info a {
+    height: 32px;
+    line-height: 32px;
+    margin: 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    float: left;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    color: black;
+}
+
+    .profilo-info a.btn_logout {
+        background-image: url(../Images/icon_logout.png);
+    }
+
+    .profilo-info a.btn_follow,
+    .profilo-info a.btn_following {
+        background-image: url(../Images/icon_follow.png)
+    }
+
+    .profilo-info a.btn_following {
+        opacity: 0.5;
+    }
+
+@media (max-width: 640px) {
+    body {
+        margin: 0;
+        background-color: #FFF;
+    }
+
+    .main {
+        width: auto;
+        padding: 20px;
+        border-radius: 0;
+    }
+
+    .posts .post-likes button,
+    .posts .visualizza-tutti-commenti,
+    .post-dettaglio .post-likes button,
+    .post-dettaglio .visualizza-tutti-commenti,
+    .user *[class*="btn_"] a {
+        font-size: 0;
+        padding-right: 0;
+    }
+
+    .form_reg input[type=text],
+    .form_reg input[type=password],
+    .form_reg input[type=email],
+    .form_login input[type=text],
+    .form_login input[type=password],
+    .form_login input[type=email] {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+    }
+}

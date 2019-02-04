@@ -1,0 +1,14 @@
+﻿@using InstaLike.Web.Models
+
+@model IEnumerable<PostModel>
+
+@{
+    ViewBag.Title = "Timeline";
+}
+
+<div class="posts">
+    @foreach (var post in Model)
+    {
+        <partial name="~/Views/Post/_VisualizzaPostPartial.cshtml" model="post" />
+    }
+</div>

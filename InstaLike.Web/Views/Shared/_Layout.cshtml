@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - InstaLike</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="main">
+        <header>
+            <a href="/"></a>
+        </header>
+        <div class="user">
+            <partial name="~/Views/Shared/_LoginPartial.cshtml" />
+        </div>
+        <div class="body-contenuto">
+            @RenderBody()
+        </div>
+        <footer>
+            <p>&copy; @DateTime.Now.Year - InstaLike</p>
+        </footer>
+    </div>
+
+    <div class="popup">
+        <a class="popup-chiudi" href="#">&times;</a>
+        <div class="popup-contenuto"></div>
+    </div>
+
+    <script src="~/js/InstaLike.js" language="text/javascript"></script>
+</body>
+</html>
