@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,14 +19,14 @@ namespace InstaLike.Core.Domain
         {
             Author = author;
             Picture = picture;
-            Comment = comment;
+            Text = comment;
 
             Date = DateTimeOffset.Now;
         }
 
         public virtual User Author { get; protected set; }
         public virtual Picture Picture { get; protected set; }
-        public virtual string Comment { get; protected set; }
+        public virtual string Text { get; protected set; }
         public virtual DateTimeOffset Date { get; protected set; }
 
         public virtual IReadOnlyList<Comment> Comments => _comments.ToList();

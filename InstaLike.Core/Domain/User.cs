@@ -16,19 +16,19 @@ namespace InstaLike.Core.Domain
             _following = new List<User>();
         }
 
-        public User(string nickName, string firstName, string lastName, Email email)
+        public User(string nickname, string firstName, string lastName, Email email)
         {
-            _nickName = nickName ?? throw new ArgumentNullException(nameof(nickName));
+            _nickname = nickname ?? throw new ArgumentNullException(nameof(nickname));
             _email = email ?? throw new ArgumentNullException(nameof(email)) ;
             FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
             LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
         }
 
-        private string _nickName;
-        public virtual NickName NickName
+        private string _nickname;
+        public virtual NickName Nickname
         {
-            get => (NickName)_nickName;
-            set => _nickName = value;
+            get => (NickName)_nickname;
+            set => _nickname = value;
         }
 
         public virtual string FirstName { get; protected set; }

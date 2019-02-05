@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System.Reflection;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
+using FluentNHibernate.Conventions.Helpers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NHibernate;
 
 namespace InstaLike.Web
 {
@@ -25,10 +30,35 @@ namespace InstaLike.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            var connectionString = Configuration.GetConnectionString("DefaultDatabase");
+            var nhConfig = Fluently.Configure()
+                .Database(
+                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
+                        .DefaultSchema("dbo")
+                        .AdoNetBatchSize(20)
+                        .ShowSql()
+                        .FormatSql()
+                        .UseReflectionOptimizer()
+                )
+                .Mappings(m =>
+                    m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly())
+                        .Conventions.Add(
+                            LazyLoad.Always(), 
+                            DynamicUpdate.AlwaysTrue()
+                ));
+
+            services.AddSingleton(nhConfig.BuildSessionFactory());
+            services.AddScoped(sp =>
+            {
+                var sessionFactory = sp.GetRequiredService<ISessionFactory>();
+                return sessionFactory.OpenSession();
+            });
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
