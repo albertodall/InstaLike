@@ -1,0 +1,75 @@
+﻿@using InstaLike.Web.Models
+
+@model RegisterUserModel
+
+@{
+    ViewData["Title"] = "Register on InstaLike";
+}
+
+<h1>Register</h1>
+
+<form method="post" asp-action="Register" asp-controller="Account" asp-antiforgery="true">
+    <div class="form_reg">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <label asp-for="Nickname"></label>
+            <div>
+                <input asp-for="Nickname" />
+                <span asp-validation-for="Nickname"></span>
+            </div>
+        </div>
+        <div>
+            <label asp-for="Name"></label>
+            <div>
+                <input asp-for="Name" />
+                <span asp-validation-for="Name"></span>
+            </div>
+        </div>
+        <div>
+            <label asp-for="Surname"></label>
+            <div>
+                <input asp-for="Surname" />
+                <span asp-validation-for="Surname"></span>
+            </div>
+        </div>
+        <div>
+            <label asp-for="Password"></label>
+            <div>
+                <input asp-for="Password" />
+                <span asp-validation-for="Password"></span>
+            </div>
+        </div>
+        <div>
+            <label asp-for="ConfirmPassword"></label>
+            <div>
+                <input asp-for="ConfirmPassword" />
+                <span asp-validation-for="ConfirmPassword"></span>
+            </div>
+        </div>
+        <div>
+            <label asp-for="Email"></label>
+            <div>
+                <input asp-for="Email" />
+                <span asp-validation-for="Email"></span>
+            </div>
+        </div>
+        <div>
+            <label asp-for="Biography"></label>
+            <div>
+                <input asp-for="Biography" />
+                <span asp-validation-for="Biography"></span>
+            </div>
+        </div>
+        <div>
+            <input type="file" name="profilePictureFile" id="profilePictureFile" />
+        </div>
+
+        <div>
+            <input class="btn_save" type="submit" value="Register" />
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

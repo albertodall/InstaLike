@@ -5,7 +5,7 @@
     [Name]                  VARCHAR (30)       CONSTRAINT [DF_User_Name] DEFAULT ('') NOT NULL,
     [Surname]               VARCHAR (50)       CONSTRAINT [DF_User_Surname] DEFAULT ('') NOT NULL,
     [Email]				    VARCHAR (50)	   CONSTRAINT [DF_User_Email] DEFAULT('') NOT NULL,
-    [Biography]                   VARCHAR (500)      CONSTRAINT [DF_User_Bio] DEFAULT ('') NOT NULL,
+    [Biography]             VARCHAR (500)      CONSTRAINT [DF_User_Biography] DEFAULT ('') NOT NULL,
     [ProfilePicture]	    VARBINARY (MAX)	   FILESTREAM NOT NULL,
     [RegistrationDate]      DATETIMEOFFSET (7) CONSTRAINT [DF_User_RegistrationDate] DEFAULT (sysdatetimeoffset()) NOT NULL,
     [ProfilePictureGuid]    UNIQUEIDENTIFIER ROWGUIDCOL CONSTRAINT [DF_ProfilePictureGuid] DEFAULT (newsequentialid()) NOT NULL,

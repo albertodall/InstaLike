@@ -23,14 +23,20 @@ namespace InstaLike.Core.Domain
         public bool IsRead { get; protected set; }
         public DateTimeOffset DateTime { get; protected set; }
 
-        public virtual void SetNotificationRead()
+        public virtual void MarkAsRead()
         {
-            IsRead = true;
+            if (!IsRead)
+            {
+                IsRead = true;
+            }
         }
 
-        public virtual void SetNotificationUnread()
+        public virtual void MarkAsUnread()
         {
-            IsRead = false;
+            if (IsRead)
+            {
+                IsRead = false;
+            }
         }
     }
 }
