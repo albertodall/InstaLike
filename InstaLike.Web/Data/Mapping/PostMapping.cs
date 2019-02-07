@@ -8,7 +8,7 @@ namespace InstaLike.Web.Data.Mapping
     {
         public PostMapping()
         {
-            Table("Post");
+            Table("[Post]");
 
             Id(p => p.ID).GeneratedBy.Native();
 

@@ -2,6 +2,11 @@
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
+using InstaLike.Core.Domain;
+using InstaLike.Web.Data;
+using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
+using InstaLike.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,6 +35,8 @@ namespace InstaLike.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddSingleton<IMessageDispatcher, MessageDispatcher>();
+
             var connectionString = Configuration.GetConnectionString("DefaultDatabase");
             var nhConfig = Fluently.Configure()
                 .Database(
@@ -53,7 +60,10 @@ namespace InstaLike.Web
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();
                 return sessionFactory.OpenSession();
             });
+            services.AddScoped<IRepository<User, int>, Repository<User, int>>();
+            services.RegisterCommandHandlers();
 
+            services.AddSingleton<IUserAuthenticationService, DatabaseAuthenticationService>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
@@ -74,7 +84,7 @@ namespace InstaLike.Web
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
-            // app.UseAuthentication();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {

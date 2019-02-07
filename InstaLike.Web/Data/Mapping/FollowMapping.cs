@@ -8,7 +8,7 @@ namespace InstaLike.Web.Data.Mapping
     {
         public FollowMapping()
         {
-            Table("Follow");
+            Table("[Follow]");
 
             Id(p => p.ID).GeneratedBy.Native();
             Map(p => p.FollowDate).CustomType<DateTimeOffset>().Not.Nullable();

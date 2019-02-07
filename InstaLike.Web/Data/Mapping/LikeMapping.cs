@@ -8,7 +8,7 @@ namespace InstaLike.Web.Data.Mapping
     {
         public LikeMapping()
         {
-            Table("Like");
+            Table("[Like]");
 
             Id(p => p.ID).GeneratedBy.Native();
 

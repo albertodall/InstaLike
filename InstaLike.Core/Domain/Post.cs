@@ -33,7 +33,7 @@ namespace InstaLike.Core.Domain
 
         public virtual IReadOnlyList<Like> Likes => _likes.ToList();
 
-        public void Like(User user)
+        public virtual void Like(User user)
         {
             if (!Likes.Any(like => like.User == user))
             {
@@ -41,7 +41,7 @@ namespace InstaLike.Core.Domain
             }
         }
 
-        public void RemoveLike(User user)
+        public virtual void RemoveLike(User user)
         {
             var likeToRemove = Likes.FirstOrDefault(like => like.User == user);
             if (likeToRemove != null)

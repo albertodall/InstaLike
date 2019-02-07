@@ -26,7 +26,18 @@
         <a class="popup-chiudi" href="#">&times;</a>
         <div class="popup-contenuto"></div>
     </div>
-
-    <script src="~/js/InstaLike.js" language="text/javascript"></script>
+    <environment include="Development">
+        <script src="~/lib/jquery/jquery.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+                asp-fallback-src="~/lib/jquery/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=">
+        </script>
+    </environment>
+    <script type="text/javascript" src="~/js/InstaLike.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

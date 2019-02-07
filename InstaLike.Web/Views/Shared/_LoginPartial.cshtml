@@ -2,12 +2,10 @@
 {
     <ul>
         <li class="btn_share">
-            <a href="@Url.Action("Publish", "Post")" title="Share your picture">
-                Share your picture
-            </a>
+            <a asp-action="Publish" asp-controller="Post" title="Share your picture">Share your picture</a>
         </li>
         <li class="btn_alert">
-            <a href="@Url.Action("Index", "Notifications")" title="Notifications">
+            <a asp-action="Index" asp-controller="Notifications">
                 Notifiche
                 @*@{ var notificationsCount = Html.Action("Count", "Notifications").ToString(); }
                 @if (int.Parse(notificationsCount) > 0)
@@ -17,14 +15,12 @@
             </a>
         </li>
         <li class="btn_user">
-            <a href="@Url.Action("Profile", "Account", new { id = User.Identity.Name })" title="User profile">
+            <a asp-action="Profile" asp-controller="Account", asp-route-id="@User.Identity.Name" title="User profile">
                 User profile
             </a>
         </li>
         <li class="btn_logout">
-            <a href="@Url.Action("Logout", "Account")" title="Logout">
-                Logout
-            </a>
+            <a asp-action="Logout" asp-controller="Account" title="Logout">Logout</a>
         </li>
     </ul>
 }
@@ -32,10 +28,10 @@ else
 {
     <ul>
         <li class="btn_register">
-            <a href="@Url.Action("Register", "Account")" title="Registrati">Register</a>
+            <a asp-action="Register" asp-controller="Account" title="Register">Register</a>
         </li>
         <li class="btn_login">
-            <a href="@Url.Action("Login", "Account")" title="Accedi">Login</a>
+            <a asp-action="Login" asp-controller="Account" title="Login">Login</a>
         </li>
     </ul>
 }

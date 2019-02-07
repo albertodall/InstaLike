@@ -7,7 +7,7 @@ namespace InstaLike.Web.Data.Mapping
     {
         public NotificationMapping()
         {
-            Table("Notification");
+            Table("[Notification]");
 
             Id(p => p.ID).GeneratedBy.Native();
 

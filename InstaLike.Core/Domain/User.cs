@@ -16,18 +16,23 @@ namespace InstaLike.Core.Domain
             _following = new List<User>();
         }
 
-        public User(string nickname, string firstName, string lastName, Email email)
+        public User(Nickname nickname, string firstName, string lastName, Password password, Email email, string biography)
+            : this()
         {
             _nickname = nickname ?? throw new ArgumentNullException(nameof(nickname));
             _email = email ?? throw new ArgumentNullException(nameof(email)) ;
+            _password = password ?? throw new ArgumentNullException(nameof(password));
             FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
             LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
+            Biography = biography ?? throw new ArgumentNullException(nameof(biography));
+            ProfilePicture = Picture.DefaultProfilePicture;
+            RegistrationDate = DateTimeOffset.Now;
         }
 
         private string _nickname;
-        public virtual NickName Nickname
+        public virtual Nickname Nickname
         {
-            get => (NickName)_nickname;
+            get => (Nickname)_nickname;
             set => _nickname = value;
         }
 
@@ -58,6 +63,11 @@ namespace InstaLike.Core.Domain
                 return Result.Fail(passwordResult.Error);
             }
             return Result.Ok();
+        }
+
+        public virtual void SetProfilePicture(Picture picture)
+        {
+            ProfilePicture = picture;
         }
     }
 }

@@ -3,41 +3,41 @@ using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
-    public class NickName : ValueObject
+    public class Nickname : ValueObject
     {
         public virtual string Value { get; }
 
-        protected NickName()
+        protected Nickname()
         { }
 
-        private NickName(string nickName)
+        private Nickname(string nickName)
         {
             Value = nickName;
         }
 
-        public static Result<NickName> Create(string nickName)
+        public static Result<Nickname> Create(string nickName)
         {
             var nick = (nickName ?? string.Empty).Trim();
 
             if (nick.Length == 0)
             {
-                return Result.Fail<NickName>("Nickname should not be empty");
+                return Result.Fail<Nickname>("Nickname should not be empty");
             }
 
             if (nick.Length > 20)
             {
-                return Result.Fail<NickName>("Nickname is too long (max 20 chars)");
+                return Result.Fail<Nickname>("Nickname is too long (max 20 chars)");
             }
 
-            return Result.Ok(new NickName(nick));
+            return Result.Ok(new Nickname(nick));
         }
 
-        public static implicit operator string(NickName nickName)
+        public static implicit operator string(Nickname nickName)
         {
             return nickName.Value;
         }
 
-        public static explicit operator NickName(string nickName)
+        public static explicit operator Nickname(string nickName)
         {
             return Create(nickName).Value;
         }

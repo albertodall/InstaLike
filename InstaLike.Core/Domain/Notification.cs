@@ -17,11 +17,11 @@ namespace InstaLike.Core.Domain
             DateTime = DateTimeOffset.Now;
         }
 
-        public User Sender { get; protected set; }
-        public User Recipient { get; protected set; }
-        public string Message { get; protected set; }
-        public bool IsRead { get; protected set; }
-        public DateTimeOffset DateTime { get; protected set; }
+        public virtual User Sender { get; protected set; }
+        public virtual User Recipient { get; protected set; }
+        public virtual string Message { get; protected set; }
+        public virtual bool IsRead { get; protected set; }
+        public virtual DateTimeOffset DateTime { get; protected set; }
 
         public virtual void MarkAsRead()
         {

@@ -16,8 +16,8 @@ namespace InstaLike.Core.Domain
             FollowDate = DateTimeOffset.Now;
         }
 
-        public User Follower { get; protected set; }
-        public User Following { get; protected set; }
-        public DateTimeOffset FollowDate { get; protected set; }
+        public virtual User Follower { get; protected set; }
+        public virtual User Following { get; protected set; }
+        public virtual DateTimeOffset FollowDate { get; protected set; }
     }
 }

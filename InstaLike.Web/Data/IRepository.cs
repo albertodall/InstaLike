@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data
@@ -6,7 +7,7 @@ namespace InstaLike.Web.Data
     public interface IRepository<TEntity, TKey>
         where TEntity : EntityBase<TKey>
     {
-        Task<TEntity> GetById(TKey id);
-        Task Save(TEntity entity);
+        Task<Maybe<TEntity>> GetById(TKey id);
+        Task<Result<TKey>> Save(TEntity entity);
     }
 }

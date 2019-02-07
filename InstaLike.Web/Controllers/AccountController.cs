@@ -74,19 +74,27 @@ namespace InstaLike.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterUserModel model)
         {
-            var command = new RegisterUserCommand(
-                model.Nickname,
-                model.Name,
-                model.Surname,
-                model.Password,
-                model.Email,
-                model.Biography,
-                model.ProfilePicture);
-
             if (ModelState.IsValid)
             {
-                await _dispatcher.DispatchAsync(command);
-                return RedirectToAction("Index", "Home");
+                var command = new RegisterUserCommand(
+                    model.Nickname,
+                    model.Name,
+                    model.Surname,
+                    model.Password,
+                    model.Email,
+                    model.Biography,
+                    model.ProfilePicture);
+
+                var processCommandResult = await _dispatcher.DispatchAsync(command);
+                if (processCommandResult.IsSuccess)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    return RedirectToAction("Error", "Home");
+                }
+                
             }
             return View(model);
         }

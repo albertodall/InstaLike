@@ -9,7 +9,7 @@
 header {
     height: 100px;
     margin-bottom: 10px;
-    background-image: url(../Images/InstaLike-logo.png);
+    background-image: url(../img/InstaLike-logo.png);
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -90,7 +90,7 @@ textarea {
 .validation-summary-errors li {
     color: red;
     font-style: italic;
-    background-image: url(../Images/icon_warning.png);
+    background-image: url(../img/icon_warning.png);
     background-position: 0 top;
     background-size: 14px;
     background-repeat: no-repeat;
@@ -131,27 +131,27 @@ textarea {
     }
 
     .user .btn_share a {
-        background-image: url(../Images/icon_photo.png);
+        background-image: url(../img/icon_photo.png);
     }
 
     .user .btn_alert a {
-        background-image: url(../Images/icon_alert.png);
+        background-image: url(../img/icon_alert.png);
     }
 
     .user .btn_user a {
-        background-image: url(../Images/icon_user.png);
+        background-image: url(../img/icon_user.png);
     }
 
     .user .btn_logout a {
-        background-image: url(../Images/icon_logout.png);
+        background-image: url(../img/icon_logout.png);
     }
 
     .user .btn_login a {
-        background-image: url(../Images/icon_login.png);
+        background-image: url(../img/icon_login.png);
     }
 
     .user .btn_register a {
-        background-image: url(../Images/icon_register.png);
+        background-image: url(../img/icon_register.png);
     }
 
 /*CLASSI x POST*/
@@ -202,7 +202,7 @@ textarea {
     background-repeat: no-repeat;
     background-position: 10px center;
     background-size: 20px;
-    background-image: url(../Images/icon_heart_empty.png);
+    background-image: url(../img/icon_heart_empty.png);
     font-size: 11px;
     color: black;
 }
@@ -215,7 +215,7 @@ textarea {
 
 .posts .post-likes .post-piaciuto {
     opacity: 0.4;
-    background-image: url(../Images/icon_heart.png);
+    background-image: url(../img/icon_heart.png);
 }
 
 .posts .commento-autore-post {
@@ -309,7 +309,7 @@ textarea {
     background-repeat: no-repeat;
     background-position: 10px center;
     background-size: 20px;
-    background-image: url(../Images/icon_show.png);
+    background-image: url(../img/icon_show.png);
     font-size: 11px;
 }
 
@@ -365,7 +365,7 @@ textarea {
     background-repeat: no-repeat;
     background-position: 10px center;
     background-size: 20px;
-    background-image: url(../Images/icon_heart_empty.png);
+    background-image: url(../img/icon_heart_empty.png);
     font-size: 11px;
     color: black;
 }
@@ -378,7 +378,7 @@ textarea {
 
 .post-dettaglio .post-likes .post-piaciuto {
     opacity: 0.4;
-    background-image: url(../Images/icon_heart.png);
+    background-image: url(../img/icon_heart.png);
 }
 
 .post-dettaglio .commento-autore-post {
@@ -472,7 +472,7 @@ textarea {
     background-repeat: no-repeat;
     background-position: 10px center;
     background-size: 20px;
-    background-image: url(../Images/icon_show.png);
+    background-image: url(../img/icon_show.png);
     font-size: 11px;
 }
 
@@ -526,7 +526,7 @@ textarea {
         display: block;
         color: red;
         font-style: italic;
-        background-image: url(../Images/icon_warning.png);
+        background-image: url(../img/icon_warning.png);
         background-position: 0 top;
         background-size: 14px;
         background-repeat: no-repeat;
@@ -548,7 +548,7 @@ textarea {
     background-size: 20px;
     font-size: 11px;
     background-color: #FFF;
-    background-image: url(../Images/icon_floppy.png);
+    background-image: url(../img/icon_floppy.png);
 }
 
 .form_login > DIV {
@@ -569,14 +569,14 @@ textarea {
     background-size: 20px;
     font-size: 11px;
     background-color: #FFF;
-    background-image: url(../Images/icon_login.png);
+    background-image: url(../img/icon_login.png);
 }
 
 .form_login > DIV span span {
     display: block;
     color: red;
     font-style: italic;
-    background-image: url(../Images/icon_warning.png);
+    background-image: url(../img/icon_warning.png);
     background-position: 0 top;
     background-size: 14px;
     background-repeat: no-repeat;
@@ -602,14 +602,14 @@ textarea {
     background-size: 20px;
     font-size: 11px;
     background-color: #FFF;
-    background-image: url(../Images/icon_send.png);
+    background-image: url(../img/icon_send.png);
 }
 
 .form_post > DIV span {
     display: block;
     color: red;
     font-style: italic;
-    background-image: url(../Images/icon_warning.png);
+    background-image: url(../img/icon_warning.png);
     background-position: 0 top;
     background-size: 14px;
     background-repeat: no-repeat;
@@ -797,12 +797,12 @@ textarea {
 }
 
     .profilo-info a.btn_logout {
-        background-image: url(../Images/icon_logout.png);
+        background-image: url(../img/icon_logout.png);
     }
 
     .profilo-info a.btn_follow,
     .profilo-info a.btn_following {
-        background-image: url(../Images/icon_follow.png)
+        background-image: url(../img/icon_follow.png)
     }
 
     .profilo-info a.btn_following {

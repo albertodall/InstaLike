@@ -7,7 +7,7 @@ namespace InstaLike.Web.Data.Mapping
     {
         public CommentMapping()
         {
-            Table("Comment");
+            Table("[Comment]");
 
             Id(p => p.ID).GeneratedBy.Native();
 
