@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentNHibernate;
 using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
@@ -17,9 +18,9 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.Email).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
-            Map(p => p.FirstName).CustomType<string>()
+            Map(p => p.Name).CustomType<string>()
                 .Not.Nullable();
-            Map(p => p.LastName).CustomType<string>()
+            Map(p => p.Surname).CustomType<string>()
                 .Not.Nullable();
             Map(p => p.Nickname).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
@@ -33,14 +34,15 @@ namespace InstaLike.Web.Data.Mapping
             Component(p => p.ProfilePicture, m =>
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Generated.Never()
-                    .Not.Nullable();
+                    .Not.Insert()
+                    .Not.Update();
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
+                    .Column("ProfilePicture")
                     .Not.Nullable();
             });
 
-            HasMany(p => p.Followers);
-            HasMany(p => p.Following);
+            HasMany(p => p.Followers).KeyColumn("ID");
+            HasMany(p => p.Following).KeyColumn("ID");
 
             DynamicInsert();
         }

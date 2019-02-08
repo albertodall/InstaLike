@@ -5,19 +5,19 @@ namespace InstaLike.Core.Domain
 {
     public class Nickname : ValueObject
     {
-        public virtual string Value { get; }
+        public string Value { get; }
 
         protected Nickname()
         { }
 
-        private Nickname(string nickName)
+        private Nickname(string nickname)
         {
-            Value = nickName;
+            Value = nickname;
         }
 
-        public static Result<Nickname> Create(string nickName)
+        public static Result<Nickname> Create(string nickname)
         {
-            var nick = (nickName ?? string.Empty).Trim();
+            var nick = (nickname ?? string.Empty).Trim();
 
             if (nick.Length == 0)
             {
@@ -32,14 +32,14 @@ namespace InstaLike.Core.Domain
             return Result.Ok(new Nickname(nick));
         }
 
-        public static implicit operator string(Nickname nickName)
+        public static implicit operator string(Nickname nickname)
         {
-            return nickName.Value;
+            return nickname.Value;
         }
 
-        public static explicit operator Nickname(string nickName)
+        public static explicit operator Nickname(string nickname)
         {
-            return Create(nickName).Value;
+            return Create(nickname).Value;
         }
 
         public override string ToString()

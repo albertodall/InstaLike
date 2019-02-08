@@ -30,8 +30,8 @@ namespace InstaLike.Web.CommandHandlers
 
             var userToRegister = new User(
                 nicknameValidationResult.Value, 
-                command.FirstName, 
-                command.LastName, 
+                command.Name, 
+                command.Surname, 
                 passwordValidationResult.Value, 
                 eMailValidationResult.Value,
                 command.Biography);

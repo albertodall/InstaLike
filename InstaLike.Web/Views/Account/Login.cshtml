@@ -9,7 +9,7 @@
 <div>
     <h2>Login to InstaLike</h2>
 
-    <form method="post" asp-controller="Account" asp-action="Login" asp-antiforgery="true" asp-route-returnurl="@ViewBag.ReturnUrl">
+    <form method="post" asp-controller="Account" asp-action="Login" asp-antiforgery="true" asp-route-returnurl="@Model.ReturnUrl">
         <div asp-validation-summary="ModelOnly"></div>
         <div class="form_login">
             <div>

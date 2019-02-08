@@ -17,19 +17,20 @@ namespace InstaLike.Web.Services
 
         public async Task<Result> AuthenticateUser(string userName, string password)
         {
-            var hashedPassword = (Password)password;
             bool authenticated = false;
 
             using (var session = _sessionFactory.OpenStatelessSession())
             {
-                var authenticationQuery = session.QueryOver<User>()
-                    .Where(u => u.Nickname == userName && u.Password == hashedPassword)
-                    .Select(u => u.ID);
+                var authQuery = session.CreateQuery("select u.Password from User u where u.Nickname = :nick")
+                    .SetParameter("nick", userName);
 
-                authenticated = await authenticationQuery.SingleOrDefaultAsync() != null;
+                var storedPassword = (Password)Convert.FromBase64String((string)await authQuery.UniqueResultAsync());
+                authenticated = storedPassword.HashMatches(password);
             }
 
-            return authenticated ? Result.Ok(authenticated) : Result.Fail("Username or password not valid.");
-        }
+            return authenticated ? 
+                Result.Ok(authenticated) : 
+                Result.Fail("Username or password are not valid.");
+        }      
     }
 }

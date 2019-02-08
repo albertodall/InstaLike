@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
@@ -65,7 +66,12 @@ namespace InstaLike.Web
 
             services.AddSingleton<IUserAuthenticationService, DatabaseAuthenticationService>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
+                .AddCookie(opt => 
+                {
+                    opt.Cookie.Expiration = TimeSpan.FromMinutes(30);
+                    opt.Cookie.HttpOnly = true;
+                    opt.LoginPath = new PathString("/Account/Login");
+                });
 
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

@@ -25,8 +25,11 @@ namespace InstaLike.Web.Controllers
 
         public IActionResult Login(string returnUrl)
         {
-            ViewBag.ReturnUrl = returnUrl;
-            return View();
+            var model = new LoginModel()
+            {
+                ReturnUrl = returnUrl
+            };
+            return View(model);
         }
 
         [HttpPost]
@@ -46,10 +49,15 @@ namespace InstaLike.Web.Controllers
                 };
 
                 var userIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                ClaimsPrincipal principal = new ClaimsPrincipal(userIdentity);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(userIdentity),
+                    new AuthenticationProperties()
+                    {
+                        IsPersistent = model.RememberMe
+                    });
 
-                return Redirect(ViewBag.ReturnUrl);
+                return Redirect(model.ReturnUrl);
             }
 
             return View(model);
