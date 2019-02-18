@@ -18,7 +18,9 @@ namespace InstaLike.Web.Data.Mapping
             Component(p => p.Picture, m => 
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Generated.Never()
+                    .Column("PostGuid")
+                    .Not.Insert()
+                    .Not.Update()
                     .Not.Nullable();
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
                     .Not.Nullable();

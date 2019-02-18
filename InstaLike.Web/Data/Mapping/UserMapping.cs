@@ -1,5 +1,4 @@
 ﻿using System;
-using FluentNHibernate;
 using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
@@ -34,8 +33,10 @@ namespace InstaLike.Web.Data.Mapping
             Component(p => p.ProfilePicture, m =>
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
+                    .Column("ProfilePictureGuid")
                     .Not.Insert()
-                    .Not.Update();
+                    .Not.Update()
+                    .Not.Nullable();
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
                     .Column("ProfilePicture")
                     .Not.Nullable();

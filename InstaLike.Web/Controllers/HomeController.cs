@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using InstaLike.Web.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 namespace InstaLike.Web.Controllers
@@ -10,7 +11,8 @@ namespace InstaLike.Web.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            var model = new List<PostModel>();
+            return View(model);
         }
 
         public IActionResult Privacy()

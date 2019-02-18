@@ -17,9 +17,9 @@ namespace InstaLike.Core.Domain
         protected Password()
         { }
 
-        private Password(string password)
+        private Password(string base64string)
         {
-            Value = password;
+            Value = base64string;
         }
 
         private Password(byte[] hash)
@@ -36,7 +36,7 @@ namespace InstaLike.Core.Domain
 
             if (password.Length < MinimumPasswordLength)
             {
-                return Result.Fail<Password>("Password is too short. Minimum allowed length is 6 characters. ");
+                return Result.Fail<Password>($"Password is too short. Minimum allowed length is {MinimumPasswordLength} characters. ");
             }
 
             return Result.Ok(new Password(HashPassword(password)));
