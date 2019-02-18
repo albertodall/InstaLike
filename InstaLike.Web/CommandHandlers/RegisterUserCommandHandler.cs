@@ -40,6 +40,10 @@ namespace InstaLike.Web.CommandHandlers
             {
                 userToRegister.SetProfilePicture((Picture)command.ProfilePicture);
             }
+            else
+            {
+                userToRegister.SetDefaultProfilePicture();
+            }
 
             var userRegistrationResult = await _repository.Save(userToRegister);
             if (userRegistrationResult.IsFailure)
