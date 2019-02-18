@@ -3,13 +3,14 @@
 @model PostModel
 
 @{
-    var liked = Model.UserLikes.Any(user => user == User.Identity.Name);
+    ViewBag.Title = "Post detail";
+    var liked = Model.UserLikes.Any(u => u == User.Identity.Name);
 }
 
-<div>
+<div class="post-dettaglio">
     <div class="author">
         @{
-            var profilePictureBase64 = Convert.ToBase64String(Model.AuthorProfilePicture);
+            var profilePictureBase64 = Convert.ToBase64String(Model.Picture);
             var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
         }
         <img src="@profilePicture" />
@@ -23,21 +24,21 @@
         </time>
     </div>
 
-    <a href="@Url.Action("Detail", "Post", new { id = Model.PostID })">
+    <div>
         @{
             var postPictureBase64 = Convert.ToBase64String(Model.Picture);
             var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);
         }
-        <img class="image-timeline" src="@postPicture" />
-    </a>
+        <img class="immagine-post" src="@postPicture" />
+    </div>
 
     <div>
         <div class="post-likes">
             <button class="pulsante-like @(liked ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID">
-                Like
+                Mi piace
             </button>
             <strong>
-                <span class="numero-like">@Model.UserLikes.Count()</span> likes
+                <span class="numero-like">@Model.UserLikes.Count()</span> mi piace
             </strong>
         </div>
 
@@ -45,8 +46,8 @@
             @Html.Raw(Model.Text)
         </p>
 
-        <partial name="~/Views/Post/_CommentsPartial.cshtm" model="Model.Comments" />
-
-        <partial name="~/Views/Post/_AggiungiCommentoPartial.cshtml" model="Model" />
+        <partial name="~/Views/Post/_CommentsPartial.cshtml" model="Model.Comments" />
+        <partial name="~/Views/Post/_AddCommentPartial.cshtml" model="Model" />
     </div>
+
 </div>

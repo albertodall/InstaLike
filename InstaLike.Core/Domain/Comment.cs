@@ -12,10 +12,12 @@ namespace InstaLike.Core.Domain
             Post = post;
             User = User;
             Text = text ?? throw new ArgumentNullException(nameof(text));
+            DateTime = DateTimeOffset.Now;
         }
 
         public virtual Post Post { get; }
         public virtual User User { get; }
         public virtual string Text { get; }
+        public virtual DateTimeOffset DateTime { get; }
     }
 }

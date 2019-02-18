@@ -1,4 +1,5 @@
-﻿using FluentNHibernate.Mapping;
+﻿using System;
+using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
@@ -12,6 +13,7 @@ namespace InstaLike.Web.Data.Mapping
             Id(p => p.ID).GeneratedBy.Native();
 
             Map(p => p.Text).CustomType<string>().Not.Nullable();
+            Map(p => p.DateTime).CustomType<DateTimeOffset>().Not.Nullable();
 
             References(p => p.Post);
             References(p => p.User);
