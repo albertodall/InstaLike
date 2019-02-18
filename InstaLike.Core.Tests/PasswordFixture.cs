@@ -26,5 +26,19 @@ namespace InstaLike.Core.Tests
             var sut = Password.Create(string.Empty);
             sut.IsFailure.Should().BeTrue();
         }
+
+        [Fact]
+        public void Should_Match_Password_Hash()
+        {
+            var sut = Password.Create("password123").Value;
+            sut.HashMatches("password123").Should().BeTrue();
+        }
+
+        [Fact]
+        public void Should_Not_Match_Password_Hash()
+        {
+            var sut = Password.Create("password123").Value;
+            sut.HashMatches("password").Should().BeFalse();
+        }
     }
 }
