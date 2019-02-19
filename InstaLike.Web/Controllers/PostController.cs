@@ -56,11 +56,38 @@ namespace InstaLike.Web.Controllers
             return View(newPost);
         }
 
-        public async Task<ActionResult> Detail(int id)
+        public async Task<IActionResult> Detail(int id)
         {
             var postQuery = new PostQuery(id);
             var model = await _dispatcher.DispatchAsync(postQuery);
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostComment(NewCommentModel newComment)
+        {
+            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, newComment.AuthorNickName);
+            var commandResult = await _dispatcher.DispatchAsync(command);
+
+            // Send Notification
+            // Another command here or raise an event?
+            
+            var commentsQuery = new PostCommentsQuery(newComment.PostID);
+            var comments = await _dispatcher.DispatchAsync(commentsQuery);
+
+            return PartialView("_CommentsPartial", comments);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Like(LikePostModel like)
+        {
+            var command = new LikeOrDislikePostCommand(like.PostID, like.Nickname);
+            var commandResult = await _dispatcher.DispatchAsync(command);
+
+            // Send Notification
+            // Another command here or raise an event?
+
+            return new EmptyResult();
         }
     }
 }

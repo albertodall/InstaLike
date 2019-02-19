@@ -41,7 +41,7 @@ namespace InstaLike.Core.Domain
             }
         }
 
-        public virtual void RemoveLike(User user)
+        public virtual void Dislike(User user)
         {
             var likeToRemove = Likes.FirstOrDefault(like => like.User == user);
             if (likeToRemove != null)
