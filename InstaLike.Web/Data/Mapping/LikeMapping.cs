@@ -12,7 +12,7 @@ namespace InstaLike.Web.Data.Mapping
 
             Id(p => p.ID).GeneratedBy.Native();
 
-            Map(p => p.Date).CustomType<DateTimeOffset>()
+            Map(p => p.LikeDate).CustomType<DateTimeOffset>()
                 .Not.Nullable();
 
             References(p => p.Post).Not.Nullable();

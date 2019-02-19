@@ -1,0 +1,8 @@
+﻿@using InstaLike.Web.Models
+
+@model PostModel
+
+<form method="post" class="form-commento" role="form" asp-action="AddComment" asp-controller="Post" asp-antiforgery="true">
+    <input asp-for="PostID" />
+    <input type="text" name="comment" id="comment" placeholder="Add your comment..." />
+</form>

@@ -15,9 +15,7 @@
         }
         <img src="@profilePicture" />
 
-        <a href="@Url.Action("Profile", "Account", new { @id = Model.AuthorNickName })">
-            @Model.AuthorNickName
-        </a>
+        <a asp-action="Profile" asp-controller="Account" asp-route-id="@Model.AuthorNickName">@Model.AuthorNickName</a>
 
         <time title="@Model.PostDate.DateTime.ToString("dd/MM/yyyy HH:mm")" datetime="@Model.PostDate.DateTime.ToString("dd/MM/yyyy HH:mm")">
             @Model.PostDate.UtcDateTime.AsPastDays()
@@ -47,6 +45,7 @@
         </p>
 
         <partial name="~/Views/Post/_CommentsPartial.cshtml" model="Model.Comments" />
+
         <partial name="~/Views/Post/_AddCommentPartial.cshtml" model="Model" />
     </div>
 

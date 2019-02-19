@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace InstaLike.Web.Models
 {
     public class PostModel
     {
+        [HiddenInput]
         public int PostID { get; set; }
         public string AuthorNickName { get; set; }
         public byte[] AuthorProfilePicture { get; set; }

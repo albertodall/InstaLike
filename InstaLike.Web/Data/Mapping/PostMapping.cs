@@ -13,7 +13,7 @@ namespace InstaLike.Web.Data.Mapping
             Id(p => p.ID).GeneratedBy.Native();
 
             Map(p => p.Text).CustomType<string>().Not.Nullable();
-            Map(p => p.Date).CustomType<DateTimeOffset>().Not.Nullable();
+            Map(p => p.PostDate).CustomType<DateTimeOffset>().Not.Nullable();
 
             Component(p => p.Picture, m => 
             {

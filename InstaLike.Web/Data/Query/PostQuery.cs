@@ -58,12 +58,12 @@ namespace InstaLike.Web.Data.Query
                 AuthorProfilePicture = post.Author.ProfilePicture,
                 Text = post.Text,
                 Picture = post.Picture.RawBytes,
-                PostDate = post.Date,
+                PostDate = post.PostDate,
                 UserLikes = post.Likes.Select(l => (string)l.User.Nickname).ToArray(),
                 Comments = post.Comments.Select(c => new CommentModel()
                 {
                     AuthorNickName = c.User.Nickname,
-                    DateTime = c.DateTime,
+                    CommentDate = c.CommentDate,
                     Text = c.Text
                 }).ToArray()
             };

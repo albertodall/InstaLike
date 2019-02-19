@@ -4,7 +4,7 @@ using Humanizer;
 
 namespace InstaLike.Web.Extensions
 {
-    internal static class DateTimeExtensions
+    public static class DateTimeExtensions
     {
         public static string AsPastDays(this DateTime date)
         {

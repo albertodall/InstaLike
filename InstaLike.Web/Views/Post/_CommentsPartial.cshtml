@@ -1,0 +1,36 @@
+﻿@using InstaLike.Web.Extensions
+
+@model IEnumerable<CommentModel>
+
+@if (Model != null && Model.Any())
+{
+    <ol class="commenti-post">
+        @* Shows only the first five comments *@
+        @foreach (var comment in Model.OrderByDescending(c => c.CommentDate).Take(5))
+        {
+            <li>
+                <strong>
+                    <a asp-action="Profile" asp-controller="Account" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
+                </strong>
+                &nbsp;@comment.Text
+                <span>
+                    &nbsp;<time title="@comment.CommentDate.DateTime" datetime="@comment.CommentDate.DateTime">@comment.CommentDate.UtcDateTime.AsPastDays()</time>
+                </span>
+            </li>
+        }
+
+        @* Hides other comments *@
+        @foreach (var comment in Model.OrderByDescending(c => c.CommentDate).Skip(5))
+        {
+            <li class="nascosto">
+                <strong>
+                    <a asp-action="Profile" asp-controller="Account" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
+                </strong>
+                &nbsp;@comment.Text
+                <span>
+                    &nbsp;<time title="@comment.CommentDate.DateTime" datetime="@comment.CommentDate.DateTime">@comment.CommentDate.UtcDateTime.AsPastDays()</time>
+                </span>
+            </li>
+        }
+    </ol>
+}

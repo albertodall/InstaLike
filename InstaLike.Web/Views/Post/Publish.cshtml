@@ -1,0 +1,29 @@
+﻿@model PublishNewPostModel
+
+@{
+    ViewBag.Title = "Publish new post";
+}
+
+<div>
+    <h2>Share something with the world</h2>
+    <form method="post" enctype="multipart/form-data" asp-action="Publish" asp-controller="Post" asp-antiforgery="true">
+        <div class="form_post">
+            <div asp-validation-summary="ModelOnly"></div>
+            <div>
+                <input type="hidden" asp-for="AuthorNickName" value="@User.Identity.Name" />
+                <input type="file" asp-for="Picture" name="pictureFile" required />
+            </div>
+
+            <div>
+                <input asp-for="Text" placeholder="Write a comment for your post..." />
+                <span asp-validation-for="Text"></span>
+            </div>
+
+            <button type="submit">Publish</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -21,13 +21,13 @@ namespace InstaLike.Core.Domain
             Picture = picture;
             Text = comment;
 
-            Date = DateTimeOffset.Now;
+            PostDate = DateTimeOffset.Now;
         }
 
         public virtual User Author { get; protected set; }
         public virtual Picture Picture { get; protected set; }
         public virtual string Text { get; protected set; }
-        public virtual DateTimeOffset Date { get; protected set; }
+        public virtual DateTimeOffset PostDate { get; protected set; }
 
         public virtual IReadOnlyList<Comment> Comments => _comments.ToList();
 

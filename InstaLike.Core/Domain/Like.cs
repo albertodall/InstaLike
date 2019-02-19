@@ -11,13 +11,13 @@ namespace InstaLike.Core.Domain
         {
             Post = post;
             User = user;
-            Date = DateTimeOffset.Now;
+            LikeDate = DateTimeOffset.Now;
         }
 
         public virtual Post Post { get; protected set; }
 
         public virtual User User { get; protected set; }
 
-        public virtual DateTimeOffset Date { get; protected set; }
+        public virtual DateTimeOffset LikeDate { get; protected set; }
     }
 }

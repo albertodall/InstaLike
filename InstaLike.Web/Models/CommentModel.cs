@@ -6,6 +6,6 @@ namespace InstaLike.Web.Models
     {
         public string AuthorNickName { get; set; }
         public string Text { get; set; }
-        public DateTimeOffset DateTime { get; set; }
+        public DateTimeOffset CommentDate { get; set; }
     }
 }
