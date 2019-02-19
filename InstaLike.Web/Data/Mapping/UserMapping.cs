@@ -13,7 +13,8 @@ namespace InstaLike.Web.Data.Mapping
             Id(p => p.ID).GeneratedBy.Native();
 
             Map(p => p.Biography).CustomType<string>()
-                .Not.Nullable();
+                .Not.Nullable()
+                .LazyLoad();
             Map(p => p.Email).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
@@ -40,7 +41,7 @@ namespace InstaLike.Web.Data.Mapping
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
                     .Column("ProfilePicture")
                     .Not.Nullable();
-            });
+            }).LazyLoad();
 
             HasMany(p => p.Followers).KeyColumn("ID");
             HasMany(p => p.Following).KeyColumn("ID");

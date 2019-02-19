@@ -24,8 +24,7 @@ namespace InstaLike.Web.CommandHandlers
                 try
                 {
                     var authorQuery = _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("NickName", command.AuthorNickName))
-                        .Select(u => u.ID);
+                        .Where(Restrictions.Eq("Nickname", command.AuthorNickName));
 
                     var author = await authorQuery.SingleOrDefaultAsync();
 

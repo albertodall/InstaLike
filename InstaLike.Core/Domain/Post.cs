@@ -16,6 +16,7 @@ namespace InstaLike.Core.Domain
         }
 
         public Post(User author, Picture picture, string comment)
+            : this()
         {
             Author = author;
             Picture = picture;
