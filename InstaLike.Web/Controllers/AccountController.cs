@@ -43,12 +43,10 @@ namespace InstaLike.Web.Controllers
                     ModelState.AddModelError("", authenticationResult.Error);
                 }
 
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, model.Username)
-                };
+                var userIdentity = new ClaimsIdentity(
+                    authenticationResult.Value.Claims, 
+                    CookieAuthenticationDefaults.AuthenticationScheme);
 
-                var userIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(userIdentity),

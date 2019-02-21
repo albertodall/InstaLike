@@ -23,10 +23,7 @@ namespace InstaLike.Web.CommandHandlers
             {
                 try
                 {
-                    var authorQuery = _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("Nickname", command.AuthorNickName));
-
-                    var author = await authorQuery.SingleOrDefaultAsync();
+                    var author = await _session.LoadAsync<User>(command.UserID);
 
                     var post = new Post(author, (Picture)command.PictureRawBytes, command.Text);
                     await _session.SaveAsync(post);

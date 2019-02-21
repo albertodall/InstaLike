@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
 using InstaLike.Web.Data.Query;
+using InstaLike.Web.Extensions;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +39,7 @@ namespace InstaLike.Web.Controllers
                     newPost.Picture = stream.ToArray();
                 }
 
-                var command = new PublishNewPostCommand(newPost.AuthorNickName, newPost.Text, newPost.Picture);
+                var command = new PublishNewPostCommand(User.GetIdentifier(), newPost.Text, newPost.Picture);
                 var commandResult = await _dispatcher.DispatchAsync(command);
                 if (commandResult.IsSuccess)
                 {

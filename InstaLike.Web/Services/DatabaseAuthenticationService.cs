@@ -16,27 +16,26 @@ namespace InstaLike.Web.Services
             _sessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
         }
 
-        public async Task<Result> AuthenticateUser(string userName, string password)
+        public async Task<Result<User>> AuthenticateUser(string userName, string password)
         {
             bool authenticated = false;
+            User userLoggingIn = null;
 
             using (var session = _sessionFactory.OpenStatelessSession())
             {
                 var authQuery = session.QueryOver<User>()
-                    .Where(Restrictions.Eq("Nickname", userName)) // Compares the private field
-                    .Select(u => u.Password);
+                    .Where(Restrictions.Eq("Nickname", userName)); // Compares the private field
 
-                var storedHash = await authQuery.SingleOrDefaultAsync<string>();
-                if (storedHash != null)
+                userLoggingIn = await authQuery.SingleOrDefaultAsync();
+                if (userLoggingIn != null)
                 {
-                    var storedPassword = (Password)Convert.FromBase64String(storedHash);
-                    authenticated = storedPassword.HashMatches(password);
+                    authenticated = userLoggingIn.Password.HashMatches(password);
                 }
             }
 
             return authenticated ? 
-                Result.Ok(authenticated) : 
-                Result.Fail("Username or password are not valid.");
+                Result.Ok(userLoggingIn) : 
+                Result.Fail<User>("Username or password are not valid.");
         }      
     }
 }

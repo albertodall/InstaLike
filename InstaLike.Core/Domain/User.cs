@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace InstaLike.Core.Domain
 {
@@ -65,5 +66,14 @@ namespace InstaLike.Core.Domain
         {
             ProfilePicture = Picture.DefaultProfilePicture;
         }
+
+        public virtual List<Claim> Claims => new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, ID.ToString(), ClaimValueTypes.Integer32),
+                new Claim(ClaimTypes.Name, Nickname, ClaimValueTypes.String),
+                new Claim(ClaimTypes.GivenName, Name, ClaimValueTypes.String),
+                new Claim(ClaimTypes.Surname, Surname, ClaimValueTypes.String),
+                new Claim(ClaimTypes.Email, Email, ClaimValueTypes.Email)
+            };
     }
 }

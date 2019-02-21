@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Services
 {
     public interface IUserAuthenticationService
     {
-        Task<Result> AuthenticateUser(string userName, string password);
+        Task<Result<User>> AuthenticateUser(string userName, string password);
     }
 }

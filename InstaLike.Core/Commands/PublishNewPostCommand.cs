@@ -6,13 +6,13 @@ namespace InstaLike.Core.Commands
 {
     public class PublishNewPostCommand : ICommand
     {
-        public string AuthorNickName { get; }
+        public int UserID { get; }
         public string Text { get; }
         public byte[] PictureRawBytes { get; }
 
-        public PublishNewPostCommand(string authorNickName, string text, byte[] pictureRawBytes)
+        public PublishNewPostCommand(int userID, string text, byte[] pictureRawBytes)
         {
-            AuthorNickName = authorNickName;
+            UserID = userID;
             Text = text;
             PictureRawBytes = pictureRawBytes;
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
@@ -12,21 +13,25 @@ namespace InstaLike.Core.Domain
         private const byte SaltSize = 16;
         private const byte HashSize = 20;
 
-        public virtual string Value { get; }
+        public virtual string HashedValue { get; }
 
         protected Password()
         { }
 
         private Password(string base64string)
         {
-            Value = base64string;
+            HashedValue = base64string;
         }
 
         private Password(byte[] hash)
         {
-            Value = Convert.ToBase64String(hash);
+            HashedValue = Convert.ToBase64String(hash);
         }
 
+        /// <summary>
+        /// Creates a password from a plain text string.
+        /// </summary>
+        /// <param name="password">The password.</param>
         public static Result<Password> Create(string password)
         {
             if (string.IsNullOrEmpty(password))
@@ -46,7 +51,7 @@ namespace InstaLike.Core.Domain
         public bool HashMatches(string password)
         {
             byte[] hashedPassword;
-            byte[] storedHashedPassword = Convert.FromBase64String(Value);
+            byte[] storedHashedPassword = Convert.FromBase64String(HashedValue);
             byte[] saltPart = new byte[SaltSize];
             Array.Copy(storedHashedPassword, 0, saltPart, 0, SaltSize);
             using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltPart, 10000))
@@ -58,12 +63,16 @@ namespace InstaLike.Core.Domain
 
         public static implicit operator string(Password password)
         {
-            return password.Value;
+            return password.HashedValue;
         }
 
-        public static explicit operator Password(string password)
+        public static explicit operator Password(string base64password)
         {
-            return Create(password).Value;
+            if (!IsBase64String(base64password))
+            {
+                throw new InvalidCastException("The specified password is not a valid base64 string");
+            }
+            return new Password(base64password);
         }
 
         public static explicit operator Password(byte[] hashBytes)
@@ -73,12 +82,12 @@ namespace InstaLike.Core.Domain
 
         public override string ToString()
         {
-            return Enumerable.Repeat('*', MinimumPasswordLength).ToString();
+            return HashedValue;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Value;
+            yield return HashedValue;
         }
 
         private static string HashPassword(string password)
@@ -100,6 +109,14 @@ namespace InstaLike.Core.Domain
             Array.Copy(salt, 0, hashBytes, 0, SaltSize);
             Array.Copy(hash, 0, hashBytes, SaltSize, HashSize);
             return Convert.ToBase64String(hashBytes);
+        }
+
+        private static bool IsBase64String(string s)
+        {
+            return !string.IsNullOrEmpty(s)
+                && s.Length != 0
+                && s.Length % 4 == 0
+                && Regex.IsMatch(s, @"^[a-zA-Z0-9\+/]*={0,2}$");
         }
     }
 }
