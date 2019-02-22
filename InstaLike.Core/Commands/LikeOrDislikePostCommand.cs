@@ -3,12 +3,12 @@
     public class LikeOrDislikePostCommand : ICommand
     {
         public int PostID { get; }
-        public string Nickname { get; }
+        public int UserID { get; }
 
-        public LikeOrDislikePostCommand(int postID, string nickName)
+        public LikeOrDislikePostCommand(int postID, int userID)
         {
             PostID = postID;
-            Nickname = nickName;
+            UserID = userID;
         }
     }
 }

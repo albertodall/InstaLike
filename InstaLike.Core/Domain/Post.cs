@@ -34,21 +34,26 @@ namespace InstaLike.Core.Domain
 
         public virtual IReadOnlyList<Like> Likes => _likes.ToList();
 
-        public virtual void Like(User user)
+        public virtual void PutLikeFor(User user)
         {
-            if (!Likes.Any(like => like.User == user))
+            if (!LikesTo(user))
             {
                 _likes.Add(new Like(this, user));
             }
         }
 
-        public virtual void Dislike(User user)
+        public virtual void RemoveLikeBy(User user)
         {
-            var likeToRemove = Likes.FirstOrDefault(like => like.User == user);
-            if (likeToRemove != null)
+            if (LikesTo(user))
             {
+                var likeToRemove = Likes.FirstOrDefault(like => like.User == user);
                 _likes.Remove(likeToRemove);
-            }
+            }           
+        }
+
+        public virtual bool LikesTo(User user)
+        {
+            return Likes.Any(l => l.User == user);
         }
     }
 }

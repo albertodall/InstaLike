@@ -4,7 +4,6 @@ using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using NHibernate;
-using NHibernate.Criterion;
 
 namespace InstaLike.Web.CommandHandlers
 {

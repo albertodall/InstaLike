@@ -4,13 +4,13 @@
     {
         public int PostID { get; }
         public string Text { get; }
-        public string AuthorNickName { get; }
+        public int UserID { get; }
 
-        public PublishCommentCommand(int postID, string text, string nickName)
+        public PublishCommentCommand(int postID, string text, int userID)
         {
             PostID = postID;
             Text = text;
-            AuthorNickName = nickName;
+            UserID = userID;
         }
     }
 }
