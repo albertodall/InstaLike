@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace InstaLike.Web.Extensions
 {
-    internal static class ClaimPrincipalExtensions
+    public static class ClaimPrincipalExtensions
     {
         public static int GetIdentifier(this ClaimsPrincipal principal)
         {

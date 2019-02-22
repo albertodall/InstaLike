@@ -4,13 +4,13 @@ using System.Text;
 
 namespace InstaLike.Core.Commands
 {
-    public class PublishNewPostCommand : ICommand
+    public class PublishPostCommand : ICommand
     {
         public int UserID { get; }
         public string Text { get; }
         public byte[] PictureRawBytes { get; }
 
-        public PublishNewPostCommand(int userID, string text, byte[] pictureRawBytes)
+        public PublishPostCommand(int userID, string text, byte[] pictureRawBytes)
         {
             UserID = userID;
             Text = text;

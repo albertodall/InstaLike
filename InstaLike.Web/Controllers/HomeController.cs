@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using InstaLike.Web.Models;
+using InstaLike.Web.Data.Query;
+using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -9,9 +13,17 @@ namespace InstaLike.Web.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IMessageDispatcher _dispatcher;
+
+        public HomeController(IMessageDispatcher dispatcher)
         {
-            var model = new List<PostModel>();
+            _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var query = new TimelineQuery(User.GetIdentifier());
+            var model = await _dispatcher.DispatchAsync(query);
             return View(model);
         }
 

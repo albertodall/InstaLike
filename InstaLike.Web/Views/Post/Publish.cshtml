@@ -1,4 +1,6 @@
-﻿@model PublishNewPostModel
+﻿@using InstaLike.Web.Extensions
+
+@model PublishPostModel
 
 @{
     ViewBag.Title = "Publish new post";
@@ -10,7 +12,7 @@
         <div class="form_post">
             <div asp-validation-summary="ModelOnly"></div>
             <div>
-                <input type="hidden" asp-for="AuthorNickName" value="@User.Identity.Name" />
+                <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
                 <input type="file" asp-for="Picture" name="pictureFile" required />
             </div>
 

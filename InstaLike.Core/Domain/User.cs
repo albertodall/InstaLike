@@ -7,13 +7,13 @@ namespace InstaLike.Core.Domain
 {
     public class User : EntityBase<int>
     {
-        private readonly IList<User> _followers;
-        private readonly IList<User> _following;
+        private readonly IList<Follow> _followers;
+        private readonly IList<Follow> _following;
 
         protected User()
         {
-            _followers = new List<User>();
-            _following = new List<User>();
+            _followers = new List<Follow>();
+            _following = new List<Follow>();
         }
 
         public User(Nickname nickname, string name, string surname, Password password, Email email, string biography)
@@ -49,8 +49,8 @@ namespace InstaLike.Core.Domain
         public virtual Picture ProfilePicture { get; protected set; }
         public virtual string Biography { get; protected set; }
         public virtual DateTimeOffset RegistrationDate { get; protected set; }
-        public virtual IReadOnlyList<User> Followers => _followers.ToList();
-        public virtual IReadOnlyList<User> Following => _following.ToList();
+        public virtual IReadOnlyList<Follow> Followers => _followers.ToList();
+        public virtual IReadOnlyList<Follow> Following => _following.ToList();
 
         public virtual void ChangePassword(Password password)
         {

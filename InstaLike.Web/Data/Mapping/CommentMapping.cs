@@ -15,8 +15,13 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.Text).CustomType<string>().Not.Nullable();
             Map(p => p.CommentDate).CustomType<DateTimeOffset>().Not.Nullable();
 
-            References(p => p.Post);
-            References(p => p.User);
+            References(p => p.Post)
+                .Column("PostID")
+                .Not.Nullable();
+
+            References(p => p.User)
+                .Column("UserID")
+                .Not.Nullable();
 
             DynamicInsert();
         }

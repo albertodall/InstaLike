@@ -1,9 +1,9 @@
 ﻿namespace InstaLike.Web.Models
 {
-    public class NewCommentModel
+    public class PublishCommentModel
     {
         public int PostID { get; set; }
         public string CommentText { get; set; }
-        public string AuthorNickName { get; set; }
+        public int AuthorID { get; set; }
     }
 }

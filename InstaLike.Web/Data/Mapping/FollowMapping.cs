@@ -10,11 +10,20 @@ namespace InstaLike.Web.Data.Mapping
         {
             Table("[Follow]");
 
-            Id(p => p.ID).GeneratedBy.Native();
+            Id(p => p.ID)
+                .GeneratedBy.Native();
+
             Map(p => p.FollowDate).CustomType<DateTimeOffset>().Not.Nullable();
 
-            References(p => p.Follower).Not.Nullable();
-            References(p => p.Following).Not.Nullable();
+            References(p => p.Follower)
+                .Column("FollowerID")
+                .Cascade.SaveUpdate()
+                .Not.Nullable();
+
+            References(p => p.Following)
+                .Column("FollowingID")
+                .Cascade.SaveUpdate()
+                .Not.Nullable();
         }
     }
 }

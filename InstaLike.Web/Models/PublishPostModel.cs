@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Models
 {
-    [Bind("AuthorNickName, Text")]
-    public class PublishNewPostModel
+    [Bind("AuthorID, Text")]
+    public class PublishPostModel
     {
-        public string AuthorNickName { get; set; }
+        public int AuthorID { get; set; }
 
         [Required(ErrorMessage = "Please, write a text for the picture you're publishing.")]
         public string Text { get; set; }

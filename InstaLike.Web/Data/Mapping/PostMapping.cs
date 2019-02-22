@@ -22,11 +22,16 @@ namespace InstaLike.Web.Data.Mapping
                     .Not.Insert()
                     .Not.Update()
                     .Not.Nullable();
-                m.Map(p => p.RawBytes).CustomType<byte[]>()
+                m.Map(p => p.RawBytes)
+                    .Column("[Picture]")
+                    .CustomType<byte[]>()
+                    .Length(2_000_000)
                     .Not.Nullable();
             });
 
-            References(p => p.Author).Not.Nullable();
+            References(p => p.Author)
+                .Column("UserID")
+                .Not.Nullable();
 
             HasMany(p => p.Comments);
             HasMany(p => p.Likes);

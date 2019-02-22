@@ -63,6 +63,7 @@ namespace InstaLike.Web
             });
             services.AddScoped<IRepository<User, int>, Repository<User, int>>();
             services.RegisterCommandHandlers();
+            services.RegisterQueryHandlers();
 
             services.AddSingleton<IUserAuthenticationService, DatabaseAuthenticationService>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

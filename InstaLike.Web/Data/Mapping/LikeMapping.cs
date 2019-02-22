@@ -15,8 +15,13 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.LikeDate).CustomType<DateTimeOffset>()
                 .Not.Nullable();
 
-            References(p => p.Post).Not.Nullable();
-            References(p => p.User).Not.Nullable();
+            References(p => p.Post)
+                .Column("PostID")
+                .Not.Nullable();
+
+            References(p => p.User)
+                .Column("UserID")
+                .Not.Nullable();
         }
     }
 }

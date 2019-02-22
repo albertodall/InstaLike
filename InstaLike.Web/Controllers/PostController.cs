@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
 using InstaLike.Web.Data.Query;
@@ -29,7 +28,7 @@ namespace InstaLike.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Publish(PublishNewPostModel newPost, IFormFile pictureFile)
+        public async Task<IActionResult> Publish(PublishPostModel newPost, IFormFile pictureFile)
         {
             if (ModelState.IsValid)
             {
@@ -39,7 +38,7 @@ namespace InstaLike.Web.Controllers
                     newPost.Picture = stream.ToArray();
                 }
 
-                var command = new PublishNewPostCommand(User.GetIdentifier(), newPost.Text, newPost.Picture);
+                var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, newPost.Picture);
                 var commandResult = await _dispatcher.DispatchAsync(command);
                 if (commandResult.IsSuccess)
                 {
@@ -66,9 +65,9 @@ namespace InstaLike.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostComment(NewCommentModel newComment)
+        public async Task<IActionResult> PostComment(PublishCommentModel newComment)
         {
-            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, newComment.AuthorNickName);
+            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, newComment.AuthorID);
             var commandResult = await _dispatcher.DispatchAsync(command);
 
             // Send Notification
@@ -83,7 +82,7 @@ namespace InstaLike.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Like(LikePostModel like)
         {
-            var command = new LikeOrDislikePostCommand(like.PostID, like.Nickname);
+            var command = new LikeOrDislikePostCommand(like.PostID, like.UserID);
             var commandResult = await _dispatcher.DispatchAsync(command);
 
             // Send Notification

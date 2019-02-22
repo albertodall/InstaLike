@@ -40,11 +40,17 @@ namespace InstaLike.Web.Data.Mapping
                     .Not.Nullable();
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
                     .Column("ProfilePicture")
+                    .Length(10000)
                     .Not.Nullable();
             }).LazyLoad();
 
-            HasMany(p => p.Followers).KeyColumn("ID");
-            HasMany(p => p.Following).KeyColumn("ID");
+            HasMany(p => p.Followers)
+                .Cascade.All()
+                .Inverse().KeyColumn("ID");
+
+            HasMany(p => p.Following)
+                .Cascade.All()
+                .Inverse().KeyColumn("ID");
 
             DynamicInsert();
         }

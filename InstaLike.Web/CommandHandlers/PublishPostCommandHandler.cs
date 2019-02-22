@@ -7,16 +7,16 @@ using NHibernate;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class PublishNewPostCommandHandler : ICommandHandler<PublishNewPostCommand>
+    internal sealed class PublishPostCommandHandler : ICommandHandler<PublishPostCommand>
     {
         private readonly ISession _session;
 
-        public PublishNewPostCommandHandler(ISession session)
+        public PublishPostCommandHandler(ISession session)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> HandleAsync(PublishNewPostCommand command)
+        public async Task<Result> HandleAsync(PublishPostCommand command)
         {
             using (var tx = _session.BeginTransaction())
             {
