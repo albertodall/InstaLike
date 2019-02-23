@@ -12,8 +12,12 @@ namespace InstaLike.Web.Data.Mapping
 
             Id(p => p.ID).GeneratedBy.Native();
 
-            Map(p => p.Text).CustomType<string>().Not.Nullable();
-            Map(p => p.PostDate).CustomType<DateTimeOffset>().Not.Nullable();
+            Map(p => p.Text).CustomType<string>()
+                .Access.CamelCaseField(Prefix.Underscore)
+                .Not.Nullable();
+
+            Map(p => p.PostDate).CustomType<DateTimeOffset>()
+                .Not.Nullable();
 
             Component(p => p.Picture, m => 
             {
@@ -33,8 +37,15 @@ namespace InstaLike.Web.Data.Mapping
                 .Column("UserID")
                 .Not.Nullable();
 
-            HasMany(p => p.Comments);
-            HasMany(p => p.Likes);
+            HasMany(p => p.Comments)
+                .Cascade.All()
+                .Inverse()
+                .KeyColumn("PostID");
+
+            HasMany(p => p.Likes)
+                .Cascade.All()
+                .Inverse()
+                .KeyColumn("PostID");
 
             DynamicInsert();
         }

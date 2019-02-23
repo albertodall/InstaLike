@@ -24,7 +24,7 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     var author = await _session.LoadAsync<User>(command.UserID);
 
-                    var post = new Post(author, (Picture)command.PictureRawBytes, command.Text);
+                    var post = new Post(author, (Picture)command.PictureRawBytes, (PostText)command.Text);
                     await _session.SaveAsync(post);
                     await tx.CommitAsync();
                     return Result.Ok(post.ID);

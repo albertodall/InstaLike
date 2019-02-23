@@ -1,19 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
+using InstaLike.Web.Data.Query;
+using InstaLike.Web.Extensions;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Models;
 using InstaLike.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
+        private const int MaxThumbnailsInUserProfile = 20;
+
         private readonly IUserAuthenticationService _authenticationService;
         private readonly IMessageDispatcher _dispatcher;
 
@@ -23,6 +28,7 @@ namespace InstaLike.Web.Controllers
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
 
+        [AllowAnonymous]
         public IActionResult Login(string returnUrl)
         {
             var model = new LoginModel()
@@ -33,6 +39,7 @@ namespace InstaLike.Web.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginModel model)
         {
             if (ModelState.IsValid)
@@ -67,17 +74,23 @@ namespace InstaLike.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        public IActionResult Profile(string id)
+        public async Task<IActionResult> Profile(string id)
         {
-            return View();
+            var currentUserID = User.GetIdentifier();
+
+            var query = new UserProfileQuery(currentUserID, id, MaxThumbnailsInUserProfile);
+            var model = await _dispatcher.DispatchAsync(query);
+            return View(model);
         }
 
+        [AllowAnonymous]
         public IActionResult Register()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterUserModel model)
         {
             if (ModelState.IsValid)

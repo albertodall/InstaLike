@@ -1,0 +1,85 @@
+﻿@model UserProfileModel
+
+@{
+    ViewData["Title"] = $"{Model.Nickname} user profile";
+}
+
+<div>
+    <div class="profilo-info">
+        @{
+            var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePicture);
+            var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+        }
+        <img src="@profilePicture" />
+
+        <div class="profilo-details">
+            <h1>@Model.Nickname</h1>
+            <strong>@string.Format("{0} {1}", Model.Name, Model.Surname)</strong>
+            <p>@Model.Bio</p>
+        </div>
+
+        @if (Model.IsCurrentUserProfile)
+        {
+            <a class="btn_logout" asp-action="Logout" asp-controller="Account">Logout</a>
+        }
+        else
+        {
+            <a class="@(Model.Following ? "btn_following" : "btn_follow")"
+               asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Account" asp-route-id="@Model.UserID">
+                @(Model.Following ? "Unfollow" : "Follow")
+            </a>
+        }
+    </div>
+
+    <div class="profilo-posts">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <ul>
+                <li>@Model.NumberOfPosts <label>post</label></li>
+                <li>
+                    <a asp-action="Followers" asp-controller="Account" asp-route-id="@Model.UserID" class="popup-link" data-ajax-url="@Url.Action("Followers", "Account", new { id = Model.UserID })">
+                        @Model.NumberOfFollowers <label>followers</label>
+                    </a>
+                </li>
+                <li>
+                    <a asp-action="Following" asp-controller="Account" asp-route-id="@Model.UserID" class="popup-link" data-ajax-url="@Url.Action("Following", "Account", new { id = Model.UserID })">
+                        @Model.NumberOfFollows <label>following</label>
+                    </a>
+                </li>
+            </ul>
+        }
+        else
+        {
+            <ul>
+                <li>
+                    <strong>@Model.NumberOfPosts</strong> post
+                </li>
+                <li>
+                    <strong>@Model.NumberOfFollowers</strong> followers
+                </li>
+                <li>
+                    Followed by <strong>@Model.NumberOfFollows</strong> people
+                </li>
+            </ul>
+        }
+    </div>
+
+    <div class="profilo-images">
+        @if (Model.NumberOfPosts == 0)
+        {
+            <p>@(Model.Nickname) hasn't still shared anything.</p>
+        }
+        else
+        {
+            <p>Latest @(Model.RecentPosts.Length) post by @(Model.Nickname)</p>
+            foreach (var img in Model.RecentPosts)
+            {
+                var postPictureBase64 = Convert.ToBase64String(img.Picture);
+                var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);
+                <a asp-action="Detail" asp-controller="Post" asp-route-id="@img.PostID">
+                    <img src="@postPicture" />
+                </a>
+            }
+        }
+    </div>
+</div>

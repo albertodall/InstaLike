@@ -12,8 +12,12 @@ namespace InstaLike.Web.Data.Mapping
 
             Id(p => p.ID).GeneratedBy.Native();
 
-            Map(p => p.Text).CustomType<string>().Not.Nullable();
-            Map(p => p.CommentDate).CustomType<DateTimeOffset>().Not.Nullable();
+            Map(p => p.Text).CustomType<string>()
+                .Access.CamelCaseField(Prefix.Underscore)
+                .Not.Nullable();
+
+            Map(p => p.CommentDate).CustomType<DateTimeOffset>()
+                .Not.Nullable();
 
             References(p => p.Post)
                 .Column("PostID")

@@ -15,19 +15,22 @@ namespace InstaLike.Core.Domain
             _likes = new List<Like>();
         }
 
-        public Post(User author, Picture picture, string comment)
+        public Post(User author, Picture picture, PostText text)
             : this()
         {
             Author = author;
             Picture = picture;
-            Text = comment;
+            _text = text;
 
             PostDate = DateTimeOffset.Now;
         }
 
         public virtual User Author { get; protected set; }
         public virtual Picture Picture { get; protected set; }
-        public virtual string Text { get; protected set; }
+
+        private readonly string _text;
+        public virtual PostText Text => (PostText)_text;
+
         public virtual DateTimeOffset PostDate { get; protected set; }
 
         public virtual IReadOnlyList<Comment> Comments => _comments.ToList();

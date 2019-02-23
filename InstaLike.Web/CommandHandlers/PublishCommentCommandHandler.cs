@@ -25,7 +25,7 @@ namespace InstaLike.Web.CommandHandlers
                     var author = await _session.LoadAsync<User>(command.UserID);
                     var post = await _session.LoadAsync<Post>(command.PostID);
 
-                    var comment = new Comment(post, author, command.Text);
+                    var comment = new Comment(post, author, (CommentText)command.Text);
                     await _session.SaveAsync(comment);
                     await tx.CommitAsync();
                     return Result.Ok(comment.ID);
