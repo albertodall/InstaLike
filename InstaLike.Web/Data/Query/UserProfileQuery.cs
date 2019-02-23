@@ -39,16 +39,15 @@ namespace InstaLike.Web.Data.Query
             {
                 var authorQuery = _session.QueryOver<User>()
                     .Fetch(SelectMode.FetchLazyProperties, u => u)
-                    .Fetch(SelectMode.Skip, u => u.Followers, u => u.Following)
                     .Where(Restrictions.Eq("Nickname", query.Nickname));
 
                 var author = await authorQuery.SingleOrDefaultAsync();
 
-                // Number of posts published by this author.
-                var postCountQuery = _session.QueryOver<Post>()
-                    .Where(p => p.Author == author)
-                    .Select(Projections.RowCount())
-                    .FutureValue<int>();
+               // Number of posts published by this author.
+               var postCountQuery = _session.QueryOver<Post>()
+                   .Where(p => p.Author == author)
+                   .Select(Projections.Count<Post>(p => p.ID))
+                   .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
                 PostThumbnailModel thumbnailModel = null;
@@ -64,24 +63,24 @@ namespace InstaLike.Web.Data.Query
                     .TransformUsing(Transformers.AliasToBean<PostThumbnailModel>())
                     .Take(query.NumberOfThumbnails)
                     .Future<PostThumbnailModel>();
-                
+
                 // Number of followers
                 var followersCountQuery = _session.QueryOver<Follow>()
                     .Where(f => f.Following == author)
-                    .Select(Projections.RowCount())
+                    .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
                 // Number of followed users
                 var followingCountQuery = _session.QueryOver<Follow>()
                     .Where(f => f.Follower == author)
-                    .Select(Projections.RowCount())
+                    .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
                 // Is the current user following the selected user?
-                var isFollowedByCurrentUserQuery =_session.QueryOver<Follow>()
+                var isFollowedByCurrentUserQuery = _session.QueryOver<Follow>()
                     .Where(f => f.Following == author)
                     .And(f => f.Follower.ID == query.CurrentUserID)
-                    .Select(Projections.RowCount())
+                    .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
                 result = new UserProfileModel()
@@ -92,8 +91,8 @@ namespace InstaLike.Web.Data.Query
                     Bio = author.Biography,
                     ProfilePicture = author.ProfilePicture,
                     NumberOfPosts = postCountQuery.Value,
-                    // NumberOfFollowers = followersCountQuery.Value,
-                    // NumberOfFollows = followingCountQuery.Value,
+                    NumberOfFollowers = followersCountQuery.Value,
+                    NumberOfFollows = followingCountQuery.Value,
                     IsCurrentUserProfile = author.ID == query.CurrentUserID
                 };
 

@@ -117,5 +117,21 @@ namespace InstaLike.Web.Controllers
             }
             return View(model);
         }
+
+        public async Task<IActionResult> Followers(string id)
+        {
+            ViewBag.Message = $"Users following {id}";
+            var query = new FollowersQuery(id);
+            var followersList = await _dispatcher.DispatchAsync(query);
+            return PartialView("_UserListPartial", followersList);
+        }
+
+        public async Task<IActionResult> Following(string id)
+        {
+            ViewBag.Message = $"Users followed by {id}";
+            var query = new FollowingQuery(id);
+            var followersList = await _dispatcher.DispatchAsync(query);
+            return PartialView("_UserListPartial", followersList);
+        }
     }
 }
