@@ -133,5 +133,19 @@ namespace InstaLike.Web.Controllers
             var followersList = await _dispatcher.DispatchAsync(query);
             return PartialView("_UserListPartial", followersList);
         }
+
+        public async Task<IActionResult> Follow(string id)
+        {
+            var command = new FollowCommand(User.GetIdentifier(), id);
+            var processCommandResult = await _dispatcher.DispatchAsync(command);
+            if (processCommandResult.IsSuccess)
+            {
+                return RedirectToAction(nameof(Profile), new { id });
+            }
+            else
+            {
+                return RedirectToAction("Error", "Home");
+            }
+        }
     }
 }

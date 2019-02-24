@@ -67,6 +67,35 @@ namespace InstaLike.Core.Domain
             ProfilePicture = Picture.DefaultProfilePicture;
         }
 
+        public virtual bool IsFollowing(User user)
+        {
+            return Following.Any(f => f.Following == user);
+        }
+
+        public virtual bool IsFollowedBy(User user)
+        {
+            return Followers.Any(f => f.Follower == user);
+        }
+
+        public virtual void Follow(User user)
+        {
+            if (!IsFollowing(user))
+            {
+                _following.Add(new Follow(this, user));
+            }
+        }
+
+        public virtual void Unfollow(User user)
+        {
+            if (IsFollowing(user))
+            {
+                var follow = _following
+                    .Where(f => f.Follower == this && f.Following == user)
+                    .Single();
+                _following.Remove(follow);
+            }
+        }
+
         public virtual List<Claim> Claims => new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, ID.ToString(), ClaimValueTypes.Integer32),

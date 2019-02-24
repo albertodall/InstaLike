@@ -72,11 +72,11 @@
         else
         {
             <p>Latest @(Model.RecentPosts.Length) post by @(Model.Nickname)</p>
-            foreach (var img in Model.RecentPosts)
+            foreach (var thumbnail in Model.RecentPosts)
             {
-                var postPictureBase64 = Convert.ToBase64String(img.Picture);
+                var postPictureBase64 = Convert.ToBase64String(thumbnail.Picture);
                 var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);
-                <a asp-action="Detail" asp-controller="Post" asp-route-id="@img.PostID">
+                <a asp-action="Detail" asp-controller="Post" asp-route-id="@thumbnail.PostID">
                     <img src="@postPicture" />
                 </a>
             }
