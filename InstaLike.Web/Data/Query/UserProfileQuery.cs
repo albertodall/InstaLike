@@ -33,26 +33,35 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<UserProfileModel> HandleAsync(UserProfileQuery query)
         {
-            UserProfileModel result = null;
+            UserProfileModel profile = null;
 
             using (var tx = _session.BeginTransaction())
             {
-                var authorQuery = _session.QueryOver<User>()
-                    .Fetch(SelectMode.FetchLazyProperties, u => u)
-                    .Where(Restrictions.Eq("Nickname", query.Nickname));
+                var userProfileQuery = _session.QueryOver<User>()
+                    .Where(Restrictions.Eq("Nickname", query.Nickname))
+                    .SelectList(list => list
+                        .Select(u => u.ID).WithAlias(() => profile.UserID)
+                        .Select(u => u.Nickname).WithAlias(() => profile.Nickname)
+                        .Select(u => u.Name).WithAlias(() => profile.Name)
+                        .Select(u => u.Surname).WithAlias(() => profile.Surname)
+                        .Select(u => u.Biography).WithAlias(() => profile.Bio)
+                        .Select(u => u.ProfilePicture.RawBytes).WithAlias(() => profile.ProfilePicture)
+                    )
+                    .TransformUsing(Transformers.AliasToBean<UserProfileModel>());
 
-                var author = await authorQuery.SingleOrDefaultAsync();
+                // Loads user's information
+                profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>();
 
-               // Number of posts published by this author.
-               var postCountQuery = _session.QueryOver<Post>()
-                   .Where(p => p.Author == author)
+                // Number of posts published by this author.
+                var postCountQuery = _session.QueryOver<Post>()
+                   .Where(p => p.Author.ID == profile.UserID)
                    .Select(Projections.Count<Post>(p => p.ID))
                    .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
                 PostThumbnailModel thumbnailModel = null;
                 var thumbnailsQuery = _session.QueryOver<Post>()
-                    .Where(p => p.Author == author)
+                    .Where(p => p.Author.ID == profile.UserID)
                     .OrderBy(p => p.PostDate).Desc()
                     .Select(Projections.ProjectionList()
                         .Add(Projections.Property<Post>(p => p.ID)
@@ -66,47 +75,39 @@ namespace InstaLike.Web.Data.Query
 
                 // Number of followers
                 var followersCountQuery = _session.QueryOver<Follow>()
-                    .Where(f => f.Following == author)
+                    .Where(f => f.Following.ID == profile.UserID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
                 // Number of followed users
                 var followingCountQuery = _session.QueryOver<Follow>()
-                    .Where(f => f.Follower == author)
+                    .Where(f => f.Follower.ID == profile.UserID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
                 // Is the current user following the selected user?
                 var isFollowedByCurrentUserQuery = _session.QueryOver<Follow>()
-                    .Where(f => f.Following == author)
+                    .Where(f => f.Following.ID == profile.UserID)
                     .And(f => f.Follower.ID == query.CurrentUserID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
-                result = new UserProfileModel()
-                {
-                    Nickname = author.Nickname,
-                    Name = author.Name,
-                    Surname = author.Surname,
-                    Bio = author.Biography,
-                    ProfilePicture = author.ProfilePicture,
-                    NumberOfPosts = postCountQuery.Value,
-                    NumberOfFollowers = followersCountQuery.Value,
-                    NumberOfFollows = followingCountQuery.Value,
-                    IsCurrentUserProfile = author.ID == query.CurrentUserID
-                };
+                profile.NumberOfPosts = await postCountQuery.GetValueAsync();
+                profile.NumberOfFollowers = await followersCountQuery.GetValueAsync();
+                profile.NumberOfFollows = await followingCountQuery.GetValueAsync();
+                profile.IsCurrentUserProfile = profile.UserID == query.CurrentUserID;
 
-                if (result.IsCurrentUserProfile)
+                if (profile.IsCurrentUserProfile)
                 {
-                    result.Following = true;
+                    profile.Following = true;
                 }
                 else
                 {
-                    result.Following = isFollowedByCurrentUserQuery.Value == 1;
+                    profile.Following = await isFollowedByCurrentUserQuery.GetValueAsync() == 1;
                 }
             }
 
-            return result;
+            return profile;
         }
     }
 }
