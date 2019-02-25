@@ -23,7 +23,7 @@ namespace InstaLike.Web.Data.Mapping
                 .Column("PostID")
                 .Not.Nullable();
 
-            References(p => p.User)
+            References(p => p.Author)
                 .Column("UserID")
                 .Not.Nullable();
 

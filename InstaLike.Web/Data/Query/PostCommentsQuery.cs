@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
 using NHibernate;
+using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -29,24 +30,28 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<CommentModel[]> HandleAsync(PostCommentsQuery query)
         {
-            IList<Comment> result = null;
+            CommentModel[] result = null;
+
             using (var tx = _session.BeginTransaction())
             {
+                CommentModel comment = null;
+                User commentAuthor = null;
                 var commentsQuery = _session.QueryOver<Comment>()
-                    .Fetch(SelectMode.Fetch, c => c.User)
                     .Where(c => c.Post.ID == query.PostID)
-                    .OrderBy(c => c.CommentDate).Desc;
+                    .OrderBy(c => c.CommentDate).Desc
+                    .Inner.JoinQueryOver(c => c.Author, () => commentAuthor)
+                    .SelectList(list => list
+                        .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
+                        .Select(c => c.Text).WithAlias(() => comment.Text)
+                        .Select(c => c.CommentDate).WithAlias(() => comment.CommentDate)
+                    )
+                    .TransformUsing(Transformers.AliasToBean<CommentModel>());
+                    
 
-                result = await commentsQuery.ListAsync();
+                result = (await commentsQuery.ListAsync<CommentModel>()).ToArray();
             }
 
-            // Automapper?
-            return result.Select(c => new CommentModel()
-            {
-                AuthorNickName = c.User.Nickname,
-                CommentDate = c.CommentDate,
-                Text = c.Text
-            }).ToArray();
+            return result;
         }
     }
 }

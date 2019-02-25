@@ -10,13 +10,13 @@ namespace InstaLike.Core.Domain
         public Comment(Post post, User author, CommentText text)
         {
             Post = post;
-            User = author;
+            Author = author;
             _text = text ?? throw new ArgumentNullException(nameof(text));
             CommentDate = DateTimeOffset.Now;
         }
 
         public virtual Post Post { get; }
-        public virtual User User { get; }
+        public virtual User Author { get; }
 
         private readonly string _text;
         public virtual CommentText Text => (CommentText)_text;

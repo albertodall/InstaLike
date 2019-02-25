@@ -39,6 +39,7 @@ namespace InstaLike.Web.Data.Mapping
 
             HasMany(p => p.Comments)
                 .KeyColumn("PostID")
+                .Inverse()
                 .Cascade.SaveUpdate();
 
             HasMany(p => p.Likes)
