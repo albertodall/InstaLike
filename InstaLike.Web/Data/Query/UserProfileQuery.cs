@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
@@ -52,7 +53,7 @@ namespace InstaLike.Web.Data.Query
                 // Loads user's information
                 profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>();
 
-                // Number of posts published by this author.
+                // Number of posts published by this author. 
                 var postCountQuery = _session.QueryOver<Post>()
                    .Where(p => p.Author.ID == profile.UserID)
                    .Select(Projections.Count<Post>(p => p.ID))
@@ -66,7 +67,7 @@ namespace InstaLike.Web.Data.Query
                     .Select(Projections.ProjectionList()
                         .Add(Projections.Property<Post>(p => p.ID)
                             .WithAlias(() => thumbnailModel.PostID))
-                        .Add(Projections.Property<Post>(p => p.Picture)
+                        .Add(Projections.Property<Post>(p => p.Picture.RawBytes)
                             .WithAlias(() => thumbnailModel.Picture))
                     )
                     .TransformUsing(Transformers.AliasToBean<PostThumbnailModel>())
@@ -93,6 +94,7 @@ namespace InstaLike.Web.Data.Query
                     .FutureValue<int>();
 
                 profile.NumberOfPosts = await postCountQuery.GetValueAsync();
+                profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync()).ToArray();
                 profile.NumberOfFollowers = await followersCountQuery.GetValueAsync();
                 profile.NumberOfFollows = await followingCountQuery.GetValueAsync();
                 profile.IsCurrentUserProfile = profile.UserID == query.CurrentUserID;

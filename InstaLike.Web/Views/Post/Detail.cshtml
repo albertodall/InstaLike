@@ -10,7 +10,7 @@
 <div class="post-dettaglio">
     <div class="author">
         @{
-            var profilePictureBase64 = Convert.ToBase64String(Model.Picture);
+            var profilePictureBase64 = Convert.ToBase64String(Model.AuthorProfilePicture);
             var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
         }
         <img src="@profilePicture" />

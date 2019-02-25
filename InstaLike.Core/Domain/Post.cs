@@ -58,5 +58,15 @@ namespace InstaLike.Core.Domain
         {
             return Likes.Any(l => l.User == user);
         }
+
+        public virtual void AddComment(Comment comment)
+        {
+            if (comment == null)
+            {
+                throw new ArgumentNullException(nameof(comment));
+            }
+
+            _comments.Add(comment);
+        }
     }
 }

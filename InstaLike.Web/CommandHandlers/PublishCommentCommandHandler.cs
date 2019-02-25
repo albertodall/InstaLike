@@ -26,11 +26,12 @@ namespace InstaLike.Web.CommandHandlers
                     var post = await _session.LoadAsync<Post>(command.PostID);
 
                     var comment = new Comment(post, author, (CommentText)command.Text);
-                    await _session.SaveAsync(comment);
+                    post.AddComment(comment);
+                    await _session.SaveAsync(post);
                     await tx.CommitAsync();
                     return Result.Ok(comment.ID);
                 }
-                catch (ADOException ex)
+                catch (Exception ex)
                 {
                     await tx.RollbackAsync();
                     return Result.Fail(ex.Message);

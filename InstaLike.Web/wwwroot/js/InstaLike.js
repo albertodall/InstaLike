@@ -1,24 +1,24 @@
 ﻿// Adds a comment to a post
-$('.form-commento').submit(function (e) {
+$('.form-comment').submit(function (e) {
     e.preventDefault();
 
     var form = $(this),
-        idPost = form.find('#IDPost').val(),
-        commento = form.find('#commento'),
-        commentiPost = form.parent().find('.commenti-post'),
-        visualizzaTuttiCommenti = form.parent().find('.visualizza-tutti-commenti'),
-        commentoAutorePost = form.parent().find('.commento-autore-post'),
-        testoCommento = commento.val();
+        postID = form.find('#PostID').val(),
+        comment = form.find('#comment'),
+        postComments = form.parent().find('.commenti-post'),
+        showAllComments = form.parent().find('.visualizza-tutti-commenti'),
+        authorComment = form.parent().find('.commento-autore-post'),
+        commentText = comment.val();
 
-    $.post("/Post/AggiungiCommento", { IDPost: idPost, commento: testoCommento }, function (response) {
-        commentiPost.remove();
-        visualizzaTuttiCommenti.remove();
+    $.post("/Post/PublishComment", { PostID: postID, CommentText: commentText }, function (response) {
+        postComments.remove();
+        showAllComments.remove();
 
         // Updates markup
-        $(response).insertAfter(commentoAutorePost);
+        $(response).insertAfter(authorComment);
 
         // Cleanup comment textbox
-        commento.val('');
+        comment.val('');
     });
 });
 

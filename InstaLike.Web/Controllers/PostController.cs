@@ -59,15 +59,15 @@ namespace InstaLike.Web.Controllers
 
         public async Task<IActionResult> Detail(int id)
         {
-            var postQuery = new PostQuery(id);
+            var postQuery = new PostDetailQuery(id);
             var model = await _dispatcher.DispatchAsync(postQuery);
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostComment(PublishCommentModel newComment)
+        public async Task<IActionResult> PublishComment(PublishCommentModel newComment)
         {
-            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, newComment.AuthorID);
+            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetIdentifier());
             var commandResult = await _dispatcher.DispatchAsync(command);
 
             // Send Notification

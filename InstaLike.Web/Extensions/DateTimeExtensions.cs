@@ -11,11 +11,11 @@ namespace InstaLike.Web.Extensions
             var days = (DateTimeOffset.UtcNow.DateTime - date).TotalDays;
             if (days <= 15)
             {
-                return date.Humanize(true, DateTimeOffset.UtcNow.DateTime, CultureInfo.GetCultureInfo("it-it"));
+                return date.Humanize(true, DateTimeOffset.UtcNow.DateTime, CultureInfo.CurrentUICulture);
             }
             else
             {
-                return date.ToString("dddd dd/MM/yyyy", CultureInfo.GetCultureInfo("it-it"));
+                return date.ToString("dddd dd/MM/yyyy", CultureInfo.CurrentUICulture);
             }
         }
     }

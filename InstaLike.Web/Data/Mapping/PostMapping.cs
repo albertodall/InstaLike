@@ -38,14 +38,12 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             HasMany(p => p.Comments)
-                .Cascade.All()
-                .Inverse()
-                .KeyColumn("PostID");
+                .KeyColumn("PostID")
+                .Cascade.SaveUpdate();
 
             HasMany(p => p.Likes)
-                .Cascade.All()
-                .Inverse()
-                .KeyColumn("PostID");
+                .KeyColumn("PostID")
+                .Cascade.SaveUpdate();
 
             DynamicInsert();
         }

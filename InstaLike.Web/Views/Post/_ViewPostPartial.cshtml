@@ -14,7 +14,7 @@
         }
         <img src="@profilePicture" />
 
-        <a href="@Url.Action("Profile", "Account", new { @id = Model.AuthorNickName })">
+        <a asp-action="Profile" asp-controller="Account" asp-route-id="@Model.AuthorNickName">
             @Model.AuthorNickName
         </a>
 
@@ -23,7 +23,7 @@
         </time>
     </div>
 
-    <a href="@Url.Action("Detail", "Post", new { id = Model.PostID })">
+    <a asp-action="Detail" asp-controller="Post" asp-route-id="@Model.PostID)">
         @{
             var postPictureBase64 = Convert.ToBase64String(Model.Picture);
             var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);

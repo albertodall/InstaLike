@@ -7,10 +7,10 @@ namespace InstaLike.Core.Domain
         protected Comment()
         { }
 
-        public Comment(Post post, User user, CommentText text)
+        public Comment(Post post, User author, CommentText text)
         {
             Post = post;
-            User = User;
+            User = author;
             _text = text ?? throw new ArgumentNullException(nameof(text));
             CommentDate = DateTimeOffset.Now;
         }

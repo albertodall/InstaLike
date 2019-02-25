@@ -32,6 +32,11 @@ namespace InstaLike.Core.Domain
             return Result.Ok(new Email(email));
         }
 
+        public override string ToString()
+        {
+            return Value;
+        }
+
         public static explicit operator Email(string email)
         {
             return Create(email).Value;
