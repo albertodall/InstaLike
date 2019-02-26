@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using MediatR;
 using NHibernate;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class PublishCommentCommandHandler : ICommandHandler<PublishCommentCommand>
+    internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishCommentCommand, Result>
     {
         private readonly ISession _session;
 
@@ -16,7 +18,7 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> HandleAsync(PublishCommentCommand command)
+        public async Task<Result> Handle(PublishCommentCommand command, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {

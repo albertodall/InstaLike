@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Data;
+using MediatR;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand>
+    internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result>
     {
         private readonly IRepository<User, int> _repository;
 
@@ -16,7 +18,7 @@ namespace InstaLike.Web.CommandHandlers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<Result> HandleAsync(RegisterUserCommand command)
+        public async Task<Result> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
         {
             var nicknameValidationResult = Nickname.Create(command.Nickname);
             var eMailValidationResult = Email.Create(command.Email);

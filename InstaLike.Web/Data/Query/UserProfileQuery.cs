@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
+using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
-    public class UserProfileQuery : IQuery<UserProfileModel>
+    public class UserProfileQuery : MediatR.IRequest<UserProfileModel>
     {
         public int CurrentUserID { get; }
         public string Nickname { get; }
@@ -23,7 +25,7 @@ namespace InstaLike.Web.Data.Query
         }
     }
 
-    internal sealed class UserProfileQueryHandler : IQueryHandler<UserProfileQuery, UserProfileModel>
+    internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery, UserProfileModel>
     {
         private readonly ISession _session;
 
@@ -32,7 +34,7 @@ namespace InstaLike.Web.Data.Query
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<UserProfileModel> HandleAsync(UserProfileQuery query)
+        public async Task<UserProfileModel> Handle(UserProfileQuery query, CancellationToken cancellationToken)
         {
             UserProfileModel profile = null;
 

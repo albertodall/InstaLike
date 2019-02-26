@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
+using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
-    public class PostDetailQuery : IQuery<PostModel>
+    public class PostDetailQuery : IRequest<PostModel>
     {
         public int PostID { get; }
 
@@ -19,7 +21,7 @@ namespace InstaLike.Web.Data.Query
         }
     }
 
-    internal sealed class PostDetailQueryHandler : IQueryHandler<PostDetailQuery, PostModel>
+    internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, PostModel>
     {
         private readonly ISession _session;
 
@@ -28,7 +30,7 @@ namespace InstaLike.Web.Data.Query
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<PostModel> HandleAsync(PostDetailQuery query)
+        public async Task<PostModel> Handle(PostDetailQuery query, CancellationToken cancellationToken)
         {
             PostModel post = null;
 

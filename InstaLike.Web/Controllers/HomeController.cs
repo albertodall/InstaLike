@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 using InstaLike.Web.Models;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using MediatR;
 
 namespace InstaLike.Web.Controllers
 {
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly IMessageDispatcher _dispatcher;
+        private readonly IMediator _dispatcher;
 
-        public HomeController(IMessageDispatcher dispatcher)
+        public HomeController(IMediator dispatcher)
         {
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
@@ -23,7 +23,7 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var query = new TimelineQuery(User.GetIdentifier());
-            var model = await _dispatcher.DispatchAsync(query);
+            var model = await _dispatcher.Send(query);
             return View(model);
         }
 

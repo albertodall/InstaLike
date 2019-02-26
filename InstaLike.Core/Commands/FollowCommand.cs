@@ -1,6 +1,9 @@
-﻿namespace InstaLike.Core.Commands
+﻿using CSharpFunctionalExtensions;
+using MediatR;
+
+namespace InstaLike.Core.Commands
 {
-    public class FollowCommand : ICommand
+    public class FollowCommand : IRequest<Result>
     {
         public int FollowerID { get; }
         public string FollowedNickname { get; }

@@ -1,6 +1,9 @@
-﻿namespace InstaLike.Core.Commands
+﻿using CSharpFunctionalExtensions;
+using MediatR;
+
+namespace InstaLike.Core.Commands
 {
-    public class PublishCommentCommand : ICommand
+    public class PublishCommentCommand : IRequest<Result>
     {
         public int PostID { get; }
         public string Text { get; }

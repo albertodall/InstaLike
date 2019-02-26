@@ -1,14 +1,16 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
+using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
-    public class FollowersQuery : IQuery<FollowModel[]>
+    public class FollowersQuery : IRequest<FollowModel[]>
     {
         public string Nickname { get; }
 
@@ -18,7 +20,7 @@ namespace InstaLike.Web.Data.Query
         }
     }
 
-    internal sealed class FollowersQueryHandler : IQueryHandler<FollowersQuery, FollowModel[]>
+    internal sealed class FollowersQueryHandler : IRequestHandler<FollowersQuery, FollowModel[]>
     {
         private readonly ISession _session;
 
@@ -27,14 +29,14 @@ namespace InstaLike.Web.Data.Query
             _session = session;
         }
 
-        public async Task<FollowModel[]> HandleAsync(FollowersQuery query)
+        public async Task<FollowModel[]> Handle(FollowersQuery request, CancellationToken cancellationToken)
         {
             FollowModel[] result = null;
 
             using (var tx = _session.BeginTransaction())
             {
                 var user = await _session.QueryOver<User>()
-                    .Where(Restrictions.Eq("Nickname", query.Nickname))
+                    .Where(Restrictions.Eq("Nickname", request.Nickname))
                     .SingleOrDefaultAsync();
 
                 FollowModel model = null;

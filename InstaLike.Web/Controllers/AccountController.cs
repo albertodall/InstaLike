@@ -1,15 +1,17 @@
 ﻿using System;
+using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Models;
 using InstaLike.Web.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Controllers
@@ -20,9 +22,9 @@ namespace InstaLike.Web.Controllers
         private const int MaxThumbnailsInUserProfile = 20;
 
         private readonly IUserAuthenticationService _authenticationService;
-        private readonly IMessageDispatcher _dispatcher;
+        private readonly IMediator _dispatcher;
 
-        public AccountController(IUserAuthenticationService authenticationService, IMessageDispatcher dispatcher)
+        public AccountController(IUserAuthenticationService authenticationService, IMediator dispatcher)
         {
             _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
@@ -79,7 +81,7 @@ namespace InstaLike.Web.Controllers
             var currentUserID = User.GetIdentifier();
 
             var query = new UserProfileQuery(currentUserID, id, MaxThumbnailsInUserProfile);
-            var model = await _dispatcher.DispatchAsync(query);
+            var model = await _dispatcher.Send(query);
             return View(model);
         }
 
@@ -91,20 +93,29 @@ namespace InstaLike.Web.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterUserModel model)
+        public async Task<IActionResult> Register(RegisterUserModel newUser, IFormFile profilePictureFile)
         {
             if (ModelState.IsValid)
             {
-                var command = new RegisterUserCommand(
-                    model.Nickname,
-                    model.Name,
-                    model.Surname,
-                    model.Password,
-                    model.Email,
-                    model.Biography,
-                    model.ProfilePicture);
+                if (profilePictureFile != null)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await profilePictureFile.CopyToAsync(stream);
+                        newUser.ProfilePicture = stream.ToArray();
+                    }
+                }
 
-                var processCommandResult = await _dispatcher.DispatchAsync(command);
+                var command = new RegisterUserCommand(
+                    newUser.Nickname,
+                    newUser.Name,
+                    newUser.Surname,
+                    newUser.Password,
+                    newUser.Email,
+                    newUser.Biography,
+                    newUser.ProfilePicture);
+
+                var processCommandResult = await _dispatcher.Send(command);
                 if (processCommandResult.IsSuccess)
                 {
                     return RedirectToAction("Index", "Home");
@@ -115,14 +126,14 @@ namespace InstaLike.Web.Controllers
                 }
                 
             }
-            return View(model);
+            return View(newUser);
         }
 
         public async Task<IActionResult> Followers(string id)
         {
             ViewBag.Message = $"Users following {id}";
             var query = new FollowersQuery(id);
-            var followersList = await _dispatcher.DispatchAsync(query);
+            var followersList = await _dispatcher.Send(query);
             return PartialView("_UserListPartial", followersList);
         }
 
@@ -130,14 +141,14 @@ namespace InstaLike.Web.Controllers
         {
             ViewBag.Message = $"Users followed by {id}";
             var query = new FollowingQuery(id);
-            var followersList = await _dispatcher.DispatchAsync(query);
+            var followersList = await _dispatcher.Send(query);
             return PartialView("_UserListPartial", followersList);
         }
 
         public async Task<IActionResult> Follow(string id)
         {
             var command = new FollowCommand(User.GetIdentifier(), id);
-            var processCommandResult = await _dispatcher.DispatchAsync(command);
+            var processCommandResult = await _dispatcher.Send(command);
             if (processCommandResult.IsSuccess)
             {
                 return RedirectToAction(nameof(Profile), new { id });

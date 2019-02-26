@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using MediatR;
 using NHibernate;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class LikeOrDislikePostCommandHandler : ICommandHandler<LikeOrDislikePostCommand>
+    internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikeOrDislikePostCommand, Result>
     {
         private readonly ISession _session;
 
@@ -16,30 +18,30 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> HandleAsync(LikeOrDislikePostCommand command)
+        public async Task<Result> Handle(LikeOrDislikePostCommand command, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
                 try
                 {
-                    Post postAlias = null;
-
                     var user = await _session.LoadAsync<User>(command.UserID);
                     var likeQuery = _session.QueryOver<Like>()
-                        .Inner.JoinAlias(l => l.Post, () => postAlias).Fetch()
+                        .Fetch(SelectMode.Fetch, l => l.Post)
                         .Where(l => l.Post.ID == command.PostID && l.User == user)
                         .Select(l => l.Post);
+                        
+                    var post = await likeQuery.SingleOrDefaultAsync<Post>();
 
-                    if (postAlias.LikesTo(user))
+                    if (post.LikesTo(user))
                     {
-                        postAlias.RemoveLikeBy(user);
+                        post.RemoveLikeBy(user);
                     }
                     else
                     {
-                        postAlias.PutLikeFor(user);
+                        post.PutLikeFor(user);
                     }
 
-                    await _session.SaveOrUpdateAsync(postAlias);
+                    await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
                     return Result.Ok();
                 }

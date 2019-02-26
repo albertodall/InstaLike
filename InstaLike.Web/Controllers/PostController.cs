@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using InstaLike.Core.Commands;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +15,9 @@ namespace InstaLike.Web.Controllers
     [Authorize]
     public class PostController : Controller
     {
-        private readonly IMessageDispatcher _dispatcher;
+        private readonly IMediator _dispatcher;
 
-        public PostController(IMessageDispatcher dispatcher)
+        public PostController(IMediator dispatcher)
         {
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
@@ -39,7 +39,7 @@ namespace InstaLike.Web.Controllers
                 }
 
                 var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, newPost.Picture);
-                var commandResult = await _dispatcher.DispatchAsync(command);
+                var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {
                     return RedirectToAction("Index", "Home");
@@ -60,7 +60,7 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Detail(int id)
         {
             var postQuery = new PostDetailQuery(id);
-            var model = await _dispatcher.DispatchAsync(postQuery);
+            var model = await _dispatcher.Send(postQuery);
             return View(model);
         }
 
@@ -68,13 +68,13 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> PublishComment(PublishCommentModel newComment)
         {
             var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetIdentifier());
-            var commandResult = await _dispatcher.DispatchAsync(command);
+            var commandResult = await _dispatcher.Send(command);
 
             // Send Notification
             // Another command here or raise an event?
             
             var commentsQuery = new PostCommentsQuery(newComment.PostID);
-            var comments = await _dispatcher.DispatchAsync(commentsQuery);
+            var comments = await _dispatcher.Send(commentsQuery);
 
             return PartialView("_CommentsPartial", comments);
         }
@@ -83,7 +83,7 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Like(LikePostModel like)
         {
             var command = new LikeOrDislikePostCommand(like.PostID, like.UserID);
-            var commandResult = await _dispatcher.DispatchAsync(command);
+            var commandResult = await _dispatcher.Send(command);
 
             // Send Notification
             // Another command here or raise an event?

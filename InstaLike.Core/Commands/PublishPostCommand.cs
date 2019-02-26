@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CSharpFunctionalExtensions;
+using MediatR;
 
 namespace InstaLike.Core.Commands
 {
-    public class PublishPostCommand : ICommand
+    public class PublishPostCommand : IRequest<Result>
     {
         public int UserID { get; }
         public string Text { get; }

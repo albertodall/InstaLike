@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
+using MediatR;
 using NHibernate;
 using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
-    public class PostCommentsQuery : IQuery<CommentModel[]>
+    public class PostCommentsQuery : IRequest<CommentModel[]>
     {
         public int PostID { get;  }
 
@@ -19,7 +21,7 @@ namespace InstaLike.Web.Data.Query
         }
     }
 
-    internal class PostCommentsQueryHandler : IQueryHandler<PostCommentsQuery, CommentModel[]>
+    internal class PostCommentsQueryHandler : IRequestHandler<PostCommentsQuery, CommentModel[]>
     {
         private readonly ISession _session;
 
@@ -28,7 +30,7 @@ namespace InstaLike.Web.Data.Query
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<CommentModel[]> HandleAsync(PostCommentsQuery query)
+        public async Task<CommentModel[]> Handle(PostCommentsQuery query, CancellationToken cancellationToken)
         {
             CommentModel[] result = null;
 

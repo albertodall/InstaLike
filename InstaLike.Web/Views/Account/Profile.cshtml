@@ -14,7 +14,7 @@
 
         <div class="profilo-details">
             <h1>@Model.Nickname</h1>
-            <strong>@string.Format("{0} {1}", Model.Name, Model.Surname)</strong>
+            <strong>@(Model.Name) @(Model.Surname)</strong>
             <p>@Model.Bio</p>
         </div>
 
@@ -25,7 +25,7 @@
         else
         {
             <a class="@(Model.Following ? "btn_following" : "btn_follow")"
-               asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Account" asp-route-id="@Model.UserID">
+               asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Account" asp-route-id="@Model.Nickname">
                 @(Model.Following ? "Unfollow" : "Follow")
             </a>
         }
@@ -37,12 +37,12 @@
             <ul>
                 <li>@Model.NumberOfPosts <label>post</label></li>
                 <li>
-                    <a asp-action="Followers" asp-controller="Account" asp-route-id="@Model.UserID" class="popup-link" data-ajax-url="@Url.Action("Followers", "Account", new { id = Model.UserID })">
+                    <a asp-action="Followers" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Followers", "Account", new { id = Model.UserID })">
                         @Model.NumberOfFollowers <label>followers</label>
                     </a>
                 </li>
                 <li>
-                    <a asp-action="Following" asp-controller="Account" asp-route-id="@Model.UserID" class="popup-link" data-ajax-url="@Url.Action("Following", "Account", new { id = Model.UserID })">
+                    <a asp-action="Following" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Following", "Account", new { id = Model.UserID })">
                         @Model.NumberOfFollows <label>following</label>
                     </a>
                 </li>

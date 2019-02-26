@@ -1,6 +1,9 @@
-﻿namespace InstaLike.Core.Commands
+﻿using CSharpFunctionalExtensions;
+using MediatR;
+
+namespace InstaLike.Core.Commands
 {
-    public class RegisterUserCommand : ICommand
+    public class RegisterUserCommand : IRequest<Result>
     {
         public string Nickname { get; }
         public string Name { get; }

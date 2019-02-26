@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class FollowCommandHandler : ICommandHandler<FollowCommand>
+    internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Result>
     {
         private readonly ISession _session;
 
@@ -17,7 +19,7 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> HandleAsync(FollowCommand command)
+        public async Task<Result> Handle(FollowCommand command, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
@@ -25,8 +27,7 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     var follower = await _session.LoadAsync<User>(command.FollowerID);
                     var followedUserQuery = _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("Nickname", command.FollowedNickname))
-                        .Select(u => u.ID);
+                        .Where(Restrictions.Eq("Nickname", command.FollowedNickname));
 
                     var followedUser = await followedUserQuery.SingleOrDefaultAsync();
 
