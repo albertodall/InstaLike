@@ -13,6 +13,8 @@ namespace InstaLike.Web.Controllers
     [Authorize]
     public class HomeController : Controller
     {
+        private const int MaxNumberOfPosts = 10;
+
         private readonly IMediator _dispatcher;
 
         public HomeController(IMediator dispatcher)
@@ -22,7 +24,7 @@ namespace InstaLike.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var query = new TimelineQuery(User.GetIdentifier());
+            var query = new TimelineQuery(User.GetIdentifier(), MaxNumberOfPosts);
             var model = await _dispatcher.Send(query);
             return View(model);
         }

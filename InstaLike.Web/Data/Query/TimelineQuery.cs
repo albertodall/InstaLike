@@ -14,10 +14,12 @@ namespace InstaLike.Web.Data.Query
     public class TimelineQuery : IRequest<PostModel[]>
     {
         public int UserID { get; }
+        public int NumberOfPosts { get; }
 
-        public TimelineQuery(int userID)
+        public TimelineQuery(int userID, int numberOfPosts)
         {
             UserID = userID;
+            NumberOfPosts = numberOfPosts;
         }
     }
 
@@ -48,7 +50,7 @@ namespace InstaLike.Web.Data.Query
                             .Where(() => followingAlias.Follower.ID == query.UserID)
                     .OrderBy(() => postAlias.PostDate).Desc()
                     .TransformUsing(Transformers.DistinctRootEntity)
-                    .Take(10);
+                    .Take(query.NumberOfPosts);
 
                 var postsInTimeline = await timelineQuery.ListAsync();
 
