@@ -149,6 +149,23 @@ namespace InstaLike.Web.Controllers
         {
             var command = new FollowCommand(User.GetIdentifier(), id);
             var processCommandResult = await _dispatcher.Send(command);
+
+            // Notification
+
+            if (processCommandResult.IsSuccess)
+            {
+                return RedirectToAction(nameof(Profile), new { id });
+            }
+            else
+            {
+                return RedirectToAction("Error", "Home");
+            }
+        }
+
+        public async Task<IActionResult> Unfollow(string id)
+        {
+            var command = new UnfollowCommand(User.GetIdentifier(), id);
+            var processCommandResult = await _dispatcher.Send(command);
             if (processCommandResult.IsSuccess)
             {
                 return RedirectToAction(nameof(Profile), new { id });
