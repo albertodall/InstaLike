@@ -33,17 +33,18 @@ $('.visualizza-tutti-commenti').click(function (e) {
 $('.pulsante-like').click(function (e) {
     e.preventDefault();
 
-    var pulsante = $(this),
-        markupNumeroLike = pulsante.next('strong').find('.numero-like'),
-        numeroLikeRicevuti = parseInt(markupNumeroLike.html()),
-        idPost = pulsante.attr('data-post-id');
+    var likeButton = $(this),
+        likesMarkup = likeButton.next('strong').find('.numero-like'),
+        likes = parseInt(likesMarkup.html()),
+        postID = likeButton.attr('data-post-id'),
+        userID = likeButton.attr('data-user-id');
 
-    $.post('/Post/Like', { IDPost: idPost }, function (response) {
-        pulsante.toggleClass('post-piaciuto');
+    $.post('/Post/Like', { PostID: postID, UserID: userID }, function () {
+        likeButton.toggleClass('post-piaciuto');
 
         // Increments o decrements the number of likes.
-        var incremento = pulsante.hasClass('post-piaciuto') ? 1 : -1;
-        markupNumeroLike.html(numeroLikeRicevuti + incremento);
+        var increment = likeButton.hasClass('post-piaciuto') ? 1 : -1;
+        likesMarkup.html(likes + increment);
     });
 });
 

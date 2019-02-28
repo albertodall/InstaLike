@@ -33,7 +33,7 @@
 
     <div>
         <div class="post-likes">
-            <button class="pulsante-like @(liked ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID">
+            <button class="pulsante-like @(liked ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
                 Like
             </button>
             <strong>

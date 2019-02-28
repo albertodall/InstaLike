@@ -26,8 +26,8 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     var user = await _session.LoadAsync<User>(command.UserID);
                     var likeQuery = _session.QueryOver<Like>()
-                        .Fetch(SelectMode.Fetch, l => l.Post)
                         .Where(l => l.Post.ID == command.PostID && l.User == user)
+                        .Right.JoinQueryOver(l => l.Post).Fetch()
                         .Select(l => l.Post);
                         
                     var post = await likeQuery.SingleOrDefaultAsync<Post>();
