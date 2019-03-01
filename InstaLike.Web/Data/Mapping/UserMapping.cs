@@ -47,12 +47,12 @@ namespace InstaLike.Web.Data.Mapping
             HasMany(p => p.Followers)
                 .Cascade.All()
                 .Inverse()
-                .KeyColumn("ID");
+                .KeyColumn("FollowerID");
 
             HasMany(p => p.Following)
                 .Cascade.All()
                 .Inverse()
-                .KeyColumn("ID");
+                .KeyColumn("FollowingID");
 
             DynamicInsert();
         }

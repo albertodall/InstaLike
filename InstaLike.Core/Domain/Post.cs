@@ -56,7 +56,7 @@ namespace InstaLike.Core.Domain
 
         public virtual bool LikesTo(User user)
         {
-            return Likes.Any(l => l.User == user);
+            return _likes.Any(l => l.User == user);
         }
 
         public virtual void AddComment(Comment comment)

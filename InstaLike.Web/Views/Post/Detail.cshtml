@@ -4,7 +4,6 @@
 
 @{
     ViewBag.Title = "Post detail";
-    var liked = Model.UserLikes.Any(u => u == User.Identity.Name);
 }
 
 <div class="post-dettaglio">
@@ -32,11 +31,11 @@
 
     <div>
         <div class="post-likes">
-            <button class="pulsante-like @(liked ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID">
+            <button class="pulsante-like @(Model.IsLikedByCurrentUser == 1? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID">
                 Mi piace
             </button>
             <strong>
-                <span class="numero-like">@Model.UserLikes.Count()</span> mi piace
+                <span class="numero-like">@Model.LikesCount</span> mi piace
             </strong>
         </div>
 

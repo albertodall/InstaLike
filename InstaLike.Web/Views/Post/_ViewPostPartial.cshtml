@@ -2,10 +2,6 @@
 
 @model PostModel
 
-@{
-    var liked = Model.UserLikes.Any(user => user == User.Identity.Name);
-}
-
 <div>
     <div class="author">
         @{
@@ -33,11 +29,11 @@
 
     <div>
         <div class="post-likes">
-            <button class="pulsante-like @(liked ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
+            <button class="pulsante-like @(Model.IsLikedByCurrentUser == 1 ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
                 Like
             </button>
             <strong>
-                <span class="numero-like">@Model.UserLikes.Count()</span> likes
+                <span class="numero-like">@Model.LikesCount</span> likes
             </strong>
         </div>
 

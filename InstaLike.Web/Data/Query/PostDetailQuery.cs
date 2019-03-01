@@ -14,10 +14,12 @@ namespace InstaLike.Web.Data.Query
     public class PostDetailQuery : IRequest<PostModel>
     {
         public int PostID { get; }
+        public int CurrendUserID { get; }
 
-        public PostDetailQuery(int postID)
+        public PostDetailQuery(int postID, int currentUserID)
         {
             PostID = postID;
+            CurrendUserID = currentUserID;
         }
     }
 
@@ -36,12 +38,10 @@ namespace InstaLike.Web.Data.Query
 
             using (var tx = _session.BeginTransaction())
             {
-                User userWhoLiked = null;
-                var postLikesQuery =_session.QueryOver<Like>()
+                var postLikesCountQuery =_session.QueryOver<Like>()
                     .Where(l => l.Post.ID == query.PostID)
-                    .Inner.JoinQueryOver(l => l.User, () => userWhoLiked)
-                    .Select(Projections.Property(() => userWhoLiked.Nickname))
-                    .Future<string>();
+                    .ToRowCountQuery()
+                    .FutureValue<int>();
 
                 User commentAuthor = null;
                 CommentModel comment = null;
@@ -55,6 +55,11 @@ namespace InstaLike.Web.Data.Query
                     )
                     .TransformUsing(Transformers.AliasToBean<CommentModel>())
                     .Future<CommentModel>();
+
+                var isLikedByCurrentUserQuery = _session.QueryOver<Like>()
+                    .Where(p => p.ID == query.PostID).And(l => l.User.ID == query.CurrendUserID)
+                    .ToRowCountQuery()
+                    .FutureValue<byte>();
 
                 User postAuthor = null;
                 var postQuery = _session.QueryOver<Post>()
@@ -72,8 +77,9 @@ namespace InstaLike.Web.Data.Query
                     .FutureValue<PostModel>();
 
                 post = await postQuery.GetValueAsync();
-                post.UserLikes = (await postLikesQuery.GetEnumerableAsync()).ToArray();
-                post.Comments = (await postCommentsQuery.GetEnumerableAsync()).ToArray();     
+                post.LikesCount = await postLikesCountQuery.GetValueAsync();
+                post.Comments = (await postCommentsQuery.GetEnumerableAsync()).ToArray();
+                post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync();
             }
 
             return post;

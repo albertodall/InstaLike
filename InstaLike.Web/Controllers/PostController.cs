@@ -59,7 +59,7 @@ namespace InstaLike.Web.Controllers
 
         public async Task<IActionResult> Detail(int id)
         {
-            var postQuery = new PostDetailQuery(id);
+            var postQuery = new PostDetailQuery(id, User.GetIdentifier());
             var model = await _dispatcher.Send(postQuery);
             return View(model);
         }
