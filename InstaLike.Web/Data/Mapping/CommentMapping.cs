@@ -21,7 +21,8 @@ namespace InstaLike.Web.Data.Mapping
 
             References(p => p.Post)
                 .Column("PostID")
-                .Not.Nullable();
+                .Not.Nullable()
+                .LazyLoad();
 
             References(p => p.Author)
                 .Column("UserID")

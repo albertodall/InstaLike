@@ -31,7 +31,7 @@
 
     <div>
         <div class="post-likes">
-            <button class="pulsante-like @(Model.IsLikedByCurrentUser == 1? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID">
+            <button class="pulsante-like @(Model.IsLikedByCurrentUser ? "post-piaciuto" : String.Empty)" data-post-id="@Model.PostID">
                 Mi piace
             </button>
             <strong>

@@ -14,6 +14,6 @@ namespace InstaLike.Web.Models
         public string Text { get; set; }
         public CommentModel[] Comments { get; set; } = new CommentModel[] { };
         public int LikesCount { get; set; }
-        public int IsLikedByCurrentUser { get; set; }
+        public bool IsLikedByCurrentUser { get; set; }
     }
 }

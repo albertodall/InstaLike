@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
@@ -10,7 +8,6 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
-using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -40,62 +37,78 @@ namespace InstaLike.Web.Data.Query
             PostModel[] timeline = null;
 
             using (var tx = _session.BeginTransaction())
-            {
-                PostModel post = null;
-                CommentModel comment = null;
-                
-                Post postAlias = null;
+            {           
+                Post post = null;
+                Comment comment = null;
                 User postAuthor = null;
-                User commentAuthor = null;
-                Follow followingAlias = null;
+                Follow following = null;
 
                 // Post to show in the timeline.
                 var postsToShowInTimelineQuery = QueryOver.Of<Post>()
                     .Inner.JoinAlias(p => p.Author, () => postAuthor)
-                        .Left.JoinAlias(() => postAuthor.Following, () => followingAlias)
-                    .Where(() => followingAlias.Follower.ID == query.UserID)
+                        .Left.JoinAlias(() => postAuthor.Following, () => following)
+                    .Where(() => following.Follower.ID == query.UserID)
                     .Select(p => p.ID)
                     .OrderBy(p => p.PostDate).Desc
                     .Take(query.NumberOfPosts);
 
                 // Comments for all post included in the timeline.
-                _session.QueryOver<Comment>()
-                    .Inner.JoinAlias(c => c.Author, () => commentAuthor)
-                    .WithSubquery.WhereProperty(c => c.Post.ID).In(postsToShowInTimelineQuery)
-                    .SelectList(commentFields => commentFields
-                        .Select(c => c.Post.ID).WithAlias(() => comment.PostID)
-                        .Select(c => c.Text).WithAlias(() => comment.Text)
-                        .Select(c => c.CommentDate).WithAlias(() => comment.CommentDate)
-                        .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
-                    )
-                    .TransformUsing(Transformers.AliasToBean<CommentModel>())
-                    .Future<CommentModel>();
-
-                var timelineQuery = _session.QueryOver(() => postAlias)
+                _session.QueryOver<Post>()
+                    .Left.JoinAlias(p => p.Comments, () => comment)
+                    .Fetch(SelectMode.FetchLazyProperties, () => comment.Author)
                     .WithSubquery.WhereProperty(p => p.ID).In(postsToShowInTimelineQuery)
-                    .Inner.JoinAlias(p => p.Author, () => postAuthor)
-                    .SelectList(list => list
-                        .Select(p => p.ID).WithAlias(() => post.PostID)
-                        .Select(p => p.PostDate).WithAlias(() => post.PostDate)
-                        .Select(p => p.Picture.RawBytes).WithAlias(() => post.Picture)
-                        .Select(p => p.Text).WithAlias(() => post.Text) 
-                        .Select(() => postAuthor.Nickname).WithAlias(() => post.AuthorNickName)
-                        .Select(() => postAuthor.ProfilePicture.RawBytes).WithAlias(() => post.AuthorProfilePicture)
-                        // Count of post's likes
-                        .SelectSubQuery(
-                            QueryOver.Of<Like>().Where(l => l.Post.ID == postAlias.ID)
-                            .ToRowCountQuery()).WithAlias(() => post.LikesCount)
-                        // Checks if the post likes to the current user
-                        .SelectSubQuery(
-                            QueryOver.Of<Like>()
-                                .Where(l => l.Post.ID == postAlias.ID)
-                                .And(l => l.User.ID == query.UserID)
-                            .ToRowCountQuery()).WithAlias(() => post.IsLikedByCurrentUser)
-                    )
-                    .TransformUsing(Transformers.AliasToBean<PostModel>())
-                    .Future<PostModel>();
+                    .Future<Post>();
 
-                timeline = (await timelineQuery.GetEnumerableAsync()).ToArray();
+                // Number of likes for each post that has likes.
+                var postLikesCountQuery = _session.QueryOver<Like>()
+                    .WithSubquery.WhereProperty(l => l.Post.ID).In(postsToShowInTimelineQuery)
+                    .SelectList(fields => fields
+                        .SelectGroup(l => l.Post.ID)
+                        .SelectCount(l => l.ID)
+                    )
+                    .Future<object[]>();
+
+                // Posts liked by current user
+                var postsLikedByCurrentUserQuery = _session.QueryOver<Like>()
+                    .WithSubquery
+                        .WhereProperty(l => l.Post.ID).In(postsToShowInTimelineQuery)
+                        .And(l => l.User.ID == query.UserID)
+                    .Select(l => l.Post.ID)
+                    .Future<int>();
+
+                var timelineQuery = _session.QueryOver(() => post)
+                    .Fetch(SelectMode.FetchLazyProperties, () => post.Author)
+                    .WithSubquery.WhereProperty(p => p.ID).In(postsToShowInTimelineQuery)
+                    .Future<Post>();
+
+                var timelineQueryResult = await timelineQuery.GetEnumerableAsync();
+                var postLikesCount = postLikesCountQuery.ToDictionary(o => (int)o[0], o => (int)o[1]);
+
+                // Mapping
+                var timelineList = new List<PostModel>();
+                foreach (var p in timelineQueryResult)
+                {
+                    var postModel = new PostModel()
+                    {
+                        PostID = p.ID,
+                        AuthorNickName = p.Author.Nickname,
+                        AuthorProfilePicture = p.Author.ProfilePicture,
+                        Picture = p.Picture,
+                        PostDate = p.PostDate,
+                        Text = p.Text,
+                        Comments = p.Comments.Select(c => new CommentModel()
+                        {
+                            PostID = p.ID,
+                            AuthorNickName = c.Author.Nickname,
+                            CommentDate = c.CommentDate,
+                            Text = c.Text
+                        }).ToArray(),
+                        LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
+                        IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID)
+                    };
+                    timelineList.Add(postModel);
+                }
+                timeline = timelineList.ToArray();
             }
 
             return timeline;
