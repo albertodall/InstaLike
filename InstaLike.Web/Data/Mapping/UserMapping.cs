@@ -45,12 +45,12 @@ namespace InstaLike.Web.Data.Mapping
             }).LazyLoad();
 
             HasMany(p => p.Followers)
-                .Cascade.AllDeleteOrphan()
+                .Cascade.All()
                 .Inverse()
                 .KeyColumn("FollowerID");
 
             HasMany(p => p.Following)
-                .Cascade.AllDeleteOrphan()
+                .Cascade.All()
                 .Inverse()
                 .KeyColumn("FollowingID");
 

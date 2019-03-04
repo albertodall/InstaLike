@@ -26,7 +26,6 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     Like like = null;
 
-                    var user = await _session.LoadAsync<User>(command.UserID);
                     var post = await _session.LoadAsync<Post>(command.PostID);
                     var likeQuery = _session.QueryOver(() => like)
                         .Where(() => like.Post.ID == command.PostID && like.User.ID == command.UserID);
@@ -34,6 +33,7 @@ namespace InstaLike.Web.CommandHandlers
                     var postLike = await likeQuery.SingleOrDefaultAsync();
                     if (postLike == null)
                     {
+                        var user = await _session.LoadAsync<User>(command.UserID);
                         post.PutLikeFor(user);
                     }
                     else

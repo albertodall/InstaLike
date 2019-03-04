@@ -1,4 +1,5 @@
-﻿using FluentNHibernate.Mapping;
+﻿using System;
+using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
@@ -11,11 +12,22 @@ namespace InstaLike.Web.Data.Mapping
 
             Id(p => p.ID).GeneratedBy.Native();
 
-            Map(p => p.IsRead).CustomType<bool>().Not.Nullable();
-            Map(p => p.Message).CustomType<string>().Not.Nullable();
+            Map(p => p.IsRead).CustomType<bool>()
+                .Not.Nullable();
 
-            References(p => p.Recipient);
-            References(p => p.Sender);
+            Map(p => p.Message).CustomType<string>()
+                .Not.Nullable();
+
+            Map(p => p.NotificationDate).CustomType<DateTimeOffset>()
+                .Not.Nullable();
+
+            References(p => p.Recipient)
+                .Column("RecipientID")
+                .Not.Nullable();
+
+            References(p => p.Sender)
+                .Column("SenderID")
+                .Not.Nullable();
 
             DynamicInsert();
         }

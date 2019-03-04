@@ -14,14 +14,14 @@ namespace InstaLike.Core.Domain
             Message = message ?? throw new ArgumentNullException(nameof(message));
 
             IsRead = false;
-            DateTime = DateTimeOffset.Now;
+            NotificationDate = DateTimeOffset.Now;
         }
 
         public virtual User Sender { get; protected set; }
         public virtual User Recipient { get; protected set; }
         public virtual string Message { get; protected set; }
         public virtual bool IsRead { get; protected set; }
-        public virtual DateTimeOffset DateTime { get; protected set; }
+        public virtual DateTimeOffset NotificationDate { get; protected set; }
 
         public virtual void MarkAsRead()
         {
