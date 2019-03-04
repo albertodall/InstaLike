@@ -18,12 +18,10 @@ namespace InstaLike.Web.Data.Mapping
 
             References(p => p.Follower)
                 .Column("FollowerID")
-                .Cascade.SaveUpdate()
                 .Not.Nullable();
 
             References(p => p.Following)
                 .Column("FollowingID")
-                .Cascade.SaveUpdate()
                 .Not.Nullable();
         }
     }

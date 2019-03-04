@@ -39,12 +39,15 @@ namespace InstaLike.Web.Data.Mapping
 
             HasMany(p => p.Comments)
                 .KeyColumn("PostID")
+                .Access.CamelCaseField(Prefix.Underscore)
                 .Inverse()
-                .Cascade.SaveUpdate();
+                .Cascade.AllDeleteOrphan();
 
             HasMany(p => p.Likes)
                 .KeyColumn("PostID")
-                .Cascade.SaveUpdate();
+                .Access.CamelCaseField(Prefix.Underscore)
+                .Inverse()
+                .Cascade.AllDeleteOrphan();
 
             DynamicInsert();
         }

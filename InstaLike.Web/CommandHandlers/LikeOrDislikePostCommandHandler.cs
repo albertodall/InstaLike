@@ -24,21 +24,21 @@ namespace InstaLike.Web.CommandHandlers
             {
                 try
                 {
-                    var user = await _session.LoadAsync<User>(command.UserID);
-                    var likeQuery = _session.QueryOver<Like>()
-                        .Where(l => l.Post.ID == command.PostID && l.User == user)
-                        .Right.JoinQueryOver(l => l.Post).Fetch()
-                        .Select(l => l.Post);
-                        
-                    var post = await likeQuery.SingleOrDefaultAsync<Post>();
+                    Like like = null;
 
-                    if (post.LikesTo(user))
+                    var user = await _session.LoadAsync<User>(command.UserID);
+                    var post = await _session.LoadAsync<Post>(command.PostID);
+                    var likeQuery = _session.QueryOver(() => like)
+                        .Where(() => like.Post.ID == command.PostID && like.User.ID == command.UserID);
+
+                    var postLike = await likeQuery.SingleOrDefaultAsync();
+                    if (postLike == null)
                     {
-                        post.RemoveLikeBy(user);
+                        post.PutLikeFor(user);
                     }
                     else
                     {
-                        post.PutLikeFor(user);
+                        post.RemoveLike(postLike);
                     }
 
                     await _session.SaveOrUpdateAsync(post);

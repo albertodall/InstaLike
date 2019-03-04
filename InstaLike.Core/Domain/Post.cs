@@ -39,24 +39,12 @@ namespace InstaLike.Core.Domain
 
         public virtual void PutLikeFor(User user)
         {
-            if (!LikesTo(user))
-            {
-                _likes.Add(new Like(this, user));
-            }
+            _likes.Add(new Like(this, user));
         }
 
-        public virtual void RemoveLikeBy(User user)
+        public virtual void RemoveLike(Like likeToRemove)
         {
-            if (LikesTo(user))
-            {
-                var likeToRemove = Likes.FirstOrDefault(like => like.User == user);
-                _likes.Remove(likeToRemove);
-            }           
-        }
-
-        public virtual bool LikesTo(User user)
-        {
-            return _likes.Any(l => l.User == user);
+            _likes.Remove(likeToRemove);
         }
 
         public virtual void AddComment(Comment comment)
