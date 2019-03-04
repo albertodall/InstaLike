@@ -1,0 +1,34 @@
+﻿@using InstaLike.Web.Models
+@using InstaLike.Web.Extensions
+
+@model IEnumerable<NotificationModel>
+
+@{
+    ViewBag.Title = "Notifications";
+}
+
+<div class="alerts">
+    @if (Model.Any())
+    {
+        foreach (var notification in Model)
+        {
+            <div>
+                @{
+                    var senderProfilePictureBase64 = Convert.ToBase64String(notification.SenderProfilePicture);
+                    var senderProfilePicture = String.Format("data:image/jpeg;base64,{0}", senderProfilePictureBase64);
+                }
+                <img src="@senderProfilePicture" />
+                <a href="@Url.Action("Profile", "Account", new { @id = notification.SenderNickname})">
+                    @notification.SenderNickname
+                </a>
+                <time title="@notification.NotificationDate.DateTime" datetime="@notification.NotificationDate.DateTime">@notification.NotificationDate.UtcDateTime.AsPastDays()</time>
+
+                <p>@Html.Raw(notification.Text)</p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="msg">There are no unread notifications.</div>
+    }
+</div>
