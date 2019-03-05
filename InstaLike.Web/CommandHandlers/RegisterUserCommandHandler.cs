@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
-using InstaLike.Web.Data;
 using MediatR;
+using NHibernate;
 
 namespace InstaLike.Web.CommandHandlers
 {
     internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result>
     {
-        private readonly IRepository<User, int> _repository;
+        private readonly ISession _session;
 
-        public RegisterUserCommandHandler(IRepository<User, int> repository)
+        public RegisterUserCommandHandler(ISession session)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            this._session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
         public async Task<Result> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
@@ -47,13 +47,15 @@ namespace InstaLike.Web.CommandHandlers
                 userToRegister.SetDefaultProfilePicture();
             }
 
-            var userRegistrationResult = await _repository.Save(userToRegister);
-            if (userRegistrationResult.IsFailure)
+            try
             {
-                return Result.Fail(userRegistrationResult.Error);
+                await _session.SaveAsync(userToRegister);
+                return Result.Ok(userToRegister.ID);
             }
-
-            return Result.Ok(userToRegister.ID);
+            catch (ADOException ex)
+            {
+                return Result.Fail(ex.Message);
+            } 
         }
     }
 }

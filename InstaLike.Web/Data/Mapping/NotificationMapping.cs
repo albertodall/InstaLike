@@ -24,11 +24,13 @@ namespace InstaLike.Web.Data.Mapping
 
             References(p => p.Recipient)
                 .Column("RecipientID")
-                .Not.Nullable();
+                .Not.Nullable()
+                .LazyLoad();
 
             References(p => p.Sender)
                 .Column("SenderID")
-                .Not.Nullable();
+                .Not.Nullable()
+                .LazyLoad();
 
             DynamicInsert();
         }

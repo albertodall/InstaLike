@@ -61,7 +61,6 @@ namespace InstaLike.Web
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();
                 return sessionFactory.OpenSession();
             });
-            services.AddScoped<IRepository<User, int>, Repository<User, int>>();
 
             services.AddSingleton<IUserAuthenticationService, DatabaseAuthenticationService>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

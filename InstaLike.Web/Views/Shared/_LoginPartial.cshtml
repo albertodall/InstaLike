@@ -10,11 +10,6 @@
             <a asp-action="Index" asp-controller="Notification">
                 Notifications
                 @await Component.InvokeAsync("UnreadNotificationsCount", User.GetIdentifier())
-                @*@{ var unreadNotificationsCount = Html.Action("Count", "Notification").ToString(); }
-                @if (int.Parse(unreadNotificationsCount) > 0)
-                {
-                    <span> (@unreadNotificatiosCount)</span>
-                }*@
             </a>
         </li>
         <li class="btn_user">

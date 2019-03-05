@@ -1,9 +1,9 @@
-﻿using InstaLike.Core.Domain;
-using MediatR;
-using NHibernate;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using InstaLike.Core.Domain;
+using MediatR;
+using NHibernate;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -28,15 +28,17 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<int> Handle(UnreadNotificationsQuery request, CancellationToken cancellationToken)
         {
-            int count = 5;
-            //using (var tx = _session.BeginTransaction())
-            //{
-            //    count = await _session.QueryOver<Notification>()
-            //        .Where(n => n.Recipient.ID == request.UserID).And(n => !n.IsRead)
-            //        .RowCountAsync();
-            //}
+            int result = 0;
+            using (var tx = _session.BeginTransaction())
+            {
+                var countQuery = _session.QueryOver<Notification>()
+                    .Where(n => n.Recipient.ID == request.UserID) // Filter notifications to read
+                    .ToRowCountQuery();
 
-            return await Task.FromResult(count);
+                result = await countQuery.RowCountAsync();
+            }
+
+            return result;
         }
     }
 }

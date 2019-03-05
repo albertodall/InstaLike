@@ -33,11 +33,12 @@ namespace InstaLike.Web.Data.Query
         public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)
         {
             NotificationModel notification = null;
+            User sender = null;
 
             using (var tx = _session.BeginTransaction())
             {
                 var notificationsQuery = _session.QueryOver<Notification>()
-                    .Fetch(SelectMode.FetchLazyProperties, n => n.Sender)
+                    .Inner.JoinAlias(n => n.Sender, () => sender)
                     .Where(n => n.Recipient.ID == request.UserID);
 
                 if (!request.IncludeReadNotifications)
@@ -48,8 +49,8 @@ namespace InstaLike.Web.Data.Query
                 notificationsQuery
                     .OrderBy(n => n.NotificationDate).Desc
                     .SelectList(fields => fields
-                        .Select(n => n.Sender.Nickname.Value).WithAlias(() => notification.SenderNickname)
-                        .Select(n => n.Sender.ProfilePicture.RawBytes).WithAlias(() => notification.SenderProfilePicture)
+                        .Select(() => sender.Nickname.Value).WithAlias(() => notification.SenderNickname)
+                        .Select(() => sender.ProfilePicture.RawBytes).WithAlias(() => notification.SenderProfilePicture)
                         .Select(n => n.Message).WithAlias(() => notification.Message)
                         .Select(n => n.NotificationDate).WithAlias(() => notification.NotificationDate)
                     );
