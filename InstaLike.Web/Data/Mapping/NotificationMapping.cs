@@ -13,6 +13,7 @@ namespace InstaLike.Web.Data.Mapping
             Id(p => p.ID).GeneratedBy.Native();
 
             Map(p => p.IsRead).CustomType<bool>()
+                .Column("Read")
                 .Not.Nullable();
 
             Map(p => p.Message).CustomType<string>()

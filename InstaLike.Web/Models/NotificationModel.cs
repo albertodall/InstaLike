@@ -6,7 +6,7 @@ namespace InstaLike.Web.Models
     {
         public string SenderNickname { get; set; }
         public byte[] SenderProfilePicture { get; set; }
-        public string Text { get; set; }
+        public string Message { get; set; }
         public DateTimeOffset NotificationDate { get; set; }
     }
 }

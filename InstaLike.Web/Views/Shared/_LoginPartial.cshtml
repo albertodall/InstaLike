@@ -1,16 +1,19 @@
-﻿@if (User.Identity.IsAuthenticated)
+﻿@using InstaLike.Web.Extensions
+
+@if (User.Identity.IsAuthenticated)
 {
     <ul>
         <li class="btn_share">
             <a asp-action="Publish" asp-controller="Post" title="Share your picture">Share your picture</a>
         </li>
         <li class="btn_alert">
-            <a asp-action="Index" asp-controller="Notifications">
+            <a asp-action="Index" asp-controller="Notification">
                 Notifications
-                @*@{ var notificationsCount = Html.Action("Count", "Notifications").ToString(); }
-                @if (int.Parse(notificationsCount) > 0)
+                @await Component.InvokeAsync("UnreadNotificationsCount", User.GetIdentifier())
+                @*@{ var unreadNotificationsCount = Html.Action("Count", "Notification").ToString(); }
+                @if (int.Parse(unreadNotificationsCount) > 0)
                 {
-                    <span> (@notificatiosCount)</span>
+                    <span> (@unreadNotificatiosCount)</span>
                 }*@
             </a>
         </li>

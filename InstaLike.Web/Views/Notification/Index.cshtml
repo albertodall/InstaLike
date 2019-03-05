@@ -23,7 +23,7 @@
                 </a>
                 <time title="@notification.NotificationDate.DateTime" datetime="@notification.NotificationDate.DateTime">@notification.NotificationDate.UtcDateTime.AsPastDays()</time>
 
-                <p>@Html.Raw(notification.Text)</p>
+                <p>@Html.Raw(notification.Message)</p>
             </div>
         }
     }
