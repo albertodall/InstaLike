@@ -21,7 +21,7 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             References(p => p.Following)
-                .Column("FollowingID")
+                .Column("FollowedID")
                 .Not.Nullable();
         }
     }

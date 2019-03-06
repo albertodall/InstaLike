@@ -27,19 +27,19 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     User following = null;
 
-                    var unfollowedUser = await _session.QueryOver<User>()
+                    var userToUnfollow = await _session.QueryOver<User>()
                         .Where(Restrictions.Eq("Nickname", command.UnfollowedNickname))
                         .SingleOrDefaultAsync();
 
-                    var followerQuery = _session.QueryOver<User>()
+                    var followingQuery = _session.QueryOver<User>()
                         .Where(u => u.ID == command.FollowerID)
                         .Left.JoinAlias(u => u.Following, () => following)
-                        .Where(() => following == unfollowedUser);
+                        .Where(() => following.ID == userToUnfollow.ID);
 
-                    var follower = await followerQuery.SingleOrDefaultAsync();
+                    var followerUser = await followingQuery.SingleOrDefaultAsync();
 
-                    follower.Unfollow(unfollowedUser);
-                    await _session.SaveOrUpdateAsync(follower);
+                    followerUser.Unfollow(userToUnfollow);
+                    await _session.SaveOrUpdateAsync(followerUser);
                     await tx.CommitAsync();
                     return Result.Ok();
                 }

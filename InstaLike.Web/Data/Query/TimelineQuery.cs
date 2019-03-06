@@ -41,13 +41,13 @@ namespace InstaLike.Web.Data.Query
                 Post post = null;
                 Comment comment = null;
                 User postAuthor = null;
-                Follow following = null;
+                Follow follow = null;
 
                 // Post to show in the timeline.
                 var postsToShowInTimelineQuery = QueryOver.Of<Post>()
                     .Inner.JoinAlias(p => p.Author, () => postAuthor)
-                        .Left.JoinAlias(() => postAuthor.Following, () => following)
-                    .Where(() => following.Follower.ID == query.UserID)
+                        .Left.JoinAlias(() => postAuthor.Followers, () => follow)
+                    .Where(() => follow.Follower.ID == query.UserID)
                     .Select(p => p.ID)
                     .OrderBy(p => p.PostDate).Desc
                     .Take(query.NumberOfPosts);

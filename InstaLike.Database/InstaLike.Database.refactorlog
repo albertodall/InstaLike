@@ -35,4 +35,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ReadByRecipient" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="169b4dff-2eb5-4d46-a5c6-8c11825bfd44" ChangeDateTime="03/06/2019 18:36:50">
+    <Property Name="ElementName" Value="[dbo].[Follow].[FollowingID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Follow]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="FollowedID" />
+  </Operation>
 </Operations>

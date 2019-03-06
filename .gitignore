@@ -122,6 +122,9 @@ AutoTest.Net/
 # Web workbench (sass)
 .sass-cache/
 
+# Sonarqube
+/.sonarqube
+
 # Installshield output folder
 [Ee]xpress/
 

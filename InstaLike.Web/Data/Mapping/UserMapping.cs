@@ -48,13 +48,13 @@ namespace InstaLike.Web.Data.Mapping
                 .Cascade.AllDeleteOrphan()
                 .Inverse()
                 .Access.CamelCaseField(Prefix.Underscore)
-                .KeyColumn("FollowerID");
+                .KeyColumn("FollowedID");
 
             HasMany(p => p.Following)
                 .Cascade.AllDeleteOrphan()
                 .Inverse()
                 .Access.CamelCaseField(Prefix.Underscore)
-                .KeyColumn("FollowingID");
+                .KeyColumn("FollowerID");
 
             DynamicInsert();
         }
