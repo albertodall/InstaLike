@@ -32,8 +32,7 @@ namespace InstaLike.Web.Data.Query
             using (var tx = _session.BeginTransaction())
             {
                 var countQuery = _session.QueryOver<Notification>()
-                    .Where(n => n.Recipient.ID == request.UserID) // Filter notifications to read
-                    .ToRowCountQuery();
+                    .Where(n => n.Recipient.ID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
 
                 result = await countQuery.RowCountAsync();
             }

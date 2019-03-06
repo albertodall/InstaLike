@@ -9,7 +9,7 @@ using NHibernate;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikeOrDislikePostCommand, Result>
+    internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikeOrDislikePostCommand, Result<LikeStatus>>
     {
         private readonly ISession _session;
 
@@ -18,7 +18,7 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> Handle(LikeOrDislikePostCommand command, CancellationToken cancellationToken)
+        public async Task<Result<LikeStatus>> Handle(LikeOrDislikePostCommand command, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
@@ -43,12 +43,12 @@ namespace InstaLike.Web.CommandHandlers
 
                     await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
-                    return Result.Ok();
+                    return Result.Ok(postLike == null ? LikeStatus.Liked : LikeStatus.Disliked);
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    return Result.Fail(ex.Message);
+                    return Result.Fail<LikeStatus>(ex.Message);
                 }
             }
         }

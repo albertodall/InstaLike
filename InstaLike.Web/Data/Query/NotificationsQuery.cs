@@ -6,6 +6,7 @@ using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
+using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -16,7 +17,7 @@ namespace InstaLike.Web.Data.Query
 
         public NotificationsQuery(int userID, bool includeReadNotifications)
         {
-            UserID = UserID;
+            UserID = userID;
             IncludeReadNotifications = includeReadNotifications;
         }
     }
@@ -32,31 +33,36 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)
         {
-            NotificationModel notification = null;
-            User sender = null;
+            NotificationModel[] result = { };
 
             using (var tx = _session.BeginTransaction())
             {
+                NotificationModel notification = null;
+                User recipient = null;
+
                 var notificationsQuery = _session.QueryOver<Notification>()
-                    .Inner.JoinAlias(n => n.Sender, () => sender)
+                    .Inner.JoinAlias(n => n.Recipient, () => recipient)
                     .Where(n => n.Recipient.ID == request.UserID);
 
                 if (!request.IncludeReadNotifications)
                 {
-                    notificationsQuery.And(n => !n.IsRead);
+                    notificationsQuery.And(n => !n.HasBeenReadByRecipient);
                 }
 
                 notificationsQuery
                     .OrderBy(n => n.NotificationDate).Desc
                     .SelectList(fields => fields
-                        .Select(() => sender.Nickname.Value).WithAlias(() => notification.SenderNickname)
-                        .Select(() => sender.ProfilePicture.RawBytes).WithAlias(() => notification.SenderProfilePicture)
+                        .Select(() => recipient.Nickname).WithAlias(() => notification.SenderNickname)
+                        .Select(() => recipient.ProfilePicture.RawBytes).WithAlias(() => notification.SenderProfilePicture)
                         .Select(n => n.Message).WithAlias(() => notification.Message)
                         .Select(n => n.NotificationDate).WithAlias(() => notification.NotificationDate)
-                    );
+                    )
+                    .TransformUsing(Transformers.AliasToBean<NotificationModel>());
 
-                return (await notificationsQuery.ListAsync<NotificationModel>()).ToArray();
+                result = (await notificationsQuery.ListAsync<NotificationModel>()).ToArray();
             }
+
+            return result;
         }
     }
 }

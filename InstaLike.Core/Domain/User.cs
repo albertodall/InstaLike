@@ -69,19 +69,14 @@ namespace InstaLike.Core.Domain
 
         public virtual bool IsFollowing(User user)
         {
-            return Following.Any(f => f.Following == user);
-        }
-
-        public virtual bool IsFollowedBy(User user)
-        {
-            return Followers.Any(f => f.Follower == user);
+            return Followers.Any(f => f.Following == user);
         }
 
         public virtual void Follow(User user)
         {
             if (!IsFollowing(user))
             {
-                _following.Add(new Follow(this, user));
+                _followers.Add(new Follow(this, user));
             }
         }
 
@@ -89,7 +84,7 @@ namespace InstaLike.Core.Domain
         {
             if (IsFollowing(user))
             {
-                var follow = _following
+                var follow = Following
                     .Where(f => f.Follower == this && f.Following == user)
                     .Single();
                 _following.Remove(follow);

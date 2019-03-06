@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
+using InstaLike.Core.Events;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Models;
@@ -150,10 +151,15 @@ namespace InstaLike.Web.Controllers
             var command = new FollowCommand(User.GetIdentifier(), id);
             var processCommandResult = await _dispatcher.Send(command);
 
-            // Notification
-
             if (processCommandResult.IsSuccess)
             {
+                var newFollowerNotification = new FollowedUserEvent(
+                    User.Identity.Name,
+                    Url.Action("Profile", "Account", new { id = User.Identity.Name }),
+                    id);
+
+                await _dispatcher.Publish(newFollowerNotification);
+
                 return RedirectToAction(nameof(Profile), new { id });
             }
             else

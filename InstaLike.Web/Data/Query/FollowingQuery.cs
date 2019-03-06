@@ -40,18 +40,17 @@ namespace InstaLike.Web.Data.Query
                     .SingleOrDefaultAsync();
 
                 FollowModel model = null;
-                var followers = await _session.QueryOver<Follow>()
-                    .Where(f => f.Follower == user)
-                    .SelectList(list => list
-                        .Select(f => f.Following.Nickname)
-                            .WithAlias(() => model.Nickname)
-                        .Select(f => f.Following.ProfilePicture)
-                            .WithAlias(() => model.ProfilePicture)
+                User following = null;
+                var followersQuery = _session.QueryOver<Follow>()
+                    .Inner.JoinAlias(f => f.Following, () => following)
+                    .Where(f => f.Follower.ID == user.ID)
+                    .SelectList(fields => fields
+                        .Select(f => following.Nickname).WithAlias(() => model.Nickname)
+                        .Select(f => following.ProfilePicture.RawBytes).WithAlias(() => model.ProfilePicture)
                     )
-                    .TransformUsing(Transformers.AliasToBean<FollowModel>())
-                    .ListAsync<FollowModel>();
+                    .TransformUsing(Transformers.AliasToBean<FollowModel>());
 
-                result = followers.ToArray();
+                result = (await followersQuery.ListAsync<FollowModel>()).ToArray();
             }
 
             return result;

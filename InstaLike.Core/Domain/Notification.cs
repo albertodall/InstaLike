@@ -13,29 +13,29 @@ namespace InstaLike.Core.Domain
             Recipient = recipient ?? throw new ArgumentNullException(nameof(recipient));
             Message = message ?? throw new ArgumentNullException(nameof(message));
 
-            IsRead = false;
+            HasBeenReadByRecipient = false;
             NotificationDate = DateTimeOffset.Now;
         }
 
         public virtual User Sender { get; protected set; }
         public virtual User Recipient { get; protected set; }
         public virtual string Message { get; protected set; }
-        public virtual bool IsRead { get; protected set; }
+        public virtual bool HasBeenReadByRecipient { get; protected set; }
         public virtual DateTimeOffset NotificationDate { get; protected set; }
 
         public virtual void MarkAsRead()
         {
-            if (!IsRead)
+            if (!HasBeenReadByRecipient)
             {
-                IsRead = true;
+                HasBeenReadByRecipient = true;
             }
         }
 
         public virtual void MarkAsUnread()
         {
-            if (IsRead)
+            if (HasBeenReadByRecipient)
             {
-                IsRead = false;
+                HasBeenReadByRecipient = false;
             }
         }
     }

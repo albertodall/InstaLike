@@ -2,25 +2,28 @@
 
 @if (User.Identity.IsAuthenticated)
 {
-    <ul>
-        <li class="btn_share">
-            <a asp-action="Publish" asp-controller="Post" title="Share your picture">Share your picture</a>
-        </li>
-        <li class="btn_alert">
-            <a asp-action="Index" asp-controller="Notification">
-                Notifications
-                @await Component.InvokeAsync("UnreadNotificationsCount", User.GetIdentifier())
-            </a>
-        </li>
-        <li class="btn_user">
-            <a asp-action="Profile" asp-controller="Account", asp-route-id="@User.Identity.Name" title="User profile">
-                User profile
-            </a>
-        </li>
-        <li class="btn_logout">
-            <a asp-action="Logout" asp-controller="Account" title="Logout">Logout</a>
-        </li>
-    </ul>
+<ul>
+    <li class="btn_home">
+        <a asp-action="Index" asp-controller="Home" title="Share your picture">Home</a>
+    </li>
+    <li class="btn_share">
+        <a asp-action="Publish" asp-controller="Post" title="Share your picture">Share your picture</a>
+    </li>
+    <li class="btn_alert">
+        <a asp-action="Index" asp-controller="Notification">
+            Notifications
+            @await Component.InvokeAsync("UnreadNotificationsCount", User.GetIdentifier())
+        </a>
+    </li>
+    <li class="btn_user">
+        <a asp-action="Profile" asp-controller="Account" , asp-route-id="@User.Identity.Name" title="User profile">
+            User profile
+        </a>
+    </li>
+    <li class="btn_logout">
+        <a asp-action="Logout" asp-controller="Account" title="Logout">Logout</a>
+    </li>
+</ul>
 }
 else
 {

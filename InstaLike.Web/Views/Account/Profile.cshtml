@@ -37,12 +37,12 @@
             <ul>
                 <li>@Model.NumberOfPosts <label>post</label></li>
                 <li>
-                    <a asp-action="Followers" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Followers", "Account", new { id = Model.UserID })">
+                    <a asp-action="Followers" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Followers", "Account", new { id = Model.Nickname })">
                         @Model.NumberOfFollowers <label>followers</label>
                     </a>
                 </li>
                 <li>
-                    <a asp-action="Following" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Following", "Account", new { id = Model.UserID })">
+                    <a asp-action="Following" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Following", "Account", new { id = Model.Nickname })">
                         @Model.NumberOfFollows <label>following</label>
                     </a>
                 </li>

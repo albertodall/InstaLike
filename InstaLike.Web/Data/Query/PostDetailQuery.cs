@@ -13,12 +13,12 @@ namespace InstaLike.Web.Data.Query
     public class PostDetailQuery : IRequest<PostModel>
     {
         public int PostID { get; }
-        public int CurrendUserID { get; }
+        public int CurrentUserID { get; }
 
         public PostDetailQuery(int postID, int currentUserID)
         {
             PostID = postID;
-            CurrendUserID = currentUserID;
+            CurrentUserID = currentUserID;
         }
     }
 
@@ -59,10 +59,10 @@ namespace InstaLike.Web.Data.Query
 
                 // Is this post liked by the current user?
                 var isLikedByCurrentUserQuery = _session.QueryOver<Like>()
-                    .Where(p => p.ID == query.PostID)
-                        .And(l => l.User.ID == query.CurrendUserID)
+                    .Where(l => l.Post.ID == query.PostID)
+                        .And(l => l.User.ID == query.CurrentUserID)
                     .ToRowCountQuery()
-                    .FutureValue<byte>();
+                    .FutureValue<int>();
 
                 // Post to show
                 User postAuthor = null;
@@ -84,7 +84,7 @@ namespace InstaLike.Web.Data.Query
                 post = await postQuery.GetValueAsync();
                 post.LikesCount = await postLikesCountQuery.GetValueAsync();
                 post.Comments = postCommentsQuery.ToArray();
-                post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync() > 0;
+                post.IsLikedByCurrentUser = (await isLikedByCurrentUserQuery.GetValueAsync()) > 0;
             }
 
             return post;

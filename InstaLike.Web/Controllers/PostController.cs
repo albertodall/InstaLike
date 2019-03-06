@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
+using InstaLike.Core.Domain;
 using InstaLike.Core.Events;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
@@ -71,15 +72,17 @@ namespace InstaLike.Web.Controllers
             var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetIdentifier());
             var commandResult = await _dispatcher.Send(command);
 
-            var newCommentNotification = new CommentPublishedEvent(
-                User.Identity.Name,
-                Url.Action("Profile", "Account", new { id = User.Identity.Name }),
-                newComment.PostID,
-                Url.Action("Detail", "Post", new { id = newComment.PostID })
-            );
+            if (commandResult.IsSuccess)
+            {
+                var newCommentNotification = new CommentPublishedEvent(
+                    User.Identity.Name,
+                    Url.Action("Profile", "Account", new { id = User.Identity.Name }),
+                    newComment.PostID,
+                    Url.Action("Detail", "Post", new { id = newComment.PostID })
+                );
 
-            await _dispatcher.Publish(newCommentNotification);
-
+                await _dispatcher.Publish(newCommentNotification);
+            }
             var commentsQuery = new PostCommentsQuery(newComment.PostID);
             var comments = await _dispatcher.Send(commentsQuery);
 
@@ -92,8 +95,17 @@ namespace InstaLike.Web.Controllers
             var command = new LikeOrDislikePostCommand(like.PostID, like.UserID);
             var commandResult = await _dispatcher.Send(command);
 
-            // Send Notification
-            // Another command here or raise an event?
+            if (commandResult.IsSuccess && commandResult.Value == LikeStatus.Liked)
+            {
+                var postLikedNotification = new PostLikedEvent(
+                    User.Identity.Name,
+                    Url.Action("Profile", "Account", new { id = User.Identity.Name }),
+                    like.PostID,
+                    Url.Action("Detail", "Post", new { id = like.PostID })
+                );
+
+                await _dispatcher.Publish(postLikedNotification);
+            }
 
             return new EmptyResult();
         }

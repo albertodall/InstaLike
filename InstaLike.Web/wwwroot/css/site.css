@@ -29,10 +29,10 @@ footer {
 }
 
 .main {
-    width: 600px;
+    width: 700px;
     padding: 20px 40px;
     margin: 0 auto;
-    background-color: #FFF;
+    background-color: white;
     border-radius: 10px;
     box-sizing: border-box;
 }
@@ -98,7 +98,7 @@ textarea {
     margin-top: 5px;
 }
 
-/*CLASSI x USERLOGIN*/
+/* User login classes */
 .user {
     padding: 1px;
 }
@@ -130,12 +130,30 @@ textarea {
         color: black;
     }
 
+    .user .btn_home a {
+        background-image: url(../img/icon_home.png);
+    }
+
     .user .btn_share a {
         background-image: url(../img/icon_photo.png);
     }
 
     .user .btn_alert a {
         background-image: url(../img/icon_alert.png);
+    }
+
+    .user .btn_alert .alerts_count {
+        background: red;
+        border-radius: 0.8em;
+        -moz-border-radius: 0.8em;
+        -webkit-border-radius: 0.8em;
+        color: white;
+        display: inline-block;
+        font-weight: bold;
+        line-height: 1.6em;
+        margin-left: 5px;
+        text-align: center;
+        width: 1.6em;
     }
 
     .user .btn_user a {
@@ -154,7 +172,7 @@ textarea {
         background-image: url(../img/icon_register.png);
     }
 
-/*CLASSI x POST*/
+/* Post classes */
 .posts > div {
     margin-bottom: 40px;
 }
@@ -189,12 +207,12 @@ textarea {
         display: block;
         text-decoration: none;
         font-weight: bold;
-        color: #000;
+        color: black;
     }
 
 .posts .post-likes button {
     border: 1px solid #CCC;
-    background-color: #FFF;
+    background-color: white;
     height: 32px;
     line-height: 32px;
     border-radius: 3px;
@@ -274,7 +292,7 @@ textarea {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;
-        color: #000;
+        color: black;
         padding: 5px 10px 0 10px;
         position: absolute;
         border-radius: 5px;
@@ -343,21 +361,21 @@ textarea {
         display: block;
         text-decoration: none;
         font-weight: bold;
-        color: #000;
+        color: black;
     }
 
 .post-dettaglio .immagine-post {
     box-sizing: border-box;
     display: block;
     width: 100%;
-    border: 10px solid #FFF;
+    border: 10px solid white;
     box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
     margin: 10px 0;
 }
 
 .post-dettaglio .post-likes button {
     border: 1px solid #CCC;
-    background-color: #FFF;
+    background-color: white;
     height: 32px;
     line-height: 32px;
     border-radius: 3px;
@@ -437,7 +455,7 @@ textarea {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;
-        color: #000;
+        color: black;
         padding: 5px 10px 0 10px;
         position: absolute;
         border-radius: 5px;
@@ -476,7 +494,7 @@ textarea {
     font-size: 11px;
 }
 
-/*CLASSI x NOTIFICHE*/
+/* Notification classes */
 .alerts > div {
     margin-bottom: 20px;
     position: relative;
@@ -512,7 +530,6 @@ textarea {
         padding: 0;
     }
 
-
 .form_reg > DIV {
     margin-bottom: 10px;
 }
@@ -547,13 +564,25 @@ textarea {
     background-position: 10px center;
     background-size: 20px;
     font-size: 11px;
-    background-color: #FFF;
+    background-color: white;
     background-image: url(../img/icon_floppy.png);
 }
 
 .form_login > DIV {
     margin-bottom: 10px;
 }
+
+    .form_login > DIV span span {
+        display: block;
+        color: red;
+        font-style: italic;
+        background-image: url(../img/icon_warning.png);
+        background-position: 0 top;
+        background-size: 14px;
+        background-repeat: no-repeat;
+        padding-left: 20px;
+        margin-top: 5px;
+    }
 
 .form_login button[type=submit] {
     height: 32px;
@@ -568,25 +597,25 @@ textarea {
     background-position: 10px center;
     background-size: 20px;
     font-size: 11px;
-    background-color: #FFF;
+    background-color: white;
     background-image: url(../img/icon_login.png);
-}
-
-.form_login > DIV span span {
-    display: block;
-    color: red;
-    font-style: italic;
-    background-image: url(../img/icon_warning.png);
-    background-position: 0 top;
-    background-size: 14px;
-    background-repeat: no-repeat;
-    padding-left: 20px;
-    margin-top: 5px;
 }
 
 .form_post > DIV {
     margin-bottom: 10px;
 }
+
+    .form_post > DIV span {
+        display: block;
+        color: red;
+        font-style: italic;
+        background-image: url(../img/icon_warning.png);
+        background-position: 0 top;
+        background-size: 14px;
+        background-repeat: no-repeat;
+        padding-left: 20px;
+        margin-top: 5px;
+    }
 
 .form_post button[type=submit] {
     height: 32px;
@@ -601,30 +630,18 @@ textarea {
     background-position: 10px center;
     background-size: 20px;
     font-size: 11px;
-    background-color: #FFF;
+    background-color: white;
     background-image: url(../img/icon_send.png);
 }
 
-.form_post > DIV span {
-    display: block;
-    color: red;
-    font-style: italic;
-    background-image: url(../img/icon_warning.png);
-    background-position: 0 top;
-    background-size: 14px;
-    background-repeat: no-repeat;
-    padding-left: 20px;
-    margin-top: 5px;
-}
-
-/*CLASSI x POPUP*/
+/* Popup classes */
 .popup {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: #000;
+    background: black;
     background: rgba(0,0,0,.70);
     display: none;
 }
@@ -644,7 +661,7 @@ textarea {
     z-index: 200;
     width: 30px;
     text-align: center;
-    color: #000;
+    color: black;
 }
 
 .popup-contenuto {
@@ -665,7 +682,7 @@ textarea {
     }
 
 
-/*USERS LIST*/
+/* User list */
 .user_list {
     float: left;
     width: 100%;
@@ -688,13 +705,13 @@ textarea {
 
         .user_list DIV a {
             display: block;
-            color: #000;
+            color: black;
             text-decoration: none;
             font-weight: bold;
             margin-top: 5px;
         }
 
-/*USER DETAILS*/
+/* User details */
 .profilo-images {
     width: 100%;
     float: left;
@@ -734,7 +751,7 @@ textarea {
     }
 
     .profilo-posts LI a {
-        color: #000;
+        color: black;
         text-decoration: none;
     }
 
@@ -812,7 +829,7 @@ textarea {
 @media (max-width: 640px) {
     body {
         margin: 0;
-        background-color: #FFF;
+        background-color: white;
     }
 
     .main {
