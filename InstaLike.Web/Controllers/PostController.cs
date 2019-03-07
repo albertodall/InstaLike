@@ -95,7 +95,7 @@ namespace InstaLike.Web.Controllers
             var command = new LikeOrDislikePostCommand(like.PostID, like.UserID);
             var commandResult = await _dispatcher.Send(command);
 
-            if (commandResult.IsSuccess && commandResult.Value == LikeStatus.Liked)
+            if (commandResult.IsSuccess && commandResult.Value == LikePostResult.Liked)
             {
                 var postLikedNotification = new PostLikedEvent(
                     User.Identity.Name,

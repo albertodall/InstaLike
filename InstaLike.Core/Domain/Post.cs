@@ -37,23 +37,26 @@ namespace InstaLike.Core.Domain
 
         public virtual IReadOnlyList<Like> Likes => _likes.ToList();
 
-        public virtual void PutLikeFor(User user)
+        public virtual bool LikesTo(User user)
         {
-            _likes.Add(new Like(this, user));
+            return _likes.Any(u => u.User == user);
         }
 
-        public virtual void RemoveLike(Like likeToRemove)
+        public virtual LikePostResult Like(User user)
         {
+            if (!LikesTo(user))
+            {
+                _likes.Add(new Like(this, user));
+                return LikePostResult.Liked;
+            }
+
+            var likeToRemove = _likes.Single(l => l.User == user);
             _likes.Remove(likeToRemove);
+            return LikePostResult.Disliked;
         }
 
         public virtual void AddComment(Comment comment)
         {
-            if (comment == null)
-            {
-                throw new ArgumentNullException(nameof(comment));
-            }
-
             _comments.Add(comment);
         }
     }

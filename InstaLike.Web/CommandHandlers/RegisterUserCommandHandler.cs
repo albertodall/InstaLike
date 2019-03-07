@@ -18,11 +18,11 @@ namespace InstaLike.Web.CommandHandlers
             this._session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            var nicknameValidationResult = Nickname.Create(command.Nickname);
-            var eMailValidationResult = Email.Create(command.Email);
-            var passwordValidationResult = Password.Create(command.Password);
+            var nicknameValidationResult = Nickname.Create(request.Nickname);
+            var eMailValidationResult = Email.Create(request.Email);
+            var passwordValidationResult = Password.Create(request.Password);
 
             var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult);
             if (validationResult.IsFailure)
@@ -32,15 +32,15 @@ namespace InstaLike.Web.CommandHandlers
 
             var userToRegister = new User(
                 nicknameValidationResult.Value, 
-                command.Name, 
-                command.Surname, 
+                request.Name, 
+                request.Surname, 
                 passwordValidationResult.Value, 
                 eMailValidationResult.Value,
-                command.Biography);
+                request.Biography);
 
-            if (command.ProfilePicture != null)
+            if (request.ProfilePicture != null)
             {
-                userToRegister.SetProfilePicture((Picture)command.ProfilePicture);
+                userToRegister.SetProfilePicture((Picture)request.ProfilePicture);
             }
             else
             {

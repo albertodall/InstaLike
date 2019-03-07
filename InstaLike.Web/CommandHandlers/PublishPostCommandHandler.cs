@@ -18,15 +18,15 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> Handle(PublishPostCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(PublishPostCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
                 try
                 {
-                    var author = await _session.LoadAsync<User>(command.UserID);
+                    var author = await _session.LoadAsync<User>(request.UserID);
 
-                    var post = new Post(author, (Picture)command.PictureRawBytes, (PostText)command.Text);
+                    var post = new Post(author, (Picture)request.PictureRawBytes, (PostText)request.Text);
                     await _session.SaveAsync(post);
                     await tx.CommitAsync();
                     return Result.Ok(post.ID);

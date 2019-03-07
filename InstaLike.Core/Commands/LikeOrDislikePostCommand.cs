@@ -4,7 +4,7 @@ using MediatR;
 
 namespace InstaLike.Core.Commands
 {
-    public class LikeOrDislikePostCommand : IRequest<Result<LikeStatus>>
+    public class LikeOrDislikePostCommand : IRequest<Result<LikePostResult>>
     {
         public int PostID { get; }
         public int UserID { get; }

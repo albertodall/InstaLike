@@ -1,6 +1,6 @@
 ﻿namespace InstaLike.Core.Domain
 {
-    public enum LikeStatus
+    public enum LikePostResult
     {
         Liked,
         Disliked

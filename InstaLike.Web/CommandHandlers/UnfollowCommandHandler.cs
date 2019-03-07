@@ -19,7 +19,7 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> Handle(UnfollowCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UnfollowCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
@@ -28,11 +28,11 @@ namespace InstaLike.Web.CommandHandlers
                     User following = null;
 
                     var userToUnfollow = await _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("Nickname", command.UnfollowedNickname))
+                        .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
                         .SingleOrDefaultAsync();
 
                     var followingQuery = _session.QueryOver<User>()
-                        .Where(u => u.ID == command.FollowerID)
+                        .Where(u => u.ID == request.FollowerID)
                         .Left.JoinAlias(u => u.Following, () => following)
                         .Where(() => following.ID == userToUnfollow.ID);
 

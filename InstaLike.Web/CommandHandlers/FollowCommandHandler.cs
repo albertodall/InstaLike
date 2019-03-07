@@ -19,15 +19,15 @@ namespace InstaLike.Web.CommandHandlers
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Result> Handle(FollowCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
                 try
                 {
-                    var follower = await _session.LoadAsync<User>(command.FollowerID);
+                    var follower = await _session.LoadAsync<User>(request.FollowerID);
                     var followedUserQuery = _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("Nickname", command.FollowedNickname));
+                        .Where(Restrictions.Eq("Nickname", request.FollowedNickname));
 
                     var followedUser = await followedUserQuery.SingleOrDefaultAsync();
 
