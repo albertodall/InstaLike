@@ -55,7 +55,7 @@ namespace InstaLike.Web.Data.Query
                 // Comments for all post included in the timeline.
                 _session.QueryOver<Post>()
                     .Left.JoinAlias(p => p.Comments, () => comment)
-                    .Fetch(SelectMode.FetchLazyProperties, () => comment.Author)
+                    .Fetch(SelectMode.Fetch, () => comment.Author)
                     .WithSubquery.WhereProperty(p => p.ID).In(postsToShowInTimelineQuery)
                     .Future<Post>();
 
