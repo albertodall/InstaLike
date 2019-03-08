@@ -2,10 +2,11 @@
 using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
+using FluentNHibernate.Conventions;
 using FluentNHibernate.Conventions.Helpers;
+using FluentNHibernate.Conventions.Instances;
+using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
-using InstaLike.Web.Data;
-using InstaLike.Web.Extensions;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -52,8 +53,9 @@ namespace InstaLike.Web
                     m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly())
                         .Conventions.Add(
                             LazyLoad.Always(), 
-                            DynamicUpdate.AlwaysTrue()
-                ));
+                            DynamicUpdate.AlwaysTrue())
+                        .Conventions.Add<AssociationsConvention>()
+                    );
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -96,6 +98,24 @@ namespace InstaLike.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private class AssociationsConvention : IHasManyConvention, IReferenceConvention
+        {
+            public void Apply(IOneToManyCollectionInstance instance)
+            {
+                instance.LazyLoad();
+                instance.AsBag();
+                instance.Cascade.AllDeleteOrphan();
+                instance.Inverse();
+            }
+
+            public void Apply(IManyToOneInstance instance)
+            {
+                instance.LazyLoad(Laziness.Proxy);
+                instance.Cascade.None();
+                instance.Not.Nullable();
+            }
         }
     }
 }

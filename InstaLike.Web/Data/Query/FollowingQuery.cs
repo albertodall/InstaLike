@@ -29,21 +29,21 @@ namespace InstaLike.Web.Data.Query
             _session = session;
         }
 
-        public async Task<FollowModel[]> Handle(FollowingQuery query, CancellationToken cancellationToken)
+        public async Task<FollowModel[]> Handle(FollowingQuery request, CancellationToken cancellationToken)
         {
             FollowModel[] result = null;
 
             using (var tx = _session.BeginTransaction())
             {
-                var user = await _session.QueryOver<User>()
-                    .Where(Restrictions.Eq("Nickname", query.Nickname))
-                    .SingleOrDefaultAsync();
-
                 FollowModel model = null;
                 User following = null;
+                User follower = null;
+
                 var followersQuery = _session.QueryOver<Follow>()
                     .Inner.JoinAlias(f => f.Following, () => following)
-                    .Where(f => f.Follower.ID == user.ID)
+                    .Inner.JoinAlias(f => f.Follower, () => follower)
+                    .Where(Restrictions.Eq("follower.Nickname", request.Nickname))
+                        .And(f => f.Follower.ID == follower.ID)
                     .SelectList(fields => fields
                         .Select(f => following.Nickname).WithAlias(() => model.Nickname)
                         .Select(f => following.ProfilePicture.RawBytes).WithAlias(() => model.ProfilePicture)

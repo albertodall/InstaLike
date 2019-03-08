@@ -31,7 +31,7 @@ namespace InstaLike.Web.Data.Query
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<PostModel> Handle(PostDetailQuery query, CancellationToken cancellationToken)
+        public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)
         {
             PostModel post = null;
 
@@ -39,7 +39,7 @@ namespace InstaLike.Web.Data.Query
             {
                 // Total likes for this post
                 var postLikesCountQuery =_session.QueryOver<Like>()
-                    .Where(l => l.Post.ID == query.PostID)
+                    .Where(l => l.Post.ID == request.PostID)
                     .ToRowCountQuery()
                     .FutureValue<int>();
 
@@ -47,7 +47,7 @@ namespace InstaLike.Web.Data.Query
                 User commentAuthor = null;
                 CommentModel comment = null;
                 var postCommentsQuery = _session.QueryOver<Comment>()
-                    .Where(c => c.Post.ID == query.PostID)
+                    .Where(c => c.Post.ID == request.PostID)
                     .Inner.JoinQueryOver(c => c.Author, () => commentAuthor)
                     .SelectList(list => list
                         .Select(c => c.Text).WithAlias(() => comment.Text)
@@ -59,15 +59,15 @@ namespace InstaLike.Web.Data.Query
 
                 // Is this post liked by the current user?
                 var isLikedByCurrentUserQuery = _session.QueryOver<Like>()
-                    .Where(l => l.Post.ID == query.PostID)
-                        .And(l => l.User.ID == query.CurrentUserID)
+                    .Where(l => l.Post.ID == request.PostID)
+                        .And(l => l.User.ID == request.CurrentUserID)
                     .ToRowCountQuery()
                     .FutureValue<int>();
 
                 // Post to show
                 User postAuthor = null;
                 var postQuery = _session.QueryOver<Post>()
-                    .Where(p => p.ID == query.PostID)
+                    .Where(p => p.ID == request.PostID)
                     .Inner.JoinQueryOver(p => p.Author, () => postAuthor)
                     .SelectList(list => list
                         .Select(p => p.ID).WithAlias(() => post.PostID)

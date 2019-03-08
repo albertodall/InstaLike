@@ -34,27 +34,23 @@ namespace InstaLike.Web.Data.Mapping
             Component(p => p.ProfilePicture, m =>
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Column("ProfilePictureGuid")
+                    .Column("[ProfilePictureGuid]")
                     .Not.Insert()
                     .Not.Update()
                     .Not.Nullable();
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
-                    .Column("ProfilePicture")
+                    .Column("[ProfilePicture]")
                     .Length(100_000)
                     .Not.Nullable();
             }).LazyLoad();
 
             HasMany(p => p.Followers)
-                .Cascade.AllDeleteOrphan()
-                .Inverse()
-                .Access.CamelCaseField(Prefix.Underscore)
-                .KeyColumn("FollowedID");
+                .KeyColumn("[FollowedID]")
+                .Access.CamelCaseField(Prefix.Underscore);
 
             HasMany(p => p.Following)
-                .Cascade.AllDeleteOrphan()
-                .Inverse()
-                .Access.CamelCaseField(Prefix.Underscore)
-                .KeyColumn("FollowerID");
+                .KeyColumn("[FollowerID]")
+                .Access.CamelCaseField(Prefix.Underscore);
 
             DynamicInsert();
         }

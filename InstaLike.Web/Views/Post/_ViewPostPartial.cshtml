@@ -19,7 +19,7 @@
         </time>
     </div>
 
-    <a asp-action="Detail" asp-controller="Post" asp-route-id="@Model.PostID)">
+    <a asp-action="Detail" asp-controller="Post" asp-route-id="@Model.PostID">
         @{
             var postPictureBase64 = Convert.ToBase64String(Model.Picture);
             var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);

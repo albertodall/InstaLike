@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,7 +47,6 @@ namespace InstaLike.Web.Data.Query
                         .Select(c => c.CommentDate).WithAlias(() => comment.CommentDate)
                     )
                     .TransformUsing(Transformers.AliasToBean<CommentModel>());
-                    
 
                 result = (await commentsQuery.ListAsync<CommentModel>()).ToArray();
             }

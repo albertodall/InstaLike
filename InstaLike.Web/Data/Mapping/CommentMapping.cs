@@ -20,13 +20,10 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             References(p => p.Post)
-                .Column("PostID")
-                .Not.Nullable()
-                .LazyLoad();
+                .Column("PostID");
 
             References(p => p.Author)
-                .Column("UserID")
-                .Not.Nullable();
+                .Column("UserID");
 
             DynamicInsert();
         }

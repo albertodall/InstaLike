@@ -16,14 +16,10 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             References(p => p.Post)
-                .Column("PostID")
-                .Not.Nullable()
-                .LazyLoad();
+                .Column("[PostID]");
 
             References(p => p.User)
-                .Column("UserID")
-                .Not.Nullable()
-                .LazyLoad();
+                .Column("[UserID]");
         }
     }
 }

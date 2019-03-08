@@ -17,12 +17,10 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             References(p => p.Follower)
-                .Column("FollowerID")
-                .Not.Nullable();
+                .Column("[FollowerID]");
 
             References(p => p.Following)
-                .Column("FollowedID")
-                .Not.Nullable();
+                .Column("[FollowedID]");
         }
     }
 }

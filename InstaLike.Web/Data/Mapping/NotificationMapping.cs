@@ -13,7 +13,7 @@ namespace InstaLike.Web.Data.Mapping
             Id(p => p.ID).GeneratedBy.Native();
 
             Map(p => p.HasBeenReadByRecipient).CustomType<bool>()
-                .Column("ReadByRecipient")
+                .Column("[ReadByRecipient]")
                 .Not.Nullable();
 
             Map(p => p.Message).CustomType<string>()
@@ -23,12 +23,10 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             References(p => p.Recipient)
-                .Column("RecipientID")
-                .Not.Nullable();
+                .Column("[RecipientID]");
 
             References(p => p.Sender)
-                .Column("SenderID")
-                .Not.Nullable();
+                .Column("[SenderID]");
 
             DynamicInsert();
         }

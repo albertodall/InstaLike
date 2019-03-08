@@ -22,7 +22,7 @@ namespace InstaLike.Web.Data.Mapping
             Component(p => p.Picture, m => 
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Column("PostGuid")
+                    .Column("[PostGuid]")
                     .Not.Insert()
                     .Not.Update()
                     .Not.Nullable();
@@ -34,20 +34,15 @@ namespace InstaLike.Web.Data.Mapping
             });
 
             References(p => p.Author)
-                .Column("UserID")
-                .Not.Nullable();
+                .Column("[UserID]");
 
             HasMany(p => p.Comments)
-                .KeyColumn("PostID")
-                .Access.CamelCaseField(Prefix.Underscore)
-                .Inverse()
-                .Cascade.AllDeleteOrphan();
+                .KeyColumn("[PostID]")
+                .Access.CamelCaseField(Prefix.Underscore);
 
             HasMany(p => p.Likes)
-                .KeyColumn("PostID")
-                .Access.CamelCaseField(Prefix.Underscore)
-                .Inverse()
-                .Cascade.AllDeleteOrphan();
+                .KeyColumn("[PostID]")
+                .Access.CamelCaseField(Prefix.Underscore);
 
             DynamicInsert();
         }
