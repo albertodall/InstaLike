@@ -11,7 +11,7 @@ using NHibernate.Transform;
 
 namespace InstaLike.Web.Data.Query
 {
-    public class UserProfileQuery : MediatR.IRequest<UserProfileModel>
+    public class UserProfileQuery : IRequest<UserProfileModel>
     {
         public int CurrentUserID { get; }
         public string Nickname { get; }

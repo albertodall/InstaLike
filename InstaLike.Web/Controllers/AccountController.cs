@@ -86,6 +86,15 @@ namespace InstaLike.Web.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> Edit()
+        {
+            var currentUserID = User.GetIdentifier();
+
+            var query = new UserDetailsQuery(currentUserID);
+            var model = await _dispatcher.Send(query);
+            return View(model);
+        }
+
         [AllowAnonymous]
         public IActionResult Register()
         {

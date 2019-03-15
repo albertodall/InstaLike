@@ -711,7 +711,7 @@ textarea {
             margin-top: 5px;
         }
 
-/* User details */
+/* User profile */
 .profilo-images {
     width: 100%;
     float: left;
@@ -825,6 +825,13 @@ textarea {
     .profilo-info a.btn_following {
         opacity: 0.5;
     }
+
+/* Edit user details */
+.user-details-profile-picture > input {
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
 
 @media (max-width: 640px) {
     body {

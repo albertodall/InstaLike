@@ -1,0 +1,67 @@
+﻿@model UserDetailsModel
+
+@{
+    ViewData["Title"] = $"Edit details for user {Model.Nickname}";
+}
+
+<div>
+    @{
+        var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePicture);
+        var profilePicture = string.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+    }
+    <div>
+        <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Account" asp-antiforgery="true">
+            <div asp-validation-summary="ModelOnly"></div>
+            <div>
+                <input asp-for="UserID" />
+            </div>
+            <div>
+                <label asp-for="Nickname"></label>
+                <input asp-for="Nickname" />
+                <span asp-validation-for="Nickname"></span>
+            </div>
+            <div>
+                <label asp-for="Password"></label>
+                <input asp-for="Password" />
+                <span asp-validation-for="Password"></span>
+            </div>
+            <div>
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" />
+                <span asp-validation-for="ConfirmPassword"></span>
+            </div>
+            <div>
+                <label asp-for="Name"></label>
+                <input asp-for="Name" />
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div>
+                <label asp-for="Surname"></label>
+                <input asp-for="Surname" />
+                <span asp-validation-for="Surname"></span>
+            </div>
+            <div>
+                <label asp-for="Bio"></label>
+                <input asp-for="Bio" />
+                <span asp-validation-for="Bio"></span>
+            </div>
+            <div class="user-details-profile-picture">
+                <label asp-for="ProfilePicture">
+                    <img src="@profilePicture" />
+                </label>
+                <input asp-for="ProfilePicture" type="file" />
+            </div>
+            <div>
+                <input type="submit" value="Save" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
