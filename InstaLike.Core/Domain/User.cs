@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpFunctionalExtensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -30,7 +31,7 @@ namespace InstaLike.Core.Domain
             RegistrationDate = DateTimeOffset.Now;
         }
 
-        private readonly string _nickname;
+        private string _nickname;
         public virtual Nickname Nickname => (Nickname)_nickname;
 
         public virtual string Name { get; protected set; }
@@ -43,7 +44,7 @@ namespace InstaLike.Core.Domain
             set => _password = value;
         }
         
-        private readonly string _email;
+        private string _email;
         public virtual Email Email => (Email)_email;
         
         public virtual Picture ProfilePicture { get; protected set; }
@@ -65,6 +66,38 @@ namespace InstaLike.Core.Domain
         public virtual void SetDefaultProfilePicture()
         {
             ProfilePicture = Picture.DefaultProfilePicture;
+        }
+
+        public virtual void ChangeNickname(Nickname nickname)
+        {
+            _nickname = nickname;
+        }
+
+        public virtual Result SetFullName(string name, string surname)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return Result.Fail("You have to specify a proper name. An empty string is not allowed.");
+            }
+
+            if (string.IsNullOrEmpty(surname))
+            {
+                return Result.Fail("You have to specify a proper surname. An empty string is not allowed.");
+            }
+
+            Name = name;
+            Surname = surname;
+            return Result.Ok();
+        }
+
+        public virtual void ChangeEmailAddress(Email email)
+        {
+            _email = email;
+        }
+
+        public virtual void UpdateBiography(string newBiography)
+        {
+            Biography = newBiography;
         }
 
         public virtual bool IsFollowing(User user)

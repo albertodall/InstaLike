@@ -15,7 +15,7 @@ namespace InstaLike.Web.CommandHandlers
 
         public RegisterUserCommandHandler(ISession session)
         {
-            this._session = session ?? throw new ArgumentNullException(nameof(session));
+            _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
         public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)

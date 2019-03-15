@@ -37,10 +37,10 @@ namespace InstaLike.Web.Data.Query
 
                 result = new UserDetailsModel()
                 {
-                    UserID = request.CurrentUserId,
                     Nickname = user.Nickname,
                     Name = user.Name,
                     Surname = user.Surname,
+                    Email = user.Email,
                     Bio = user.Biography,
                     ProfilePicture = user.ProfilePicture.RawBytes
                 };

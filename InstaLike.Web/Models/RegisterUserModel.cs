@@ -8,7 +8,7 @@ namespace InstaLike.Web.Models
         [Display(Name = "Nickname")]
         public string Nickname { get; set; }
 
-        [Required(ErrorMessage = "Namwe not specified.")]
+        [Required(ErrorMessage = "Name not specified.")]
         [Display(Name = "Name")]
         public string Name { get; set; }
 

@@ -813,8 +813,8 @@ textarea {
     color: black;
 }
 
-    .profilo-info a.btn_logout {
-        background-image: url(../img/icon_logout.png);
+    .profilo-info a.btn_edit {
+        background-image: url(../img/icon_edit.png);
     }
 
     .profilo-info a.btn_follow,
@@ -827,6 +827,10 @@ textarea {
     }
 
 /* Edit user details */
+.user-details-profile-picture > label > img {
+    cursor: pointer;
+}
+
 .user-details-profile-picture > input {
     visibility: hidden;
     width: 0;

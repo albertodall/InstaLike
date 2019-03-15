@@ -2,7 +2,7 @@
 
 namespace InstaLike.Core.Commands
 {
-    public class MarkAllUserNotificationsReadCommand : IRequest<int>
+    public sealed class MarkAllUserNotificationsReadCommand : IRequest<int>
     {
         public int UserID { get; }
 

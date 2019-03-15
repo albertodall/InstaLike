@@ -3,7 +3,7 @@ using MediatR;
 
 namespace InstaLike.Core.Commands
 {
-    public class PublishPostCommand : IRequest<Result>
+    public sealed class PublishPostCommand : IRequest<Result>
     {
         public int UserID { get; }
         public string Text { get; }

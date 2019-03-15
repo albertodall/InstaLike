@@ -95,6 +95,42 @@ namespace InstaLike.Web.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Edit(UserDetailsModel userDetails, IFormFile profilePictureFile)
+        {
+            if (ModelState.IsValid)
+            {
+                if (profilePictureFile != null)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await profilePictureFile.CopyToAsync(stream);
+                        userDetails.ProfilePicture = stream.ToArray();
+                    }
+                }
+
+                var command = new EditUserDetailsCommand(
+                    User.GetIdentifier(),
+                    userDetails.Nickname,
+                    userDetails.Name,
+                    userDetails.Surname,
+                    userDetails.Email,
+                    userDetails.Bio,
+                    userDetails.ProfilePicture);
+
+                var processCommandResult = await _dispatcher.Send(command);
+                if (processCommandResult.IsSuccess)
+                {
+                    return RedirectToAction(nameof(Edit));
+                }
+                else
+                {
+                    return RedirectToAction("Error", "Home");
+                }
+            }
+            return View(userDetails);
+        }
+
         [AllowAnonymous]
         public IActionResult Register()
         {

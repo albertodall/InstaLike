@@ -3,7 +3,7 @@ using MediatR;
 
 namespace InstaLike.Core.Commands
 {
-    public class FollowCommand : IRequest<Result>
+    public sealed class FollowCommand : IRequest<Result>
     {
         public int FollowerID { get; }
         public string FollowedNickname { get; }

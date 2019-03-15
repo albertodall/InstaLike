@@ -13,21 +13,18 @@
         <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Account" asp-antiforgery="true">
             <div asp-validation-summary="ModelOnly"></div>
             <div>
-                <input asp-for="UserID" />
-            </div>
-            <div>
                 <label asp-for="Nickname"></label>
                 <input asp-for="Nickname" />
                 <span asp-validation-for="Nickname"></span>
             </div>
             <div>
                 <label asp-for="Password"></label>
-                <input asp-for="Password" />
+                <input asp-for="Password" type="password" />
                 <span asp-validation-for="Password"></span>
             </div>
             <div>
                 <label asp-for="ConfirmPassword"></label>
-                <input asp-for="ConfirmPassword" />
+                <input asp-for="ConfirmPassword" type="password" />
                 <span asp-validation-for="ConfirmPassword"></span>
             </div>
             <div>
@@ -41,6 +38,11 @@
                 <span asp-validation-for="Surname"></span>
             </div>
             <div>
+                <label asp-for="Email"></label>
+                <input asp-for="Email" type="email" />
+                <span asp-validation-for="Email"></span>
+            </div>
+            <div>
                 <label asp-for="Bio"></label>
                 <input asp-for="Bio" />
                 <span asp-validation-for="Bio"></span>
@@ -49,7 +51,7 @@
                 <label asp-for="ProfilePicture">
                     <img src="@profilePicture" />
                 </label>
-                <input asp-for="ProfilePicture" type="file" />
+                <input asp-for="ProfilePicture" type="file" name="profilePictureFile" />
             </div>
             <div>
                 <input type="submit" value="Save" />
@@ -58,10 +60,6 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

@@ -3,7 +3,7 @@ using MediatR;
 
 namespace InstaLike.Core.Commands
 {
-    public class UnfollowCommand : IRequest<Result>
+    public sealed class UnfollowCommand : IRequest<Result>
     {
         public int FollowerID { get; }
         public string UnfollowedNickname { get; }
