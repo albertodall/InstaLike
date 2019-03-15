@@ -45,8 +45,8 @@ namespace InstaLike.Web.Data.Query
                     .SelectList(list => list
                         .Select(u => u.ID).WithAlias(() => profile.UserID)
                         .Select(u => u.Nickname).WithAlias(() => profile.Nickname)
-                        .Select(u => u.Name).WithAlias(() => profile.Name)
-                        .Select(u => u.Surname).WithAlias(() => profile.Surname)
+                        .Select(u => u.FullName.Name).WithAlias(() => profile.Name)
+                        .Select(u => u.FullName.Surname).WithAlias(() => profile.Surname)
                         .Select(u => u.Biography).WithAlias(() => profile.Bio)
                         .Select(u => u.ProfilePicture.RawBytes).WithAlias(() => profile.ProfilePicture)
                     )

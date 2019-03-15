@@ -1,8 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
@@ -17,14 +17,13 @@ namespace InstaLike.Core.Domain
             _following = new List<Follow>();
         }
 
-        public User(Nickname nickname, string name, string surname, Password password, Email email, string biography)
+        public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
             : this()
         {
             _nickname = nickname ?? throw new ArgumentNullException(nameof(nickname));
             _email = email ?? throw new ArgumentNullException(nameof(email));
             _password = password ?? throw new ArgumentNullException(nameof(password));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Surname = surname ?? throw new ArgumentNullException(nameof(surname));
+            _fullName = fullName ?? throw new ArgumentNullException(nameof(fullName));
             Biography = biography ?? throw new ArgumentNullException(nameof(biography));
 
             ProfilePicture = Picture.DefaultProfilePicture;
@@ -32,10 +31,18 @@ namespace InstaLike.Core.Domain
         }
 
         private string _nickname;
-        public virtual Nickname Nickname => (Nickname)_nickname;
+        public virtual Nickname Nickname
+        {
+            get => (Nickname)_nickname;
+            set => _nickname = value;
+        }
 
-        public virtual string Name { get; protected set; }
-        public virtual string Surname { get; protected set; }
+        private string _fullName;
+        public virtual FullName FullName
+        {
+            get => (FullName)_fullName;
+            set => _fullName = value;
+        }
 
         private string _password;
         public virtual Password Password
@@ -45,7 +52,11 @@ namespace InstaLike.Core.Domain
         }
         
         private string _email;
-        public virtual Email Email => (Email)_email;
+        public virtual Email Email
+        {
+            get => (Email)_email;
+            set => _email = value;
+        }
         
         public virtual Picture ProfilePicture { get; protected set; }
         public virtual string Biography { get; protected set; }
@@ -70,29 +81,17 @@ namespace InstaLike.Core.Domain
 
         public virtual void ChangeNickname(Nickname nickname)
         {
-            _nickname = nickname;
+            Nickname = nickname;
         }
 
-        public virtual Result SetFullName(string name, string surname)
+        public virtual void ChangeFullName(FullName fullName)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                return Result.Fail("You have to specify a proper name. An empty string is not allowed.");
-            }
-
-            if (string.IsNullOrEmpty(surname))
-            {
-                return Result.Fail("You have to specify a proper surname. An empty string is not allowed.");
-            }
-
-            Name = name;
-            Surname = surname;
-            return Result.Ok();
+            FullName = fullName;
         }
 
         public virtual void ChangeEmailAddress(Email email)
         {
-            _email = email;
+            Email = email;
         }
 
         public virtual void UpdateBiography(string newBiography)
@@ -128,8 +127,8 @@ namespace InstaLike.Core.Domain
             {
                 new Claim(ClaimTypes.NameIdentifier, ID.ToString(), ClaimValueTypes.Integer32),
                 new Claim(ClaimTypes.Name, Nickname, ClaimValueTypes.String),
-                new Claim(ClaimTypes.GivenName, Name, ClaimValueTypes.String),
-                new Claim(ClaimTypes.Surname, Surname, ClaimValueTypes.String),
+                new Claim(ClaimTypes.GivenName, FullName.Name, ClaimValueTypes.String),
+                new Claim(ClaimTypes.Surname, FullName.Surname, ClaimValueTypes.String),
                 new Claim(ClaimTypes.Email, Email, ClaimValueTypes.Email)
             };
     }

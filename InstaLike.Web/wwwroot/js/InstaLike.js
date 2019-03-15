@@ -1,4 +1,17 @@
-﻿// Adds a comment to a post
+﻿// Displays user's profile picture after choosing it
+$(".user-details-profile-picture input").change(function (e) {
+    if (e.target.files && e.target.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('.user-details-profile-picture > label > img').attr('src', e.target.result);
+        };
+
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+
+// Adds a comment to a post
 $('.form-comment').submit(function (e) {
     e.preventDefault();
 

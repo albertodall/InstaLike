@@ -22,8 +22,9 @@ namespace InstaLike.Web.CommandHandlers
         {
             var nicknameValidationResult = Nickname.Create(request.Nickname);
             var eMailValidationResult = Email.Create(request.Email);
+            var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-            var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult);
+            var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
                 return Result.Fail(validationResult.Error);
@@ -36,7 +37,7 @@ namespace InstaLike.Web.CommandHandlers
                     var userToUpdate = await _session.GetAsync<User>(request.UserID);
                     userToUpdate.ChangeNickname(nicknameValidationResult.Value);
                     userToUpdate.ChangeEmailAddress(eMailValidationResult.Value);
-                    userToUpdate.SetFullName(request.Name, request.Surname);
+                    userToUpdate.ChangeFullName(fullNameValidationResult.Value);
                     userToUpdate.UpdateBiography(request.Bio);
                     userToUpdate.SetProfilePicture((Picture)request.ProfilePicture);
 

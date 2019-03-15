@@ -23,8 +23,9 @@ namespace InstaLike.Web.CommandHandlers
             var nicknameValidationResult = Nickname.Create(request.Nickname);
             var eMailValidationResult = Email.Create(request.Email);
             var passwordValidationResult = Password.Create(request.Password);
+            var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-            var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult);
+            var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
                 return Result.Fail(validationResult.Error);
@@ -32,8 +33,7 @@ namespace InstaLike.Web.CommandHandlers
 
             var userToRegister = new User(
                 nicknameValidationResult.Value, 
-                request.Name, 
-                request.Surname, 
+                fullNameValidationResult.Value,
                 passwordValidationResult.Value, 
                 eMailValidationResult.Value,
                 request.Biography);
@@ -42,20 +42,21 @@ namespace InstaLike.Web.CommandHandlers
             {
                 userToRegister.SetProfilePicture((Picture)request.ProfilePicture);
             }
-            else
-            {
-                userToRegister.SetDefaultProfilePicture();
-            }
 
-            try
+            using (var tx = _session.BeginTransaction())
             {
-                await _session.SaveAsync(userToRegister);
-                return Result.Ok(userToRegister.ID);
+                try
+                {
+                    await _session.SaveAsync(userToRegister);
+                    await tx.CommitAsync();
+                    return Result.Ok(userToRegister.ID);
+                }
+                catch (ADOException ex)
+                {
+                    await tx.RollbackAsync();
+                    return Result.Fail(ex.Message);
+                }
             }
-            catch (ADOException ex)
-            {
-                return Result.Fail(ex.Message);
-            } 
         }
     }
 }

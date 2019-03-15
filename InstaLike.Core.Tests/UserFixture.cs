@@ -14,8 +14,7 @@ namespace InstaLike.Core.Tests
 
             var sut = new User(
                 (Nickname)"user1", 
-                "Test", 
-                "User",
+                (FullName)"Test User",
                 password1, 
                 (Email)"user1@acme.com", 
                 "My Bio");
