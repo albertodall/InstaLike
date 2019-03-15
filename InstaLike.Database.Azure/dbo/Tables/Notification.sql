@@ -3,7 +3,7 @@
     [SenderID]          INT                NOT NULL,
     [RecipientID]       INT                NOT NULL,
     [Message]           VARCHAR (200)      CONSTRAINT [DF_Notification_Message] DEFAULT ('') NOT NULL,
-    [ReadByRecipient]   BIT                CONSTRAINT [DF_Notification_ReadByRecipient] DEFAULT ((0)) NOT NULL,
+    [ReadByRecipient]   BIT                CONSTRAINT [DF_Notification_Read] DEFAULT ((0)) NOT NULL,
     [NotificationDate]  DATETIMEOFFSET (7) CONSTRAINT [DF_Notification_NotificationDate] DEFAULT (sysdatetimeoffset()) NOT NULL,
     CONSTRAINT [PK_Notification] PRIMARY KEY CLUSTERED ([ID] ASC),
     CONSTRAINT [FK_Recipient_Notification] FOREIGN KEY ([RecipientID]) REFERENCES [dbo].[User] ([ID]),

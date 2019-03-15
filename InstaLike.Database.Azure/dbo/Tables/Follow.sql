@@ -4,7 +4,7 @@
     [FollowedID]  INT                NOT NULL,
     [FollowDate]  DATETIMEOFFSET (7) CONSTRAINT [DF_Follow_FollowDate] DEFAULT (SYSDATETIMEOFFSET()) NOT NULL,
     CONSTRAINT [PK_Follow] PRIMARY KEY ([ID]),
-    CONSTRAINT [FK_User_Follower]  FOREIGN KEY ([FollowerID]) REFERENCES [dbo].[User] ([ID]),
+    CONSTRAINT [FK_User_Follower]  FOREIGN KEY ([FollowerID])  REFERENCES [dbo].[User] ([ID]),
     CONSTRAINT [FK_User_Following] FOREIGN KEY ([FollowedID]) REFERENCES [dbo].[User] ([ID])
 );
 
