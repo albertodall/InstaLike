@@ -4,7 +4,7 @@
 
 @if (Model != null && Model.Any())
 {
-    <ol class="commenti-post">
+    <ol class="post-comments">
         @* Shows only the first five comments *@
         @foreach (var comment in Model.OrderByDescending(c => c.CommentDate).Take(5))
         {

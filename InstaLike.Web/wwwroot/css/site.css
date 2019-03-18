@@ -172,7 +172,7 @@ textarea {
         background-image: url(../img/icon_register.png);
     }
 
-/* Post classes */
+/* Post timeline classes */
 .posts > div {
     margin-bottom: 40px;
 }
@@ -236,7 +236,7 @@ textarea {
     background-image: url(../img/icon_heart.png);
 }
 
-.posts .commento-autore-post {
+.posts .post-author-comment {
     padding: 10px;
     background-color: #d8ecff;
     margin-bottom: 20px;
@@ -246,7 +246,7 @@ textarea {
     position: relative;
 }
 
-    .posts .commento-autore-post::before {
+    .posts .post-author-comment::before {
         position: absolute;
         left: -6px;
         top: -6px;
@@ -259,14 +259,14 @@ textarea {
         transform: rotate(45deg);
     }
 
-.posts .commenti-post {
+.posts .post-comments {
     padding: 0;
     padding-left: 40px;
     margin: 0;
     list-style-type: none;
 }
 
-    .posts .commenti-post li {
+    .posts .post-comments li {
         display: block;
         background-color: #e6f1fb;
         border-radius: 10px;
@@ -275,7 +275,7 @@ textarea {
         position: relative;
     }
 
-        .posts .commenti-post li::before {
+        .posts .post-comments li::before {
             position: absolute;
             right: -6px;
             bottom: -6px;
@@ -288,7 +288,7 @@ textarea {
             transform: rotate(45deg);
         }
 
-    .posts .commenti-post a {
+    .posts .post-comments a {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;
@@ -300,20 +300,20 @@ textarea {
         left: 0;
     }
 
-    .posts .commenti-post span {
+    .posts .post-comments span {
         font-size: 11px;
         opacity: 0.6;
     }
 
-    .posts .commenti-post li.nascosto {
+    .posts .post-comments li.hidden {
         display: none;
     }
 
-        .posts .commenti-post li.nascosto.mostra-tutti {
+        .posts .post-comments li.hidden.show-all {
             display: block;
         }
 
-.posts .visualizza-tutti-commenti {
+.posts .show-all-comments {
     height: 32px;
     line-height: 32px;
     margin: 3px;
@@ -340,7 +340,8 @@ textarea {
     padding: 0 10px;
 }
 
-.post-dettaglio .author {
+/* Post details */
+.post-detail .author {
     margin: 5px 0;
     position: relative;
     padding-left: 40px;
@@ -348,7 +349,7 @@ textarea {
     color: #AAA;
 }
 
-    .post-dettaglio .author img {
+    .post-detail .author img {
         width: 30px;
         height: 30px;
         position: absolute;
@@ -357,14 +358,14 @@ textarea {
         border-radius: 50%;
     }
 
-    .post-dettaglio .author a {
+    .post-detail .author a {
         display: block;
         text-decoration: none;
         font-weight: bold;
         color: black;
     }
 
-.post-dettaglio .immagine-post {
+.post-detail .post-picture {
     box-sizing: border-box;
     display: block;
     width: 100%;
@@ -373,7 +374,7 @@ textarea {
     margin: 10px 0;
 }
 
-.post-dettaglio .post-likes button {
+.post-detail .post-likes button {
     border: 1px solid #CCC;
     background-color: white;
     height: 32px;
@@ -388,18 +389,18 @@ textarea {
     color: black;
 }
 
-.post-dettaglio .post-likes strong {
+.post-detail .post-likes strong {
     padding: 0 10px;
     font-weight: normal;
     font-size: 11px;
 }
 
-.post-dettaglio .post-likes .post-liked {
+.post-detail .post-likes .post-liked {
     opacity: 0.4;
     background-image: url(../img/icon_heart.png);
 }
 
-.post-dettaglio .commento-autore-post {
+.post-detail .post-author-comment {
     padding: 10px;
     background-color: #d8ecff;
     margin-bottom: 20px;
@@ -409,7 +410,7 @@ textarea {
     position: relative;
 }
 
-    .post-dettaglio .commento-autore-post::before {
+    .post-detail .post-author-comment::before {
         position: absolute;
         left: -6px;
         top: -6px;
@@ -422,14 +423,14 @@ textarea {
         transform: rotate(45deg);
     }
 
-.post-dettaglio .commenti-post {
+.post-detail .post-comments {
     padding: 0;
     padding-left: 40px;
     margin: 0;
     list-style-type: none;
 }
 
-    .post-dettaglio .commenti-post li {
+    .post-detail .post-comments li {
         display: block;
         background-color: #e6f1fb;
         border-radius: 10px;
@@ -438,7 +439,7 @@ textarea {
         position: relative;
     }
 
-        .post-dettaglio .commenti-post li::before {
+        .post-detail .post-comments li::before {
             position: absolute;
             right: -6px;
             bottom: -6px;
@@ -451,7 +452,7 @@ textarea {
             transform: rotate(45deg);
         }
 
-    .post-dettaglio .commenti-post a {
+    .post-detail .post-comments a {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;
@@ -463,20 +464,20 @@ textarea {
         left: 0;
     }
 
-    .post-dettaglio .commenti-post span {
+    .post-detail .post-comments span {
         font-size: 11px;
         opacity: 0.6;
     }
 
-    .post-dettaglio .commenti-post li.nascosto {
+    .post-detail .post-comments li.hidden {
         display: none;
     }
 
-        .post-dettaglio .commenti-post li.nascosto.mostra-tutti {
+        .post-detail .post-comments li.hidden.show-all {
             display: block;
         }
 
-.post-dettaglio .visualizza-tutti-commenti {
+.post-detail .show-all-comments {
     height: 32px;
     line-height: 32px;
     margin: 3px;
@@ -494,7 +495,7 @@ textarea {
     font-size: 11px;
 }
 
-/* Notification classes */
+/* Alerts */
 .alerts > div {
     margin-bottom: 20px;
     position: relative;
@@ -530,16 +531,17 @@ textarea {
         padding: 0;
     }
 
-.form_reg > DIV {
+/* User registration form */
+.form_reg > div {
     margin-bottom: 10px;
 }
 
-    .form_reg > DIV label {
+    .form_reg > div label {
         display: block;
         padding-bottom: 3px;
     }
 
-    .form_reg > DIV span {
+    .form_reg > div span {
         display: block;
         color: red;
         font-style: italic;
@@ -568,11 +570,12 @@ textarea {
     background-image: url(../img/icon_floppy.png);
 }
 
-.form_login > DIV {
+/* Login form */
+.form_login > div {
     margin-bottom: 10px;
 }
 
-    .form_login > DIV span span {
+    .form_login > div span span {
         display: block;
         color: red;
         font-style: italic;
@@ -601,11 +604,12 @@ textarea {
     background-image: url(../img/icon_login.png);
 }
 
-.form_post > DIV {
+/* Publish post */
+.form_post > div {
     margin-bottom: 10px;
 }
 
-    .form_post > DIV span {
+    .form_post > div span {
         display: block;
         color: red;
         font-style: italic;
@@ -634,6 +638,7 @@ textarea {
     background-image: url(../img/icon_send.png);
 }
 
+/* Post comments */
 .form_comment button[type=submit] {
     height: 32px;
     line-height: 32px;
@@ -651,6 +656,7 @@ textarea {
     background-image: url(../img/icon_send.png);
 }
 
+/* Edit user details */
 .form_edit > div {
     margin-bottom: 10px;
 }
@@ -682,7 +688,6 @@ textarea {
         box-shadow: rgba(0,0,0,0.5) 0 0 10px;
     }
 
-/* Edit user details */
 .form_edit input[type=submit] {
     height: 32px;
     line-height: 32px;
@@ -720,12 +725,12 @@ textarea {
     display: none;
 }
 
-.popup-attivo {
+.popup-activated {
     z-index: 100;
     display: block;
 }
 
-.popup-chiudi {
+.popup-close {
     position: absolute;
     top: 10%;
     right: 10%;
@@ -738,7 +743,7 @@ textarea {
     color: black;
 }
 
-.popup-contenuto {
+.popup-content {
     background: #fff;
     border-radius: 5px;
     position: absolute;
@@ -750,7 +755,7 @@ textarea {
     box-sizing: border-box;
 }
 
-    .popup-contenuto h1 {
+    .popup-content h1 {
         color: #4685c2;
         font-size: 2em;
     }
@@ -786,12 +791,12 @@ textarea {
         }
 
 /* User profile */
-.profilo-images {
+.user-profile-images {
     width: 100%;
     float: left;
 }
 
-    .profilo-images A {
+    .user-profile-images a {
         float: left;
         width: calc(25% - 2px);
         padding-bottom: 20%;
@@ -800,20 +805,20 @@ textarea {
         overflow: hidden;
     }
 
-    .profilo-images IMG {
+    .user-profile-images img {
         position: absolute;
         top: 0;
         left: 0;
         height: 100%;
     }
 
-.profilo-posts {
+.user-profile-stats {
     width: 100%;
     float: left;
     padding: 20px 0;
 }
 
-    .profilo-posts ul {
+    .user-profile-stats ul {
         list-style-type: none;
         margin: 0;
         padding: 5px 0;
@@ -824,12 +829,7 @@ textarea {
         border-radius: 5px;
     }
 
-    .profilo-posts LI a {
-        color: black;
-        text-decoration: none;
-    }
-
-    .profilo-posts LI {
+    .user-profile-stats li {
         float: left;
         width: 33%;
         font-size: 25px;
@@ -839,17 +839,22 @@ textarea {
         border-left: 1px solid #CCC;
     }
 
-        .profilo-posts LI:first-child {
-            border: 0;
+        .user-profile-stats li a {
+            color: black;
+            text-decoration: none;
         }
 
-        .profilo-posts LI label {
+        .user-profile-stats li label {
             display: block;
             font-size: 11px;
             opacity: 0.6;
         }
 
-.profilo-info img {
+        .user-profile-stats li:first-child {
+            border: 0;
+        }
+
+.user-profile-info img {
     width: 100px;
     height: 100px;
     display: block;
@@ -859,18 +864,18 @@ textarea {
     box-shadow: rgba(0,0,0,0.5) 0 0 10px;
 }
 
-.profilo-info .profilo-details h1 {
+.user-profile-info .user-profile-details h1 {
     margin: 0;
     color: #4685c2;
 }
 
-.profilo-info .profilo-details p {
+.user-profile-info .user-profile-details p {
     font-style: italic;
     margin: 0;
     padding: 5px 0;
 }
 
-.profilo-info a {
+.user-profile-info a {
     height: 32px;
     line-height: 32px;
     margin: 3px;
@@ -887,16 +892,16 @@ textarea {
     color: black;
 }
 
-    .profilo-info a.btn_edit {
+    .user-profile-info a.btn_edit {
         background-image: url(../img/icon_edit.png);
     }
 
-    .profilo-info a.btn_follow,
-    .profilo-info a.btn_following {
+    .user-profile-info a.btn_follow,
+    .user-profile-info a.btn_following {
         background-image: url(../img/icon_follow.png)
     }
 
-    .profilo-info a.btn_following {
+    .user-profile-info a.btn_following {
         opacity: 0.5;
     }
 
@@ -913,9 +918,9 @@ textarea {
     }
 
     .posts .post-likes button,
-    .posts .visualizza-tutti-commenti,
-    .post-dettaglio .post-likes button,
-    .post-dettaglio .visualizza-tutti-commenti,
+    .posts .show-all-comments,
+    .post-detail .post-likes button,
+    .post-detail .show-all-comments,
     .user *[class*="btn_"] a {
         font-size: 0;
         padding-right: 0;
