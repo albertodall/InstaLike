@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
@@ -100,15 +99,6 @@ namespace InstaLike.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (profilePictureFile != null)
-                {
-                    using (var stream = new MemoryStream())
-                    {
-                        await profilePictureFile.CopyToAsync(stream);
-                        userDetails.ProfilePicture = stream.ToArray();
-                    }
-                }
-
                 var command = new EditUserDetailsCommand(
                     User.GetIdentifier(),
                     userDetails.Nickname,
@@ -116,7 +106,7 @@ namespace InstaLike.Web.Controllers
                     userDetails.Surname,
                     userDetails.Email,
                     userDetails.Bio,
-                    userDetails.ProfilePicture);
+                    await profilePictureFile.ToByteArrayAsync());
 
                 var processCommandResult = await _dispatcher.Send(command);
                 if (processCommandResult.IsSuccess)
@@ -143,15 +133,6 @@ namespace InstaLike.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (profilePictureFile != null)
-                {
-                    using (var stream = new MemoryStream())
-                    {
-                        await profilePictureFile.CopyToAsync(stream);
-                        newUser.ProfilePicture = stream.ToArray();
-                    }
-                }
-
                 var command = new RegisterUserCommand(
                     newUser.Nickname,
                     newUser.Name,
@@ -159,7 +140,7 @@ namespace InstaLike.Web.Controllers
                     newUser.Password,
                     newUser.Email,
                     newUser.Biography,
-                    newUser.ProfilePicture);
+                    await profilePictureFile.ToByteArrayAsync());
 
                 var processCommandResult = await _dispatcher.Send(command);
                 if (processCommandResult.IsSuccess)

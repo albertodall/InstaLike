@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
@@ -34,13 +33,7 @@ namespace InstaLike.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var stream = new MemoryStream())
-                {
-                    await pictureFile.CopyToAsync(stream);
-                    newPost.Picture = stream.ToArray();
-                }
-
-                var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, newPost.Picture);
+                var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, await pictureFile.ToByteArrayAsync());
                 var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {
