@@ -12,7 +12,7 @@ $(".user-details-profile-picture input").change(function (e) {
 });
 
 // Adds a comment to a post
-$('.form-comment').submit(function (e) {
+$('.form_comment').submit(function (e) {
     e.preventDefault();
 
     var form = $(this),
@@ -22,6 +22,10 @@ $('.form-comment').submit(function (e) {
         showAllComments = form.parent().find('.visualizza-tutti-commenti'),
         authorComment = form.parent().find('.commento-autore-post'),
         commentText = comment.val();
+
+    if (!commentText) {
+        return false;
+    }
 
     $.post("/Post/PublishComment", { PostID: postID, CommentText: commentText }, function (response) {
         postComments.remove();
@@ -53,10 +57,10 @@ $('.pulsante-like').click(function (e) {
         userID = likeButton.attr('data-user-id');
 
     $.post('/Post/Like', { PostID: postID, UserID: userID }, function () {
-        likeButton.toggleClass('post-piaciuto');
+        likeButton.toggleClass('post-liked');
 
         // Increments o decrements the number of likes.
-        var increment = likeButton.hasClass('post-piaciuto') ? 1 : -1;
+        var increment = likeButton.hasClass('post-liked') ? 1 : -1;
         likesMarkup.html(likes + increment);
     });
 });

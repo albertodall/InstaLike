@@ -1,6 +1,7 @@
 ﻿@model PostModel
 
-<form method="post" class="form-comment" role="form" asp-action="PublishComment" asp-controller="Post" asp-antiforgery="true">
+<form method="post" class="form_comment" role="form" asp-action="PublishComment" asp-controller="Post" asp-antiforgery="true">
     <input asp-for="PostID" />
     <input type="text" name="comment" id="comment" placeholder="Add your comment..." />
+    <button type="submit" value="Send" />
 </form>

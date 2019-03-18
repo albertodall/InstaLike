@@ -37,11 +37,11 @@ footer {
     box-sizing: border-box;
 }
 
-.body-contenuto {
+.body-content {
     padding: 20px 0;
 }
 
-    .body-contenuto h2 {
+    .body-content h2 {
         color: #4685c2;
         text-transform: uppercase;
         border-bottom: 1px dashed #4685c2;
@@ -231,7 +231,7 @@ textarea {
     font-size: 11px;
 }
 
-.posts .post-likes .post-piaciuto {
+.posts .post-likes .post-liked {
     opacity: 0.4;
     background-image: url(../img/icon_heart.png);
 }
@@ -394,7 +394,7 @@ textarea {
     font-size: 11px;
 }
 
-.post-dettaglio .post-likes .post-piaciuto {
+.post-dettaglio .post-likes .post-liked {
     opacity: 0.4;
     background-image: url(../img/icon_heart.png);
 }
@@ -634,6 +634,80 @@ textarea {
     background-image: url(../img/icon_send.png);
 }
 
+.form_comment button[type=submit] {
+    height: 32px;
+    line-height: 32px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    float: right;
+    background-color: white;
+    background-image: url(../img/icon_send.png);
+}
+
+.form_edit > div {
+    margin-bottom: 10px;
+}
+
+    .form_edit > div label {
+        display: block;
+        padding-bottom: 3px;
+    }
+
+    .form_edit > div span {
+        display: block;
+        color: red;
+        font-style: italic;
+        background-image: url(../img/icon_warning.png);
+        background-position: 0 top;
+        background-size: 14px;
+        background-repeat: no-repeat;
+        padding-left: 20px;
+        margin-top: 5px;
+    }
+
+    .form_edit > div img {
+        width: 150px;
+        height: 150px;
+        display: block;
+        float: left;
+        border-radius: 5%;
+        margin-right: 20px;
+        box-shadow: rgba(0,0,0,0.5) 0 0 10px;
+    }
+
+/* Edit user details */
+.form_edit input[type=submit] {
+    height: 32px;
+    line-height: 32px;
+    margin: 20px 3px 3px 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    background-color: white;
+    background-image: url(../img/icon_floppy.png);
+}
+
+.user-details-profile-picture > label > img {
+    cursor: pointer;
+}
+
+.user-details-profile-picture > input {
+    display: none;
+}
+
 /* Popup classes */
 .popup {
     position: fixed;
@@ -825,17 +899,6 @@ textarea {
     .profilo-info a.btn_following {
         opacity: 0.5;
     }
-
-/* Edit user details */
-.user-details-profile-picture > label > img {
-    cursor: pointer;
-}
-
-.user-details-profile-picture > input {
-    visibility: hidden;
-    width: 0;
-    height: 0;
-}
 
 @media (max-width: 640px) {
     body {
