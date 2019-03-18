@@ -5,14 +5,14 @@
 }
 
 <div>
-    <div class="profilo-info">
+    <div class="user-profile-info">
         @{
             var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePicture);
             var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
         }
         <img src="@profilePicture" />
 
-        <div class="profilo-details">
+        <div class="user-profile-details">
             <h1>@Model.Nickname</h1>
             <strong>@(Model.Name) @(Model.Surname)</strong>
             <p>@Model.Bio</p>
@@ -31,7 +31,7 @@
         }
     </div>
 
-    <div class="profilo-posts">
+    <div class="user-profile-stats">
         @if (User.Identity.IsAuthenticated)
         {
             <ul>
@@ -64,7 +64,7 @@
         }
     </div>
 
-    <div class="profilo-images">
+    <div class="user-profile-images">
         @if (Model.NumberOfPosts == 0)
         {
             <p>@(Model.Nickname) hasn't still shared anything.</p>

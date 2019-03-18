@@ -18,9 +18,9 @@ $('.form_comment').submit(function (e) {
     var form = $(this),
         postID = form.find('#PostID').val(),
         comment = form.find('#comment'),
-        postComments = form.parent().find('.commenti-post'),
-        showAllComments = form.parent().find('.visualizza-tutti-commenti'),
-        authorComment = form.parent().find('.commento-autore-post'),
+        postComments = form.parent().find('.post-comments'),
+        showAllComments = form.parent().find('.show-all-comments'),
+        authorComment = form.parent().find('.post-author-comment'),
         commentText = comment.val();
 
     if (!commentText) {
@@ -40,10 +40,10 @@ $('.form_comment').submit(function (e) {
 });
 
 // Shows all comments
-$('.visualizza-tutti-commenti').click(function (e) {
+$('.show-all-comments').click(function (e) {
     e.preventDefault();
 
-    $(this).siblings('.commenti-post').find('li.nascosto').toggleClass('mostra-tutti');
+    $(this).siblings('.post-comments').find('li.hidden').toggleClass('show-all');
 });
 
 // Sets o removes a "Like" to a post.
@@ -70,21 +70,21 @@ $('.popup-link').click(function (e) {
     e.preventDefault();
 
     var popup = $('.popup'),
-        contenutoPopup = $('.popup-contenuto');
+        contenutoPopup = $('.popup-content');
 
     var link = $(this),
         url = link.attr('data-ajax-url');
 
     $.get(url, function (response) {
         contenutoPopup.empty().append(response);
-        popup.addClass('popup-attivo');
+        popup.addClass('popup-activated');
     });
 });
 
 // Close popup
-$('.popup-chiudi').click(function (e) {
-    if ($('.popup').hasClass('popup-attivo')) {
-        $('.popup').removeClass('popup-attivo');
-        $('.popup-contenuto').empty();
+$('.popup-close').click(function (e) {
+    if ($('.popup').hasClass('popup-activated')) {
+        $('.popup').removeClass('popup-activated');
+        $('.popup-content').empty();
     }
 });

@@ -6,7 +6,7 @@
     ViewBag.Title = "Post detail";
 }
 
-<div class="post-dettaglio">
+<div class="post-detail">
     <div class="author">
         @{
             var profilePictureBase64 = Convert.ToBase64String(Model.AuthorProfilePicture);
@@ -26,7 +26,7 @@
             var postPictureBase64 = Convert.ToBase64String(Model.Picture);
             var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);
         }
-        <img class="immagine-post" src="@postPicture" />
+        <img class="post-picture" src="@postPicture" />
     </div>
 
     <div>
@@ -39,7 +39,7 @@
             </strong>
         </div>
 
-        <p class="commento-autore-post">
+        <p class="post-author-comment">
             @Html.Raw(Model.Text)
         </p>
 
