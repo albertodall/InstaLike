@@ -10,7 +10,7 @@
         var profilePicture = string.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
     }
     <div>
-        <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Account" asp-antiforgery="true">
+        <form method="post" class="form_edit" enctype="multipart/form-data" asp-action="Edit" asp-controller="Account" asp-antiforgery="true">
             <div asp-validation-summary="ModelOnly"></div>
             <div>
                 <label asp-for="Nickname"></label>
@@ -54,7 +54,7 @@
                 <input asp-for="ProfilePicture" type="file" name="profilePictureFile" />
             </div>
             <div>
-                <input type="submit" value="Save" />
+                <input class="btn_save" type="submit" value="Save" />
             </div>
         </form>
     </div>
