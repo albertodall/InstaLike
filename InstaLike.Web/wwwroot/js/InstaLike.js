@@ -1,4 +1,27 @@
-﻿// Displays user's profile picture after choosing it
+﻿const NicknamePattern = new RegExp('@\\w+', 'gi');
+const HashtagPattern = new RegExp('#\\w+', 'gi');
+
+var formatNicknames = function (index, textElement) {
+    var commentText = textElement.innerText;
+    textElement.innerHTML = commentText.replace(NicknamePattern, function (txt) {
+        return "<span class='at-nickname'>" + txt.substring(1, txt.length) + "</span>";
+    });
+};
+
+var formatHashtags = function (index, textElement) {
+    var commentText = textElement.innerText;
+    textElement.innerHTML = commentText.replace(HashtagPattern, function (txt) {
+        return "<span class='hashtag'>" + txt + "</span>";
+    });
+};
+
+$(function () {
+    $('.post-author-comment, .post-comments > li > p')
+        .each(formatNicknames)
+        .each(formatHashtags);
+});
+
+// Displays user's profile picture after choosing it
 $(".user-details-profile-picture input").change(function (e) {
     if (e.target.files && e.target.files[0]) {
         var reader = new FileReader();
@@ -47,11 +70,11 @@ $('.show-all-comments').click(function (e) {
 });
 
 // Sets o removes a "Like" to a post.
-$('.pulsante-like').click(function (e) {
+$('.like-button').click(function (e) {
     e.preventDefault();
 
     var likeButton = $(this),
-        likesMarkup = likeButton.next('strong').find('.numero-like'),
+        likesMarkup = likeButton.next('strong').find('.likes-count'),
         likes = parseInt(likesMarkup.html()),
         postID = likeButton.attr('data-post-id'),
         userID = likeButton.attr('data-user-id');

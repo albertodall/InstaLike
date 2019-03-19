@@ -29,11 +29,11 @@
 
     <div>
         <div class="post-likes">
-            <button class="pulsante-like @(Model.IsLikedByCurrentUser ? "post-liked" : String.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
+            <button class="like-button @(Model.IsLikedByCurrentUser ? "post-liked" : String.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
                 Like
             </button>
             <strong>
-                <span class="numero-like">@Model.LikesCount</span> likes
+                <span class="likes-count">@Model.LikesCount</span> likes
             </strong>
         </div>
 

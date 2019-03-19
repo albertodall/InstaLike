@@ -172,6 +172,18 @@ textarea {
         background-image: url(../img/icon_register.png);
     }
 
+.at-nickname {
+    font-style: italic;
+    font-weight: bold;
+    color: darkblue;
+}
+
+.hashtag {
+    font-style: italic;
+    font-weight: bold;
+    color: firebrick;
+}
+
 /* Post timeline classes */
 .posts > div {
     margin-bottom: 40px;
@@ -305,11 +317,11 @@ textarea {
         opacity: 0.6;
     }
 
-    .posts .post-comments li.hidden {
+    .posts .post-comments li.comment-hidden {
         display: none;
     }
 
-        .posts .post-comments li.hidden.show-all {
+        .posts .post-comments li.comment-hidden.show-all {
             display: block;
         }
 

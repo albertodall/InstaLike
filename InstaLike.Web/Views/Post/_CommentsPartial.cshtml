@@ -12,7 +12,9 @@
                 <strong>
                     <a asp-action="Profile" asp-controller="Account" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
                 </strong>
-                &nbsp;@comment.Text
+                <p>
+                    &nbsp;@comment.Text
+                </p>
                 <span>
                     &nbsp;<time title="@comment.CommentDate.DateTime" datetime="@comment.CommentDate.DateTime">@comment.CommentDate.UtcDateTime.AsPastDays()</time>
                 </span>
@@ -22,11 +24,13 @@
         @* Hides other comments *@
         @foreach (var comment in Model.OrderByDescending(c => c.CommentDate).Skip(5))
         {
-            <li class="nascosto">
+            <li class="comment-hidden">
                 <strong>
                     <a asp-action="Profile" asp-controller="Account" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
                 </strong>
-                &nbsp;@comment.Text
+                <p>
+                    &nbsp;@comment.Text
+                </p>
                 <span>
                     &nbsp;<time title="@comment.CommentDate.DateTime" datetime="@comment.CommentDate.DateTime">@comment.CommentDate.UtcDateTime.AsPastDays()</time>
                 </span>
