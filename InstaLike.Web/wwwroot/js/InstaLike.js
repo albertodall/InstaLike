@@ -76,7 +76,7 @@ $('.show-all-comments').click(function (e) {
     $(this).siblings('.post-comments').find('li.hidden').toggleClass('show-all');
 });
 
-// Sets o removes a "Like" to a post.
+// Sets o removes a "Like" on a post.
 $('.like-button').click(function (e) {
     e.preventDefault();
 
@@ -86,7 +86,9 @@ $('.like-button').click(function (e) {
         postID = likeButton.attr('data-post-id'),
         userID = likeButton.attr('data-user-id');
 
-    $.post('/Post/Like', { PostID: postID, UserID: userID }, function () {
+    var endpoint = likeButton.hasClass('post-liked') ? '/Post/Dislike' : '/Post/Like';
+
+    $.post(endpoint, { PostID: postID, UserID: userID }, function () {
         likeButton.toggleClass('post-liked');
 
         // Increments o decrements the number of likes.
@@ -100,13 +102,13 @@ $('.popup-link').click(function (e) {
     e.preventDefault();
 
     var popup = $('.popup'),
-        contenutoPopup = $('.popup-content');
+        popupContent = $('.popup-content');
 
     var link = $(this),
         url = link.attr('data-ajax-url');
 
     $.get(url, function (response) {
-        contenutoPopup.empty().append(response);
+        popupContent.empty().append(response);
         popup.addClass('popup-activated');
     });
 });

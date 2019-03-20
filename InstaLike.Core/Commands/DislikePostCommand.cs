@@ -1,15 +1,14 @@
 ﻿using CSharpFunctionalExtensions;
-using InstaLike.Core.Domain;
 using MediatR;
 
 namespace InstaLike.Core.Commands
 {
-    public sealed class LikeOrDislikePostCommand : IRequest<Result<LikePostResult>>
+    public sealed class DislikePostCommand : IRequest<Result>
     {
         public int PostID { get; }
         public int UserID { get; }
 
-        public LikeOrDislikePostCommand(int postID, int userID)
+        public DislikePostCommand(int postID, int userID)
         {
             PostID = postID;
             UserID = userID;

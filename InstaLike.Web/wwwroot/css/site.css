@@ -254,18 +254,25 @@ textarea {
     position: relative;
 }
 
-    .posts .post-author-comment::before {
-        position: absolute;
-        left: -6px;
-        top: -6px;
-        content: "";
-        width: 0;
-        height: 0;
-        border-top: 6px solid transparent;
-        border-right: 12px solid #d8ecff;
-        border-bottom: 6px solid transparent;
-        transform: rotate(45deg);
-    }
+.posts .post-author-comment::before {
+    position: absolute;
+    left: -6px;
+    top: -6px;
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-right: 12px solid #d8ecff;
+    border-bottom: 6px solid transparent;
+    transform: rotate(45deg);
+}
+
+.post-author-comment span.hashtag {
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold;
+    color: firebrick;
+}
 
 .post-comments p > span.hashtag {
     font-size: 14px;

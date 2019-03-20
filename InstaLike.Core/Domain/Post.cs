@@ -42,17 +42,21 @@ namespace InstaLike.Core.Domain
             return _likes.Any(u => u.User == user);
         }
 
-        public virtual LikePostResult Like(User user)
+        public virtual void Like(User user)
         {
             if (!LikesTo(user))
             {
                 _likes.Add(new Like(this, user));
-                return LikePostResult.Liked;
             }
+        }
 
-            var likeToRemove = _likes.Single(l => l.User == user);
-            _likes.Remove(likeToRemove);
-            return LikePostResult.Disliked;
+        public virtual void Dislike(User user)
+        {
+            if (LikesTo(user))
+            {
+                var likeToRemove = _likes.Single(l => l.User == user);
+                _likes.Remove(likeToRemove);
+            }
         }
 
         public virtual void AddComment(Comment comment)

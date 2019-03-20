@@ -85,10 +85,10 @@ namespace InstaLike.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Like(LikePostModel like)
         {
-            var command = new LikeOrDislikePostCommand(like.PostID, like.UserID);
+            var command = new LikePostCommand(like.PostID, like.UserID);
             var commandResult = await _dispatcher.Send(command);
 
-            if (commandResult.IsSuccess && commandResult.Value == LikePostResult.Liked)
+            if (commandResult.IsSuccess)
             {
                 var postLikedNotification = new PostLikedEvent(
                     User.Identity.Name,
@@ -100,6 +100,15 @@ namespace InstaLike.Web.Controllers
                 await _dispatcher.Publish(postLikedNotification);
             }
 
+            return new EmptyResult();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Dislike(LikePostModel like)
+        {
+            var command = new DislikePostCommand(like.PostID, like.UserID);
+            var commandResult = await _dispatcher.Send(command);
+            
             return new EmptyResult();
         }
     }
