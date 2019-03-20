@@ -173,15 +173,11 @@ textarea {
     }
 
 .at-nickname {
+    font-size: 14px;
+    text-decoration: none;
     font-style: italic;
     font-weight: bold;
     color: darkblue;
-}
-
-.hashtag {
-    font-style: italic;
-    font-weight: bold;
-    color: firebrick;
 }
 
 /* Post timeline classes */
@@ -271,6 +267,13 @@ textarea {
         transform: rotate(45deg);
     }
 
+.post-comments p > span.hashtag {
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold;
+    color: firebrick;
+}
+
 .posts .post-comments {
     padding: 0;
     padding-left: 40px;
@@ -300,7 +303,7 @@ textarea {
             transform: rotate(45deg);
         }
 
-    .posts .post-comments a {
+    .posts .post-comments a.comment-author-nickname {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;
@@ -497,7 +500,7 @@ textarea {
     border: 1px solid #CCC;
     display: block;
     text-decoration: none;
-    background-color: #FFF;
+    background-color: white;
     float: right;
     padding: 0 10px 0 40px;
     background-repeat: no-repeat;
@@ -756,7 +759,7 @@ textarea {
 }
 
 .popup-content {
-    background: #fff;
+    background: white;
     border-radius: 5px;
     position: absolute;
     top: 10%;
@@ -779,7 +782,7 @@ textarea {
     width: 100%;
 }
 
-    .user_list DIV {
+    .user_list div {
         float: left;
         width: 150px;
         text-align: center;
@@ -788,13 +791,13 @@ textarea {
         padding-left: 10px;
     }
 
-        .user_list DIV img {
+        .user_list div img {
             width: 100px;
             height: 100px;
             border-radius: 50%;
         }
 
-        .user_list DIV a {
+        .user_list div a {
             display: block;
             color: black;
             text-decoration: none;
@@ -812,7 +815,7 @@ textarea {
         float: left;
         width: calc(25% - 2px);
         padding-bottom: 20%;
-        border: 1px solid #fff;
+        border: 1px solid white;
         position: relative;
         overflow: hidden;
     }
@@ -943,7 +946,10 @@ textarea {
     .form_reg input[type=email],
     .form_login input[type=text],
     .form_login input[type=password],
-    .form_login input[type=email] {
+    .form_login input[type=email],
+    .form_edit input[type=text],
+    .form_edit input[type=password],
+    .form_edit input[type=email] {
         display: block;
         box-sizing: border-box;
         width: 100%;

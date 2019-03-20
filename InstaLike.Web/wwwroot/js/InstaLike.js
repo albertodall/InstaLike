@@ -2,17 +2,24 @@
 const HashtagPattern = new RegExp('#\\w+', 'gi');
 
 var formatNicknames = function (index, textElement) {
-    var commentText = textElement.innerText;
-    textElement.innerHTML = commentText.replace(NicknamePattern, function (txt) {
-        return "<span class='at-nickname'>" + txt.substring(1, txt.length) + "</span>";
+    var commentText = textElement.innerHTML;
+
+    commentText = commentText.replace(NicknamePattern, function (txt) {
+        var nickname = txt.substring(1, txt.length);
+        return `<a class='at-nickname' href='/Account/Profile/${nickname}'>${nickname}</a>`;
     });
+
+    textElement.innerHTML = commentText;
 };
 
 var formatHashtags = function (index, textElement) {
-    var commentText = textElement.innerText;
-    textElement.innerHTML = commentText.replace(HashtagPattern, function (txt) {
-        return "<span class='hashtag'>" + txt + "</span>";
+    var commentText = textElement.innerHTML;
+
+    commentText = commentText.replace(HashtagPattern, function (txt) {
+        return `<span class='hashtag'>${txt}</span>`;
     });
+
+    textElement.innerHTML = commentText;
 };
 
 $(function () {
