@@ -1,31 +1,26 @@
-﻿const NicknamePattern = new RegExp('@\\w+', 'gi');
-const HashtagPattern = new RegExp('#\\w+', 'gi');
+﻿$(function () {
+    const NicknamePattern = new RegExp('@\\w+', 'gi');
+    const HashtagPattern = new RegExp('#\\w+', 'gi');
 
-var formatNicknames = function (index, textElement) {
-    var commentText = textElement.innerHTML;
-
-    commentText = commentText.replace(NicknamePattern, function (txt) {
-        var nickname = txt.substring(1, txt.length);
-        return `<a class='at-nickname' href='/Account/Profile/${nickname}'>${nickname}</a>`;
-    });
-
-    textElement.innerHTML = commentText;
-};
-
-var formatHashtags = function (index, textElement) {
-    var commentText = textElement.innerHTML;
-
-    commentText = commentText.replace(HashtagPattern, function (txt) {
-        return `<span class='hashtag'>${txt}</span>`;
-    });
-
-    textElement.innerHTML = commentText;
-};
-
-$(function () {
     $('.post-author-comment, .post-comments > li > p')
-        .each(formatNicknames)
-        .each(formatHashtags);
+        .each(function () {
+            var commentText = this.innerHTML;
+
+            commentText = commentText.replace(NicknamePattern, function (nickname) {
+                return `<a class='at-nickname' href='/Account/Profile/${nickname.substring(1, nickname.length)}'>${nickname}</a>`;
+            });
+
+            this.innerHTML = commentText;
+        })
+        .each(function () {
+            var commentText = this.innerHTML;
+
+            commentText = commentText.replace(HashtagPattern, function (hashtag) {
+                return `<span class='hashtag'>${hashtag}</span>`;
+            });
+
+            this.innerHTML = commentText;
+        });
 });
 
 // Displays user's profile picture after choosing it

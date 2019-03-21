@@ -173,10 +173,9 @@ textarea {
     }
 
 .at-nickname {
-    font-size: 14px;
+    font-size: 12px;
     text-decoration: none;
     font-style: italic;
-    font-weight: bold;
     color: darkblue;
 }
 
@@ -189,7 +188,7 @@ textarea {
     box-sizing: border-box;
     display: block;
     width: 100%;
-    border: 10px solid #FFF;
+    border: 10px solid white;
     box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
     margin: 10px 0;
 }
@@ -268,14 +267,14 @@ textarea {
 }
 
 .post-author-comment span.hashtag {
-    font-size: 14px;
+    font-size: 12px;
     font-style: italic;
     font-weight: bold;
     color: firebrick;
 }
 
 .post-comments p > span.hashtag {
-    font-size: 14px;
+    font-size: 12px;
     font-style: italic;
     font-weight: bold;
     color: firebrick;
