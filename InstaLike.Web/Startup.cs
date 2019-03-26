@@ -1,22 +1,14 @@
-﻿using System;
-using System.Reflection;
-using FluentNHibernate.Cfg;
-using FluentNHibernate.Cfg.Db;
-using FluentNHibernate.Conventions;
-using FluentNHibernate.Conventions.Helpers;
-using FluentNHibernate.Conventions.Instances;
-using FluentNHibernate.Mapping;
+﻿using System.Reflection;
 using InstaLike.Core.Domain;
-using InstaLike.Web.Services;
+using InstaLike.Web.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NHibernate;
+using Serilog;
 
 namespace InstaLike.Web
 {
@@ -37,41 +29,23 @@ namespace InstaLike.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            var loggerConfig = new LoggerConfiguration()
+                .MinimumLevel.Warning()
+                .WriteTo.Console()
+                .WriteTo.File(
+                    Configuration["Logging:LogFile"], 
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true);
+
+            services.ConfigureLogging(loggerConfig);
+
+            services.RegisterPipelineBehaviors();
+
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
-            var connectionString = Configuration.GetConnectionString("DefaultDatabase");
-            var nhConfig = Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly())
-                        .Conventions.Add(
-                            LazyLoad.Always(), 
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsConvention>()
-                    );
+            services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
 
-            services.AddSingleton(nhConfig.BuildSessionFactory());
-            services.AddScoped(sp =>
-            {
-                var sessionFactory = sp.GetRequiredService<ISessionFactory>();
-                return sessionFactory.OpenSession();
-            });
-
-            services.AddSingleton<IUserAuthenticationService, DatabaseAuthenticationService>();
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(opt => 
-                {
-                    opt.Cookie.Expiration = TimeSpan.FromMinutes(30);
-                    opt.Cookie.HttpOnly = true;
-                    opt.LoginPath = new PathString("/Account/Login");
-                });
+            services.ConfigureAuthentication();
 
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -100,22 +74,6 @@ namespace InstaLike.Web
             });
         }
 
-        private class AssociationsConvention : IHasManyConvention, IReferenceConvention
-        {
-            public void Apply(IOneToManyCollectionInstance instance)
-            {
-                instance.LazyLoad();
-                instance.AsBag();
-                instance.Cascade.AllDeleteOrphan();
-                instance.Inverse();
-            }
-
-            public void Apply(IManyToOneInstance instance)
-            {
-                instance.LazyLoad(Laziness.Proxy);
-                instance.Cascade.None();
-                instance.Not.Nullable();
-            }
-        }
+        
     }
 }

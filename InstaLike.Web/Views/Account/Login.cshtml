@@ -13,19 +13,16 @@
         <div asp-validation-summary="ModelOnly"></div>
         <div class="form_login">
             <div>
-                <label asp-for="Username"></label>
                 <input asp-for="Username" type="text" placeholder="Username" />
                 <span asp-validation-for="Username"></span>
             </div>
             <div>
-                <label asp-for="Password"></label>
                 <input asp-for="Password" type="password" placeholder="Password" />
                 <span asp-validation-for="Password"></span>
             </div>
             <div>
                 <label asp-for="RememberMe"></label>
                 <input asp-for="RememberMe" type="checkbox" />
-                <span asp-validation-for="RememberMe"></span>
             </div>
             <button type="submit">Login</button>
         </div>

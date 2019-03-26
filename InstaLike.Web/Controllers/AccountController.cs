@@ -51,20 +51,22 @@ namespace InstaLike.Web.Controllers
                 {
                     ModelState.AddModelError("", authenticationResult.Error);
                 }
+                else
+                {
+                    var userIdentity = new ClaimsIdentity(
+                        authenticationResult.Value.Claims,
+                        CookieAuthenticationDefaults.AuthenticationScheme);
 
-                var userIdentity = new ClaimsIdentity(
-                    authenticationResult.Value.Claims, 
-                    CookieAuthenticationDefaults.AuthenticationScheme);
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(userIdentity),
+                        new AuthenticationProperties()
+                        {
+                            IsPersistent = model.RememberMe
+                        });
 
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(userIdentity),
-                    new AuthenticationProperties()
-                    {
-                        IsPersistent = model.RememberMe
-                    });
-
-                return Redirect(model.ReturnUrl);
+                    return Redirect(model.ReturnUrl);
+                }
             }
 
             return View(model);
@@ -115,7 +117,7 @@ namespace InstaLike.Web.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("Error", "Home");
+                    ModelState.AddModelError("", processCommandResult.Error);
                 }
             }
             return View(userDetails);
@@ -149,7 +151,7 @@ namespace InstaLike.Web.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("Error", "Home");
+                    ModelState.AddModelError("", processCommandResult.Error);
                 }
                 
             }
