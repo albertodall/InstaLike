@@ -64,9 +64,10 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureLogging(this IServiceCollection services, LoggerConfiguration config)
         {
-            var logger = config.CreateLogger();
-            services.AddSingleton<ILogger>(logger);
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => logger.Dispose();
+            Log.Logger = config.CreateLogger();
+            services.AddSingleton(Log.Logger);
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
+            services.AddSingleton<ISequentialGuidGeneratorService, SequentialGuidGeneratorService>();
 
             return services;
         }

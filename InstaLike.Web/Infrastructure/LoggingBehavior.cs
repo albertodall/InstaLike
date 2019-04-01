@@ -1,26 +1,36 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using InstaLike.Web.Services;
 using MediatR;
 using Serilog;
+using Serilog.Context;
 
 namespace InstaLike.Web.Infrastructure
 {
     internal class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
-        private readonly ILogger _logger;
+        private const string CorrelationIdPropertyName = "CorrelationID";
 
-        public LoggingBehavior(ILogger logger)
+        private readonly ILogger _logger;
+        private readonly ISequentialGuidGeneratorService _correlationIDGenerator;
+
+        public LoggingBehavior(ILogger logger, ISequentialGuidGeneratorService correlationIDGenerator)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger?.ForContext<TRequest>() ?? throw new ArgumentNullException(nameof(logger));
+            _correlationIDGenerator = correlationIDGenerator ?? throw new ArgumentNullException(nameof(correlationIDGenerator)); ;
         }
 
-        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
-            _logger.Debug($"Executing {typeof(TRequest).Name}");
-            var response = next();
-            _logger.Debug($"Executed {typeof(TRequest).Name}.");
-            return response;
+            var correlationId = _correlationIDGenerator.GetIdentifier();
+            using (LogContext.PushProperty(CorrelationIdPropertyName, _correlationIDGenerator.GetIdentifier()))
+            {
+                _logger.Debug("Started Request");
+                var response = await next();
+                _logger.Debug("Ended Request");
+                return response;
+            }
         }
     }
 }

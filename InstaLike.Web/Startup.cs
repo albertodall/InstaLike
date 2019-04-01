@@ -9,17 +9,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Events;
+using Serilog.Exceptions;
 
 namespace InstaLike.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private const string LogEntrytemplate = "[{Timestamp:HH:mm:ss} {SourceContext} {Level:u3}] - [{CorrelationID}] - {Message:lj}{NewLine}{Exception}";
+
+        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             Configuration = configuration;
+            HostingEnvironment = hostingEnvironment;
         }
 
         public IConfiguration Configuration { get; }
+        private IHostingEnvironment HostingEnvironment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -30,12 +36,15 @@ namespace InstaLike.Web
             });
 
             var loggerConfig = new LoggerConfiguration()
-                .MinimumLevel.Warning()
-                .WriteTo.Console()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .Enrich.WithExceptionDetails()
+                .WriteTo.Console(outputTemplate: LogEntrytemplate)
                 .WriteTo.File(
-                    Configuration["Logging:LogFile"], 
-                    rollingInterval: RollingInterval.Day,
-                    rollOnFileSizeLimit: true);
+                    path: $@"D:\Temp\{Configuration["Logging:LogFile"]}",
+                    outputTemplate: LogEntrytemplate); 
+                    
 
             services.ConfigureLogging(loggerConfig);
 
@@ -73,7 +82,5 @@ namespace InstaLike.Web
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
-
-        
     }
 }
