@@ -8,6 +8,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -26,14 +27,18 @@ namespace InstaLike.Web.Data.Query
     public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostModel[]>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public TimelineQueryHandler(ISession session)
+        public TimelineQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<TimelineQuery>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<PostModel[]> Handle(TimelineQuery query, CancellationToken cancellationToken)
         {
+            _logger.Debug("Fetching user timeline with parameters {@query}.", query);
+
             PostModel[] timeline = null;
 
             using (var tx = _session.BeginTransaction())

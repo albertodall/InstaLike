@@ -1,6 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,7 +18,8 @@ namespace InstaLike.Web
 {
     public class Startup
     {
-        private const string LogEntrytemplate = "[{Timestamp:HH:mm:ss} {SourceContext} {Level:u3}] - [{CorrelationID}] - {Message:lj}{NewLine}{Exception}";
+        private const string LogEntrytemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
+        private const int LogFlushIntervalInSeconds = 15;
 
         public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
@@ -43,7 +46,8 @@ namespace InstaLike.Web
                 .WriteTo.Console(outputTemplate: LogEntrytemplate)
                 .WriteTo.File(
                     path: $@"D:\Temp\{Configuration["Logging:LogFile"]}",
-                    outputTemplate: LogEntrytemplate); 
+                    outputTemplate: LogEntrytemplate,
+                    flushToDiskInterval: TimeSpan.FromSeconds(LogFlushIntervalInSeconds)); 
                     
 
             services.ConfigureLogging(loggerConfig);

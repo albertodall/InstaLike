@@ -67,14 +67,13 @@ namespace InstaLike.Web.Extensions
             Log.Logger = config.CreateLogger();
             services.AddSingleton(Log.Logger);
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
-            services.AddSingleton<ISequentialGuidGeneratorService, SequentialGuidGeneratorService>();
 
             return services;
         }
 
         public static IServiceCollection RegisterPipelineBehaviors(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestLoggingProcessor<,>));
 
             return services;
         }

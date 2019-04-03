@@ -65,6 +65,8 @@ namespace InstaLike.Web.Controllers
                             IsPersistent = model.RememberMe
                         });
 
+                    await _dispatcher.Publish(new UserLoggedInEvent(authenticationResult.Value.ID, authenticationResult.Value.Nickname));
+
                     return Redirect(model.ReturnUrl);
                 }
             }
@@ -75,6 +77,9 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var userIDClaim = (User.Identity as ClaimsIdentity).FindFirst(ClaimTypes.NameIdentifier);
+            await _dispatcher.Publish(new UserLoggedOutEvent(int.Parse(userIDClaim.Value), User.Identity.Name));
+
             return RedirectToAction("Index", "Home");
         }
 

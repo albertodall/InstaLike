@@ -42,10 +42,10 @@ namespace InstaLike.Web.EventHandlers
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
                 }
-                catch (ADOException ex)
+                catch (ADOException)
                 {
                     await tx.RollbackAsync();
-                    throw ex;
+                    throw;
                 }
             }
         }

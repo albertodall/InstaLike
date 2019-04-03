@@ -6,6 +6,7 @@ using InstaLike.Core.Events;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using Serilog;
 
 namespace InstaLike.Web.EventHandlers
 {
@@ -14,10 +15,12 @@ namespace InstaLike.Web.EventHandlers
         private const string NotificationMessageTemplate = "<a href=\"{0}\">{1}</a> liked your <a href=\"{2}\">post.</a>";
 
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public PostLikedEventHandler(ISession session)
+        public PostLikedEventHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<PostLikedEvent>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Handle(PostLikedEvent notification, CancellationToken cancellationToken)
@@ -45,11 +48,17 @@ namespace InstaLike.Web.EventHandlers
 
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
+                    _logger.Debug("Sent notification for a like put to post {PostID} by {SenderNickName}", 
+                        notification.PostID, 
+                        notification.SenderNickname);
                 }
-                catch (ADOException ex)
+                catch (ADOException)
                 {
                     await tx.RollbackAsync();
-                    throw ex;
+                    _logger.Debug("Failed to send notification for a like put to post {PostID} by {SenderNickName}", 
+                        notification.PostID, 
+                        notification.SenderNickname);
+                    throw;
                 }
             }
         }

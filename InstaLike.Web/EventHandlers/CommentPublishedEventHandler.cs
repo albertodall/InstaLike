@@ -6,6 +6,7 @@ using InstaLike.Core.Events;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using Serilog;
 
 namespace InstaLike.Web.EventHandlers
 {
@@ -14,10 +15,12 @@ namespace InstaLike.Web.EventHandlers
         private const string NotificationMessageTemplate = "<a href=\"{0}\">{1}</a> wrote a comment <a href=\"{2}\">about your post.</a>";
 
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public CommentPublishedEventHandler(ISession session)
+        public CommentPublishedEventHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<CommentPublishedEvent>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Handle(CommentPublishedEvent notification, CancellationToken cancellationToken)
@@ -45,11 +48,18 @@ namespace InstaLike.Web.EventHandlers
 
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
+
+                    _logger.Debug("Sent comment notification for post {PostID}. Notification sender: {SenderNickname}", 
+                        notification.PostID, 
+                        notification.SenderNickname);
                 }
-                catch (ADOException ex)
+                catch (ADOException)
                 {
                     await tx.RollbackAsync();
-                    throw ex;
+                    _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: {SenderNickname}", 
+                        notification.PostID, 
+                        notification.SenderNickname);
+                    throw;
                 }
             }
         }
