@@ -73,7 +73,7 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection RegisterPipelineBehaviors(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestLoggingProcessor<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestTimingMeter<,>));
 
             return services;
         }

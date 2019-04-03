@@ -75,6 +75,7 @@ namespace InstaLike.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseRequestCorrelation();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
