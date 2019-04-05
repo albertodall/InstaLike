@@ -2,7 +2,6 @@
 using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,8 +17,7 @@ namespace InstaLike.Web
 {
     public class Startup
     {
-        private const string LogEntrytemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
-        private const int LogFlushIntervalInSeconds = 15;
+        private const string LogEntryTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
 
         public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
@@ -43,16 +41,15 @@ namespace InstaLike.Web
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionDetails()
-                .WriteTo.Console(outputTemplate: LogEntrytemplate)
+                .WriteTo.Console(outputTemplate: LogEntryTemplate)
                 .WriteTo.File(
-                    path: $@"D:\Temp\{Configuration["Logging:LogFile"]}",
-                    outputTemplate: LogEntrytemplate,
-                    flushToDiskInterval: TimeSpan.FromSeconds(LogFlushIntervalInSeconds)); 
-                    
+                    path: Configuration["Logging:LogFile"],
+                    outputTemplate: LogEntryTemplate,
+                    flushToDiskInterval: TimeSpan.FromSeconds(Configuration.GetValue<int>("Logging:FlushToDiskIntervalSeconds")));
 
             services.ConfigureLogging(loggerConfig);
 
-            services.RegisterPipelineBehaviors();
+            services.ConfigurePipeline();
 
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 

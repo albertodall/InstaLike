@@ -7,20 +7,29 @@ using InstaLike.Core.Domain;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public LikeOrDislikePostCommandHandler(ISession session)
+        public LikeOrDislikePostCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> Handle(LikePostCommand request, CancellationToken cancellationToken)
         {
+            _logger.ForContext<LikePostCommand>()
+                .Debug("User {@UserID} is putting a 'Like' on post {@PostID} with the following parameters: {@Request}", 
+                    request.UserID, 
+                    request.PostID, 
+                    request);
+
             using (var tx = _session.BeginTransaction())
             {
                 try
@@ -43,6 +52,12 @@ namespace InstaLike.Web.CommandHandlers
 
         public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
         {
+            _logger.ForContext<DislikePostCommand>()
+                .Debug("User {@UserID} is removing a 'Like' on post {@PostID} with the following parameters: {@Request}",
+                    request.UserID,
+                    request.PostID,
+                    request);
+
             using (var tx = _session.BeginTransaction())
             {
                 try

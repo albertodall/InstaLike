@@ -8,6 +8,7 @@ using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -28,14 +29,18 @@ namespace InstaLike.Web.Data.Query
     internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery, UserProfileModel>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public UserProfileQueryHandler(ISession session)
+        public UserProfileQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<UserProfileModel>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<UserProfileModel> Handle(UserProfileQuery query, CancellationToken cancellationToken)
         {
+            _logger.Debug("Reading user profile with parameters {@query}.", query);
+
             UserProfileModel profile = null;
 
             using (var tx = _session.BeginTransaction())
