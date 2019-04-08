@@ -37,16 +37,16 @@ namespace InstaLike.Web.Data.Query
             _logger = logger?.ForContext<UserProfileModel>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<UserProfileModel> Handle(UserProfileQuery query, CancellationToken cancellationToken)
+        public async Task<UserProfileModel> Handle(UserProfileQuery request, CancellationToken cancellationToken)
         {
-            _logger.Debug("Reading user profile with parameters {@query}.", query);
-
             UserProfileModel profile = null;
+
+            _logger.Debug("Reading user profile for user {UserID} with parameters {@Request}.", request.CurrentUserID, request);
 
             using (var tx = _session.BeginTransaction())
             {
                 var userProfileQuery = _session.QueryOver<User>()
-                    .Where(Restrictions.Eq("Nickname", query.Nickname))
+                    .Where(Restrictions.Eq("Nickname", request.Nickname))
                     .SelectList(list => list
                         .Select(u => u.ID).WithAlias(() => profile.UserID)
                         .Select(u => u.Nickname).WithAlias(() => profile.Nickname)
@@ -78,7 +78,7 @@ namespace InstaLike.Web.Data.Query
                             .WithAlias(() => thumbnailModel.Picture))
                     )
                     .TransformUsing(Transformers.AliasToBean<PostThumbnailModel>())
-                    .Take(query.NumberOfThumbnails)
+                    .Take(request.NumberOfThumbnails)
                     .Future<PostThumbnailModel>();
 
                 // Number of followers
@@ -96,7 +96,7 @@ namespace InstaLike.Web.Data.Query
                 // Is the current user following the selected user?
                 var isFollowedByCurrentUserQuery = _session.QueryOver<Follow>()
                     .Where(f => f.Following.ID == profile.UserID)
-                    .And(f => f.Follower.ID == query.CurrentUserID)
+                    .And(f => f.Follower.ID == request.CurrentUserID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
@@ -104,7 +104,7 @@ namespace InstaLike.Web.Data.Query
                 profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync()).ToArray();
                 profile.NumberOfFollowers = await followersCountQuery.GetValueAsync();
                 profile.NumberOfFollows = await followingCountQuery.GetValueAsync();
-                profile.IsCurrentUserProfile = profile.UserID == query.CurrentUserID;
+                profile.IsCurrentUserProfile = profile.UserID == request.CurrentUserID;
 
                 if (profile.IsCurrentUserProfile)
                 {

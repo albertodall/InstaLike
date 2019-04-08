@@ -7,38 +7,53 @@ using InstaLike.Core.Domain;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Result>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public FollowCommandHandler(ISession session)
+        public FollowCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<FollowCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
+                User followedUser = null;
                 try
                 {
                     var follower = await _session.LoadAsync<User>(request.FollowerID);
                     var followedUserQuery = _session.QueryOver<User>()
                         .Where(Restrictions.Eq("Nickname", request.FollowedNickname));
 
-                    var followedUser = await followedUserQuery.SingleOrDefaultAsync();
+                    followedUser = await followedUserQuery.SingleOrDefaultAsync();
 
                     follower.Follow(followedUser);
                     await _session.SaveOrUpdateAsync(follower);
                     await tx.CommitAsync();
+                    _logger.Information("User {UserID} started following user {FollowedUserID} ({FollowedUserNickname})",
+                        request.FollowerID,
+                        followedUser.ID,
+                        request.FollowedNickname);
+
                     return Result.Ok();
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+                    _logger.Error("Error while following {FollowedUserID} ({FollowedUserNickname}) by user {UserID}. Error message: {ErrorMessage}",
+                        followedUser.ID,
+                        request.FollowedNickname,
+                        request.FollowerID,
+                        ex.Message);
+
                     return Result.Fail(ex.Message);
                 }
             }

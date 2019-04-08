@@ -6,13 +6,13 @@ namespace InstaLike.Core.Events
     {
         public string SenderNickname { get; set; }
         public string SenderProfileUrl { get; }
-        public string FollowingNickname { get; }
+        public string FollowedNickname { get; }
 
-        public FollowedUserEvent(string senderNickname, string senderProfileUrl, string followingNickname)
+        public FollowedUserEvent(string senderNickname, string senderProfileUrl, string followedNickname)
         {
             SenderNickname = senderNickname;
             SenderProfileUrl = senderProfileUrl;
-            FollowingNickname = followingNickname;
+            FollowedNickname = followedNickname;
         }
     }
 }

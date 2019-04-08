@@ -6,16 +6,19 @@ using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using MediatR;
 using NHibernate;
+using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
     public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDetailsCommand, Result>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public EditUserDetailsCommandHandler(ISession session)
+        public EditUserDetailsCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            this._logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -27,6 +30,10 @@ namespace InstaLike.Web.CommandHandlers
             var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
+                _logger.Warning("Tried to update user profile for user {UserID} ({Nickname}) but some data were not valid: {WarningMessage}",
+                    request.UserID,
+                    request.Nickname,
+                    validationResult.Error);
                 return Result.Fail(validationResult.Error);
             }
 
@@ -43,11 +50,18 @@ namespace InstaLike.Web.CommandHandlers
 
                     await _session.UpdateAsync(userToUpdate);
                     await tx.CommitAsync();
+                    _logger.Information("Successfully updated user profile for user {UserID} ({Nickname})",
+                        request.UserID,
+                        request.Nickname);
                     return Result.Ok(userToUpdate.ID);
                 }
-                catch (ADOException)
+                catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+                    _logger.Error("Error updating user profile for user {UserID} ({Nickname}). Error message: {ErrorMessage}",
+                        request.UserID,
+                        request.Nickname,
+                        ex.Message);
                     throw;
                 }
             }

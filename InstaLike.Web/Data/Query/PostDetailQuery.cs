@@ -7,6 +7,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Transform;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -25,15 +26,19 @@ namespace InstaLike.Web.Data.Query
     internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, PostModel>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public PostDetailQueryHandler(ISession session)
+        public PostDetailQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<PostDetailQuery>() ?? throw new ArgumentNullException(nameof(logger)) ;
         }
 
         public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)
         {
             PostModel post = null;
+
+            _logger.Debug("Reading details for post {PostID} with parameters {@Request}", request.PostID, request);
 
             using (var tx = _session.BeginTransaction())
             {

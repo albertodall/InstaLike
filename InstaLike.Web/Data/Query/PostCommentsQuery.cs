@@ -7,6 +7,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Transform;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -23,22 +24,26 @@ namespace InstaLike.Web.Data.Query
     internal class PostCommentsQueryHandler : IRequestHandler<PostCommentsQuery, CommentModel[]>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public PostCommentsQueryHandler(ISession session)
+        public PostCommentsQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<CommentModel[]> Handle(PostCommentsQuery query, CancellationToken cancellationToken)
+        public async Task<CommentModel[]> Handle(PostCommentsQuery request, CancellationToken cancellationToken)
         {
             CommentModel[] result = null;
+
+            _logger.Debug("Reading comments list for post {PostID} with parameters {@Request}", request.PostID, request);
 
             using (var tx = _session.BeginTransaction())
             {
                 CommentModel comment = null;
                 User commentAuthor = null;
                 var commentsQuery = _session.QueryOver<Comment>()
-                    .Where(c => c.Post.ID == query.PostID)
+                    .Where(c => c.Post.ID == request.PostID)
                     .OrderBy(c => c.CommentDate).Desc
                     .Inner.JoinQueryOver(c => c.Author, () => commentAuthor)
                     .SelectList(list => list

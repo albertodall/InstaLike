@@ -27,6 +27,7 @@ namespace InstaLike.Web.EventHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
+                User sender = null;
                 try
                 {
                     var postQuery = _session.QueryOver<Post>()
@@ -41,24 +42,29 @@ namespace InstaLike.Web.EventHandlers
                     var post = await postQuery.GetValueAsync();
                     var message = string.Format(NotificationMessageTemplate, 
                         notification.SenderProfileUrl, 
-                        post.Author.Nickname,
+                        notification.SenderNickname,
                         notification.PostUrl);
 
-                    var notificationToInsert = new Notification(await senderQuery.GetValueAsync(), post.Author, message);
+                    sender = await senderQuery.GetValueAsync();
+                    var notificationToInsert = new Notification(sender, post.Author, message);
 
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
-                    _logger.Debug("Sent comment notification for post {PostID}. Notification sender: {SenderNickname}", 
+                    _logger.Information("Sent comment notification for post {PostID}. Notification sender: {UserID} ({SenderNickname}).", 
                         notification.PostID, 
+                        sender.ID,
                         notification.SenderNickname);
                 }
-                catch (ADOException)
+                catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: {SenderNickname}", 
+                    _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: {UserID} ({SenderNickname}). Error message {ErrorMessage}", 
                         notification.PostID, 
-                        notification.SenderNickname);
+                        sender.ID,
+                        notification.SenderNickname,
+                        ex.Message);
+
                     throw;
                 }
             }

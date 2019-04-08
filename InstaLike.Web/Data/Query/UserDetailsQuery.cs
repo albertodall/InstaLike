@@ -5,6 +5,7 @@ using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -21,15 +22,19 @@ namespace InstaLike.Web.Data.Query
     internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery, UserDetailsModel>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public UserDetailsQueryHandler(ISession session)
+        public UserDetailsQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            this._logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<UserDetailsModel> Handle(UserDetailsQuery request, CancellationToken cancellationToken)
         {
             UserDetailsModel result = null;
+
+            _logger.Information("readong user details fo user {UserID} with parameters {@Request}", request.CurrentUserId, request);
 
             using (var tx = _session.BeginTransaction())
             {

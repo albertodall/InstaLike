@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
@@ -7,6 +8,7 @@ using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -23,19 +25,22 @@ namespace InstaLike.Web.Data.Query
     internal sealed class FollowersQueryHandler : IRequestHandler<FollowersQuery, FollowModel[]>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public FollowersQueryHandler(ISession session)
+        public FollowersQueryHandler(ISession session, ILogger logger)
         {
-            _session = session;
+            _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<FollowersQuery>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<FollowModel[]> Handle(FollowersQuery request, CancellationToken cancellationToken)
         {
             FollowModel[] result = null;
 
+            _logger.Debug("Reading followers list for user {Nickname} with parameters {@Request}", request.Nickname, request);
+
             using (var tx = _session.BeginTransaction())
             {
-
                 FollowModel model = null;
                 User following = null;
                 User follower = null;

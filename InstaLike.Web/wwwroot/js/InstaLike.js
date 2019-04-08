@@ -1,4 +1,5 @@
-﻿$(function () {
+﻿// Highlights hashtags (#string) and Users' nicknames (@string)
+function highlightHashtagsAndNicknames() {
     const NicknamePattern = new RegExp('@\\w+', 'gi');
     const HashtagPattern = new RegExp('#\\w+', 'gi');
 
@@ -21,6 +22,10 @@
 
             this.innerHTML = commentText;
         });
+}
+
+$(function () {
+    highlightHashtagsAndNicknames();
 });
 
 // Displays user's profile picture after choosing it
@@ -61,6 +66,8 @@ $('.form_comment').submit(function (e) {
 
         // Cleanup comment textbox
         comment.val('');
+
+        highlightHashtagsAndNicknames();
     });
 });
 

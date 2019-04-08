@@ -31,7 +31,7 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<int> Handle(UnreadNotificationsQuery request, CancellationToken cancellationToken)
         {
-            int result = 0;
+            int unreadNotifications = 0;
 
             _logger.Debug("Counting unread notifications for user {UserID}", request.UserID);
 
@@ -40,12 +40,15 @@ namespace InstaLike.Web.Data.Query
                 var countQuery = _session.QueryOver<Notification>()
                     .Where(n => n.Recipient.ID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
 
-                result = await countQuery.RowCountAsync();
+                unreadNotifications = await countQuery.RowCountAsync();
             }
 
-            _logger.Debug("User {UserID} has {UnreadNotifications} unread notifications", request.UserID, result);
+            if (unreadNotifications > 0)
+            {
+                _logger.Information("User {UserID} has {UnreadNotifications} unread notifications", request.UserID, unreadNotifications);
+            }
 
-            return result;
+            return unreadNotifications;
         }
     }
 }

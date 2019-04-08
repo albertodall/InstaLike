@@ -27,6 +27,7 @@ namespace InstaLike.Web.EventHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
+                User sender = null;
                 try
                 {
                     var postQuery = _session.QueryOver<Post>()
@@ -44,20 +45,24 @@ namespace InstaLike.Web.EventHandlers
                         notification.SenderNickname,
                         notification.PostUrl);
 
-                    var notificationToInsert = new Notification(await senderQuery.GetValueAsync(), post.Author, message);
+                    sender = await senderQuery.GetValueAsync();
+                    var notificationToInsert = new Notification(sender, post.Author, message);
 
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
-                    _logger.Debug("Sent notification for a like put to post {PostID} by {SenderNickName}", 
+                    _logger.Information("Sent notification for a like put to post {PostID} by {UserID} ({SenderNickName})", 
                         notification.PostID, 
+                        sender.ID,
                         notification.SenderNickname);
                 }
-                catch (ADOException)
+                catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Debug("Failed to send notification for a like put to post {PostID} by {SenderNickName}", 
+                    _logger.Error("Failed to send notification for a like put to post {PostID} by {UserID} ({SenderNickName}). Error message: {ErrorMessage}", 
                         notification.PostID, 
-                        notification.SenderNickname);
+                        sender.ID,
+                        notification.SenderNickname,
+                        ex.Message);
                     throw;
                 }
             }

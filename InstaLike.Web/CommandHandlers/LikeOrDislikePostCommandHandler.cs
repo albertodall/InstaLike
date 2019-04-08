@@ -24,27 +24,37 @@ namespace InstaLike.Web.CommandHandlers
 
         public async Task<Result> Handle(LikePostCommand request, CancellationToken cancellationToken)
         {
-            _logger.ForContext<LikePostCommand>()
-                .Debug("User {@UserID} is putting a 'Like' on post {@PostID} with the following parameters: {@Request}", 
-                    request.UserID, 
-                    request.PostID, 
-                    request);
-
             using (var tx = _session.BeginTransaction())
             {
+                User user = null;
                 try
                 {
-                    var user = await _session.LoadAsync<User>(request.UserID);
+                    user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
                     post.Like(user);
 
                     await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
+
+                    _logger.ForContext<LikePostCommand>()
+                        .Information("User {UserID} ({Nickname}) put a 'Like' on post {PostID}",
+                            request.UserID,
+                            user.Nickname,
+                            request.PostID);
+
                     return Result.Ok();
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+                    _logger
+                       .ForContext<LikePostCommand>()
+                       .Error("Failed to put a 'Like' on post {PostID} by user {UserID} ({Nickname}). Error message: {ErrorMessage}",
+                           request.PostID,
+                           request.UserID,
+                           user.Nickname,
+                           ex.Message);
+
                     return Result.Fail<LikePostResult>(ex.Message);
                 }
             }
@@ -52,27 +62,38 @@ namespace InstaLike.Web.CommandHandlers
 
         public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
         {
-            _logger.ForContext<DislikePostCommand>()
-                .Debug("User {@UserID} is removing a 'Like' on post {@PostID} with the following parameters: {@Request}",
-                    request.UserID,
-                    request.PostID,
-                    request);
-
+            
             using (var tx = _session.BeginTransaction())
             {
+                User user = null;
                 try
                 {
-                    var user = await _session.LoadAsync<User>(request.UserID);
+                    user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
                     post.Dislike(user);
 
                     await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
+
+                    _logger.ForContext<DislikePostCommand>()
+                        .Information("User {UserID} ({Nickname}) removed a 'Like' on post {PostID}",
+                            request.UserID,
+                            user.Nickname,
+                            request.PostID);
+
                     return Result.Ok();
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+                    _logger
+                        .ForContext<DislikePostCommand>()
+                        .Error("Failed to remove a 'Like' on post {PostID} by user {UserID} ({Nickname}). Error message: {ErrorMessage}",
+                            request.PostID,
+                            request.UserID,
+                            user.Nickname,
+                            ex.Message);
+
                     return Result.Fail<LikePostResult>(ex.Message);
                 }
             }
@@ -81,7 +102,6 @@ namespace InstaLike.Web.CommandHandlers
         private async Task<Post> GetPostAsync(int userID, int postID)
         {
             Like likeAlias = null;
-
             
             var postQuery = _session.QueryOver<Post>()
                 .Left.JoinAlias(p => p.Likes, () => likeAlias)

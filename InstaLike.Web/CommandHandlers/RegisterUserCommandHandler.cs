@@ -6,16 +6,19 @@ using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using MediatR;
 using NHibernate;
+using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
     internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public RegisterUserCommandHandler(ISession session)
+        public RegisterUserCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -28,6 +31,9 @@ namespace InstaLike.Web.CommandHandlers
             var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
+                _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
+                    request.Nickname,
+                    validationResult.Error);
                 return Result.Fail(validationResult.Error);
             }
 
@@ -49,11 +55,20 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     await _session.SaveAsync(userToRegister);
                     await tx.CommitAsync();
+
+                    _logger.Information("User {UserID} ({Nickname}) has just registered.",
+                        userToRegister.ID,
+                        request.Nickname);
+
                     return Result.Ok(userToRegister.ID);
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+                    _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
+                        request.Nickname,
+                        ex.Message);
+
                     return Result.Fail(ex.Message);
                 }
             }

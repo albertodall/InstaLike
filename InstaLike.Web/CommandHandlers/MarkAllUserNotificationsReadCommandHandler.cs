@@ -6,22 +6,26 @@ using InstaLike.Core.Domain;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
     public class MarkAllUserNotificationsReadCommandHandler : IRequestHandler<MarkAllUserNotificationsReadCommand, int>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public MarkAllUserNotificationsReadCommandHandler(ISession session)
+        public MarkAllUserNotificationsReadCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<MarkAllUserNotificationsReadCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<int> Handle(MarkAllUserNotificationsReadCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
+                int unreadNotificationsCount = 0;
                 try
                 {
                     var notificationsQuery = QueryOver.Of<Notification>()
@@ -36,11 +40,25 @@ namespace InstaLike.Web.CommandHandlers
                     }
 
                     await tx.CommitAsync();
-                    return await unreadNotificationsCountQuery.GetValueAsync();
+                    unreadNotificationsCount = await unreadNotificationsCountQuery.GetValueAsync();
+
+                    if (unreadNotificationsCount > 0)
+                    {
+                        _logger.Information("User {UserID} marked {ReadNotifications} notification as read.",
+                            request.UserID,
+                            unreadNotificationsCount);
+                    }
+
+                    return unreadNotificationsCount;
                 }
-                catch (ADOException)
+                catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+                    _logger.Error("Failed to mark {UnreadNotifications} notifications as read for user {UserID}. Error message: {ErrorMessage}",
+                        unreadNotificationsCount,
+                        request.UserID,
+                        ex.Message);
+
                     throw;
                 }
             }

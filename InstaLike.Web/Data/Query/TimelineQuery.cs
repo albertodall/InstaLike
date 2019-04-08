@@ -35,9 +35,9 @@ namespace InstaLike.Web.Data.Query
             _logger = logger?.ForContext<TimelineQuery>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<PostModel[]> Handle(TimelineQuery query, CancellationToken cancellationToken)
+        public async Task<PostModel[]> Handle(TimelineQuery request, CancellationToken cancellationToken)
         {
-            _logger.Debug("Fetching user timeline with parameters {@query}.", query);
+            _logger.Debug("Fetching timeline for user {UserID} with parameters {@Request}.", request.UserID, request);
 
             PostModel[] timeline = null;
 
@@ -52,10 +52,10 @@ namespace InstaLike.Web.Data.Query
                 var postsToShowInTimelineQuery = QueryOver.Of<Post>()
                     .Inner.JoinAlias(p => p.Author, () => postAuthor)
                         .Left.JoinAlias(() => postAuthor.Followers, () => follow)
-                    .Where(() => follow.Follower.ID == query.UserID)
+                    .Where(() => follow.Follower.ID == request.UserID)
                     .Select(p => p.ID)
                     .OrderBy(p => p.PostDate).Desc
-                    .Take(query.NumberOfPosts);
+                    .Take(request.NumberOfPosts);
 
                 // Comments for all post included in the timeline.
                 _session.QueryOver<Post>()
@@ -77,7 +77,7 @@ namespace InstaLike.Web.Data.Query
                 var postsLikedByCurrentUserQuery = _session.QueryOver<Like>()
                     .WithSubquery
                         .WhereProperty(l => l.Post.ID).In(postsToShowInTimelineQuery)
-                        .And(l => l.User.ID == query.UserID)
+                        .And(l => l.User.ID == request.UserID)
                     .Select(l => l.Post.ID)
                     .Future<int>();
 

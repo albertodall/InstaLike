@@ -7,6 +7,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Transform;
+using Serilog;
 
 namespace InstaLike.Web.Data.Query
 {
@@ -25,15 +26,19 @@ namespace InstaLike.Web.Data.Query
     internal class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, NotificationModel[]>
     {
         private readonly ISession _session;
+        private readonly ILogger _logger;
 
-        public NotificationsQueryHandler(ISession session)
+        public NotificationsQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _logger = logger?.ForContext<NotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)
         {
-            NotificationModel[] result = { };
+            NotificationModel[] notifications = { };
+
+            _logger.Debug("Reading notifications for user {UserID} with parameters: {@Request}", request.UserID, request);
 
             using (var tx = _session.BeginTransaction())
             {
@@ -59,10 +64,10 @@ namespace InstaLike.Web.Data.Query
                     )
                     .TransformUsing(Transformers.AliasToBean<NotificationModel>());
 
-                result = (await notificationsQuery.ListAsync<NotificationModel>()).ToArray();
+                notifications = (await notificationsQuery.ListAsync<NotificationModel>()).ToArray();
             }
 
-            return result;
+            return notifications;
         }
     }
 }
