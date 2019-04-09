@@ -30,9 +30,9 @@ namespace InstaLike.Web.CommandHandlers
             var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
-                _logger.Warning("Tried to update user profile for user {UserID} ({Nickname}) but some data were not valid: {WarningMessage}",
-                    request.UserID,
+                _logger.Warning("Tried to update user profile for user [{Nickname}({UserID})] but some data were not valid: {WarningMessage}",
                     request.Nickname,
+                    request.UserID,
                     validationResult.Error);
                 return Result.Fail(validationResult.Error);
             }
@@ -50,18 +50,20 @@ namespace InstaLike.Web.CommandHandlers
 
                     await _session.UpdateAsync(userToUpdate);
                     await tx.CommitAsync();
-                    _logger.Information("Successfully updated user profile for user {UserID} ({Nickname})",
-                        request.UserID,
-                        request.Nickname);
+                    _logger.Information("Successfully updated user profile for user [{Nickname}({UserID})]",
+                        request.Nickname,
+                        request.UserID);
+
                     return Result.Ok(userToUpdate.ID);
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Error updating user profile for user {UserID} ({Nickname}). Error message: {ErrorMessage}",
-                        request.UserID,
+                    _logger.Error("Error updating user profile for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                         request.Nickname,
+                        request.UserID,
                         ex.Message);
+
                     throw;
                 }
             }

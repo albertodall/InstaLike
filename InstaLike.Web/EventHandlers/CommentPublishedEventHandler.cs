@@ -51,18 +51,18 @@ namespace InstaLike.Web.EventHandlers
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
-                    _logger.Information("Sent comment notification for post {PostID}. Notification sender: {UserID} ({SenderNickname}).", 
-                        notification.PostID, 
-                        sender.ID,
-                        notification.SenderNickname);
+                    _logger.Information("Sent comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]", 
+                        notification.PostID,
+                        notification.SenderNickname,
+                        sender.ID);
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: {UserID} ({SenderNickname}). Error message {ErrorMessage}", 
+                    _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]. Error message {ErrorMessage}", 
                         notification.PostID, 
-                        sender.ID,
                         notification.SenderNickname,
+                        sender?.ID,
                         ex.Message);
 
                     throw;

@@ -51,12 +51,12 @@
             return cachedHashCode.Value;
         }
 
-        public static bool operator == (EntityBase<TId> left, EntityBase<TId> right)
+        public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator != (EntityBase<TId> left, EntityBase<TId> right)
+        public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
         {
             return !Equals(left, right);
         }

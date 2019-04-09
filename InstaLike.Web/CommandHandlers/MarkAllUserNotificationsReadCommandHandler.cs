@@ -54,6 +54,7 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger.Error("Failed to mark {UnreadNotifications} notifications as read for user {UserID}. Error message: {ErrorMessage}",
                         unreadNotificationsCount,
                         request.UserID,

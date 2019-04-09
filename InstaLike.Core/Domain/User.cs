@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
@@ -117,8 +116,7 @@ namespace InstaLike.Core.Domain
             if (IsFollowing(user))
             {
                 var follow = _following
-                    .Where(f => f.Follower == this && f.Following == user)
-                    .Single();
+                    .Single(f => f.Follower == this && f.Following == user);
                 _following.Remove(follow);
             }
         }

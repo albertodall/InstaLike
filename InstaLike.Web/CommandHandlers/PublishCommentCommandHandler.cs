@@ -33,10 +33,11 @@ namespace InstaLike.Web.CommandHandlers
 
                     var comment = new Comment(post, author, (CommentText)request.Text);
                     post.AddComment(comment);
+
                     await _session.SaveAsync(post);
                     await tx.CommitAsync();
 
-                    _logger.Information("User {UserID} ({NickName}) wrote a new comment to post {PostID}",
+                    _logger.Information("User [{NickName}({UserID})] wrote a new comment to post {PostID}",
                         request.UserID,
                         author.Nickname,
                         request.PostID);
@@ -46,10 +47,11 @@ namespace InstaLike.Web.CommandHandlers
                 catch (Exception ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Failed to save comment to post {PostID} written by user {UserID} ({NickName}). Error message: {ErrorMessage}",
+
+                    _logger.Error("Failed to save comment to post {PostID} written by user [{NickName}({UserID})]. Error message: {ErrorMessage}",
                         request.PostID,
+                        author?.Nickname,
                         request.UserID,
-                        author.Nickname,
                         ex.Message);
 
                     return Result.Fail(ex.Message);

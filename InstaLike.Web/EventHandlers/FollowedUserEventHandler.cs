@@ -27,7 +27,6 @@ namespace InstaLike.Web.EventHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User sender = null;
                 User recipient = null;
                 try
                 {
@@ -43,25 +42,26 @@ namespace InstaLike.Web.EventHandlers
                         notification.SenderProfileUrl,
                         notification.SenderNickname);
 
-                    sender = await senderQuery.GetValueAsync();
+                    var sender = await senderQuery.GetValueAsync();
                     recipient = await recipientQuery.GetValueAsync();
 
                     var notificationToInsert = new Notification(sender, recipient, message);
                     await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
-                    _logger.Information("User {FollowedID} ({FollowedNickname}) has been notified about {FollowerID} ({FollowerNickname}) follow.",
-                        recipient.ID,
+                    _logger.Information("User [{FollowedNickname}({FollowedID})] has been notified that user [{FollowerNickname}({FollowerID})] has just started following him/her.",
                         notification.FollowedNickname,
+                        recipient.ID,
+                        sender.Nickname,
                         sender.ID,
                         notification.SenderNickname);
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Failed to send follow notification to user {FollowedID} ({FollowedNickname}. Error message: {ErrorMessage})", 
-                        recipient.ID, 
-                        recipient.Nickname,
+                    _logger.Error("Failed to send follow notification to user [{FollowedNickname}({FollowedID})]. Error message: {ErrorMessage})", 
+                        recipient?.Nickname,
+                        recipient?.ID,
                         ex.Message);
                     throw;
                 }

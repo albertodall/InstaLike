@@ -46,7 +46,7 @@ namespace InstaLike.Web.CommandHandlers
                     await _session.SaveOrUpdateAsync(followerUser);
                     await tx.CommitAsync();
 
-                    _logger.Information("User {UserID} stopped following user {UnfollowedUserID} ({UnfollowedNickname})",
+                    _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
                         request.FollowerID,
                         userToUnfollow.ID,
                         request.UnfollowedNickname);
@@ -56,9 +56,10 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Error while following {FollowedUserID} ({FollowedUserNickname}) by user {UserID}. Error message {ErrorMessage}",
-                        userToUnfollow.ID,
+                    
+                    _logger.Error("Error while unfollowing [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message {ErrorMessage}",
                         request.UnfollowedNickname,
+                        userToUnfollow?.ID,
                         request.FollowerID);
 
                     return Result.Fail(ex.Message);

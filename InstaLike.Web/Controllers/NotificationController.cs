@@ -27,7 +27,7 @@ namespace InstaLike.Web.Controllers
 
             // Marks all unread notifications as read
             var markAllAsReadCommand = new MarkAllUserNotificationsReadCommand(User.GetIdentifier());
-            var unreadNotifications = await _dispatcher.Send(markAllAsReadCommand);
+            await _dispatcher.Send(markAllAsReadCommand);
 
             return View(notifications);
         }

@@ -18,7 +18,7 @@ namespace InstaLike.Web.EventHandlers
 
         public Task Handle(UserLoggedInEvent notification, CancellationToken cancellationToken)
         {
-            _logger.Information("User {UserID} ({Nickname}) has just logged in.", notification.UserID, notification.Nickname);
+            _logger.Information("User [{Nickname}({UserID})] has just logged in.", notification.Nickname, notification.UserID);
             return Task.CompletedTask;
         }
     }

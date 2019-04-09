@@ -36,7 +36,7 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)
         {
-            NotificationModel[] notifications = { };
+            NotificationModel[] notifications;
 
             _logger.Debug("Reading notifications for user {UserID} with parameters: {@Request}", request.UserID, request);
 

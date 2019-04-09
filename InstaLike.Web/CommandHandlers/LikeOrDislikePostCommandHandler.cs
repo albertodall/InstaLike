@@ -31,15 +31,17 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
+
                     post.Like(user);
 
                     await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
 
-                    _logger.ForContext<LikePostCommand>()
-                        .Information("User {UserID} ({Nickname}) put a 'Like' on post {PostID}",
-                            request.UserID,
+                    _logger
+                        .ForContext<LikePostCommand>()
+                        .Information("User [{Nickname}({UserID})] put a 'Like' on post {PostID}",
                             user.Nickname,
+                            request.UserID,
                             request.PostID);
 
                     return Result.Ok();
@@ -47,12 +49,13 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger
                        .ForContext<LikePostCommand>()
-                       .Error("Failed to put a 'Like' on post {PostID} by user {UserID} ({Nickname}). Error message: {ErrorMessage}",
+                       .Error("Failed to put a 'Like' on post {PostID} by user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                            request.PostID,
                            request.UserID,
-                           user.Nickname,
+                           user?.Nickname,
                            ex.Message);
 
                     return Result.Fail<LikePostResult>(ex.Message);
@@ -70,13 +73,15 @@ namespace InstaLike.Web.CommandHandlers
                 {
                     user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
+
                     post.Dislike(user);
 
                     await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
 
-                    _logger.ForContext<DislikePostCommand>()
-                        .Information("User {UserID} ({Nickname}) removed a 'Like' on post {PostID}",
+                    _logger
+                        .ForContext<DislikePostCommand>()
+                        .Information("User [{Nickname}({UserID})] removed a 'Like' on post {PostID}",
                             request.UserID,
                             user.Nickname,
                             request.PostID);
@@ -88,10 +93,10 @@ namespace InstaLike.Web.CommandHandlers
                     await tx.RollbackAsync();
                     _logger
                         .ForContext<DislikePostCommand>()
-                        .Error("Failed to remove a 'Like' on post {PostID} by user {UserID} ({Nickname}). Error message: {ErrorMessage}",
+                        .Error("Failed to remove a 'Like' on post {PostID} by user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                             request.PostID,
+                            user?.Nickname,
                             request.UserID,
-                            user.Nickname,
                             ex.Message);
 
                     return Result.Fail<LikePostResult>(ex.Message);

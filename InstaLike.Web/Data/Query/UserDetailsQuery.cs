@@ -34,7 +34,7 @@ namespace InstaLike.Web.Data.Query
         {
             UserDetailsModel result = null;
 
-            _logger.Information("readong user details fo user {UserID} with parameters {@Request}", request.CurrentUserId, request);
+            _logger.Information("Reading user details of user {UserID} with parameters {@Request}", request.CurrentUserId, request);
 
             using (var tx = _session.BeginTransaction())
             {

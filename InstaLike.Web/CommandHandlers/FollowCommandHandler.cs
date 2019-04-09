@@ -32,24 +32,25 @@ namespace InstaLike.Web.CommandHandlers
                     var follower = await _session.LoadAsync<User>(request.FollowerID);
                     var followedUserQuery = _session.QueryOver<User>()
                         .Where(Restrictions.Eq("Nickname", request.FollowedNickname));
-
                     followedUser = await followedUserQuery.SingleOrDefaultAsync();
 
                     follower.Follow(followedUser);
                     await _session.SaveOrUpdateAsync(follower);
                     await tx.CommitAsync();
-                    _logger.Information("User {UserID} started following user {FollowedUserID} ({FollowedUserNickname})",
+
+                    _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
                         request.FollowerID,
-                        followedUser.ID,
-                        request.FollowedNickname);
+                        request.FollowedNickname,
+                        followedUser.ID);
 
                     return Result.Ok();
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Error while following {FollowedUserID} ({FollowedUserNickname}) by user {UserID}. Error message: {ErrorMessage}",
-                        followedUser.ID,
+
+                    _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
+                        followedUser?.ID,
                         request.FollowedNickname,
                         request.FollowerID,
                         ex.Message);

@@ -34,18 +34,19 @@ namespace InstaLike.Web.CommandHandlers
                     await _session.SaveAsync(post);
                     await tx.CommitAsync();
 
-                    _logger.Information("User {UserID} ({Nickname}) has just shared a new post.",
-                        request.UserID,
-                        author.Nickname);
+                    _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
+                        author.Nickname,
+                        request.UserID);
 
                     return Result.Ok(post.ID);
                 }
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
-                    _logger.Error("Failed to publish a post for user {UserID} ({Nickname}). Error message: {ErrorMessage}",
+
+                    _logger.Error("Failed to publish a post for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                         request.UserID,
-                        author.Nickname,
+                        author?.Nickname,
                         ex.Message);
 
                     return Result.Fail(ex.Message);

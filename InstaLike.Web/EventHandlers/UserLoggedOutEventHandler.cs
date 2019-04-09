@@ -18,7 +18,7 @@ namespace InstaLike.Web.EventHandlers
 
         public Task Handle(UserLoggedOutEvent notification, CancellationToken cancellationToken)
         {
-            _logger.Information("User {UserID} ({Nickname}) has just logged out.", notification.UserID, notification.Nickname);
+            _logger.Information("User [{Nickname}({UserID})] has just logged out.", notification.Nickname, notification.UserID);
             return Task.CompletedTask;
         }
     }

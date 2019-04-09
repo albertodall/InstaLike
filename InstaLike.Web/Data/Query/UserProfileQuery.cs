@@ -41,7 +41,7 @@ namespace InstaLike.Web.Data.Query
         {
             UserProfileModel profile = null;
 
-            _logger.Debug("Reading user profile for user {UserID} with parameters {@Request}.", request.CurrentUserID, request);
+            _logger.Debug("Reading profile of user {UserID} with parameters {@Request}.", request.CurrentUserID, request);
 
             using (var tx = _session.BeginTransaction())
             {
