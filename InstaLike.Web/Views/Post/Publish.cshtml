@@ -7,13 +7,22 @@
 }
 
 <div>
+    @{
+        var pictureBase64 = Convert.ToBase64String(Model.Picture);
+        var picture = string.Format("data:image/jpeg;base64,{0}", pictureBase64);
+    }
     <h2>Share something with the world</h2>
     <form method="post" enctype="multipart/form-data" asp-action="Publish" asp-controller="Post" asp-antiforgery="true">
         <div class="form_post">
             <div asp-validation-summary="ModelOnly"></div>
-            <div>
-                <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
-                <input type="file" asp-for="Picture" name="pictureFile" required />
+            <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
+            <div class="picture-placeholder">
+                <div class="posted-picture">
+                    <label asp-for="Picture">
+                        <img src="@picture" />
+                    </label>
+                    <input type="file" asp-for="Picture" name="pictureFile" required />
+                </div>
             </div>
 
             <div>
@@ -21,11 +30,12 @@
                 <span asp-validation-for="Text"></span>
             </div>
 
+            <button id="autotag" type="submit">Autotag</button>
             <button type="submit">Publish</button>
         </div>
     </form>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

@@ -659,6 +659,22 @@ textarea {
     background-image: url(../img/icon_send.png);
 }
 
+.form_post .picture-placeholder {
+    border: 10px solid white;
+    box-sizing: border-box;
+    box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
+}
+
+.form_post .posted-picture > label > img {
+    display: block;
+    margin: auto;
+    cursor: pointer;
+}
+
+.form_post .posted-picture > input {
+    display: none;
+}
+
 /* Post comments */
 .form_comment button[type=submit] {
     height: 32px;

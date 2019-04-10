@@ -2,6 +2,7 @@
 using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +55,12 @@ namespace InstaLike.Web
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
             services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+
+            services.AddSingleton<IImageRecognitionService>(
+                new AzureComputerVisionRecognition(
+                    Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),
+                    Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl")
+                ));
 
             services.ConfigureAuthentication();
 

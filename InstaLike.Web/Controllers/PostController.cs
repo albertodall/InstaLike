@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
@@ -6,6 +8,7 @@ using InstaLike.Core.Events;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Models;
+using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,15 +20,21 @@ namespace InstaLike.Web.Controllers
     public class PostController : Controller
     {
         private readonly IMediator _dispatcher;
+        private readonly IImageRecognitionService _imageRecognition;
 
-        public PostController(IMediator dispatcher)
+        public PostController(IMediator dispatcher, IImageRecognitionService imageRecognition)
         {
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+            _imageRecognition = imageRecognition ?? throw new ArgumentNullException(nameof(imageRecognition));
         }
 
         public IActionResult Publish()
         {
-            return View();
+            var model = new PublishPostModel()
+            {
+                Picture = Picture.PicturePlaceholder
+            };
+            return View(model);
         }
 
         [HttpPost]
@@ -107,8 +116,8 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Dislike(LikePostModel like)
         {
             var command = new DislikePostCommand(like.PostID, like.UserID);
-            var commandResult = await _dispatcher.Send(command);
-            
+            await _dispatcher.Send(command);
+
             return new EmptyResult();
         }
     }

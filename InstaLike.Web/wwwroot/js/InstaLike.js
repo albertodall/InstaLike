@@ -41,6 +41,19 @@ $(".user-details-profile-picture input").change(function (e) {
     }
 });
 
+// Displays image to share after choosing it
+$(".posted-picture input").change(function (e) {
+    if (e.target.files && e.target.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('.posted-picture > label > img').attr('src', e.target.result);
+        };
+
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+
 // Adds a comment to a post
 $('.form_comment').submit(function (e) {
     e.preventDefault();
