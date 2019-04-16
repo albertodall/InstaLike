@@ -42,7 +42,7 @@ $(".user-details-profile-picture input").change(function (e) {
     }
 });
 
-// Displays image to share after choosing it
+// Displays picture to share after choosing it
 $(".form_post .picture-placeholder .posted-picture > input").change(function (e) {
     if (e.target.files && e.target.files[0]) {
         var reader = new FileReader();
@@ -131,12 +131,15 @@ $('.popup-link').click(function (e) {
 
 // Close popup
 $('.popup-close').click(function (e) {
+    e.preventDefault();
+
     if ($('.popup').hasClass('popup-activated')) {
         $('.popup').removeClass('popup-activated');
         $('.popup-content').empty();
     }
 });
 
+// Pictures auto tagging
 $('.form_post .autotag-button').click(function (e) {
     e.preventDefault();
 
@@ -153,10 +156,11 @@ $('.form_post .autotag-button').click(function (e) {
         contentType: false,
         processData: false,
         cache: false,
-        async: false,
-        complete: function (data) {
-            var tagsString = data.responseJSON.join(' ');
-            $('.form_post > div > input[type="text"]').val().append(tagsString);
+        complete: function (response) {
+            var tagsString = response.responseJSON.join(' ');
+            var textInput = $('.form_post > div > input[type="text"]');
+            var currentText = textInput.val();
+            textInput.val(currentText.concat(` ${tagsString}`));
         }
     });
 });

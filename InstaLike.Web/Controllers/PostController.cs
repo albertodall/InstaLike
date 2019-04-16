@@ -110,16 +110,16 @@ namespace InstaLike.Web.Controllers
                 await _dispatcher.Publish(postLikedNotification);
             }
 
-            return new EmptyResult();
+            return commandResult.IsSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         [HttpPost]
         public async Task<IActionResult> Dislike(LikePostModel like)
         {
             var command = new DislikePostCommand(like.PostID, like.UserID);
-            await _dispatcher.Send(command);
+            var commandResult = await _dispatcher.Send(command);
 
-            return new EmptyResult();
+            return commandResult.IsSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         [HttpPost]
@@ -130,21 +130,17 @@ namespace InstaLike.Web.Controllers
             {
                 Result<string[]> taggingResult;
 
-                var file = Request.Form.Files[0];
-                using (var pictureStream = new MemoryStream())
+                using (var pictureStream = await Request.Form.Files[0].ToStreamAsync())
                 {
-                    await file.CopyToAsync(pictureStream);
                     taggingResult = await _imageRecognition.AutoTagImage(pictureStream);
                 }
 
                 if (taggingResult.IsSuccess)
                 {
-                    return Json(taggingResult.Value);
+                    return Ok(taggingResult.Value);
                 }
-                else
-                {
-                    return BadRequest(taggingResult.Error);
-                }
+
+                return BadRequest(taggingResult.Error);
             }
 
             return BadRequest("No files selected");

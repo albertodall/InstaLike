@@ -11,7 +11,7 @@ namespace InstaLike.Web.Extensions
         {
             if (formFile == null)
             {
-                return Array.Empty<byte>();
+                throw new ArgumentNullException(nameof(formFile));
             }
 
             byte[] result;
@@ -22,6 +22,19 @@ namespace InstaLike.Web.Extensions
             }
 
             return result;
+        }
+
+        public async static Task<Stream> ToStreamAsync(this IFormFile formFile)
+        {
+            if (formFile == null)
+            {
+                throw new ArgumentNullException(nameof(formFile));
+            }
+
+            var stream = new MemoryStream();
+            await formFile.CopyToAsync(stream);
+            stream.Position = 0;
+            return stream;
         }
     }
 }
