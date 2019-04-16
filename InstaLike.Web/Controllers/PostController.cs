@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using InstaLike.Core.Events;
@@ -119,6 +120,34 @@ namespace InstaLike.Web.Controllers
             await _dispatcher.Send(command);
 
             return new EmptyResult();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Autotag()
+        {
+            var formFiles = Request.Form.Files;
+            if (formFiles.Count > 0)
+            {
+                Result<string[]> taggingResult;
+
+                var file = Request.Form.Files[0];
+                using (var pictureStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(pictureStream);
+                    taggingResult = await _imageRecognition.AutoTagImage(pictureStream);
+                }
+
+                if (taggingResult.IsSuccess)
+                {
+                    return Json(taggingResult.Value);
+                }
+                else
+                {
+                    return BadRequest(taggingResult.Error);
+                }
+            }
+
+            return BadRequest("No files selected");
         }
     }
 }

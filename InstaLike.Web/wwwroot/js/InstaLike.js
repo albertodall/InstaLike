@@ -24,6 +24,7 @@ function highlightHashtagsAndNicknames() {
         });
 }
 
+// On load
 $(function () {
     highlightHashtagsAndNicknames();
 });
@@ -42,12 +43,12 @@ $(".user-details-profile-picture input").change(function (e) {
 });
 
 // Displays image to share after choosing it
-$(".posted-picture input").change(function (e) {
+$(".form_post .picture-placeholder .posted-picture > input").change(function (e) {
     if (e.target.files && e.target.files[0]) {
         var reader = new FileReader();
 
         reader.onload = function (e) {
-            $('.posted-picture > label > img').attr('src', e.target.result);
+            $('.form_post .picture-placeholder .posted-picture > label > img').attr('src', e.target.result);
         };
 
         reader.readAsDataURL(e.target.files[0]);
@@ -134,4 +135,28 @@ $('.popup-close').click(function (e) {
         $('.popup').removeClass('popup-activated');
         $('.popup-content').empty();
     }
+});
+
+$('.form_post .autotag-button').click(function (e) {
+    e.preventDefault();
+
+    var formData = new FormData();
+    var pictureFileSelector = $(".posted-picture > input")[0];
+    if (pictureFileSelector.files && pictureFileSelector.files[0]) {
+        formData.append(pictureFileSelector.files[0].name, pictureFileSelector.files[0]);
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: '/Post/Autotag',
+        data: formData,
+        contentType: false,
+        processData: false,
+        cache: false,
+        async: false,
+        complete: function (data) {
+            var tagsString = data.responseJSON.join(' ');
+            $('.form_post > div > input[type="text"]').val().append(tagsString);
+        }
+    });
 });

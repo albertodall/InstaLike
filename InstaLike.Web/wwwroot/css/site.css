@@ -659,21 +659,39 @@ textarea {
     background-image: url(../img/icon_send.png);
 }
 
+.form_post .autotag-button {
+    height: 32px;
+    line-height: 32px;
+    margin: 20px 3px 3px 3px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    display: block;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 20px;
+    font-size: 11px;
+    background-color: white;
+    background-image: url(../img/icon_hashtag.png);
+}
+
 .form_post .picture-placeholder {
     border: 10px solid white;
     box-sizing: border-box;
     box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
 }
 
-.form_post .posted-picture > label > img {
-    display: block;
-    margin: auto;
-    cursor: pointer;
-}
+    .form_post .picture-placeholder .posted-picture > label > img {
+        display: block;
+        margin: auto;
+        cursor: pointer;
+        width: 100%;
+    }
 
-.form_post .posted-picture > input {
-    display: none;
-}
+    .form_post .picture-placeholder .posted-picture > input {
+        display: none;
+    }
 
 /* Post comments */
 .form_comment button[type=submit] {
