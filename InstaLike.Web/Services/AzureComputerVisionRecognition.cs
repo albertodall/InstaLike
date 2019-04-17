@@ -31,8 +31,6 @@ namespace InstaLike.Web.Services
     
         public async Task<Result<string[]>> AutoTagImage(Stream imageStream)
         {
-            string[] tags = Array.Empty<string>();
-
             var apiCredentials = new ApiKeyServiceClientCredentials(_apiKey);
             using (var cvClient = new ComputerVisionClient(apiCredentials, new DelegatingHandler[] { }))
             {

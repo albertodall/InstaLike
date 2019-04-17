@@ -29,7 +29,7 @@
                 return ReferenceEquals(this, other);
             }
 
-            return other.ID.Equals(ID);
+            return ID.Equals(other.ID);
         }
 
         public override int GetHashCode()
@@ -53,12 +53,12 @@
 
         public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
         {
-            return Equals(left, right);
+            return left.Equals(right);
         }
 
         public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
         {
-            return !Equals(left, right);
+            return !left.Equals(right);
         }
     }
 }

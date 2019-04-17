@@ -17,7 +17,7 @@
                     var senderProfilePictureBase64 = Convert.ToBase64String(notification.SenderProfilePicture);
                     var senderProfilePicture = String.Format("data:image/jpeg;base64,{0}", senderProfilePictureBase64);
                 }
-                <img src="@senderProfilePicture" />
+                <img src="@senderProfilePicture" alt="Sender's profile picture" />
                 <a href="@Url.Action("Profile", "Account", new { @id = notification.SenderNickname})">
                     @notification.SenderNickname
                 </a>

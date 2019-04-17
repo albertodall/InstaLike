@@ -10,7 +10,7 @@
             var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePicture);
             var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
         }
-        <img src="@profilePicture" />
+        <img src="@profilePicture" alt="User's profile picture" />
 
         <div class="user-profile-details">
             <h1>@Model.Nickname</h1>
@@ -77,7 +77,7 @@
                 var postPictureBase64 = Convert.ToBase64String(thumbnail.Picture);
                 var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);
                 <a asp-action="Detail" asp-controller="Post" asp-route-id="@thumbnail.PostID">
-                    <img src="@postPicture" />
+                    <img src="@postPicture" alt="Post picture thumbnail" />
                 </a>
             }
         }
