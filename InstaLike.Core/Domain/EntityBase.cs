@@ -41,7 +41,7 @@
 
             if (IsTransient())
             {
-                cachedHashCode = base.GetHashCode();
+                cachedHashCode = typeof(IEntity<TId>).GetHashCode();
             }
             else
             {
