@@ -147,20 +147,29 @@ $('.form_post .autotag-button').click(function (e) {
     var pictureFileSelector = $(".posted-picture > input")[0];
     if (pictureFileSelector.files && pictureFileSelector.files[0]) {
         formData.append(pictureFileSelector.files[0].name, pictureFileSelector.files[0]);
-    }
 
-    $.ajax({
-        type: 'POST',
-        url: '/Post/Autotag',
-        data: formData,
-        contentType: false,
-        processData: false,
-        cache: false,
-        complete: function (response) {
-            var tagsString = response.responseJSON.join(' ');
-            var textInput = $('.form_post > div > input[type="text"]');
-            var currentText = textInput.val();
-            textInput.val(currentText.concat(` ${tagsString}`));
-        }
-    });
+        var textInput = $('.form_post > div > input[type="text"]');
+        var currentText = textInput.val();
+
+        $.ajax({
+            type: 'POST',
+            url: '/Post/Autotag',
+            data: formData,
+            contentType: false,
+            processData: false,
+            cache: false,
+            beforeSend: function () {
+                $('.form_post .autotag-button').addClass('button-progress');
+            },
+            success: function (response) {
+                var tagsString = response.join(' ');
+                textInput.val(currentText.concat(` ${tagsString}`));
+                $('.form_post .autotag-button').removeClass('button-progress');
+            },
+            error: function (response) {
+                textInput.val(currentText.concat(` Error: - ${response.responseText}`));
+                $('.form_post .autotag-button').removeClass('button-progress');
+            }
+        });
+    }
 });

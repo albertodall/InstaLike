@@ -38,14 +38,13 @@ namespace InstaLike.Web.Services
             {
                 try
                 {
-                    imageStream.Position = 0;
                     cvClient.Endpoint = _endpointUrl;
                     ImageAnalysis result = await cvClient.AnalyzeImageInStreamAsync(imageStream, Features);
                     return Result.Ok(result.Tags.Select(tag => $"#{tag.Name}").ToArray());
                 }
-                catch (Exception ex)
+                catch (ComputerVisionErrorException ex)
                 {
-                    return Result.Fail<string[]>(ex.Message);
+                    return Result.Fail<string[]>(ex.Body != null ? ex.Body.Message : ex.Message);
                 }
             }
         }

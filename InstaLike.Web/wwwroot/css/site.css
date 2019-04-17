@@ -676,6 +676,10 @@ textarea {
     background-image: url(../img/icon_hashtag.png);
 }
 
+.form_post .button-progress {
+    background-image: url(../img/icon_progress.svg);
+}
+
 .form_post .picture-placeholder {
     border: 10px solid white;
     box-sizing: border-box;
