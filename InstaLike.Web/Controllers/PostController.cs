@@ -33,7 +33,7 @@ namespace InstaLike.Web.Controllers
         {
             var model = new PublishPostModel()
             {
-                Picture = Picture.PicturePlaceholder
+                Picture = Picture.EmptyPicture
             };
             return View(model);
         }
