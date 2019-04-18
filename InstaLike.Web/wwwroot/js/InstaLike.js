@@ -49,6 +49,8 @@ $(".form_post .picture-placeholder .posted-picture > input").change(function (e)
 
         reader.onload = function (e) {
             $('.form_post .picture-placeholder .posted-picture > label > img').attr('src', e.target.result);
+            // Remove tagging error message, if present
+            $('.form_post .tags-container').find('span').remove();
         };
 
         reader.readAsDataURL(e.target.files[0]);
@@ -148,9 +150,7 @@ $('.form_post .autotag-button').click(function (e) {
     if (pictureFileSelector.files && pictureFileSelector.files[0]) {
         formData.append(pictureFileSelector.files[0].name, pictureFileSelector.files[0]);
 
-        var textInput = $('.form_post > div > input[type="text"]');
-        var currentText = textInput.val();
-
+        var tagList = $('.form_post ul');
         $.ajax({
             type: 'POST',
             url: '/Post/Autotag',
@@ -162,12 +162,38 @@ $('.form_post .autotag-button').click(function (e) {
                 $('.form_post .autotag-button').addClass('button-progress');
             },
             success: function (response) {
-                var tagsString = response.join(' ');
-                textInput.val(currentText.concat(` ${tagsString}`));
+                response.forEach(function (tag) {
+                    tagList.append(`<li><a href="#" class="tag">${tag}</a></li>`);
+                });
+
+                // Add or remove a tag from a picture comment
+                $('.form_post .tag').click(function (e) {
+                    e.preventDefault();
+
+                    var tagSeparator = '';
+                    var selectedTag = $(e.target);
+                    var textInput = $('.form_post > div > input[type="text"]');
+                    var currentText = textInput.val().trim();
+
+                    selectedTag.toggleClass('tag-selected');
+                    if (selectedTag.hasClass('tag-selected')) {
+                        if (currentText.length > 0) {
+                            // If there's any text, adds a trailing space before to the tag.
+                            tagSeparator = ' ';
+                        }
+                        textInput.val(currentText.concat(tagSeparator, selectedTag.text()));
+                    } else {
+                        // Replaces tag even if it has a trailing space (separator)
+                        textInput.val(currentText.replace(` ${selectedTag.text()}`, ''));
+                        textInput.val(currentText.replace(selectedTag.text(), ''));
+                    }
+                });
+
                 $('.form_post .autotag-button').removeClass('button-progress');
             },
             error: function (response) {
-                textInput.val(currentText.concat(` Error: - ${response.responseText}`));
+                // Reports tagging error
+                $('.form_post .tags-container').append(`<span>Tagging error: ${response.responseText}</span>`);
                 $('.form_post .autotag-button').removeClass('button-progress');
             }
         });
