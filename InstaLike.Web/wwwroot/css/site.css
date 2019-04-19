@@ -473,7 +473,7 @@ textarea {
             transform: rotate(45deg);
         }
 
-    .post-detail .post-comments a {
+    .post-detail .post-comments a.comment-author-nickname {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;

@@ -21,8 +21,7 @@ namespace InstaLike.Web.Services
 
         public async Task<Result<User>> AuthenticateUser(string userName, string password)
         {
-            bool authenticated = false;
-            User userLoggingIn = null;
+            Maybe<User> userLoggingIn;
 
             _logger.Debug("Authenticating user {userName}", userName);
 
@@ -32,17 +31,13 @@ namespace InstaLike.Web.Services
                     .Where(Restrictions.Eq("Nickname", userName)); // Compares the private field
 
                 userLoggingIn = await authQuery.SingleOrDefaultAsync();
-                if (userLoggingIn != null)
-                {
-                    authenticated = userLoggingIn.Password.HashMatches(password);
-                }
             }
 
-            _logger.Debug("User authenticated: {authenticated}", authenticated);
-
-            return authenticated ? 
-                Result.Ok(userLoggingIn) : 
-                Result.Fail<User>("Username or password are not valid.");
+            return userLoggingIn
+                .ToResult($"Username or password are not valid.")
+                .Ensure(user => user.Password.HashMatches(password), "Username or password are not valid.")
+                .OnSuccess(user => _logger.Debug("User {userName} authenticated correctly"))
+                .OnFailure(user => _logger.Debug("User {userName} did not authenticate correctly."));
         }      
     }
 }

@@ -53,6 +53,7 @@ namespace InstaLike.Web.Data.Query
                 CommentModel comment = null;
                 var postCommentsQuery = _session.QueryOver<Comment>()
                     .Where(c => c.Post.ID == request.PostID)
+                    .OrderBy(c => c.CommentDate).Asc
                     .Inner.JoinQueryOver(c => c.Author, () => commentAuthor)
                     .SelectList(list => list
                         .Select(c => c.Text).WithAlias(() => comment.Text)
