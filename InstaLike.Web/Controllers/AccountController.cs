@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
+using InstaLike.Core.Domain;
 using InstaLike.Core.Events;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
@@ -131,7 +132,12 @@ namespace InstaLike.Web.Controllers
         [AllowAnonymous]
         public IActionResult Register()
         {
-            return View();
+            var model = new RegisterUserModel()
+            {
+                ProfilePicture = Picture.DefaultProfilePicture
+            };
+
+            return View(model);
         }
 
         [HttpPost]

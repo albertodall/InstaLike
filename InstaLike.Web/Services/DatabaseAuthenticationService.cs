@@ -36,8 +36,8 @@ namespace InstaLike.Web.Services
             return userLoggingIn
                 .ToResult($"Username or password are not valid.")
                 .Ensure(user => user.Password.HashMatches(password), "Username or password are not valid.")
-                .OnSuccess(user => _logger.Debug("User {userName} authenticated correctly"))
-                .OnFailure(user => _logger.Debug("User {userName} did not authenticate correctly."));
+                .OnSuccess(user => _logger.Debug("User {userName} authenticated correctly", userName))
+                .OnFailure(user => _logger.Debug("User {userName} did not authenticate correctly.", userName));
         }      
     }
 }

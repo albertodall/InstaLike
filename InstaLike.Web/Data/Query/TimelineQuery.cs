@@ -48,16 +48,20 @@ namespace InstaLike.Web.Data.Query
                 User postAuthor = null;
                 Follow follow = null;
 
-                // Post to show in the timeline.
+                // Post to show in the timeline (user's own posts and posts published by followed users)
                 var postsToShowInTimelineQuery = QueryOver.Of<Post>()
                     .Inner.JoinAlias(p => p.Author, () => postAuthor)
                         .Left.JoinAlias(() => postAuthor.Followers, () => follow)
-                    .Where(() => follow.Follower.ID == request.UserID)
+                    .Where(
+                        Restrictions.Disjunction()
+                            .Add(() => follow.Follower.ID == request.UserID)
+                            .Add(() => postAuthor.ID == request.UserID)
+                    )
                     .Select(p => p.ID)
                     .OrderBy(p => p.PostDate).Desc
                     .Take(request.NumberOfPosts);
 
-                // Comments for all post included in the timeline.
+                // Comments for all posts included in the timeline.
                 _session.QueryOver<Post>()
                     .Left.JoinAlias(p => p.Comments, () => comment)
                     .Fetch(SelectMode.Fetch, () => comment.Author)
@@ -113,7 +117,7 @@ namespace InstaLike.Web.Data.Query
                     };
                     timelineList.Add(postModel);
                 }
-                timeline = timelineList.ToArray();
+                timeline = timelineList.OrderByDescending(p => p.PostDate).ToArray();
             }
 
             return timeline;
