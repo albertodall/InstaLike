@@ -100,6 +100,11 @@ namespace InstaLike.Core.Domain
 
         public virtual bool IsFollowing(User user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             return _following.Any(f => f.Following == user);
         }
 

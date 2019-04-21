@@ -25,7 +25,7 @@ namespace InstaLike.Core.Domain
 
             if (trimmedText.Length > 200)
             {
-                return Result.Fail<CommentText>("Text for a post should not be longer than 200 chars.");
+                return Result.Fail<CommentText>("Text for a comment should not be longer than 200 chars.");
             }
 
             return Result.Ok(new CommentText(trimmedText));
