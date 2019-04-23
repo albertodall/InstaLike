@@ -34,7 +34,6 @@ namespace InstaLike.Web.CommandHandlers
                     var comment = new Comment(post, author, (CommentText)request.Text);
                     post.AddComment(comment);
 
-                    await _session.SaveAsync(post);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{NickName}({UserID})] wrote a new comment to post {PostID}",

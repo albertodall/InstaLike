@@ -29,9 +29,8 @@ namespace InstaLike.Web.CommandHandlers
                 try
                 {
                     author = await _session.LoadAsync<User>(request.UserID);
-
                     var post = new Post(author, (Picture)request.PictureRawBytes, (PostText)request.Text);
-                    await _session.SaveAsync(post);
+
                     await tx.CommitAsync();
 
                     _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
@@ -45,8 +44,8 @@ namespace InstaLike.Web.CommandHandlers
                     await tx.RollbackAsync();
 
                     _logger.Error("Failed to publish a post for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
-                        request.UserID,
                         author?.Nickname,
+                        request.UserID,
                         ex.Message);
 
                     return Result.Fail(ex.Message);

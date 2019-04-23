@@ -41,15 +41,14 @@ namespace InstaLike.Web.CommandHandlers
                         .Where(() => following.ID == userToUnfollow.ID);
 
                     var followerUser = await followingQuery.SingleOrDefaultAsync();
-
                     followerUser.Unfollow(userToUnfollow);
-                    await _session.SaveOrUpdateAsync(followerUser);
+
                     await tx.CommitAsync();
 
                     _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
                         request.FollowerID,
-                        userToUnfollow.ID,
-                        request.UnfollowedNickname);
+                        request.UnfollowedNickname,
+                        userToUnfollow.ID);
 
                     return Result.Ok();
                 }

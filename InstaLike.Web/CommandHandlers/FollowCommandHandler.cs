@@ -35,7 +35,7 @@ namespace InstaLike.Web.CommandHandlers
                     followedUser = await followedUserQuery.SingleOrDefaultAsync();
 
                     follower.Follow(followedUser);
-                    await _session.SaveOrUpdateAsync(follower);
+
                     await tx.CommitAsync();
 
                     _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
@@ -50,8 +50,8 @@ namespace InstaLike.Web.CommandHandlers
                     await tx.RollbackAsync();
 
                     _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                        followedUser?.ID,
                         request.FollowedNickname,
+                        followedUser?.ID,
                         request.FollowerID,
                         ex.Message);
 

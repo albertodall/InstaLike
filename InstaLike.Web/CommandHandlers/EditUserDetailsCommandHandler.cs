@@ -48,8 +48,8 @@ namespace InstaLike.Web.CommandHandlers
                     userToUpdate.UpdateBiography(request.Bio);
                     userToUpdate.SetProfilePicture((Picture)request.ProfilePicture);
 
-                    await _session.UpdateAsync(userToUpdate);
                     await tx.CommitAsync();
+
                     _logger.Information("Successfully updated user profile for user [{Nickname}({UserID})]",
                         request.Nickname,
                         request.UserID);
@@ -59,12 +59,13 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger.Error("Error updating user profile for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                         request.Nickname,
                         request.UserID,
                         ex.Message);
 
-                    throw;
+                    return Result.Fail(ex.Message);
                 }
             }
         }

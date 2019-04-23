@@ -53,12 +53,11 @@ namespace InstaLike.Web.CommandHandlers
             {
                 try
                 {
-                    await _session.SaveAsync(userToRegister);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{Nickname}({UserID})] has just registered.",
-                        userToRegister.ID,
-                        request.Nickname);
+                        request.Nickname,
+                        userToRegister.ID);
 
                     return Result.Ok(userToRegister.ID);
                 }

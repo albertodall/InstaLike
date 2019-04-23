@@ -34,7 +34,6 @@ namespace InstaLike.Web.CommandHandlers
 
                     post.Like(user);
 
-                    await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
 
                     _logger
@@ -54,8 +53,8 @@ namespace InstaLike.Web.CommandHandlers
                        .ForContext<LikePostCommand>()
                        .Error("Failed to put a 'Like' on post {PostID} by user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                            request.PostID,
-                           request.UserID,
                            user?.Nickname,
+                           request.UserID,
                            ex.Message);
 
                     return Result.Fail<LikePostResult>(ex.Message);
@@ -76,14 +75,13 @@ namespace InstaLike.Web.CommandHandlers
 
                     post.Dislike(user);
 
-                    await _session.SaveOrUpdateAsync(post);
                     await tx.CommitAsync();
 
                     _logger
                         .ForContext<DislikePostCommand>()
                         .Information("User [{Nickname}({UserID})] removed a 'Like' on post {PostID}",
-                            request.UserID,
                             user.Nickname,
+                            request.UserID,
                             request.PostID);
 
                     return Result.Ok();
