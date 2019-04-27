@@ -50,7 +50,7 @@ namespace InstaLike.Web.Data.Mapping
                 .KeyColumn("[FollowedID]")
                 .Access.CamelCaseField(Prefix.Underscore);
 
-            HasMany(p => p.Following)
+            HasMany(p => p.Followed)
                 .KeyColumn("[FollowerID]")
                 .Access.CamelCaseField(Prefix.Underscore);
 

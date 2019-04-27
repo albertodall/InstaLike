@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
     public class User : EntityBase<int>
     {
         private readonly IList<Follow> _followers;
-        private readonly IList<Follow> _following;
+        private readonly IList<Follow> _followed;
 
         protected User()
         {
             _followers = new List<Follow>();
-            _following = new List<Follow>();
+            _followed  = new List<Follow>();
         }
 
         public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
@@ -33,14 +34,14 @@ namespace InstaLike.Core.Domain
         public virtual Nickname Nickname
         {
             get => (Nickname)_nickname;
-            set => _nickname = value;
+            protected set => _nickname = value;
         }
 
         private string _fullName;
         public virtual FullName FullName
         {
             get => (FullName)_fullName;
-            set => _fullName = value;
+            protected set => _fullName = value;
         }
 
         private string _password;
@@ -61,7 +62,7 @@ namespace InstaLike.Core.Domain
         public virtual string Biography { get; protected set; }
         public virtual DateTimeOffset RegistrationDate { get; protected set; }
         public virtual IReadOnlyList<Follow> Followers => _followers.ToList();
-        public virtual IReadOnlyList<Follow> Following => _following.ToList();
+        public virtual IReadOnlyList<Follow> Followed => _followed.ToList();
 
         public virtual void ChangePassword(Password password)
         {
@@ -105,34 +106,109 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return _following.Any(f => f.Following == user);
+            return _followed.Any(f => f.Followed == user);
         }
 
-        public virtual void Follow(User user)
+        public virtual Result Follow(User user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             if (!IsFollowing(user))
             {
-                _followers.Add(new Follow(this, user));
+                _followed.Add(new Follow(this, user));
+                user.AddFollower(this);
+                return Result.Ok();
             }
+
+            return Result.Fail($"User '{user.Nickname}' is already followed by '{Nickname}'.");
         }
 
-        public virtual void Unfollow(User user)
+        internal virtual void AddFollower(User follower)
         {
+            _followers.Add(new Follow(follower, this));
+        }
+
+        public virtual Result Unfollow(User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             if (IsFollowing(user))
             {
-                var follow = _following
-                    .Single(f => f.Follower == this && f.Following == user);
-                _following.Remove(follow);
+                var follow = _followed.Single(f => f.Followed == user);
+                _followed.Remove(follow);
+                user.RemoveFollower(this);
+                return Result.Ok();
             }
+
+            return Result.Fail($"User '{Nickname}' is not following '{user.Nickname}'.");
+        }
+
+        internal virtual void RemoveFollower(User follower)
+        {
+            var follow = _followers.Single(f => f.Follower == follower);
+            _followers.Remove(follow);
+        }
+
+        public virtual bool Likes(Post post)
+        {
+            if (post == null)
+            {
+                throw new ArgumentNullException(nameof(post));
+            }
+
+            return post.LikesTo(this);
+        }
+
+        public virtual Result PutLikeTo(Post post)
+        {
+            if (post == null)
+            {
+                throw new ArgumentNullException(nameof(post));
+            }
+
+            if (post.Author == this)
+            {
+                return Result.Fail("You cannot put a 'Like' on your own posts.");
+            }
+
+            if (Likes(post))
+            {
+                return Result.Fail("This user already 'Liked' this post.");
+            }
+
+            post.PutLikeBy(this);
+            return Result.Ok();
+        }
+
+        public virtual Result RemoveLikeFrom(Post post)
+        {
+            if (post == null)
+            {
+                throw new ArgumentNullException(nameof(post));
+            }
+
+            if (Likes(post))
+            {
+                post.RemoveLikeBy(this);
+                return Result.Ok();
+            }
+
+            return Result.Fail($"User '{Nickname}' did not put any 'Like' on this post.");
         }
 
         public virtual List<Claim> Claims => new List<Claim>()
-            {
-                new Claim(ClaimTypes.NameIdentifier, ID.ToString(), ClaimValueTypes.Integer32),
-                new Claim(ClaimTypes.Name, Nickname, ClaimValueTypes.String),
-                new Claim(ClaimTypes.GivenName, FullName.Name, ClaimValueTypes.String),
-                new Claim(ClaimTypes.Surname, FullName.Surname, ClaimValueTypes.String),
-                new Claim(ClaimTypes.Email, Email, ClaimValueTypes.Email)
-            };
+        {
+            new Claim(ClaimTypes.NameIdentifier, ID.ToString(), ClaimValueTypes.Integer32),
+            new Claim(ClaimTypes.Name, Nickname, ClaimValueTypes.String),
+            new Claim(ClaimTypes.GivenName, FullName.Name, ClaimValueTypes.String),
+            new Claim(ClaimTypes.Surname, FullName.Surname, ClaimValueTypes.String),
+            new Claim(ClaimTypes.Email, Email, ClaimValueTypes.Email)
+        };
     }
 }

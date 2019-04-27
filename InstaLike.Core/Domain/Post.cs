@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
@@ -45,45 +44,24 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return _likes.Any(u => u.User == user);
+            return _likes.Any(like => like.User == user);
         }
 
-        public virtual Result Like(User user)
+        public virtual void PutLikeBy(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            if (user == Author)
-            {
-                return Result.Fail("You cannot put a 'Like' on your own posts.");
-            }
-
             if (!LikesTo(user))
             {
                 _likes.Add(new Like(this, user));
-                return Result.Ok();
             }
-
-            return Result.Fail("You already 'Liked' this post.");
         }
 
-        public virtual Result Dislike(User user)
+        public virtual void RemoveLikeBy(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             if (LikesTo(user))
             {
-                var likeToRemove = _likes.Single(l => l.User == user);
+                var likeToRemove = _likes.Single(like => like.User == user);
                 _likes.Remove(likeToRemove);
-                return Result.Ok();
             }
-
-            return Result.Fail("You did not put a 'Like' on this post.");
         }
 
         public virtual void AddComment(Comment comment)

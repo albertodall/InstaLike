@@ -42,14 +42,14 @@ namespace InstaLike.Web.Data.Query
             using (var tx = _session.BeginTransaction())
             {
                 FollowModel model = null;
-                User following = null;
+                User followed = null;
                 User follower = null;
 
                 var followersQuery = _session.QueryOver<Follow>()
                     .Inner.JoinAlias(f => f.Follower, () => follower)
-                    .Inner.JoinAlias(f => f.Following, () => following)
+                    .Inner.JoinAlias(f => f.Followed, () => followed)
                     .Where(Restrictions.Eq("following.Nickname", request.Nickname))
-                        .And(f => f.Following.ID == following.ID)
+                        .And(f => f.Followed.ID == followed.ID)
                     .SelectList(fields => fields
                         .Select(f => follower.Nickname).WithAlias(() => model.Nickname)
                         .Select(f => follower.ProfilePicture.RawBytes).WithAlias(() => model.ProfilePicture)

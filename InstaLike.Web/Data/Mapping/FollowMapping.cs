@@ -19,7 +19,7 @@ namespace InstaLike.Web.Data.Mapping
             References(p => p.Follower)
                 .Column("[FollowerID]");
 
-            References(p => p.Following)
+            References(p => p.Followed)
                 .Column("[FollowedID]");
         }
     }

@@ -37,7 +37,7 @@ namespace InstaLike.Web.CommandHandlers
 
                     var followingQuery = _session.QueryOver<User>()
                         .Where(u => u.ID == request.FollowerID)
-                        .Left.JoinAlias(u => u.Following, () => following)
+                        .Left.JoinAlias(u => u.Followed, () => following)
                         .Where(() => following.ID == userToUnfollow.ID);
 
                     var followerUser = await followingQuery.SingleOrDefaultAsync();

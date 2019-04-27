@@ -51,8 +51,8 @@ namespace InstaLike.Core.Domain
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Name.ToLowerInvariant();
-            yield return Surname.ToLowerInvariant();
+            yield return Name.ToUpperInvariant();
+            yield return Surname.ToUpperInvariant();
         }
     }
 }

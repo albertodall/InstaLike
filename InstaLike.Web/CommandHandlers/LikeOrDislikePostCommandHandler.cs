@@ -32,7 +32,7 @@ namespace InstaLike.Web.CommandHandlers
                     user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
 
-                    post.Like(user);
+                    user.PutLikeTo(post);
 
                     await tx.CommitAsync();
 
@@ -57,14 +57,13 @@ namespace InstaLike.Web.CommandHandlers
                            request.UserID,
                            ex.Message);
 
-                    return Result.Fail<LikePostResult>(ex.Message);
+                    return Result.Fail(ex.Message);
                 }
             }
         }
 
         public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
         {
-            
             using (var tx = _session.BeginTransaction())
             {
                 User user = null;
@@ -73,7 +72,7 @@ namespace InstaLike.Web.CommandHandlers
                     user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
 
-                    post.Dislike(user);
+                    user.RemoveLikeFrom(post);
 
                     await tx.CommitAsync();
 
@@ -89,6 +88,7 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger
                         .ForContext<DislikePostCommand>()
                         .Error("Failed to remove a 'Like' on post {PostID} by user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
@@ -97,7 +97,7 @@ namespace InstaLike.Web.CommandHandlers
                             request.UserID,
                             ex.Message);
 
-                    return Result.Fail<LikePostResult>(ex.Message);
+                    return Result.Fail(ex.Message);
                 }
             }
         }
