@@ -126,7 +126,7 @@ namespace InstaLike.Core.Domain
             return Result.Fail($"User '{user.Nickname}' is already followed by '{Nickname}'.");
         }
 
-        internal virtual void AddFollower(User follower)
+        protected internal virtual void AddFollower(User follower)
         {
             _followers.Add(new Follow(follower, this));
         }
@@ -149,7 +149,7 @@ namespace InstaLike.Core.Domain
             return Result.Fail($"User '{Nickname}' is not following '{user.Nickname}'.");
         }
 
-        internal virtual void RemoveFollower(User follower)
+        protected internal virtual void RemoveFollower(User follower)
         {
             var follow = _followers.Single(f => f.Follower == follower);
             _followers.Remove(follow);

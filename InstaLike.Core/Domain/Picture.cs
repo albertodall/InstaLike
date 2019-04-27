@@ -47,7 +47,7 @@ namespace InstaLike.Core.Domain
 
         public static explicit operator Picture(string base64)
         {
-            return Create(Encoding.ASCII.GetBytes(base64)).Value;
+            return Create(Convert.FromBase64String(base64)).Value;
         }
 
         public static implicit operator byte[](Picture picture)
@@ -57,7 +57,7 @@ namespace InstaLike.Core.Domain
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return RawBytes;
+            yield return Convert.ToBase64String(RawBytes);
         }
     }
 }
