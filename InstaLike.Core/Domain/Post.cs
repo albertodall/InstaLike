@@ -56,18 +56,10 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (Author == user)
-            {
-                return Result.Fail($"User [{user.Nickname}] cannot put a 'Like' on their own posts.");
-            }
-
-            if (LikesTo(user))
-            {
-                return Result.Fail($"User [{user.Nickname}] has already put a 'Like' on this post.");
-            }
-
-            _likes.Add(new Like(this, user));
-            return Result.Ok();
+            return Result.Ok()
+                .Ensure(() => Author != user, $"User [{user.Nickname}] cannot put a 'Like' on their own posts.")
+                .Ensure(() => !LikesTo(user), $"User [{user.Nickname}] has already put a 'Like' to this post.")
+                .OnSuccess(() => _likes.Add(new Like(this, user)));
         }
 
         public virtual Result RemoveLikeBy(User user)
@@ -76,15 +68,12 @@ namespace InstaLike.Core.Domain
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            
-            if (!LikesTo(user))
-            {
-                return Result.Fail($"User [{user.Nickname}] did not put any 'Like' on this post.");
-            }
 
-            var likeToRemove = _likes.Single(like => like.User == user);
-            _likes.Remove(likeToRemove);
-            return Result.Ok();
+            Maybe<Like> likeToRemove = _likes.SingleOrDefault(like => like.User == user);
+
+            return likeToRemove
+                .ToResult($"User [{user.Nickname}] did not put any 'Like' on this post.")
+                .OnSuccess(like => _likes.Remove(like));           
         }
 
         public virtual void AddComment(Comment comment)

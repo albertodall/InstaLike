@@ -125,14 +125,13 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (IsFollowing(user))
-            {
-                return Result.Fail($"User [{user.Nickname}] is already followed by user [{Nickname}].");
-            }
-
-            _followed.Add(new Follow(this, user));
-            user.AddFollower(this);
-            return Result.Ok();
+            return Result.Ok()
+                .Ensure(() => !IsFollowing(user), $"User [{user.Nickname}] is already followed by user [{Nickname}].")
+                .OnSuccess(() =>
+                {
+                    _followed.Add(new Follow(this, user));
+                    user.AddFollower(this);
+                });
         }
 
         protected internal virtual void AddFollower(User follower)
@@ -147,15 +146,15 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (!IsFollowing(user))
-            {
-                return Result.Fail($"User [{Nickname}] is not following user [{user.Nickname}].");
-            }
+            Maybe<Follow> followed = _followed.SingleOrDefault(f => f.Followed == user);
 
-            var follow = _followed.Single(f => f.Followed == user);
-            _followed.Remove(follow);
-            user.RemoveFollower(this);
-            return Result.Ok();
+            return followed
+                .ToResult($"User [{Nickname}] is not following user [{user.Nickname}].")
+                .OnSuccess(follow =>
+                {
+                    _followed.Remove(follow);
+                    user.RemoveFollower(this);
+                });
         }
 
         protected internal virtual void RemoveFollower(User follower)
@@ -171,18 +170,10 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(post));
             }
 
-            if (post.Author == this)
-            {
-                return Result.Fail("You cannot put a 'Like' on your own posts.");
-            }
-
-            if (post.LikesTo(this))
-            {
-                return Result.Fail($"User [{Nickname}] already 'Liked' this post.");
-            }
-
-            post.PutLikeBy(this);
-            return Result.Ok();
+            return Result.Ok()
+                .Ensure(() => post.Author != this, "You cannot put a 'Like' on your own posts.")
+                .Ensure(() => !post.LikesTo(this), $"User [{Nickname}] already 'Liked' this post.")
+                .OnSuccess(() => post.PutLikeBy(this));
         }
 
         public virtual Result RemoveLikeFrom(Post post)
@@ -192,13 +183,9 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(post));
             }
 
-            if (!post.LikesTo(this))
-            {
-                return Result.Fail($"User [{Nickname}] did not put any 'Like' on this post.");
-            }
-
-            post.RemoveLikeBy(this);
-            return Result.Ok();
+            return Result.Ok()
+                .Ensure(() => post.LikesTo(this), $"User [{Nickname}] did not put any 'Like' on this post.")
+                .OnSuccess(() => post.RemoveLikeBy(this));
         }
     }
 }

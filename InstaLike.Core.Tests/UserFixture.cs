@@ -309,8 +309,7 @@ namespace InstaLike.Core.Tests
                 "My Bio");
             var post = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
-            var l = post.LikesTo(postAuthor);
-            var x = sut.PutLikeTo(post);
+            sut.PutLikeTo(post);
 
             using (new AssertionScope())
             {
