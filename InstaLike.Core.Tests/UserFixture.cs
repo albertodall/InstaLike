@@ -13,12 +13,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void New_User_Should_Have_Default_Profile_Picture()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.ProfilePicture.Should().Be(Picture.DefaultProfilePicture);
         }
@@ -26,14 +21,9 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void User_Should_Change_Nickname()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var newNickname = Nickname.Create("newnickname");
+
             sut.ChangeNickname(newNickname.Value);
 
             sut.Nickname.Value.Should().Be(newNickname.Value);
@@ -42,14 +32,9 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void User_Should_Change_Full_Name()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var newFullName = (FullName)"Test User New";
+
             sut.ChangeFullName(newFullName);
 
             sut.FullName.Should().Be(newFullName);
@@ -58,14 +43,9 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void User_Should_Change_Email_Address()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var newEmailAddress = (Email)"user1@newdomain.com";
+
             sut.ChangeEmailAddress(newEmailAddress);
 
             sut.Email.Should().Be(newEmailAddress);
@@ -74,17 +54,12 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void User_Should_Update_Biography()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
+            var newBiographyText = "This is my new bio";
 
-            var newBio = "This is my new bio";
-            sut.UpdateBiography(newBio);
+            sut.UpdateBiography(newBiographyText);
 
-            sut.Biography.Should().Be(newBio);
+            sut.Biography.Should().Be(newBiographyText);
         }
 
         [Fact]
@@ -92,7 +67,6 @@ namespace InstaLike.Core.Tests
         {
             var password1 = Password.Create("password1").Value;
             var password2 = Password.Create("password2").Value;
-
             var sut = new User(
                 (Nickname)"user1", 
                 (FullName)"Test User",
@@ -109,13 +83,7 @@ namespace InstaLike.Core.Tests
         public void Should_Set_New_Profile_Picture()
         {
             var newProfilePicture = (Picture)Test_Picture_Base64;
-
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.SetProfilePicture(newProfilePicture);
 
@@ -126,13 +94,7 @@ namespace InstaLike.Core.Tests
         public void Should_Set_Default_Profile_Picture()
         {
             var newProfilePicture = (Picture)Test_Picture_Base64;
-
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.SetProfilePicture(newProfilePicture);
             sut.SetDefaultProfilePicture();
@@ -143,13 +105,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void User_Should_Follow_Another_User()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var followedUser = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
@@ -171,13 +127,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void User_Should_Unfollow_Another_User()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var followedUser = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
@@ -200,13 +150,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Not_Unfollow_Unfollowed_User()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var otherUser = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
@@ -220,13 +164,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Cannot_Follow_User_Twice()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var otherUser = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
@@ -244,12 +182,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Checking_If_User_Is_Following_Null_User_Should_Throw_Exception()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.Invoking(obj => obj.IsFollowing(null))
                 .Should().Throw<ArgumentNullException>();
@@ -258,12 +191,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Checking_If_User_Is_Followed_By_Null_User_Should_Throw_Exception()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.Invoking(obj => obj.IsFollowedBy(null))
                 .Should().Throw<ArgumentNullException>();
@@ -272,12 +200,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Following_Null_User_Should_Throw_Exception()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.Invoking(obj => obj.Follow(null))
                 .Should().Throw<ArgumentNullException>();
@@ -286,12 +209,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Unfollowing_Null_User_Should_Throw_Exception()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User 1",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.Invoking(obj => obj.Unfollow(null))
                 .Should().Throw<ArgumentNullException>();
@@ -300,20 +218,13 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Put_A_Like_On_A_Post()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var postAuthor = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
                 (Password)"password",
                 (Email)"user2@acme.com",
                 "My Bio");
-
             var post = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             using (new AssertionScope())
@@ -326,12 +237,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Putting_A_Like_On_Null_Post_Should_Thow_Exception()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.Invoking(obj => obj.PutLikeTo(null))
                 .Should().Throw<ArgumentNullException>();
@@ -340,20 +246,13 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Not_Put_Like_Twice()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var postAuthor = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
                 (Password)"password",
                 (Email)"user2@acme.com",
                 "My Bio");
-
             var post = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             using (new AssertionScope())
@@ -366,13 +265,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Not_Put_A_Like_On_Own_Post()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var post = new Post(sut, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             sut.PutLikeTo(post).IsSuccess.Should().BeFalse();
@@ -381,20 +274,13 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Remove_A_Like_To_A_Post()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var postAuthor = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
                 (Password)"password",
                 (Email)"user2@acme.com",
                 "My Bio");
-
             var post = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             sut.PutLikeTo(post);
@@ -405,12 +291,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Removing_A_Like_From_Null_Post_Should_Thow_Exception()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
+            var sut = CreateTestUser();
 
             sut.Invoking(obj => obj.RemoveLikeFrom(null))
                 .Should().Throw<ArgumentNullException>();
@@ -419,29 +300,33 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Not_Remove_Like_Twice()
         {
-            var sut = new User(
-                (Nickname)"user1",
-                (FullName)"Test User",
-                (Password)"password",
-                (Email)"user1@acme.com",
-                "My Bio");
-
+            var sut = CreateTestUser();
             var postAuthor = new User(
                 (Nickname)"user2",
                 (FullName)"Test User 2",
                 (Password)"password",
                 (Email)"user2@acme.com",
                 "My Bio");
-
             var post = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
-            sut.PutLikeTo(post);
+            var l = post.LikesTo(postAuthor);
+            var x = sut.PutLikeTo(post);
 
             using (new AssertionScope())
             {
                 sut.RemoveLikeFrom(post).IsSuccess.Should().BeTrue();
                 sut.RemoveLikeFrom(post).IsSuccess.Should().BeFalse();
             }
+        }
+
+        private static User CreateTestUser()
+        {
+            return new User(
+                (Nickname)"user1",
+                (FullName)"Test User",
+                (Password)"password",
+                (Email)"user1@acme.com",
+                "My Bio");
         }
     }
 }

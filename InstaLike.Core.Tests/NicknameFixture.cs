@@ -9,7 +9,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Create_A_Valid_Nickname()
         {
-            Nickname.Create("batman").IsSuccess.Should().BeTrue();
+            Nickname.Create("nick").IsSuccess.Should().BeTrue();
         }
 
         [Fact]
@@ -19,25 +19,28 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Nickname_Forom_String_too_Long_Is_Not_Valid()
+        public void Nickname_From_String_Too_Long_Is_Not_Valid()
         {
             var sut = new string('x', 42);
+
             Nickname.Create(sut).IsFailure.Should().BeTrue();
         }
 
         [Fact]
         public void Should_Convert_String_To_Nickname()
         {
-            var nick = "abcd123";
+            var nick = "nick";
             var sut = (Nickname)nick;
+
             sut.Value.Should().Be(nick);
         }
 
         [Fact]
         public void Should_Convert_Nickname_To_String()
         {
-            var nick = "abcd123";
+            var nick = "nick";
             string sut = Nickname.Create(nick).Value;
+
             sut.Should().Be(nick);
         }
 

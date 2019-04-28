@@ -19,6 +19,7 @@ namespace InstaLike.Core.Tests
         public void Should_Create_Picture_From_Byte_Array()
         {
             var bytes = Convert.FromBase64String(Test_Picture_Base64);
+
             Picture.Create(bytes).IsSuccess.Should().BeTrue();
         }
 
@@ -27,6 +28,7 @@ namespace InstaLike.Core.Tests
         {
             var bytes = Convert.FromBase64String(Test_Picture_Base64);
             var sut = (Picture)bytes;
+
             sut.RawBytes.Should().BeEquivalentTo(bytes);
         }
 
@@ -35,6 +37,7 @@ namespace InstaLike.Core.Tests
         {
             var sut = (Picture)Test_Picture_Base64;
             var bytes = Convert.FromBase64String(Test_Picture_Base64);
+
             sut.RawBytes.Should().BeEquivalentTo(bytes);
         }
 
@@ -44,6 +47,7 @@ namespace InstaLike.Core.Tests
             var bytes = Convert.FromBase64String(Test_Picture_Base64);
             var sut1 = Picture.Create(bytes).Value;
             var sut2 = Picture.Create(bytes).Value;
+
             sut1.Should().Be(sut2);
         }
 
@@ -52,6 +56,7 @@ namespace InstaLike.Core.Tests
         {
             var sut1 = (Picture)Test_Picture_Base64;
             var sut2 = (Picture)Test_Picture_Base64;
+
             sut1.Should().Be(sut2);
         }
     }

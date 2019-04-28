@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
@@ -26,6 +27,7 @@ namespace InstaLike.Core.Domain
         }
 
         public virtual User Author { get; protected set; }
+
         public virtual Picture Picture { get; protected set; }
 
         private readonly string _text;
@@ -47,21 +49,42 @@ namespace InstaLike.Core.Domain
             return _likes.Any(like => like.User == user);
         }
 
-        public virtual void PutLikeBy(User user)
+        public virtual Result PutLikeBy(User user)
         {
-            if (!LikesTo(user))
+            if (user == null)
             {
-                _likes.Add(new Like(this, user));
+                throw new ArgumentNullException(nameof(user));
             }
-        }
 
-        public virtual void RemoveLikeBy(User user)
-        {
+            if (Author == user)
+            {
+                return Result.Fail($"User [{user.Nickname}] cannot put a 'Like' on their own posts.");
+            }
+
             if (LikesTo(user))
             {
-                var likeToRemove = _likes.Single(like => like.User == user);
-                _likes.Remove(likeToRemove);
+                return Result.Fail($"User [{user.Nickname}] has already put a 'Like' on this post.");
             }
+
+            _likes.Add(new Like(this, user));
+            return Result.Ok();
+        }
+
+        public virtual Result RemoveLikeBy(User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            
+            if (!LikesTo(user))
+            {
+                return Result.Fail($"User [{user.Nickname}] did not put any 'Like' on this post.");
+            }
+
+            var likeToRemove = _likes.Single(like => like.User == user);
+            _likes.Remove(likeToRemove);
+            return Result.Ok();
         }
 
         public virtual void AddComment(Comment comment)

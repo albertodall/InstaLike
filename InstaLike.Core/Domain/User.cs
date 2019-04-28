@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
@@ -14,7 +13,7 @@ namespace InstaLike.Core.Domain
         protected User()
         {
             _followers = new List<Follow>();
-            _followed  = new List<Follow>();
+            _followed = new List<Follow>();
         }
 
         public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
@@ -126,14 +125,14 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (!IsFollowing(user))
+            if (IsFollowing(user))
             {
-                _followed.Add(new Follow(this, user));
-                user.AddFollower(this);
-                return Result.Ok();
+                return Result.Fail($"User [{user.Nickname}] is already followed by user [{Nickname}].");
             }
 
-            return Result.Fail($"User '{user.Nickname}' is already followed by '{Nickname}'.");
+            _followed.Add(new Follow(this, user));
+            user.AddFollower(this);
+            return Result.Ok();
         }
 
         protected internal virtual void AddFollower(User follower)
@@ -148,15 +147,15 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (IsFollowing(user))
+            if (!IsFollowing(user))
             {
-                var follow = _followed.Single(f => f.Followed == user);
-                _followed.Remove(follow);
-                user.RemoveFollower(this);
-                return Result.Ok();
+                return Result.Fail($"User [{Nickname}] is not following user [{user.Nickname}].");
             }
 
-            return Result.Fail($"User '{Nickname}' is not following '{user.Nickname}'.");
+            var follow = _followed.Single(f => f.Followed == user);
+            _followed.Remove(follow);
+            user.RemoveFollower(this);
+            return Result.Ok();
         }
 
         protected internal virtual void RemoveFollower(User follower)
@@ -179,7 +178,7 @@ namespace InstaLike.Core.Domain
 
             if (post.LikesTo(this))
             {
-                return Result.Fail("This user already 'Liked' this post.");
+                return Result.Fail($"User [{Nickname}] already 'Liked' this post.");
             }
 
             post.PutLikeBy(this);
@@ -193,22 +192,13 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(post));
             }
 
-            if (post.LikesTo(this))
+            if (!post.LikesTo(this))
             {
-                post.RemoveLikeBy(this);
-                return Result.Ok();
+                return Result.Fail($"User [{Nickname}] did not put any 'Like' on this post.");
             }
 
-            return Result.Fail($"User '{Nickname}' did not put any 'Like' on this post.");
+            post.RemoveLikeBy(this);
+            return Result.Ok();
         }
-
-        public virtual List<Claim> Claims => new List<Claim>()
-        {
-            new Claim(ClaimTypes.NameIdentifier, ID.ToString(), ClaimValueTypes.Integer32),
-            new Claim(ClaimTypes.Name, Nickname, ClaimValueTypes.String),
-            new Claim(ClaimTypes.GivenName, FullName.Name, ClaimValueTypes.String),
-            new Claim(ClaimTypes.Surname, FullName.Surname, ClaimValueTypes.String),
-            new Claim(ClaimTypes.Email, Email, ClaimValueTypes.Email)
-        };
     }
 }

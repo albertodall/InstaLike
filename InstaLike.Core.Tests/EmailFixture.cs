@@ -28,7 +28,9 @@ namespace InstaLike.Core.Tests
         public void Should_Convert_A_String_To_Email()
         {
             var email = "my@email.it";
+
             var sut = (Email)email;
+
             sut.Value.Should().Be(email);
         }
 
@@ -36,7 +38,9 @@ namespace InstaLike.Core.Tests
         public void Should_Convert_An_Email_To_A_String()
         {
             var emailAddress = "my@email.it";
+
             string email = Email.Create(emailAddress).Value;
+
             email.Should().Be(emailAddress);
         }
 

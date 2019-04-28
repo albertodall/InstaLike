@@ -7,7 +7,8 @@ namespace InstaLike.Core.Domain
     {
         public string Value { get; }
 
-        protected PostText() { }
+        protected PostText()
+        { }
 
         private PostText(string text)
         {
@@ -48,7 +49,7 @@ namespace InstaLike.Core.Domain
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Value;
+            yield return Value.ToUpperInvariant();
         }
     }
 }

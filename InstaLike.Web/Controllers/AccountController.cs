@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Commands;
@@ -38,6 +39,7 @@ namespace InstaLike.Web.Controllers
             {
                 ReturnUrl = returnUrl
             };
+
             return View(model);
         }
 
@@ -55,7 +57,7 @@ namespace InstaLike.Web.Controllers
                 else
                 {
                     var userIdentity = new ClaimsIdentity(
-                        authenticationResult.Value.Claims,
+                        GetUserClaims(authenticationResult.Value),
                         CookieAuthenticationDefaults.AuthenticationScheme);
 
                     await HttpContext.SignInAsync(
@@ -78,8 +80,11 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var userIDClaim = (User.Identity as ClaimsIdentity).FindFirst(ClaimTypes.NameIdentifier);
-            await _dispatcher.Publish(new UserLoggedOutEvent(int.Parse(userIDClaim.Value), User.Identity.Name));
+
+            var userIDClaim = (User.Identity as ClaimsIdentity)
+                .FindFirst(ClaimTypes.NameIdentifier);
+            await _dispatcher.Publish(
+                new UserLoggedOutEvent(int.Parse(userIDClaim.Value), User.Identity.Name));
 
             return RedirectToAction("Index", "Home");
         }
@@ -87,18 +92,18 @@ namespace InstaLike.Web.Controllers
         public async Task<IActionResult> Profile(string id)
         {
             var currentUserID = User.GetIdentifier();
-
             var query = new UserProfileQuery(currentUserID, id, MaxThumbnailsInUserProfile);
             var model = await _dispatcher.Send(query);
+
             return View(model);
         }
 
         public async Task<IActionResult> Edit()
         {
             var currentUserID = User.GetIdentifier();
-
             var query = new UserDetailsQuery(currentUserID);
             var model = await _dispatcher.Send(query);
+
             return View(model);
         }
 
@@ -126,6 +131,7 @@ namespace InstaLike.Web.Controllers
                     ModelState.AddModelError("", processCommandResult.Error);
                 }
             }
+
             return View(userDetails);
         }
 
@@ -166,6 +172,7 @@ namespace InstaLike.Web.Controllers
                 }
                 
             }
+
             return View(newUser);
         }
 
@@ -181,8 +188,8 @@ namespace InstaLike.Web.Controllers
         {
             ViewBag.Message = $"Users followed by {id}";
             var query = new FollowingQuery(id);
-            var followersList = await _dispatcher.Send(query);
-            return PartialView("_UserListPartial", followersList);
+            var followedList = await _dispatcher.Send(query);
+            return PartialView("_UserListPartial", followedList);
         }
 
         public async Task<IActionResult> Follow(string id)
@@ -211,6 +218,7 @@ namespace InstaLike.Web.Controllers
         {
             var command = new UnfollowCommand(User.GetIdentifier(), id);
             var processCommandResult = await _dispatcher.Send(command);
+
             if (processCommandResult.IsSuccess)
             {
                 return RedirectToAction(nameof(Profile), new { id });
@@ -219,6 +227,23 @@ namespace InstaLike.Web.Controllers
             {
                 return RedirectToAction("Error", "Home");
             }
+        }
+
+        /// <summary>
+        /// Builds the list of claims for the authenticated user.
+        /// </summary>
+        /// <param name="user">Authenticated user.</param>
+        /// <returns>The list of claims.</returns>
+        private static List<Claim> GetUserClaims(User user) 
+        {
+            return new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(), ClaimValueTypes.Integer32),
+                new Claim(ClaimTypes.Name, user.Nickname, ClaimValueTypes.String),
+                new Claim(ClaimTypes.GivenName, user.FullName.Name, ClaimValueTypes.String),
+                new Claim(ClaimTypes.Surname, user.FullName.Surname, ClaimValueTypes.String),
+                new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.Email)
+            };
         }
     }
 }

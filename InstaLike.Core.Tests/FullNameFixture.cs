@@ -35,6 +35,7 @@ namespace InstaLike.Core.Tests
         {
             string fullname = "first last";
             var sut = (FullName)fullname;
+
             sut.ToString().Should().Be(fullname);
         }
 
@@ -43,6 +44,7 @@ namespace InstaLike.Core.Tests
         {
             string fullname = "first   last";
             var sut = (FullName)fullname;
+
             sut.ToString().Should().Be("first last");
         }
 
@@ -53,6 +55,7 @@ namespace InstaLike.Core.Tests
             var last = "last;";
             var sut1 = FullName.Create(first, last).Value;
             var sut2 = FullName.Create(first, last).Value;
+
             sut1.Should().Be(sut2);
             sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeTrue();
         }
@@ -62,6 +65,7 @@ namespace InstaLike.Core.Tests
         {
             var sut1 = FullName.Create("first1", "last1").Value;
             var sut2 = FullName.Create("first2", "last2").Value;
+
             sut1.Should().NotBe(sut2);
             sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeFalse();
         }
