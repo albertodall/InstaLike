@@ -53,12 +53,22 @@
 
         public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
         {
+            if (left is null && right is null)
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
             return left.Equals(right);
         }
 
         public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
         {
-            return !left.Equals(right);
+            return !(left == right);
         }
     }
 }

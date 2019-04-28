@@ -109,6 +109,16 @@ namespace InstaLike.Core.Domain
             return _followed.Any(f => f.Followed == user);
         }
 
+        public virtual bool IsFollowedBy(User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return _followers.Any(f => f.Follower == user);
+        }
+
         public virtual Result Follow(User user)
         {
             if (user == null)
@@ -155,16 +165,6 @@ namespace InstaLike.Core.Domain
             _followers.Remove(follow);
         }
 
-        public virtual bool Likes(Post post)
-        {
-            if (post == null)
-            {
-                throw new ArgumentNullException(nameof(post));
-            }
-
-            return post.LikesTo(this);
-        }
-
         public virtual Result PutLikeTo(Post post)
         {
             if (post == null)
@@ -177,7 +177,7 @@ namespace InstaLike.Core.Domain
                 return Result.Fail("You cannot put a 'Like' on your own posts.");
             }
 
-            if (Likes(post))
+            if (post.LikesTo(this))
             {
                 return Result.Fail("This user already 'Liked' this post.");
             }
@@ -193,7 +193,7 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(post));
             }
 
-            if (Likes(post))
+            if (post.LikesTo(this))
             {
                 post.RemoveLikeBy(this);
                 return Result.Ok();
