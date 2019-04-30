@@ -47,9 +47,8 @@ namespace InstaLike.Web.EventHandlers
 
                     sender = await senderQuery.GetValueAsync();
                     var notificationToInsert = new Notification(sender, post.Author, message);
-
-                    await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
+
                     _logger.Information("Sent notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]", 
                         notification.PostID, 
                         notification.SenderNickname,
@@ -63,6 +62,7 @@ namespace InstaLike.Web.EventHandlers
                         notification.SenderNickname,
                         sender?.ID,
                         ex.Message);
+
                     throw;
                 }
             }

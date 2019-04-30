@@ -35,6 +35,7 @@ namespace InstaLike.Web.Controllers
             {
                 Picture = Picture.EmptyPicture
             };
+
             return View(model);
         }
 
@@ -66,6 +67,7 @@ namespace InstaLike.Web.Controllers
         {
             var postQuery = new PostDetailQuery(id, User.GetIdentifier());
             var model = await _dispatcher.Send(postQuery);
+
             return View(model);
         }
 

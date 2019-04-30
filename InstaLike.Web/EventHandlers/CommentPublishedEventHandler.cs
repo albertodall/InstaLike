@@ -48,7 +48,6 @@ namespace InstaLike.Web.EventHandlers
                     sender = await senderQuery.GetValueAsync();
                     var notificationToInsert = new Notification(sender, post.Author, message);
 
-                    await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
                     _logger.Information("Sent comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]", 

@@ -38,6 +38,6 @@ namespace InstaLike.Web.Services
                 .Ensure(user => user.Password.HashMatches(password), "Username or password are not valid.")
                 .OnSuccess(user => _logger.Debug("User {userName} authenticated correctly.", userName))
                 .OnFailure(user => _logger.Debug("User {userName} did not authenticate correctly.", userName));
-        }      
+        }
     }
 }

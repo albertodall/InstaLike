@@ -26,6 +26,7 @@ namespace InstaLike.Web.Controllers
         {
             var query = new TimelineQuery(User.GetIdentifier(), MaxNumberOfPosts);
             var model = await _dispatcher.Send(query);
+
             return View(model);
         }
 

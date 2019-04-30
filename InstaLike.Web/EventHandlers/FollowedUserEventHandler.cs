@@ -46,7 +46,6 @@ namespace InstaLike.Web.EventHandlers
                     recipient = await recipientQuery.GetValueAsync();
 
                     var notificationToInsert = new Notification(sender, recipient, message);
-                    await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{FollowedNickname}({FollowedID})] has been notified that user [{FollowerNickname}({FollowerID})] has just started following him/her.",
@@ -63,6 +62,7 @@ namespace InstaLike.Web.EventHandlers
                         recipient?.Nickname,
                         recipient?.ID,
                         ex.Message);
+
                     throw;
                 }
             }

@@ -81,10 +81,8 @@ namespace InstaLike.Web.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            var userIDClaim = (User.Identity as ClaimsIdentity)
-                .FindFirst(ClaimTypes.NameIdentifier);
-            await _dispatcher.Publish(
-                new UserLoggedOutEvent(int.Parse(userIDClaim.Value), User.Identity.Name));
+            var userIDClaim = User.GetIdentifier();
+            await _dispatcher.Publish(new UserLoggedOutEvent(userIDClaim, User.Identity.Name));
 
             return RedirectToAction("Index", "Home");
         }
@@ -170,7 +168,6 @@ namespace InstaLike.Web.Controllers
                 {
                     ModelState.AddModelError("", processCommandResult.Error);
                 }
-                
             }
 
             return View(newUser);
@@ -181,6 +178,7 @@ namespace InstaLike.Web.Controllers
             ViewBag.Message = $"Users following {id}";
             var query = new FollowersQuery(id);
             var followersList = await _dispatcher.Send(query);
+
             return PartialView("_UserListPartial", followersList);
         }
 
@@ -189,6 +187,7 @@ namespace InstaLike.Web.Controllers
             ViewBag.Message = $"Users followed by {id}";
             var query = new FollowingQuery(id);
             var followedList = await _dispatcher.Send(query);
+
             return PartialView("_UserListPartial", followedList);
         }
 
@@ -208,10 +207,8 @@ namespace InstaLike.Web.Controllers
 
                 return RedirectToAction(nameof(Profile), new { id });
             }
-            else
-            {
-                return RedirectToAction("Error", "Home");
-            }
+
+            return RedirectToAction("Error", "Home");
         }
 
         public async Task<IActionResult> Unfollow(string id)
@@ -223,10 +220,8 @@ namespace InstaLike.Web.Controllers
             {
                 return RedirectToAction(nameof(Profile), new { id });
             }
-            else
-            {
-                return RedirectToAction("Error", "Home");
-            }
+
+            return RedirectToAction("Error", "Home");
         }
 
         /// <summary>

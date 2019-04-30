@@ -24,6 +24,7 @@ namespace InstaLike.Web.Infrastructure
             var response = await next();
             _chronometer.Stop();
             _logger.Debug($"End Request. Elapsed time: {_chronometer.ElapsedMilliseconds} ms.");
+
             return response;
         }
     }
