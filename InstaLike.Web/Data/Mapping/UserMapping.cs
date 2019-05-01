@@ -24,7 +24,7 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.Password).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
-            Map(p => p.RegistrationDate).CustomType<DateTimeOffset>()
+            Map(p => p.RegistrationDate)
                 .Not.Nullable();
 
             Component(p => p.FullName, m =>
