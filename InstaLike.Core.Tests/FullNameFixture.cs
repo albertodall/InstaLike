@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Execution;
 using InstaLike.Core.Domain;
 using Xunit;
 
@@ -56,8 +57,11 @@ namespace InstaLike.Core.Tests
             var sut1 = FullName.Create(first, last).Value;
             var sut2 = FullName.Create(first, last).Value;
 
-            sut1.Should().Be(sut2);
-            sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeTrue();
+            using (new AssertionScope())
+            {
+                sut1.Should().Be(sut2);
+                sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeTrue();
+            }
         }
 
         [Fact]
@@ -66,8 +70,11 @@ namespace InstaLike.Core.Tests
             var sut1 = FullName.Create("first1", "last1").Value;
             var sut2 = FullName.Create("first2", "last2").Value;
 
-            sut1.Should().NotBe(sut2);
-            sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeFalse();
+            using (new AssertionScope())
+            {
+                sut1.Should().NotBe(sut2);
+                sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeFalse();
+            }
         }
     }
 }
