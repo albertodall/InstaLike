@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Data;
 using System.Data.Common;
 using NHibernate;
 using NHibernate.Engine;
-using NHibernate.SqlTypes;
 using NHibernate.Type;
 using NHibernate.UserTypes;
 
@@ -11,14 +9,14 @@ namespace InstaLike.IntegrationTests
 {
     /// <summary>
     /// User Type for managing DateTimeOffset fields.
-    /// SQLite doesn't have a DateTimeOffset type, so this user type splits the original DateTimeOffset value
+    /// SQLite doesn't have a DateTimeOffset type, so, to address that, this user type splits the original DateTimeOffset value
     /// into two fields:
     ///     - Ticks: to store the datetime part.
     ///     - Offset: to store the original offset.
     /// </summary>
     /// <remarks>
     /// This type has to be injected into the NHibernate configuration by convention, because we don't want
-    /// to change the types defined in the original mappings.
+    /// to change the types defined in the original mappings (<see cref="DateTimeOffsetTypeConvention"/>).
     /// </remarks>
     internal class DateTimeOffsetUserType : ICompositeUserType
     {
@@ -65,7 +63,7 @@ namespace InstaLike.IntegrationTests
                 case 1:
                     return dateTimeOffset.Offset;
                 default:
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException("Property is invalid.");
             }
         }
 

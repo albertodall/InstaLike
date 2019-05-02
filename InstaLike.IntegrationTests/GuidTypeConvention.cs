@@ -6,16 +6,17 @@ using FluentNHibernate.Conventions.Instances;
 
 namespace InstaLike.IntegrationTests
 {
-    internal class DateTimeOffsetTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
+    internal class GuidTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
     {
         public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
         {
-            criteria.Expect(x => x.Property.PropertyType == typeof(DateTimeOffset));
+            criteria.Expect(x => x.Property.PropertyType == typeof(Guid));
         }
 
         public void Apply(IPropertyInstance instance)
         {
-            instance.CustomType<DateTimeOffsetUserType>();
+            instance.Not.ReadOnly();
+            instance.Default(Guid.Empty.ToString().Replace("-", string.Empty));
         }
     }
 }

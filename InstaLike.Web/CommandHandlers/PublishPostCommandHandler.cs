@@ -10,7 +10,7 @@ using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result>
+    internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<int>>
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
@@ -21,7 +21,7 @@ namespace InstaLike.Web.CommandHandlers
             _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Result> Handle(PublishPostCommand request, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
@@ -49,7 +49,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.UserID,
                         ex.Message);
 
-                    return Result.Fail(ex.Message);
+                    return Result.Fail<int>(ex.Message);
                 }
             }
         }
