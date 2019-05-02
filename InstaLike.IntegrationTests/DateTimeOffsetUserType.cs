@@ -36,6 +36,8 @@ namespace InstaLike.IntegrationTests
 
         public object Disassemble(object value, ISessionImplementor session) => value;
 
+        public object Replace(object original, object target, ISessionImplementor session, object owner) => original;
+
         public new bool Equals(object x, object y)
         {
             if (x is null && y is null)
@@ -54,7 +56,22 @@ namespace InstaLike.IntegrationTests
 
         public object GetPropertyValue(object component, int property)
         {
-            throw new NotImplementedException();
+            var dateTimeOffset = (DateTimeOffset)component;
+
+            switch (property)
+            {
+                case 0:
+                    return dateTimeOffset.UtcTicks;
+                case 1:
+                    return dateTimeOffset.Offset;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public void SetPropertyValue(object component, int property, object value)
+        {
+            throw new InvalidOperationException($"{nameof(DateTimeOffset)} is an immutable object. SetPropertyValue is not supported.");
         }
 
         public object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
@@ -83,13 +100,6 @@ namespace InstaLike.IntegrationTests
 
             NHibernateUtil.Ticks.NullSafeSet(cmd, utcTicks, index++, session);
             NHibernateUtil.TimeSpan.NullSafeSet(cmd, offset, index, session);
-        }
-
-        public object Replace(object original, object target, ISessionImplementor session, object owner) => original;
-
-        public void SetPropertyValue(object component, int property, object value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

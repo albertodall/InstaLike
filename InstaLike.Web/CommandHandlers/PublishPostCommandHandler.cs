@@ -31,6 +31,7 @@ namespace InstaLike.Web.CommandHandlers
                     author = await _session.LoadAsync<User>(request.UserID);
                     var post = new Post(author, (Picture)request.PictureRawBytes, (PostText)request.Text);
 
+                    await _session.SaveAsync(post);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
