@@ -118,5 +118,19 @@ namespace InstaLike.IntegrationTests
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }
+
+        [Fact]
+        public async void Unregistered_User_Should_Not_Be_Able_To_Log_In()
+        {
+            Result<User> authenticationResult;
+
+            using (var session = _testFixture.OpenSession())
+            {
+                var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
+                authenticationResult = await sut.AuthenticateUser("not_existing_user", "xxx42");
+            }
+
+            authenticationResult.IsSuccess.Should().BeFalse();
+        }
     }
 }
