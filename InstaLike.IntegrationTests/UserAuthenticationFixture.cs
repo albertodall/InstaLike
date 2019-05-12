@@ -8,83 +8,42 @@ using InstaLike.Web.CommandHandlers;
 using InstaLike.Web.Services;
 using Serilog;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests
 {
     public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     {
         private readonly DatabaseFixture _testFixture;
+        private readonly ITestOutputHelper _output;
 
-        public UserAuthenticationFixture(DatabaseFixture fixture)
+        public UserAuthenticationFixture(DatabaseFixture fixture, ITestOutputHelper output)
         {
             _testFixture = fixture;
-        }
-
-        [Fact]
-        public async void Should_Register_User()
-        {
-            Result<int> userRegistrationResult;
-
-            var userRegistrationCommand = new RegisterUserCommand(
-                "testuser", 
-                "test", 
-                "user", 
-                "password", 
-                "testuser@acme.com",
-                "test user bio",
-                Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
-            
-            using (var session = _testFixture.OpenSession())
-            {
-                var handler = new RegisterUserCommandHandler(session, Log.Logger);
-                userRegistrationResult = await handler.Handle(userRegistrationCommand, default);
-            }
-
-            using (new AssertionScope())
-            {
-                userRegistrationResult.IsSuccess.Should().BeTrue();
-                userRegistrationResult.Value.Should().BeGreaterThan(0);
-                using (var session = _testFixture.OpenSession())
-                {
-                    (await session.QueryOver<User>().RowCountAsync()).Should().Be(1);
-                }
-            }
-        }
+            _output = output;
+        }       
 
         [Fact]
         public async void Registered_User_Should_Be_Able_To_Log_In()
         {
-            int testUserID;
             string testUserName = "testuser2";
             string testPassword = "password";
             Result<User> authenticationResult;
 
-            var userRegistrationCommand = new RegisterUserCommand(
-                testUserName,
-                "test2",
-                "user2",
-                testPassword,
-                "testuser2@acme.com",
-                "test user 2 bio",
-                Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
-
-            using (var session = _testFixture.OpenSession())
+            var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
+            using (var session = _testFixture.OpenSession(_output))
             {
-                var handler = new RegisterUserCommandHandler(session, Log.Logger);
-                testUserID = (await handler.Handle(userRegistrationCommand, default)).Value;
+                await session.SaveAsync(testUser);
             }
             
-            using (var session = _testFixture.OpenSession())
-            {
-                var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
-                authenticationResult = await sut.AuthenticateUser(testUserName, testPassword);
-            }
+            var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
+            authenticationResult = await sut.AuthenticateUser(testUserName, testPassword);
 
             using (new AssertionScope())
             {
                 authenticationResult.IsSuccess.Should().BeTrue();
                 authenticationResult.Value.Should().NotBeNull();
-                authenticationResult.Value.ID.Should().Be(testUserID);
+                authenticationResult.Value.ID.Should().Be(testUser.ID);
             }
         }
 
@@ -95,26 +54,14 @@ namespace InstaLike.IntegrationTests
             string testPassword = "password3";
             Result<User> authenticationResult;
 
-            var userRegistrationCommand = new RegisterUserCommand(
-                testUserName,
-                "test2",
-                "user2",
-                testPassword,
-                "testuser2@acme.com",
-                "test user 2 bio",
-                Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
-
-            using (var session = _testFixture.OpenSession())
+            var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");
+            using (var session = _testFixture.OpenSession(_output))
             {
-                var handler = new RegisterUserCommandHandler(session, Log.Logger);
-                await handler.Handle(userRegistrationCommand, default);
+                await session.SaveAsync(testUser);
             }
 
-            using (var session = _testFixture.OpenSession())
-            {
-                var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
-                authenticationResult = await sut.AuthenticateUser(testUserName, "xxx42");
-            }
+            var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
+            authenticationResult = await sut.AuthenticateUser(testUserName, "xxx42");
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }
@@ -124,11 +71,8 @@ namespace InstaLike.IntegrationTests
         {
             Result<User> authenticationResult;
 
-            using (var session = _testFixture.OpenSession())
-            {
-                var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
-                authenticationResult = await sut.AuthenticateUser("not_existing_user", "xxx42");
-            }
+            var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
+            authenticationResult = await sut.AuthenticateUser("not_existing_user", "xxx42");
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }

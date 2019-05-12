@@ -3,7 +3,9 @@ using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions;
+using FluentNHibernate.Conventions.AcceptanceCriteria;
 using FluentNHibernate.Conventions.Helpers;
+using FluentNHibernate.Conventions.Inspections;
 using FluentNHibernate.Conventions.Instances;
 using FluentNHibernate.Mapping;
 using InstaLike.Web.Infrastructure;
@@ -31,11 +33,14 @@ namespace InstaLike.Web.Extensions
                         .UseReflectionOptimizer()
                 )
                 .Mappings(m =>
-                    m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly())
+                    m.FluentMappings
                         .Conventions.Add(
                             LazyLoad.Always(),
                             DynamicUpdate.AlwaysTrue())
                         .Conventions.Add<AssociationsMappingConvention>()
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+                        
                     );
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
@@ -93,6 +98,22 @@ namespace InstaLike.Web.Extensions
         {
             instance.LazyLoad(Laziness.Proxy);
             instance.Cascade.None();
+            instance.Not.Nullable();
+        }
+    }
+
+    /// <summary>
+    /// Set Guid fields not nullable, for filestream references.
+    /// </summary>
+    internal class NotNullGuidTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
+    {
+        public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
+        {
+            criteria.Expect(x => x.Property.PropertyType == typeof(Guid));
+        }
+
+        public void Apply(IPropertyInstance instance)
+        {
             instance.Not.Nullable();
         }
     }

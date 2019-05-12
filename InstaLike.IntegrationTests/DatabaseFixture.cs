@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
@@ -7,6 +6,7 @@ using InstaLike.Web.Data.Mapping;
 using InstaLike.Web.Extensions;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
+using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests
 {
@@ -30,28 +30,33 @@ namespace InstaLike.IntegrationTests
                 .Mappings(m =>
                     m.FluentMappings
                         .Conventions.Add(
-                            LazyLoad.Always(),
                             DynamicUpdate.AlwaysTrue(),
                             new AssociationsMappingConvention(),
-                            new DateTimeOffsetTypeConvention(),
-                            new GuidTypeConvention()
+                            new DateTimeOffsetTypeConvention()
                         )
                         .Add<UserMapping>()
                         .Add<FollowMapping>()
+                        .ExportTo(Environment.CurrentDirectory)
                 )
-                .ExposeConfiguration(async cfg => 
+                .ExposeConfiguration(async cfg =>
                 {
                     var schemaExport = new SchemaExport(cfg);
+                    schemaExport.SetOutputFile("InstaLike_Schema.sql");
                     await schemaExport.DropAsync(true, true);
                     await schemaExport.CreateAsync(true, true);
-                }).BuildSessionFactory();
+
+                })
+                .BuildSessionFactory();
         }
 
         public ISessionFactory SessionFactory { get; private set; }
 
-        public ISession OpenSession()
+        public ISession OpenSession(ITestOutputHelper output)
         {
-            return SessionFactory.OpenSession();
+            return SessionFactory
+                .WithOptions()
+                    .Interceptor(new XUnitSqlStatementOutputInterceptor(output))
+                .OpenSession();
         }
 
         public string GetTestPictureBase64()

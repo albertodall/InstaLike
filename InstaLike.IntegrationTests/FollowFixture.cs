@@ -7,16 +7,19 @@ using InstaLike.Core.Domain;
 using InstaLike.Web.CommandHandlers;
 using Serilog;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests
 {
     public class FollowFixture : IClassFixture<DatabaseFixture>
     {
         private readonly DatabaseFixture _testFixture;
+        private readonly ITestOutputHelper _output;
 
-        public FollowFixture(DatabaseFixture fixture)
+        public FollowFixture(DatabaseFixture fixture, ITestOutputHelper output)
         {
             _testFixture = fixture;
+            _output = output;
         }
 
         [Fact]
@@ -26,21 +29,17 @@ namespace InstaLike.IntegrationTests
             User user2;
             Result followResult;
 
-            using (var session = _testFixture.OpenSession())
+            using (var session = _testFixture.OpenSession(_output))
             {
-                user1 = new User((Nickname)"user1", (FullName)"test1 user1", (Password)"password", (Email)"testuser1@acme.com", "bio1");
-                user2 = new User((Nickname)"user2", (FullName)"test2 user2", (Password)"password", (Email)"testuser2@acme.com", "bio2");
+                user1 = new User((Nickname)"user1", (FullName)"test1 user1", Password.Create("password").Value, (Email)"testuser1@acme.com", "bio1");
+                user2 = new User((Nickname)"user2", (FullName)"test2 user2", Password.Create("password").Value, (Email)"testuser2@acme.com", "bio2");
 
-                using (var tx = session.BeginTransaction())
-                {
-                    await session.SaveAsync(user1);
-                    await session.SaveAsync(user2);
-                    await tx.CommitAsync();
-                }
+                await session.SaveAsync(user1);
+                await session.SaveAsync(user2);
             }
 
             var followCommand = new FollowCommand(user1.ID, "user2");
-            using (var session = _testFixture.OpenSession())
+            using (var session = _testFixture.OpenSession(_output))
             {
                 var handler = new FollowCommandHandler(session, Log.Logger);
                 followResult = await handler.Handle(followCommand, default);
@@ -49,7 +48,7 @@ namespace InstaLike.IntegrationTests
             using (new AssertionScope())
             {
                 followResult.IsSuccess.Should().BeTrue();
-                using (var session = _testFixture.OpenSession())
+                using (var session = _testFixture.OpenSession(_output))
                 {
                     session.Get<User>(user1.ID).Followers.Count.Should().Be(1);
                     session.Get<User>(user2.ID).Followed.Count.Should().Be(1);
