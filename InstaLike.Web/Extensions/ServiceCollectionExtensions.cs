@@ -50,7 +50,7 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureAuthentication(this IServiceCollection services)
         {
-            services.AddSingleton<IUserAuthenticationService, DatabaseAuthenticationService>();
+            services.AddScoped<IUserAuthenticationService, DatabaseAuthenticationService>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(opt =>
                 {

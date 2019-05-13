@@ -10,12 +10,12 @@ namespace InstaLike.Web.Services
 {
     internal sealed class DatabaseAuthenticationService : IUserAuthenticationService
     {
-        private readonly ISessionFactory _sessionFactory;
+        private readonly ISession _session;
         private readonly ILogger _logger;
 
-        public DatabaseAuthenticationService(ISessionFactory sessionFactory, ILogger logger)
+        public DatabaseAuthenticationService(ISession session, ILogger logger)
         {
-            _sessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
+            _session = session ?? throw new ArgumentNullException(nameof(session));
             _logger = logger?.ForContext<DatabaseAuthenticationService>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -25,13 +25,9 @@ namespace InstaLike.Web.Services
 
             _logger.Debug("Authenticating user {userName}", userName);
 
-            using (var session = _sessionFactory.OpenStatelessSession())
-            {
-                var authQuery = session.QueryOver<User>()
-                    .Where(Restrictions.Eq("Nickname", userName)); // Compares the private field
-
-                userLoggingIn = await authQuery.SingleOrDefaultAsync();
-            }
+            var authQuery = _session.QueryOver<User>()
+                .Where(Restrictions.Eq("Nickname", userName)); // Compares the private field
+            userLoggingIn = await authQuery.SingleOrDefaultAsync();
 
             return userLoggingIn
                 .ToResult($"Username or password are not valid.")
