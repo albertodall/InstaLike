@@ -12,7 +12,7 @@ namespace InstaLike.IntegrationTests
 {
     public class DatabaseFixture : IDisposable
     {
-        private static string DatabaseFileName;
+        private string DatabaseFileName;
 
         public DatabaseFixture()
         {
@@ -30,18 +30,19 @@ namespace InstaLike.IntegrationTests
                 .Mappings(m =>
                     m.FluentMappings
                         .Conventions.Add(
+                            DefaultLazy.Always(),
                             DynamicUpdate.AlwaysTrue(),
                             new AssociationsMappingConvention(),
                             new DateTimeOffsetTypeConvention()
                         )
                         .Add<UserMapping>()
                         .Add<FollowMapping>()
-                        .ExportTo(Environment.CurrentDirectory)
+                        // .ExportTo(Environment.CurrentDirectory)
                 )
                 .ExposeConfiguration(async cfg =>
                 {
                     var schemaExport = new SchemaExport(cfg);
-                    schemaExport.SetOutputFile("InstaLike_Schema.sql");
+                    schemaExport.SetOutputFile($"{DatabaseFileName}_Schema.sql");
                     await schemaExport.DropAsync(true, true);
                     await schemaExport.CreateAsync(true, true);
 

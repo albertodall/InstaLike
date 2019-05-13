@@ -34,16 +34,16 @@ namespace InstaLike.Web.CommandHandlers
                         .Where(Restrictions.Eq("Nickname", request.FollowedNickname));
                     followedUser = await followedUserQuery.SingleOrDefaultAsync();
 
-                    follower.Follow(followedUser);
+                    return await follower.Follow(followedUser)
+                        .OnSuccess(async () =>
+                        {
+                            await tx.CommitAsync();
 
-                    await tx.CommitAsync();
-
-                    _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
-                        request.FollowerID,
-                        request.FollowedNickname,
-                        followedUser.ID);
-
-                    return Result.Ok();
+                            _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
+                                request.FollowerID,
+                                request.FollowedNickname,
+                                followedUser.ID);
+                        });                    
                 }
                 catch (ADOException ex)
                 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -23,17 +24,17 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
-        public async void Should_Register_User()
+        public async Task Should_Register_User()
         {
             Result<int> userRegistrationResult;
 
             var userRegistrationCommand = new RegisterUserCommand(
-                "testuser",
-                "test",
+                "registereduser",
+                "registered",
                 "user",
                 "password",
-                "testuser@acme.com",
-                "test user bio",
+                "registereduser@acme.com",
+                "registered user bio",
                 Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
 
             using (var session = _testFixture.OpenSession(_output))

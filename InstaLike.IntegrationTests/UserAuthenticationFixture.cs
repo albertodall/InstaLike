@@ -1,10 +1,7 @@
-﻿using System;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
-using InstaLike.Web.CommandHandlers;
 using InstaLike.Web.Services;
 using Serilog;
 using Xunit;
@@ -35,9 +32,12 @@ namespace InstaLike.IntegrationTests
             {
                 await session.SaveAsync(testUser);
             }
-            
-            var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
-            authenticationResult = await sut.AuthenticateUser(testUserName, testPassword);
+
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new DatabaseAuthenticationService(session, Log.Logger);
+                authenticationResult = await sut.AuthenticateUser(testUserName, testPassword);
+            }
 
             using (new AssertionScope())
             {
@@ -60,8 +60,11 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(testUser);
             }
 
-            var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
-            authenticationResult = await sut.AuthenticateUser(testUserName, "xxx42");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new DatabaseAuthenticationService(session, Log.Logger);
+                authenticationResult = await sut.AuthenticateUser(testUserName, "xxx42");
+            }
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }
@@ -71,8 +74,11 @@ namespace InstaLike.IntegrationTests
         {
             Result<User> authenticationResult;
 
-            var sut = new DatabaseAuthenticationService(_testFixture.SessionFactory, Log.Logger);
-            authenticationResult = await sut.AuthenticateUser("not_existing_user", "xxx42");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new DatabaseAuthenticationService(session, Log.Logger);
+                authenticationResult = await sut.AuthenticateUser("not_existing_user", "xxx42");
+            }
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }
