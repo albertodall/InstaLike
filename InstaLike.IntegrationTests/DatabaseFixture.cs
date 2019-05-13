@@ -37,7 +37,10 @@ namespace InstaLike.IntegrationTests
                         )
                         .Add<UserMapping>()
                         .Add<FollowMapping>()
-                        // .ExportTo(Environment.CurrentDirectory)
+                        .Add<PostMapping>()
+                        .Add<CommentMapping>()
+                        .Add<LikeMapping>()
+                        .Add<NotificationMapping>()
                 )
                 .ExposeConfiguration(async cfg =>
                 {

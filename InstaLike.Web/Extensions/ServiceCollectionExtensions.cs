@@ -99,6 +99,7 @@ namespace InstaLike.Web.Extensions
             instance.LazyLoad(Laziness.Proxy);
             instance.Cascade.None();
             instance.Not.Nullable();
+            instance.ForeignKey($"{instance.EntityType.Name}_{instance.Property.Name}");
         }
     }
 

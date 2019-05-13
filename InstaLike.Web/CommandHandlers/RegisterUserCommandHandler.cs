@@ -65,6 +65,7 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
                         request.Nickname,
                         ex.Message);

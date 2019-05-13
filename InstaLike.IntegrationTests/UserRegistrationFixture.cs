@@ -49,9 +49,142 @@ namespace InstaLike.IntegrationTests
                 userRegistrationResult.Value.Should().BeGreaterThan(0);
                 using (var session = _testFixture.OpenSession(_output))
                 {
-                    (await session.QueryOver<User>().RowCountAsync()).Should().Be(1);
+                    (await session.GetAsync<User>(userRegistrationResult.Value)).Should().NotBeNull();
                 }
             }
+        }
+
+        [Fact]
+        public async Task Should_Edit_Registered_User_Information()
+        {
+            string testUserName = "testuser1";
+            string testPassword = "password";
+            Result editCommandResult;
+
+            var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
+
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(testUser);
+            }
+
+            var command = new EditUserDetailsCommand(
+                testUser.ID, 
+                $"{testUser.Nickname}_mod",
+                $"{testUser.FullName.Name}_mod",
+                $"{testUser.FullName.Surname}_mod",
+                "new@email.com",
+                "new bio",
+                Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+                editCommandResult = await sut.Handle(command, default);
+            }
+
+            using (new AssertionScope())
+            {
+                editCommandResult.IsSuccess.Should().BeTrue();
+                using (var session = _testFixture.OpenSession(_output))
+                {
+                    var modifiedUser = await session.GetAsync<User>(testUser.ID);
+                    modifiedUser.Nickname.Should().Be((Nickname)$"{testUser.Nickname}_mod");
+                    modifiedUser.FullName.Should().Be((FullName)$"{testUser.FullName.Name}_mod {testUser.FullName.Surname}_mod");
+                    modifiedUser.Email.Should().Be((Email)"new@email.com");
+                    modifiedUser.Biography.Should().Be("new bio");
+                    modifiedUser.ProfilePicture.Should().Be((Picture)_testFixture.GetTestPictureBase64());
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Not_Edit_User_Email_If_Email_Is_Not_Valid()
+        {
+            string testUserName = "testuser2";
+            string testPassword = "password";
+            Result editCommandResult;
+
+            var testUser = new User((Nickname)testUserName, (FullName)"test2 user2", Password.Create(testPassword).Value, (Email)"testuser2@acme.com", "bio2");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(testUser);
+            }
+
+            var command = new EditUserDetailsCommand(
+                testUser.ID,
+                testUser.Nickname,
+                testUser.FullName.Name,
+                testUser.FullName.Surname,
+                "xyz",
+                testUser.Biography,
+                testUser.ProfilePicture);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+                editCommandResult = await sut.Handle(command, default);
+            }
+
+            editCommandResult.IsSuccess.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Should_Not_Edit_User_Nickname_If_Nickname_Is_Not_Valid()
+        {
+            string testUserName = "testuser3";
+            string testPassword = "password";
+            Result editCommandResult;
+
+            var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(testUser);
+            }
+
+            var command = new EditUserDetailsCommand(
+                testUser.ID,
+                string.Empty,
+                testUser.FullName.Name,
+                testUser.FullName.Surname,
+                testUser.Email,
+                testUser.Biography,
+                testUser.ProfilePicture);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+                editCommandResult = await sut.Handle(command, default);
+            }
+
+            editCommandResult.IsSuccess.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Should_Not_Edit_User_Full_Name_If_Full_Name_Is_Not_Valid()
+        {
+            string testUserName = "testuser4";
+            string testPassword = "password";
+            Result editCommandResult;
+
+            var testUser = new User((Nickname)testUserName, (FullName)"test4 user4", Password.Create(testPassword).Value, (Email)"testuser4@acme.com", "bio4");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(testUser);
+            }
+
+            var command = new EditUserDetailsCommand(
+                testUser.ID,
+                testUser.Nickname,
+                string.Empty,
+                string.Empty,
+                testUser.Email,
+                testUser.Biography,
+                testUser.ProfilePicture);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+                editCommandResult = await sut.Handle(command, default);
+            }
+
+            editCommandResult.IsSuccess.Should().BeFalse();
         }
     }
 }

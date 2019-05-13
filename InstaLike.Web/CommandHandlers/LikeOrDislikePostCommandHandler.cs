@@ -11,7 +11,9 @@ using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>
+    internal sealed class LikeOrDislikePostCommandHandler : 
+        IRequestHandler<LikePostCommand, Result>, 
+        IRequestHandler<DislikePostCommand, Result>
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
@@ -32,18 +34,18 @@ namespace InstaLike.Web.CommandHandlers
                     user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
 
-                    user.PutLikeTo(post);
+                    return await user.PutLikeTo(post)
+                        .OnSuccess(async () =>
+                        {
+                            await tx.CommitAsync();
 
-                    await tx.CommitAsync();
-
-                    _logger
-                        .ForContext<LikePostCommand>()
-                        .Information("User [{Nickname}({UserID})] put a 'Like' on post {PostID}",
-                            user.Nickname,
-                            request.UserID,
-                            request.PostID);
-
-                    return Result.Ok();
+                            _logger
+                                .ForContext<LikePostCommand>()
+                                .Information("User [{Nickname}({UserID})] put a 'Like' on post {PostID}",
+                                    user.Nickname,
+                                    request.UserID,
+                                    request.PostID);
+                        });
                 }
                 catch (ADOException ex)
                 {
@@ -72,18 +74,18 @@ namespace InstaLike.Web.CommandHandlers
                     user = await _session.LoadAsync<User>(request.UserID);
                     var post = await GetPostAsync(request.UserID, request.PostID);
 
-                    user.RemoveLikeFrom(post);
+                    return await user.RemoveLikeFrom(post)
+                        .OnSuccess(async () =>
+                        {
+                            await tx.CommitAsync();
 
-                    await tx.CommitAsync();
-
-                    _logger
-                        .ForContext<DislikePostCommand>()
-                        .Information("User [{Nickname}({UserID})] removed a 'Like' on post {PostID}",
-                            user.Nickname,
-                            request.UserID,
-                            request.PostID);
-
-                    return Result.Ok();
+                            _logger
+                                .ForContext<DislikePostCommand>()
+                                .Information("User [{Nickname}({UserID})] removed a 'Like' on post {PostID}",
+                                    user.Nickname,
+                                    request.UserID,
+                                    request.PostID);
+                        });
                 }
                 catch (ADOException ex)
                 {
