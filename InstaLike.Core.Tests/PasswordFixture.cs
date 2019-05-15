@@ -1,5 +1,6 @@
 using FluentAssertions;
 using InstaLike.Core.Domain;
+using System;
 using Xunit;
 
 namespace InstaLike.Core.Tests
@@ -44,6 +45,19 @@ namespace InstaLike.Core.Tests
             var sut = Password.Create("password123").Value;
 
             sut.HashMatches("password").Should().BeFalse();
+        }
+
+        [Fact]
+        public void Should_Not_Convert_A_Non_Base64_String_To_Password()
+        {
+            string sut = "xyz123$$";
+
+            Password ConvertStringToPassword(string x) => (Password)x;
+
+            sut.Invoking(x => ConvertStringToPassword(x))
+                .Should()
+                    .Throw<InvalidCastException>()
+                    .WithMessage("The specified password is not a valid base64 string");
         }
     }
 }
