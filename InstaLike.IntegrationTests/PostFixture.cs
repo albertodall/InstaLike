@@ -170,7 +170,54 @@ namespace InstaLike.IntegrationTests
                 likeResult = await sut.Handle(command, default);
             }
 
-            likeResult.IsSuccess.Should().BeFalse();
+            likeResult.IsSuccess.Should().BeFalse("User [reader3] did not put any 'Like' on this post.");
+        }
+
+        [Fact]
+        public async Task Cannot_Like_A_Post_Twice()
+        {
+            Result likeResult;
+            User author = new User((Nickname)"author5", (FullName)"author five", Password.Create("password").Value, (Email)"author5@acme.com", "my bio");
+            User reader = new User((Nickname)"reader4", (FullName)"reader four", Password.Create("password").Value, (Email)"reader4@acme.com", "my bio");
+            Post post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(author);
+                await session.SaveAsync(reader);
+                await session.SaveAsync(post);
+            }
+
+            var command = new LikePostCommand(post.ID, reader.ID);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
+                likeResult = await sut.Handle(command, default);
+                likeResult = await sut.Handle(command, default);
+            }
+
+            likeResult.IsSuccess.Should().BeFalse("User [reader4] already 'Liked' this post.");
+        }
+
+        [Fact]
+        public async Task Author_Cannot_Put_Likes_On_His_Own_Posts()
+        {
+            Result likeResult;
+            User author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");           
+            Post post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(author);
+                await session.SaveAsync(post);
+            }
+
+            var command = new LikePostCommand(post.ID, author.ID);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
+                likeResult = await sut.Handle(command, default);
+            }
+
+            likeResult.IsSuccess.Should().BeFalse("You cannot put a 'Like' on your own posts.");
         }
     }
 }
