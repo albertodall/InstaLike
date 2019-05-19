@@ -26,41 +26,33 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User userToUnfollow = null;
-                try
-                {
-                    var followerUser = await _session.LoadAsync<User>(request.FollowerID);
-                    userToUnfollow = await _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
-                        .SingleOrDefaultAsync();
+                User following = null;
 
-                    await _session.QueryOver<Follow>()
-                        .Where(f => f.Follower.ID == request.FollowerID).And(f => f.Followed == userToUnfollow)
-                        .SingleOrDefaultAsync();
+                var userToUnfollow = await _session.QueryOver<User>()
+                    .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
+                    .SingleOrDefaultAsync();
 
-                    return await followerUser.Unfollow(userToUnfollow)
-                        .OnSuccess(async () => 
+                var followingQuery = _session.QueryOver<User>()
+                    .Where(u => u.ID == request.FollowerID)
+                    .Left.JoinAlias(u => u.Followed, () => following)
+                    .Where(() => following.ID == userToUnfollow.ID);
+
+                var followerUser = await followingQuery.SingleOrDefaultAsync();
+                return await followerUser.Unfollow(userToUnfollow)
+                    .OnSuccessTry(async () => await tx.CommitAsync())
+                        .OnSuccess(_ => _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
+                            request.FollowerID,
+                            request.UnfollowedNickname,
+                            userToUnfollow.ID))
+                        .OnFailure(async errorMessage =>
                         {
-                            await tx.CommitAsync();
+                            await tx.RollbackAsync();
 
-                            _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
-                                request.FollowerID,
+                            _logger.Error("Error while unfollowing [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message {ErrorMessage}",
                                 request.UnfollowedNickname,
-                                userToUnfollow.ID);
+                                userToUnfollow?.ID,
+                                request.FollowerID);
                         });
-                }
-                catch (ADOException ex)
-                {
-                    await tx.RollbackAsync();
-                    
-                    _logger.Error("Error while unfollowing [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message {ErrorMessage}",
-                        request.UnfollowedNickname,
-                        userToUnfollow?.ID,
-                        request.FollowerID,
-                        ex.Message);
-
-                    return Result.Fail(ex.Message);
-                }
             }
         }
     }
