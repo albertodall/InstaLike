@@ -36,7 +36,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(followedUser);
             }
 
-            var followCommand = new FollowCommand(followerUser.ID, "user2");
+            var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
             using (var session = _testFixture.OpenSession(_output))
             {
                 var handler = new FollowCommandHandler(session, Log.Logger);
@@ -68,7 +68,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(new Follow(followerUser, followedUser));
             }
 
-            var unfollowCommand = new UnfollowCommand(followerUser.ID, "user4");
+            var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
             using (var session = _testFixture.OpenSession(_output))
             {
                 var handler = new UnfollowCommandHandler(session, Log.Logger);
@@ -99,7 +99,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(followedUser);
             }
 
-            var followCommand = new FollowCommand(followerUser.ID, "user6");
+            var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
             using (var session = _testFixture.OpenSession(_output))
             {
                 var handler = new FollowCommandHandler(session, Log.Logger);
@@ -136,7 +136,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(followedUser);
             }
 
-            var unfollowCommand = new UnfollowCommand(followerUser.ID, "user8");
+            var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
             using (var session = _testFixture.OpenSession(_output))
             {
                 var handler = new UnfollowCommandHandler(session, Log.Logger);
