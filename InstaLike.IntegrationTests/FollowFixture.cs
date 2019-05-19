@@ -114,7 +114,8 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                followResult.IsSuccess.Should().BeFalse();
+                followResult.IsSuccess.Should()
+                    .BeFalse($"User [{followedUser.Nickname}] is already followed by user [{followerUser.Nickname}].");
                 using (var session = _testFixture.OpenSession(_output))
                 {
                     (await session.GetAsync<User>(followerUser.ID)).Followed.Count().Should().Be(1);
@@ -126,8 +127,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Unfollow_Non_Followed_User()
         {
-            User followerUser = new User((Nickname)"user7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio5");
-            User followedUser = new User((Nickname)"user8", (FullName)"test8 user8", Password.Create("password").Value, (Email)"testuser8@acme.com", "bio6");
+            User followerUser = new User((Nickname)"user7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio7");
+            User followedUser = new User((Nickname)"user8", (FullName)"test8 user8", Password.Create("password").Value, (Email)"testuser8@acme.com", "bio8");
             Result unfollowResult;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -143,7 +144,8 @@ namespace InstaLike.IntegrationTests
                 unfollowResult = await handler.Handle(unfollowCommand, default);
             }
 
-            unfollowResult.IsSuccess.Should().BeFalse();
+            unfollowResult.IsSuccess.Should()
+                .BeFalse($"User [{followerUser.Nickname}] is not following user [{followedUser.Nickname}].");
         }
     }
 }

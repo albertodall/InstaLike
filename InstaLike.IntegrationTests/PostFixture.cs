@@ -170,7 +170,7 @@ namespace InstaLike.IntegrationTests
                 likeResult = await sut.Handle(command, default);
             }
 
-            likeResult.IsSuccess.Should().BeFalse("User [reader3] did not put any 'Like' on this post.");
+            likeResult.IsSuccess.Should().BeFalse($"User [{reader.Nickname}] did not put any 'Like' on this post.");
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace InstaLike.IntegrationTests
                 likeResult = await sut.Handle(command, default);
             }
 
-            likeResult.IsSuccess.Should().BeFalse("User [reader4] already 'Liked' this post.");
+            likeResult.IsSuccess.Should().BeFalse($"User [{reader.Nickname}] already 'Liked' this post.");
         }
 
         [Fact]
