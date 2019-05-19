@@ -26,37 +26,29 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User followedUser = null;
-                try
-                {
-                    var follower = await _session.LoadAsync<User>(request.FollowerID);
-                    var followedUserQuery = _session.QueryOver<User>()
-                        .Where(Restrictions.Eq("Nickname", request.FollowedNickname));
-                    followedUser = await followedUserQuery.SingleOrDefaultAsync();
+                var follower = await _session.LoadAsync<User>(request.FollowerID);
+                var followedUser = await _session.QueryOver<User>()
+                    .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
+                    .SingleOrDefaultAsync();
 
-                    follower.Follow(followedUser);
+                return await follower.Follow(followedUser)
+                    .OnSuccessTry(async () => await tx.CommitAsync())
+                        .OnSuccess(_ =>
+                            _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
+                                request.FollowerID,
+                                request.FollowedNickname,
+                                followedUser.ID)
+                        )
+                        .OnFailure(async errorMessage =>
+                        {
+                            await tx.RollbackAsync();
 
-                    await tx.CommitAsync();
-
-                    _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
-                        request.FollowerID,
-                        request.FollowedNickname,
-                        followedUser.ID);
-
-                    return Result.Ok();
-                }
-                catch (ADOException ex)
-                {
-                    await tx.RollbackAsync();
-
-                    _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                        request.FollowedNickname,
-                        followedUser?.ID,
-                        request.FollowerID,
-                        ex.Message);
-
-                    return Result.Fail(ex.Message);
-                }
+                            _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
+                                request.FollowedNickname,
+                                followedUser.ID,
+                                request.FollowerID,
+                                errorMessage);
+                        });
             }
         }
     }
