@@ -44,8 +44,9 @@ namespace InstaLike.Web.EventHandlers
 
                     var sender = await senderQuery.GetValueAsync();
                     recipient = await recipientQuery.GetValueAsync();
-
                     var notificationToInsert = new Notification(sender, recipient, message);
+
+                    await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{FollowedNickname}({FollowedID})] has been notified that user [{FollowerNickname}({FollowerID})] has just started following him/her.",
@@ -58,6 +59,7 @@ namespace InstaLike.Web.EventHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger.Error("Failed to send follow notification to user [{FollowedNickname}({FollowedID})]. Error message: {ErrorMessage})", 
                         recipient?.Nickname,
                         recipient?.ID,

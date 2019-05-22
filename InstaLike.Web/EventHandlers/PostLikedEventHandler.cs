@@ -47,6 +47,8 @@ namespace InstaLike.Web.EventHandlers
 
                     sender = await senderQuery.GetValueAsync();
                     var notificationToInsert = new Notification(sender, post.Author, message);
+
+                    await _session.SaveAsync(notificationToInsert);
                     await tx.CommitAsync();
 
                     _logger.Information("Sent notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]", 
@@ -57,6 +59,7 @@ namespace InstaLike.Web.EventHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger.Error("Failed to send notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]. Error message: {ErrorMessage}", 
                         notification.PostID,
                         notification.SenderNickname,
