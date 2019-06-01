@@ -48,7 +48,7 @@ namespace InstaLike.Web.Data.Query
                 var followersQuery = _session.QueryOver<Follow>()
                     .Inner.JoinAlias(f => f.Follower, () => follower)
                     .Inner.JoinAlias(f => f.Followed, () => followed)
-                    .Where(Restrictions.Eq("following.Nickname", request.Nickname))
+                    .Where(Restrictions.Eq(Projections.Property(() => followed.Nickname), request.Nickname))
                         .And(f => f.Followed.ID == followed.ID)
                     .SelectList(fields => fields
                         .Select(f => follower.Nickname).WithAlias(() => model.Nickname)
