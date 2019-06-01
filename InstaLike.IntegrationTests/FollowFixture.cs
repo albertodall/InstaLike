@@ -6,6 +6,8 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using InstaLike.Web.CommandHandlers;
+using InstaLike.Web.Data.Query;
+using InstaLike.Web.Models;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -146,6 +148,54 @@ namespace InstaLike.IntegrationTests
 
             unfollowResult.IsSuccess.Should()
                 .BeFalse($"User [{followerUser.Nickname}] is not following user [{followedUser.Nickname}].");
+        }
+
+        [Fact]
+        public async Task User_Should_Have_One_Follower()
+        {
+            User followerUser = new User((Nickname)"user9", (FullName)"test9 user9", Password.Create("password").Value, (Email)"testuser9@acme.com", "bio9");
+            User followedUser = new User((Nickname)"user10", (FullName)"test10 user10", Password.Create("password").Value, (Email)"testuser10@acme.com", "bio10");
+            FollowModel[] result;
+
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(followedUser);
+                followerUser.Follow(followedUser);
+                await session.SaveAsync(followerUser);
+            }
+
+            var followersQuery = new FollowersQuery(followedUser.Nickname);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new FollowersQueryHandler(session, Log.Logger);
+                result = await sut.Handle(followersQuery, default);
+            }
+
+            result.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public async Task User_Should_Have_Been_Following_One_User()
+        {
+            User followerUser = new User((Nickname)"user11", (FullName)"test11 user11", Password.Create("password").Value, (Email)"testuser11@acme.com", "bio11");
+            User followedUser = new User((Nickname)"user12", (FullName)"test12 user12", Password.Create("password").Value, (Email)"testuser12@acme.com", "bio12");
+            FollowModel[] result;
+
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(followedUser);
+                followerUser.Follow(followedUser);
+                await session.SaveAsync(followerUser);
+            }
+
+            var followingQuery = new FollowingQuery(followerUser.Nickname);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new FollowingQueryHandler(session, Log.Logger);
+                result = await sut.Handle(followingQuery, default);
+            }
+
+            result.Count().Should().Be(1);
         }
     }
 }
