@@ -31,6 +31,7 @@ namespace InstaLike.IntegrationTests
                     m.FluentMappings
                         .Conventions.Add(
                             DefaultLazy.Always(),
+                            DynamicInsert.AlwaysTrue(),
                             DynamicUpdate.AlwaysTrue(),
                             new AssociationsMappingConvention(),
                             new DateTimeOffsetTypeConvention()

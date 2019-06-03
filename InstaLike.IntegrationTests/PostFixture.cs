@@ -7,6 +7,8 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using InstaLike.Web.CommandHandlers;
+using InstaLike.Web.Data.Query;
+using InstaLike.Web.Models;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -218,6 +220,95 @@ namespace InstaLike.IntegrationTests
             }
 
             likeResult.IsSuccess.Should().BeFalse("You cannot put a 'Like' on your own posts.");
+        }
+
+        [Fact]
+        public async Task Should_Find_One_Comment_For_Post()
+        {
+            CommentModel[] comments = null;
+            User author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
+            Post post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            Comment comment = new Comment(post, author, CommentText.Create("First comment").Value);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                post.AddComment(comment);
+                await session.SaveAsync(author);
+                await session.SaveAsync(post);
+            }
+
+            var query = new PostCommentsQuery(post.ID);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new PostCommentsQueryHandler(session, Log.Logger);
+                comments = await sut.Handle(query, default);
+            }
+
+            comments.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public async Task Should_Load_All_Details_For_A_Post()
+        {
+            PostModel result;
+            User author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
+            User reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
+            Post post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            Comment comment = new Comment(post, reader, CommentText.Create("My comment").Value);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                post.AddComment(comment);
+                post.PutLikeBy(reader);
+                await session.SaveAsync(reader);
+                await session.SaveAsync(author);
+                await session.SaveAsync(post);
+            }
+
+            var query = new PostDetailQuery(post.ID, reader.ID);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new PostDetailQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, default);
+            }
+
+            using (new AssertionScope())
+            {
+                result.Should().NotBeNull();
+                result.LikesCount.Should().Be(1);
+                result.Comments.Count().Should().Be(1);
+                result.IsLikedByCurrentUser.Should().BeTrue();
+            }
+        }
+
+        [Fact]
+        public async Task Should_Read_Posts_Created_By_Followed_Users()
+        {
+            PostModel[] timeline;
+            User author1 = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
+            User author2 = new User((Nickname)"authoruser2", (FullName)"author2 user2", Password.Create("password").Value, (Email)"author2user2@acme.com", "my bio");
+            User reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
+            Post post1 = new Post(author1, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post 1");
+            Post post2 = new Post(author1, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post 2");
+            Post post3 = new Post(author2, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post 3");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(author1);
+                await session.SaveAsync(author2);
+                await session.SaveAsync(reader);
+                await session.SaveAsync(post1);
+                await session.SaveAsync(post2);
+                await session.SaveAsync(post3);
+                reader.Follow(author1);
+                await session.FlushAsync();
+            }
+
+            var query = new TimelineQuery(reader.ID, 5);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new TimelineQueryHandler(session, Log.Logger);
+                timeline = await sut.Handle(query, default);
+            }
+
+            timeline.Count().Should().Be(2);
         }
     }
 }
