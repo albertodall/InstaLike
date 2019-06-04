@@ -1,4 +1,6 @@
-﻿namespace InstaLike.Core.Domain
+﻿using System.Runtime.CompilerServices;
+
+namespace InstaLike.Core.Domain
 {
     public abstract class EntityBase<TId> : IEntity<TId>
     {
@@ -41,7 +43,7 @@
 
             if (IsTransient())
             {
-                cachedHashCode = typeof(IEntity<TId>).GetHashCode();
+                cachedHashCode = RuntimeHelpers.GetHashCode(this);
             }
             else
             {
