@@ -5,7 +5,7 @@ GO
 ALTER DATABASE [$(DatabaseName)]
 ADD FILE
 (
-    NAME = [InstaLike_Pictures],
+    NAME = InstaLike_Pictures,
     FILENAME = '$(DBDataPath)\$(DatabaseName)\$(PicturesFileStream)',
     MAXSIZE = UNLIMITED
 ) TO FILEGROUP [Pictures]
