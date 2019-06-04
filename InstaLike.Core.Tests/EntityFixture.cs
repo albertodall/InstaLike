@@ -4,11 +4,10 @@ using Xunit;
 
 namespace InstaLike.Core.Tests
 {
-    
     public class EntityFixture
     {
         [Fact]
-        public void Entity_Should_Not_Be_Null()
+        public void Entity_Should_Not_Be_Equal_To_Null()
         {
             var e1 = TestEntity.Create(1);
 
@@ -20,7 +19,7 @@ namespace InstaLike.Core.Tests
         {
             var e1 = TestEntity.Create(1);
 
-            (new object()).Should().NotBe(e1);
+            new object().Should().NotBe(e1);
         }
 
         [Fact]
@@ -35,13 +34,13 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Entity_With_No_Id_Should_Be_Transient()
         {
-            (new TestEntity()).IsTransient().Should().Be(true);
+            new TestEntity().IsTransient().Should().BeTrue();
         }
 
         [Fact]
-        public void Transient_Entities_Should_Be_Different()
+        public void Transient_Entities_Should_Be_Not_Be_Equal()
         {
-            (new TestEntity()).Should().NotBe(new TestEntity());
+            new TestEntity().Should().NotBe(new TestEntity());
         }
 
         [Fact]
@@ -51,17 +50,17 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Persistent_Entities_With_Same_Id_Should_Have_The_Same_HashCode()
+        public void Persistent_Entities_With_Same_ID_Should_Have_The_Same_HashCode()
         {
             TestEntity.Create(1).GetHashCode().Should().Be(TestEntity.Create(1).GetHashCode());
         }
 
         [Fact]
-        public void Changing_Id_Should_Not_Change_HashCode()
+        public void Changing_ID_Should_Not_Change_HashCode()
         {
             var e = new TestEntity();
             var oldHashCode = e.GetHashCode();
-            e.SetId(42);
+            e.ChangeID(42);
             e.GetHashCode().Should().Be(oldHashCode);
         }
 
@@ -74,7 +73,7 @@ namespace InstaLike.Core.Tests
                 return new TestEntity() { ID = id };
             }
 
-            public void SetId(int id)
+            public void ChangeID(int id)
             {
                 ID = id;
             }
