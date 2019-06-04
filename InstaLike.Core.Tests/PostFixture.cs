@@ -36,7 +36,8 @@ namespace InstaLike.Core.Tests
             var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             sut.Invoking(obj => obj.AddComment(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should()
+                .Throw<ArgumentNullException>();
         }
 
         [Fact]
@@ -72,11 +73,13 @@ namespace InstaLike.Core.Tests
 
         [Fact]
         public void Post_Author_Should_Not_Put_Like_To_His_Posts()
-        {
+         {
             var postAuthor = CreateTestPostAuthor();
             var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
-            sut.PutLikeBy(postAuthor).IsSuccess.Should().BeFalse();
+            sut.PutLikeBy(postAuthor).IsSuccess
+                .Should()
+                .BeFalse($"User [{postAuthor.Nickname}] cannot put a 'Like' on their own posts.");
         }
 
         [Fact]
@@ -93,8 +96,12 @@ namespace InstaLike.Core.Tests
 
             using (new AssertionScope())
             {
-                sut.PutLikeBy(postReader).IsSuccess.Should().BeTrue();
-                sut.PutLikeBy(postReader).IsSuccess.Should().BeFalse();
+                sut.PutLikeBy(postReader).IsSuccess
+                    .Should()
+                    .BeTrue();
+                sut.PutLikeBy(postReader).IsSuccess
+                    .Should()
+                    .BeFalse($"User [{postReader.Nickname}] has already put a 'Like' to this post.");
             }
         }
 
@@ -132,17 +139,63 @@ namespace InstaLike.Core.Tests
                 "My Bio");
             var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
-            sut.RemoveLikeBy(postReader).IsSuccess.Should().BeFalse();
+            sut.RemoveLikeBy(postReader).IsSuccess
+                .Should()
+                .BeFalse($"User [{postReader.Nickname}] did not put any 'Like' on this post.");
         }
 
         [Fact]
-        public void Should_Not_Remove_Like_By_Null_User()
+        public void Null_User_Cannot_Put_Like_To_Post()
+        {
+            var postAuthor = CreateTestPostAuthor();
+            var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
+
+            sut.Invoking(obj => obj.PutLikeBy(null))
+                .Should()
+                .Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Null_User_Cannot_Remove_Like_From_Post()
         {
             var postAuthor = CreateTestPostAuthor();
             var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             sut.Invoking(obj => obj.RemoveLikeBy(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should()
+                .Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Post_Should_Be_Liked_By_User()
+        {
+            var postAuthor = CreateTestPostAuthor();
+            var postReader = new User(
+                (Nickname)"user2",
+                (FullName)"Test User 2",
+                (Password)"password",
+                (Email)"user2@acme.com",
+                "My Bio");
+            var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
+
+            sut.PutLikeBy(postReader);
+
+            sut.LikesTo(postReader).Should().BeTrue();
+        }
+
+        [Fact]
+        public void Post_Should_Not_Be_Liked_By_User_Without_Putting_A_Like_First()
+        {
+            var postAuthor = CreateTestPostAuthor();
+            var postReader = new User(
+                (Nickname)"user2",
+                (FullName)"Test User 2",
+                (Password)"password",
+                (Email)"user2@acme.com",
+                "My Bio");
+            var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
+
+            sut.LikesTo(postReader).Should().BeFalse();
         }
 
         [Fact]
@@ -152,7 +205,8 @@ namespace InstaLike.Core.Tests
             var sut = new Post(postAuthor, (Picture)Test_Picture_Base64, (PostText)"test post");
 
             sut.Invoking(obj => obj.LikesTo(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should()
+                .Throw<ArgumentNullException>();
         }
 
         private static User CreateTestPostAuthor()
