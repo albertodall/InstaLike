@@ -6,8 +6,6 @@ namespace InstaLike.Core.Domain
     {
         private const int HashMultiplier = 29;
 
-        private int? cachedHashCode;
-
         public virtual TId ID { get; protected set; }
 
         public virtual bool IsTransient()
@@ -36,21 +34,12 @@ namespace InstaLike.Core.Domain
 
         public override int GetHashCode()
         {
-            if (cachedHashCode.HasValue)
-            {
-                return cachedHashCode.Value;
-            }
-
             if (IsTransient())
             {
-                cachedHashCode = RuntimeHelpers.GetHashCode(this);
+                return RuntimeHelpers.GetHashCode(this);
             }
-            else
-            {
-                cachedHashCode = (HashMultiplier * GetType().GetHashCode()) ^ ID.GetHashCode();
-            }
-
-            return cachedHashCode.Value;
+            
+            return (HashMultiplier * GetType().GetHashCode()) ^ ID.GetHashCode();
         }
 
         public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)

@@ -25,22 +25,25 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Same_Entity_Types_With_Different_IDs_Should_Not_Be_Equal()
         {
-            var e1 = TestEntity.Create(1);
-            var e2 = TestEntity.Create(2);
-
-            e1.Should().NotBe(e2);
+            TestEntity.Create(1).Should().NotBe(TestEntity.Create(2));
         }
 
         [Fact]
-        public void Entity_With_No_Id_Should_Be_Transient()
+        public void Entity_With_No_ID_Should_Be_Transient()
         {
             new TestEntity().IsTransient().Should().BeTrue();
         }
 
         [Fact]
-        public void Transient_Entities_Should_Be_Not_Be_Equal()
+        public void Transient_Entities_Of_Same_Type_Should_Be_Not_Be_Equal()
         {
             new TestEntity().Should().NotBe(new TestEntity());
+        }
+
+        [Fact]
+        public void Transient_Entities_Of_Different_Types_Should_Be_Not_Be_Equal()
+        {
+            new TestEntity().Should().NotBe(new OtherTestEntity());
         }
 
         [Fact]
@@ -50,18 +53,21 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Persistent_Entities_With_Same_ID_Should_Have_The_Same_HashCode()
+        public void Transient_Entities_Of_Different_Types_Should_Have_Different_HashCodes()
+        {
+            new TestEntity().GetHashCode().Should().NotBe(new OtherTestEntity().GetHashCode());
+        }
+
+        [Fact]
+        public void Persistent_Entities_Of_Same_Type_With_Same_ID_Should_Have_The_Same_HashCode()
         {
             TestEntity.Create(1).GetHashCode().Should().Be(TestEntity.Create(1).GetHashCode());
         }
 
         [Fact]
-        public void Changing_ID_Should_Not_Change_HashCode()
+        public void Persistent_Entities_Of_Different_Types_With_Same_ID_Should_Have_Different_HashCodes()
         {
-            var e = new TestEntity();
-            var oldHashCode = e.GetHashCode();
-            e.ChangeID(42);
-            e.GetHashCode().Should().Be(oldHashCode);
+            TestEntity.Create(1).GetHashCode().Should().NotBe(OtherTestEntity.Create(1).GetHashCode());
         }
 
         private class TestEntity : EntityBase<int>
@@ -70,12 +76,23 @@ namespace InstaLike.Core.Tests
 
             public static TestEntity Create(int id)
             {
-                return new TestEntity() { ID = id };
+                return new TestEntity()
+                {
+                    ID = id
+                };
             }
+        }
 
-            public void ChangeID(int id)
+        private class OtherTestEntity : EntityBase<int>
+        {
+            public override int ID { get; protected set; }
+
+            public static OtherTestEntity Create(int id)
             {
-                ID = id;
+                return new OtherTestEntity()
+                {
+                    ID = id
+                };
             }
         }
     }
