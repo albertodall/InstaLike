@@ -13,7 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaLike.Core.Tests", "Ins
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "InstaLike.Database.Azure", "InstaLike.Database.Azure\InstaLike.Database.Azure.sqlproj", "{8E2F0AE6-B073-4782-A7AB-15B99B98BBCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstaLike.IntegrationTests", "InstaLike.IntegrationTests\InstaLike.IntegrationTests.csproj", "{46ADA7D0-72BC-4701-9595-27CDA778DF52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaLike.IntegrationTests", "InstaLike.IntegrationTests\InstaLike.IntegrationTests.csproj", "{46ADA7D0-72BC-4701-9595-27CDA778DF52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5A4FDE1F-C114-4495-AE00-7E27BAF993C6}"
+	ProjectSection(SolutionItems) = preProject
+		sonarcloud.cmd = sonarcloud.cmd
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
