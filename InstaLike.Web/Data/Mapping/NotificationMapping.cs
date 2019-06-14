@@ -19,7 +19,7 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.Message).CustomType<string>()
                 .Not.Nullable();
 
-            Map(p => p.NotificationDate).CustomType<DateTimeOffset>()
+            Map(p => p.NotificationDate)
                 .Not.Nullable();
 
             References(p => p.Recipient)

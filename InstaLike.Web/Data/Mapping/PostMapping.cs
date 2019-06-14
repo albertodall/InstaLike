@@ -16,32 +16,31 @@ namespace InstaLike.Web.Data.Mapping
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
 
-            Map(p => p.PostDate).CustomType<DateTimeOffset>()
+            Map(p => p.PostDate)
                 .Not.Nullable();
 
             Component(p => p.Picture, m => 
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Column("[PostGuid]")
+                    .Column("PostGuid")
                     .Not.Insert()
-                    .Not.Update()
-                    .Not.Nullable();
+                    .Not.Update();
                 m.Map(p => p.RawBytes)
-                    .Column("[Picture]")
+                    .Column("Picture")
                     .CustomType<byte[]>()
                     .Length(2_000_000)
                     .Not.Nullable();
             });
 
             References(p => p.Author)
-                .Column("[UserID]");
+                .Column("UserID");
 
             HasMany(p => p.Comments)
-                .KeyColumn("[PostID]")
+                .KeyColumn("PostID")
                 .Access.CamelCaseField(Prefix.Underscore);
 
             HasMany(p => p.Likes)
-                .KeyColumn("[PostID]")
+                .KeyColumn("PostID")
                 .Access.CamelCaseField(Prefix.Underscore);
 
             DynamicInsert();

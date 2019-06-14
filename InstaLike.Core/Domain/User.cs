@@ -129,14 +129,15 @@ namespace InstaLike.Core.Domain
                 .Ensure(() => !IsFollowing(user), $"User [{user.Nickname}] is already followed by user [{Nickname}].")
                 .OnSuccess(() =>
                 {
-                    _followed.Add(new Follow(this, user));
-                    user.AddFollower(this);
+                    var follow = new Follow(this, user);
+                    _followed.Add(follow);
+                    user.AddFollow(follow);
                 });
         }
 
-        protected internal virtual void AddFollower(User follower)
+        protected internal virtual void AddFollow(Follow follow)
         {
-            _followers.Add(new Follow(follower, this));
+            _followers.Add(follow);
         }
 
         public virtual Result Unfollow(User user)
@@ -153,13 +154,12 @@ namespace InstaLike.Core.Domain
                 .OnSuccess(follow =>
                 {
                     _followed.Remove(follow);
-                    user.RemoveFollower(this);
+                    user.RemoveFollow(follow);
                 });
         }
 
-        protected internal virtual void RemoveFollower(User follower)
+        protected internal virtual void RemoveFollow(Follow follow)
         {
-            var follow = _followers.Single(f => f.Follower == follower);
             _followers.Remove(follow);
         }
 

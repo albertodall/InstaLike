@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaLike.Core", "InstaLike.Core\InstaLike.Core.csproj", "{F4923C44-AB39-4C05-8484-2D46F06D7BE6}"
 EndProject
@@ -12,6 +12,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaLike.Core.Tests", "InstaLike.Core.Tests\InstaLike.Core.Tests.csproj", "{819CA6BE-C968-4088-ACD2-C03A5AC5AE8F}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "InstaLike.Database.Azure", "InstaLike.Database.Azure\InstaLike.Database.Azure.sqlproj", "{8E2F0AE6-B073-4782-A7AB-15B99B98BBCB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaLike.IntegrationTests", "InstaLike.IntegrationTests\InstaLike.IntegrationTests.csproj", "{46ADA7D0-72BC-4701-9595-27CDA778DF52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5A4FDE1F-C114-4495-AE00-7E27BAF993C6}"
+	ProjectSection(SolutionItems) = preProject
+		sonarcloud.cmd = sonarcloud.cmd
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +50,10 @@ Global
 		{8E2F0AE6-B073-4782-A7AB-15B99B98BBCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E2F0AE6-B073-4782-A7AB-15B99B98BBCB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E2F0AE6-B073-4782-A7AB-15B99B98BBCB}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{46ADA7D0-72BC-4701-9595-27CDA778DF52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46ADA7D0-72BC-4701-9595-27CDA778DF52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46ADA7D0-72BC-4701-9595-27CDA778DF52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46ADA7D0-72BC-4701-9595-27CDA778DF52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

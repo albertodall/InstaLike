@@ -106,14 +106,9 @@ namespace InstaLike.Web.Data.Query
                 profile.NumberOfFollows = await followingCountQuery.GetValueAsync();
                 profile.IsCurrentUserProfile = profile.UserID == request.CurrentUserID;
 
-                if (profile.IsCurrentUserProfile)
-                {
-                    profile.Following = true;
-                }
-                else
-                {
-                    profile.Following = await isFollowedByCurrentUserQuery.GetValueAsync() == 1;
-                }
+                profile.Following = 
+                    await isFollowedByCurrentUserQuery.GetValueAsync() == 1 
+                    || profile.IsCurrentUserProfile;
             }
 
             return profile;

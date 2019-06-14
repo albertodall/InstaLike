@@ -27,7 +27,7 @@ namespace InstaLike.Web.Data.Query
         public UserDetailsQueryHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
-            this._logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<UserDetailsModel> Handle(UserDetailsQuery request, CancellationToken cancellationToken)
