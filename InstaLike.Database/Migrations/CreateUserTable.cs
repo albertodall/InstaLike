@@ -4,7 +4,7 @@ using FluentMigrator.SqlServer;
 namespace Instalike.Database.Migrations
 {
     [Migration(1, "Create 'User' Table in schema 'dbo'")]
-    public class UserTable : AutoReversingMigration
+    public class CreateUserTable : AutoReversingMigration
     {
         public override void Up()
         {
