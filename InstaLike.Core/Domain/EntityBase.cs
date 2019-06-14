@@ -1,10 +1,10 @@
-﻿namespace InstaLike.Core.Domain
+﻿using System.Runtime.CompilerServices;
+
+namespace InstaLike.Core.Domain
 {
     public abstract class EntityBase<TId> : IEntity<TId>
     {
         private const int HashMultiplier = 29;
-
-        private int? cachedHashCode;
 
         public virtual TId ID { get; protected set; }
 
@@ -34,21 +34,12 @@
 
         public override int GetHashCode()
         {
-            if (cachedHashCode.HasValue)
-            {
-                return cachedHashCode.Value;
-            }
-
             if (IsTransient())
             {
-                cachedHashCode = typeof(IEntity<TId>).GetHashCode();
+                return RuntimeHelpers.GetHashCode(this);
             }
-            else
-            {
-                cachedHashCode = (HashMultiplier * GetType().GetHashCode()) ^ ID.GetHashCode();
-            }
-
-            return cachedHashCode.Value;
+            
+            return (HashMultiplier * GetType().GetHashCode()) ^ ID.GetHashCode();
         }
 
         public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)

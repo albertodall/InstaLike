@@ -10,7 +10,7 @@ using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result>
+    internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<int>>
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
@@ -21,7 +21,7 @@ namespace InstaLike.Web.CommandHandlers
             _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Result> Handle(PublishPostCommand request, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
         {
             using (var tx = _session.BeginTransaction())
             {
@@ -31,6 +31,7 @@ namespace InstaLike.Web.CommandHandlers
                     author = await _session.LoadAsync<User>(request.UserID);
                     var post = new Post(author, (Picture)request.PictureRawBytes, (PostText)request.Text);
 
+                    await _session.SaveAsync(post);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
@@ -48,7 +49,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.UserID,
                         ex.Message);
 
-                    return Result.Fail(ex.Message);
+                    return Result.Fail<int>(ex.Message);
                 }
             }
         }

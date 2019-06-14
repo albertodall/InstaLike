@@ -10,7 +10,7 @@ using Serilog;
 
 namespace InstaLike.Web.CommandHandlers
 {
-    internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result>
+    internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
@@ -21,7 +21,7 @@ namespace InstaLike.Web.CommandHandlers
             _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var nicknameValidationResult = Nickname.Create(request.Nickname);
             var eMailValidationResult = Email.Create(request.Email);
@@ -34,7 +34,7 @@ namespace InstaLike.Web.CommandHandlers
                 _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
                     request.Nickname,
                     validationResult.Error);
-                return Result.Fail(validationResult.Error);
+                return Result.Fail<int>(validationResult.Error);
             }
 
             var userToRegister = new User(
@@ -53,6 +53,7 @@ namespace InstaLike.Web.CommandHandlers
             {
                 try
                 {
+                    await _session.SaveAsync(userToRegister);
                     await tx.CommitAsync();
 
                     _logger.Information("User [{Nickname}({UserID})] has just registered.",
@@ -64,11 +65,12 @@ namespace InstaLike.Web.CommandHandlers
                 catch (ADOException ex)
                 {
                     await tx.RollbackAsync();
+
                     _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
                         request.Nickname,
                         ex.Message);
 
-                    return Result.Fail(ex.Message);
+                    return Result.Fail<int>(ex.Message);
                 }
             }
         }

@@ -26,7 +26,7 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User following = null;
+                Follow follow = null;
 
                 var userToUnfollow = await _session.QueryOver<User>()
                     .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
@@ -34,8 +34,11 @@ namespace InstaLike.Web.CommandHandlers
 
                 var followingQuery = _session.QueryOver<User>()
                     .Where(u => u.ID == request.FollowerID)
-                    .Left.JoinAlias(u => u.Followed, () => following)
-                    .Where(() => following.ID == userToUnfollow.ID);
+                    .Left.JoinAlias(u => u.Followed, () => follow)
+                    .Where(Restrictions.Disjunction()
+                        .Add(() => follow.Followed == userToUnfollow)
+                        .Add(Restrictions.On(() => follow.Followed).IsNull)
+                    );
 
                 var followerUser = await followingQuery.SingleOrDefaultAsync();
                 return await followerUser.Unfollow(userToUnfollow)

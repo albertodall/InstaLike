@@ -24,7 +24,7 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.Password).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
-            Map(p => p.RegistrationDate).CustomType<DateTimeOffset>()
+            Map(p => p.RegistrationDate)
                 .Not.Nullable();
 
             Component(p => p.FullName, m =>
@@ -36,22 +36,21 @@ namespace InstaLike.Web.Data.Mapping
             Component(p => p.ProfilePicture, m =>
             {
                 m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Column("[ProfilePictureGuid]")
+                    .Column("ProfilePictureGuid")
                     .Not.Insert()
-                    .Not.Update()
-                    .Not.Nullable();
+                    .Not.Update();
                 m.Map(p => p.RawBytes).CustomType<byte[]>()
-                    .Column("[ProfilePicture]")
+                    .Column("ProfilePicture")
                     .Length(100_000)
                     .Not.Nullable();
             }).LazyLoad();
 
             HasMany(p => p.Followers)
-                .KeyColumn("[FollowedID]")
+                .KeyColumn("FollowedID")
                 .Access.CamelCaseField(Prefix.Underscore);
 
             HasMany(p => p.Followed)
-                .KeyColumn("[FollowerID]")
+                .KeyColumn("FollowerID")
                 .Access.CamelCaseField(Prefix.Underscore);
 
             DynamicInsert();

@@ -49,7 +49,6 @@ namespace InstaLike.Web.Data.Query
                     .Inner.JoinAlias(f => f.Followed, () => followed)
                     .Inner.JoinAlias(f => f.Follower, () => follower)
                     .Where(Restrictions.Eq(Projections.Property(() => follower.Nickname), request.Nickname))
-                        .And(f => f.Follower.ID == follower.ID)
                     .SelectList(fields => fields
                         .Select(f => followed.Nickname).WithAlias(() => model.Nickname)
                         .Select(f => followed.ProfilePicture.RawBytes).WithAlias(() => model.ProfilePicture)

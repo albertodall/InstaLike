@@ -16,7 +16,7 @@ namespace InstaLike.Web.Data.Mapping
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
 
-            Map(p => p.CommentDate).CustomType<DateTimeOffset>()
+            Map(p => p.CommentDate)
                 .Not.Nullable();
 
             References(p => p.Post)

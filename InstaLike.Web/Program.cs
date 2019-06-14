@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
+
+[assembly: InternalsVisibleTo("InstaLike.IntegrationTests")]
 
 namespace InstaLike.Web
 {
