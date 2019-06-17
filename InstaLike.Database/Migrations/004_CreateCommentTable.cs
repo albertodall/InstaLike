@@ -11,16 +11,31 @@ namespace Instalike.Database.Migrations
             Create.Table("Comment").InSchema("dbo")
                .WithColumn("ID").AsInt32().Identity(1, 1);
 
-            Create.Column("Text").OnTable("Comment").InSchema("dbo").AsString(500).NotNullable().WithDefaultValue(string.Empty);
-            Create.Column("UserID").OnTable("Comment").InSchema("dbo").AsInt32().NotNullable();
-            Create.Column("PostID").OnTable("Comment").InSchema("dbo").AsInt32().NotNullable();
-            Create.Column("CommentDate").OnTable("Comment").InSchema("dbo").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentDateTimeOffset);
+            Create.Column("Text")
+                .OnTable("Comment").InSchema("dbo")
+                .AsString(500)
+                .NotNullable().WithDefaultValue(string.Empty);
+            Create.Column("UserID")
+                .OnTable("Comment").InSchema("dbo")
+                .AsInt32()
+                .NotNullable();
+            Create.Column("PostID")
+                .OnTable("Comment").InSchema("dbo")
+                .AsInt32()
+                .NotNullable();
+            Create.Column("CommentDate")
+                .OnTable("Comment").InSchema("dbo")
+                .AsDateTimeOffset()
+                .NotNullable().WithDefault(SystemMethods.CurrentDateTimeOffset);
 
-            Create.PrimaryKey("PK_Comment").OnTable("Comment").WithSchema("dbo").Column("ID").Clustered();
+            Create.PrimaryKey("PK_Comment")
+                .OnTable("Comment").WithSchema("dbo")
+                .Column("ID").Clustered();
 
             Create.Index("IX_Comment_Post")
                 .OnTable("Comment").InSchema("dbo").OnColumn("PostID")
-                .Ascending().WithOptions().NonClustered();
+                .Ascending()
+                .WithOptions().NonClustered();
 
             Create.ForeignKey("FK_Post_Comment")
                 .FromTable("Comment").InSchema("dbo").ForeignColumn("PostID")

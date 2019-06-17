@@ -11,11 +11,23 @@ namespace Instalike.Database.Migrations
             Create.Table("Follow").InSchema("dbo")
                 .WithColumn("ID").AsInt32().Identity(1, 1);
 
-            Create.PrimaryKey("PK_Follow").OnTable("Follow").WithSchema("dbo").Column("ID").Clustered();
+            Create.Column("FollowerID")
+                .OnTable("Follow").InSchema("dbo")
+                .AsInt32()
+                .NotNullable();
+            Create.Column("FollowedID")
+                .OnTable("Follow").InSchema("dbo")
+                .AsInt32()
+                .NotNullable();
+            Create.Column("FollowDate")
+                .OnTable("Follow").InSchema("dbo")
+                .AsDateTimeOffset()
+                .NotNullable().WithDefault(SystemMethods.CurrentDateTimeOffset);
 
-            Create.Column("FollowerID").OnTable("Follow").InSchema("dbo").AsInt32().NotNullable();
-            Create.Column("FollowedID").OnTable("Follow").InSchema("dbo").AsInt32().NotNullable();
-            Create.Column("FollowDate").OnTable("Follow").InSchema("dbo").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentDateTimeOffset);
+            Create.PrimaryKey("PK_Follow")
+                .OnTable("Follow").WithSchema("dbo")
+                .Column("ID")
+                .Clustered();
 
             Create.Index("IX_Follow_Followed")
                 .OnTable("Follow").InSchema("dbo")

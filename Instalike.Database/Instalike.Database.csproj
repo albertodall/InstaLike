@@ -10,25 +10,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Scripts\CommentTable.sql">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Scripts\DatabaseDefinition.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\FollowTable.sql">
+    <None Update="Scripts\PostAddPicture_OnPrem.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\LikeTable.sql">
+    <None Update="Scripts\PostRemovePicture_OnPrem.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\NotificationTable.sql">
+    <None Update="Scripts\UserRemoveProfilePicture_OnPrem.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\PostTable.sql">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Scripts\UserTable.sql">
+    <None Update="Scripts\UserAddProfilePicture_OnPrem.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

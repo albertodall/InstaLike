@@ -11,11 +11,22 @@ namespace Instalike.Database.Migrations
             Create.Table("Like").InSchema("dbo")
                .WithColumn("ID").AsInt32().Identity(1, 1);
 
-            Create.Column("PostID").OnTable("Like").InSchema("dbo").AsInt32().NotNullable();
-            Create.Column("UserID").OnTable("Like").InSchema("dbo").AsInt32().NotNullable();
-            Create.Column("LikeDate").OnTable("Like").InSchema("dbo").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentDateTimeOffset);
+            Create.Column("PostID")
+                .OnTable("Like").InSchema("dbo")
+                .AsInt32()
+                .NotNullable();
+            Create.Column("UserID")
+                .OnTable("Like").InSchema("dbo")
+                .AsInt32()
+                .NotNullable();
+            Create.Column("LikeDate")
+                .OnTable("Like").InSchema("dbo")
+                .AsDateTimeOffset()
+                .NotNullable().WithDefault(SystemMethods.CurrentDateTimeOffset);
 
-            Create.PrimaryKey("PK_Like").OnTable("Like").WithSchema("dbo").Column("ID").Clustered();
+            Create.PrimaryKey("PK_Like")
+                .OnTable("Like").WithSchema("dbo")
+                .Column("ID").Clustered();
 
             Create.ForeignKey("FK_Post_Like")
                 .FromTable("Like").InSchema("dbo").ForeignColumn("PostID")
