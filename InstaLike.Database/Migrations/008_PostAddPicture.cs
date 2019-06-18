@@ -2,6 +2,7 @@
 
 namespace Instalike.Database.Migrations
 {
+    [Tags("SqlServerOnPrem")]
     [Migration(8, "Add picture support to 'Post' table")]
     public class PostAddPicture : Migration
     {

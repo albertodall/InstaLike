@@ -2,6 +2,7 @@
 
 namespace Instalike.Database.Migrations
 {
+    [Tags("SqlServerOnPrem")]
     [Migration(7, "Add profile picture support for 'User' table")]
     public class UserAddProfilePicture : Migration
     {
