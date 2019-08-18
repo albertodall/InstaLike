@@ -55,21 +55,10 @@ namespace InstaLike.Web
 
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
-            switch (Configuration.GetValue<DeploymentType>("DeploymentType"))
-            {
-                case DeploymentType.OnPrem:
-                    services.ConfigureOnPremDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
-                    break;
-
-                case DeploymentType.AzureCloud:
-                    services.ConfigureAzureCloudDataAccess(
-                        Configuration.GetConnectionString("DefaultDatabase"),
-                        Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
-                    break;
-
-                default:
-                    throw new ApplicationException("Unsupported or unknown deployment type. Please specify 'OnPrem' or 'AzureCloud'.");
-            }
+            // services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+            services.ConfigureCloudDataAccess(
+                Configuration.GetConnectionString("DefaultDatabase"),
+                Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
 
             services.ConfigureAzureComputerVision(
                 Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),

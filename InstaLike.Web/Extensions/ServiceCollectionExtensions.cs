@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
+using NHibernate.Event;
 using Serilog;
 
 namespace InstaLike.Web.Extensions
@@ -19,7 +20,25 @@ namespace InstaLike.Web.Extensions
     {
         public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
-            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
+            var nhConfig = Fluently.Configure()
+                .Database(
+                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
+                        .DefaultSchema("dbo")
+                        .AdoNetBatchSize(20)
+                        .ShowSql()
+                        .FormatSql()
+                        .UseReflectionOptimizer()
+                )
+                .Mappings(m =>
+                    m.FluentMappings
+                        .Conventions.Add(
+                            LazyLoad.Always(),
+                            DynamicUpdate.AlwaysTrue())
+                        .Conventions.Add<AssociationsMappingConvention>()
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+                        
+                );
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -31,20 +50,45 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureAzureCloudDataAccess(this IServiceCollection services
+        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services
             , string databaseConnectionString
             , string externalStorageConnectionString)
         {
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
+            // External storage picture provider
+            services.AddSingleton<IExternalStoragePictureLoader>(
+                new AzureBlobStoragePictureLoader(externalStorageConnectionString)
+            );
 
-            // Add Azure-related configuration parameters.
-            nhConfig.ExposeConfiguration(cfg =>
+            var nhConfig = Fluently.Configure()
+                .Database(
+                    MsSqlConfiguration.MsSql2012.ConnectionString(databaseConnectionString)
+                        .DefaultSchema("dbo")
+                        .AdoNetBatchSize(20)
+                        .ShowSql()
+                        .FormatSql()
+                        .UseReflectionOptimizer()
+                )
+                .Mappings(m =>
+                    m.FluentMappings
+                        .Conventions.Add(
+                            LazyLoad.Always(),
+                            DynamicUpdate.AlwaysTrue())
+                        .Conventions.Add<AssociationsMappingConvention>()
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+
+                );
+
+            // Attach event listener
+            services.AddSingleton(sp => 
             {
-                cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
-                cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
+                var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureLoader>();
+                nhConfig.ExposeConfiguration(cfg => cfg.AppendListeners(
+                    ListenerType.PreLoad, new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) }
+                ));
+                return nhConfig.BuildSessionFactory();
             });
-
-            services.AddSingleton(nhConfig.BuildSessionFactory());
+            
             services.AddScoped(sp =>
             {
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();
