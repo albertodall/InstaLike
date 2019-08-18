@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
+using NHibernate.Event;
 using Serilog;
 
 namespace InstaLike.Web.Extensions
@@ -41,9 +42,57 @@ namespace InstaLike.Web.Extensions
                         .Conventions.Add<NotNullGuidTypeConvention>()
                         .AddFromAssembly(Assembly.GetExecutingAssembly())
                         
-                    );
+                );
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
+            services.AddScoped(sp =>
+            {
+                var sessionFactory = sp.GetRequiredService<ISessionFactory>();
+                return sessionFactory.OpenSession();
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services
+            , string databaseConnectionString
+            , string externalStorageConnectionString)
+        {
+            // External storage picture provider
+            services.AddSingleton<IExternalStoragePictureLoader>(
+                new AzureBlobStoragePictureLoader(externalStorageConnectionString)
+            );
+
+            var nhConfig = Fluently.Configure()
+                .Database(
+                    MsSqlConfiguration.MsSql2012.ConnectionString(databaseConnectionString)
+                        .DefaultSchema("dbo")
+                        .AdoNetBatchSize(20)
+                        .ShowSql()
+                        .FormatSql()
+                        .UseReflectionOptimizer()
+                )
+                .Mappings(m =>
+                    m.FluentMappings
+                        .Conventions.Add(
+                            LazyLoad.Always(),
+                            DynamicUpdate.AlwaysTrue())
+                        .Conventions.Add<AssociationsMappingConvention>()
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+
+                );
+
+            // Attach event listener
+            services.AddSingleton(sp => 
+            {
+                var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureLoader>();
+                nhConfig.ExposeConfiguration(cfg => cfg.AppendListeners(
+                    ListenerType.PreLoad, new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) }
+                ));
+                return nhConfig.BuildSessionFactory();
+            });
+            
             services.AddScoped(sp =>
             {
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();

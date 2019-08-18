@@ -33,17 +33,17 @@ namespace InstaLike.Web.Data.Mapping
                 m.Map(p => p.Surname).CustomType<string>().Not.Nullable();
             });
 
-            Component(p => p.ProfilePicture, m =>
-            {
-                m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Column("ProfilePictureGuid")
-                    .Not.Insert()
-                    .Not.Update();
-                m.Map(p => p.RawBytes).CustomType<byte[]>()
-                    .Column("ProfilePicture")
-                    .Length(100_000)
-                    .Not.Nullable();
-            }).LazyLoad();
+            //Component(p => p.ProfilePicture, m =>
+            //{
+            //    m.Map(p => p.Identifier).CustomType<Guid>()
+            //        .Column("ProfilePictureGuid")
+            //        .Not.Insert()
+            //        .Not.Update();
+            //    m.Map(p => p.RawBytes).CustomType<byte[]>()
+            //        .Column("ProfilePicture")
+            //        .Length(100_000)
+            //        .Not.Nullable();
+            //}).LazyLoad();
 
             HasMany(p => p.Followers)
                 .KeyColumn("FollowedID")

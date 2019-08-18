@@ -52,7 +52,10 @@ namespace InstaLike.Web
 
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
-            services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+            // services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+            services.ConfigureCloudDataAccess(
+                Configuration.GetConnectionString("DefaultDatabase"),
+                Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
 
             services.AddSingleton<IImageRecognitionService>(
                 new AzureComputerVisionRecognition(
