@@ -1,9 +1,9 @@
 # InstaLike
 This project was born, more or less, two years ago. 
-I was teaching a C# Course in an High School, and I needed a "cool" project to sum up all the concepts I explained throughout the course, and having a lot of fun! :-)
+I was teaching a C# Course in a High School, and I needed a "cool" project to sum up all the concepts I explained throughout the course.
 Since (lucky or not) a Social Network is "cool by default", I decided to create a simple [Instagram](https://www.instagram.com) clone.
 The guys attending the course appreciated the idea a lot, so I did my best to create a working web project that was also simple but with a significant set of features.
-The original project was a .NET Framework 4.6.2 web application created using ASP.NET MVC 4.0 with Entity Framework 6.2 and SQL Server 2014 Express as backing store.
+The original project was a .NET Framework 4.6.2 web application created using ASP.NET MVC 4.0 with Entity Framework 6.2 and SQL Server 2014 Express as backing store, and, since I had a lot of fun creating it, I decided to evolve it a little bit...
 
 ## Evolution
 The project looked interesting, so I decided to use it as my preferred playground for testing new technologies and patterns. Today *InstaLike* is a web application built using some interesting stuff:
@@ -13,6 +13,7 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - O/RM Based persistence 
  - Unit testing and integration testing. 
  - Unstructured data (images) storage.
+ - Activity logging.
 
 ## Features
  - User registration. 
@@ -24,8 +25,8 @@ The project looked interesting, so I decided to use it as my preferred playgroun
 
 ## Requirements
 To work with *InstaLike* source code, you need:
- - [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) 2.2
- - [Visual Studio](https://visualstudio.microsoft.com/) 2017 or greater, or the IDE you like. For VS, the Community Edition is enough-
+ - [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) 2.2.
+ - [Visual Studio](https://visualstudio.microsoft.com/) 2017 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
  - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 2014 Express or greater.
 
 ## Setup
