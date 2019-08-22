@@ -1,8 +1,8 @@
 # InstaLike
-This project was born, more or less, two years ago. 
+This project was born, more or less, two years ago.  
 I was teaching a C# Course in a High School, and I needed a "cool" project to sum up all the concepts I explained throughout the course.
-Since (lucky or not) a Social Network is "cool by default", I decided to create a simple [Instagram](https://www.instagram.com) clone.
-The guys attending the course appreciated the idea a lot, so I did my best to create a working web project that was also simple but with a significant set of features.
+Since (lucky or not) a Social Network is "cool by default", I decided to create a simple [Instagram](https://www.instagram.com) clone.  
+The guys attending the course appreciated the idea a lot, so I did my best to create a working web project that was also simple but with a significant set of features.  
 The original project was a .NET Framework 4.6.2 web application created using ASP.NET MVC 4.0 with Entity Framework 6.2 and SQL Server 2014 Express as backing store, and, since I had a lot of fun creating it, I decided to evolve it a little bit...
 
 ## Evolution
