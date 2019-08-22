@@ -29,24 +29,38 @@ To work with *InstaLike* source code, you need:
  - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 2014 Express or greater.
 
 ## Setup
-Download the code.
-Install the [dotnet.exe](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet)-based [FluentMigrator Runner](https://fluentmigrator.github.io/articles/runners/dotnet-fm.html)
+1. Download the code.
+2. Install the [dotnet.exe](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet)-based [FluentMigrator Runner](https://fluentmigrator.github.io/articles/runners/dotnet-fm.html)
 ```
 dotnet tool install -g FluentMigrator.DotNet.Cli
 ```
-Build *InstaLike.Database* project:
+3. Build *InstaLike.Database* project
 ```
 cd InstaLike.Database
 dotnet build Instalike.Database.csproj
 ```
-Create the database using the provided script:
+4. Create the database using the provided script
 ```
-cd bin\Debug\netstandard2.0
-sqlcmd -S (local) -E -i DatabaseDefinition.sql -v DatabaseName="InstaLike" StoragePath="<path where you want to store database's datafiles>"
+cd bin\Debug\netstandard2.0\Scripts
+sqlcmd -S (local) -E -i DatabaseDefinition.sql -v DatabaseName="InstaLike" StoragePath="<path where you want to store data files>"
 ```
-Run migration stages, to create database objects:
+5. Run migrations to create database objects
 ```
 dotnet fm migrate --processor SqlServer2014 --connection "Data Source=(local); Initial Catalog=InstaLike; Integrated Security=True" --tag SqlServerOnPrem --assembly Instalike.Database.dll up
 ```
-Build the solution
+6. Build and run the solution
+
 ## Acknowledgements
+This project has been built using these awesome Open Source projects:
+
+- [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
+- [CSharpFunctionalExtensions](https://github.com/vkhorikov/CSharpFunctionalExtensions)
+- [MediatR](https://github.com/jbogard/MediatR)
+- [NHibernate](https://github.com/nhibernate/nhibernate-core)
+- [FluentNHibernate](https://github.com/FluentNHibernate/fluent-nhibernate)
+- [FluentMigrator](https://fluentmigrator.github.io)
+- [Xunit](https://xunit.net)
+- [FluentAssertions](https://fluentassertions.com)
+- [Serilog](https://serilog.net)
+
+Many thanks  also to my friend and fellow worker [Matteo](https://github.com/cefla) for the graphic design. I gave him some rough stuff and he made it beautiful!
