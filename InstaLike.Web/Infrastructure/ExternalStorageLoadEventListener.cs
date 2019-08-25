@@ -9,11 +9,11 @@ namespace InstaLike.Web.Infrastructure
 {
     internal class ExternalStorageLoadEventListener : IPreLoadEventListener
     {
-        private readonly IExternalStoragePictureLoader _loader;
+        private readonly IExternalStoragePictureProvider _pictureStorageProvider;
 
-        public ExternalStorageLoadEventListener(IExternalStoragePictureLoader loader)
+        public ExternalStorageLoadEventListener(IExternalStoragePictureProvider pictureStorageProvider)
         {
-            _loader = loader ?? throw new ArgumentNullException(nameof(loader));
+            _pictureStorageProvider = pictureStorageProvider ?? throw new ArgumentNullException(nameof(pictureStorageProvider));
         }
 
         public void OnPreLoad(PreLoadEvent evt)
@@ -21,7 +21,7 @@ namespace InstaLike.Web.Infrastructure
             if (evt.Persister.ConcreteProxyClass == typeof(User))
             {
                 var entity = evt.Entity as User;
-                var profilePicture = _loader.LoadPictureAsync($"{entity.ID}.jpg", "profiles").Result;
+                var profilePicture = _pictureStorageProvider.LoadPictureAsync($"{entity.ID}.jpg", "profiles").Result;
                 entity.SetProfilePicture(profilePicture);
             }
         }
@@ -31,7 +31,7 @@ namespace InstaLike.Web.Infrastructure
             if (evt.Persister.ConcreteProxyClass == typeof(User))
             {
                 var entity = evt.Entity as User;
-                var profilePicture = await _loader.LoadPictureAsync($"{entity.ID}.jpg", "profiles");
+                var profilePicture = await _pictureStorageProvider.LoadPictureAsync($"{entity.ID}.jpg", "profiles");
                 entity.SetProfilePicture(profilePicture);
             }
         }

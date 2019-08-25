@@ -59,8 +59,8 @@ namespace InstaLike.Web.Extensions
             , string externalStorageConnectionString)
         {
             // External storage picture provider
-            services.AddSingleton<IExternalStoragePictureLoader>(
-                new AzureBlobStoragePictureLoader(externalStorageConnectionString)
+            services.AddSingleton<IExternalStoragePictureProvider>(
+                new AzureBlobStoragePictureProvider(externalStorageConnectionString)
             );
 
             var nhConfig = Fluently.Configure()
@@ -86,7 +86,7 @@ namespace InstaLike.Web.Extensions
             // Attach event listener
             services.AddSingleton(sp => 
             {
-                var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureLoader>();
+                var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureProvider>();
                 nhConfig.ExposeConfiguration(cfg => cfg.AppendListeners(
                     ListenerType.PreLoad, new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) }
                 ));

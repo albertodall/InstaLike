@@ -8,13 +8,13 @@ using Microsoft.Azure.Storage.Blob;
 
 namespace InstaLike.Web.Services
 {
-    internal class AzureBlobStoragePictureLoader : IExternalStoragePictureLoader
+    internal class AzureBlobStoragePictureProvider : IExternalStoragePictureProvider
     {
         private readonly string _storageConnectionString;
         private readonly CloudStorageAccount _storageAccount;
         private readonly CloudBlobClient _client;
 
-        public AzureBlobStoragePictureLoader(string storageConnectionString)
+        public AzureBlobStoragePictureProvider(string storageConnectionString)
         {
             if (string.IsNullOrEmpty(storageConnectionString))
             {
@@ -32,6 +32,11 @@ namespace InstaLike.Web.Services
             return downloadBlobResult.IsSuccess ?
                 Picture.Create(downloadBlobResult.Value).Value :
                 Picture.MissingPicture;
+        }
+
+        public async Task SavePictureAsync(Picture picture, string blobFileName, string containerName)
+        {
+            await SavePictureToContainer(picture.RawBytes, blobFileName, containerName);
         }
 
         private async Task<Result<byte[]>> LoadPictureFromContainer(string blobName, string containerName)
@@ -53,6 +58,18 @@ namespace InstaLike.Web.Services
                 await blob.DownloadToStreamAsync(downloadStream);
                 return Result.Ok(downloadStream.ToArray());
             }
+        }
+
+        private async Task SavePictureToContainer(byte[] byteArray, string blobName, string containerName)
+        {
+            var container = _client.GetContainerReference(containerName);
+            if (!await container.ExistsAsync())
+            {
+                throw new StorageException($"Container {containerName} does not exist.");
+            }
+
+            CloudBlockBlob blob = container.GetBlockBlobReference(blobName);
+            await blob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
         }
     }
 }
