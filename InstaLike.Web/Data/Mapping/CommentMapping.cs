@@ -1,9 +1,9 @@
-﻿using System;
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
 {
+    [CloudDatabaseMapping, OnPremDatabaseMapping]
     internal class CommentMapping : ClassMap<Comment>
     {
         public CommentMapping()

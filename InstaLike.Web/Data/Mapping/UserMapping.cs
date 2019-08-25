@@ -1,9 +1,9 @@
-﻿using System;
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
 {
+    [CloudDatabaseMapping]
     internal class UserMapping : ClassMap<User>
     {
         public UserMapping()
@@ -32,18 +32,6 @@ namespace InstaLike.Web.Data.Mapping
                 m.Map(p => p.Name).CustomType<string>().Not.Nullable();
                 m.Map(p => p.Surname).CustomType<string>().Not.Nullable();
             });
-
-            //Component(p => p.ProfilePicture, m =>
-            //{
-            //    m.Map(p => p.Identifier).CustomType<Guid>()
-            //        .Column("ProfilePictureGuid")
-            //        .Not.Insert()
-            //        .Not.Update();
-            //    m.Map(p => p.RawBytes).CustomType<byte[]>()
-            //        .Column("ProfilePicture")
-            //        .Length(100_000)
-            //        .Not.Nullable();
-            //}).LazyLoad();
 
             HasMany(p => p.Followers)
                 .KeyColumn("FollowedID")

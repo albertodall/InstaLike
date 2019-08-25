@@ -4,6 +4,7 @@ using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
 {
+    [CloudDatabaseMapping, OnPremDatabaseMapping]
     internal class LikeMapping : ClassMap<Like>
     {
         public LikeMapping()

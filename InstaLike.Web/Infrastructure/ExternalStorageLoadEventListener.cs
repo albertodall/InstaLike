@@ -21,7 +21,7 @@ namespace InstaLike.Web.Infrastructure
             if (evt.Persister.ConcreteProxyClass == typeof(User))
             {
                 var entity = evt.Entity as User;
-                var profilePicture = _loader.LoadUserProfilePictureAsync(entity, "profiles").Result;
+                var profilePicture = _loader.LoadPictureAsync($"{entity.ID}.jpg", "profiles").Result;
                 entity.SetProfilePicture(profilePicture);
             }
         }
@@ -31,7 +31,7 @@ namespace InstaLike.Web.Infrastructure
             if (evt.Persister.ConcreteProxyClass == typeof(User))
             {
                 var entity = evt.Entity as User;
-                var profilePicture = await _loader.LoadUserProfilePictureAsync(entity, "profiles");
+                var profilePicture = await _loader.LoadPictureAsync($"{entity.ID}.jpg", "profiles");
                 entity.SetProfilePicture(profilePicture);
             }
         }

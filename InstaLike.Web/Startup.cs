@@ -2,6 +2,7 @@
 using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -52,10 +53,21 @@ namespace InstaLike.Web
 
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
-            // services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
-            services.ConfigureCloudDataAccess(
-                Configuration.GetConnectionString("DefaultDatabase"),
-                Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
+            switch (Configuration.GetValue<DeploymentType>("DeploymentType"))
+            {
+                case DeploymentType.OnPrem:
+                    services.ConfigureOnPremDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+                    break;
+
+                case DeploymentType.AzureCloud:
+                    services.ConfigureAzureCloudDataAccess(
+                        Configuration.GetConnectionString("DefaultDatabase"),
+                        Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
+                    break;
+
+                default:
+                    throw new ApplicationException("Unsupported or unknown deployment type. Please specify 'OnPrem' or 'AzureCloud'.");
+            }
 
             services.AddSingleton<IImageRecognitionService>(
                 new AzureComputerVisionRecognition(

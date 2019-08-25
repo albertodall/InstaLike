@@ -26,22 +26,12 @@ namespace InstaLike.Web.Services
             _client = _storageAccount.CreateCloudBlobClient();
         }
 
-        
-
-        public async Task<Picture> LoadUserProfilePictureAsync(User user, string containerName)
+        public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
-            var downloadBlobResult = await LoadPictureFromContainer($"{user.ID}.jpg", containerName);
+            var downloadBlobResult = await LoadPictureFromContainer(blobFileName, containerName);
             return downloadBlobResult.IsSuccess ?
                 Picture.Create(downloadBlobResult.Value).Value :
-                Picture.DefaultProfilePicture;
-        }
-
-        public async Task<Picture> LoadPostPictureAsync(Post post, string containerName)
-        {
-            var downloadBlobResult = await LoadPictureFromContainer($"{post.ID}.jpg", containerName);
-            return downloadBlobResult.IsSuccess ?
-                Picture.Create(downloadBlobResult.Value).Value :
-                Picture.DefaultProfilePicture;
+                Picture.MissingPicture;
         }
 
         private async Task<Result<byte[]>> LoadPictureFromContainer(string blobName, string containerName)

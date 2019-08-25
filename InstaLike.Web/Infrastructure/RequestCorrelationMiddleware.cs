@@ -7,7 +7,7 @@ using Serilog.Context;
 namespace InstaLike.Web.Infrastructure
 {
     /// <summary>
-    /// Adds a Correlation ID to every request, to ease tracking of every activity.
+    /// Adds a Correlation ID to every request, to ease activity tracking.
     /// </summary>
     internal sealed class RequestCorrelationMiddleware
     {

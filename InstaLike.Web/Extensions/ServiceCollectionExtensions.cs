@@ -8,6 +8,7 @@ using FluentNHibernate.Conventions.Helpers;
 using FluentNHibernate.Conventions.Inspections;
 using FluentNHibernate.Conventions.Instances;
 using FluentNHibernate.Mapping;
+using InstaLike.Web.Data;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using MediatR;
@@ -22,7 +23,7 @@ namespace InstaLike.Web.Extensions
 {
     internal static class ServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, string connectionString)
+        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
             var nhConfig = Fluently.Configure()
                 .Database(
@@ -40,8 +41,7 @@ namespace InstaLike.Web.Extensions
                             DynamicUpdate.AlwaysTrue())
                         .Conventions.Add<AssociationsMappingConvention>()
                         .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly())
-                        
+                        .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
                 );
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
@@ -54,7 +54,7 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services
+        public static IServiceCollection ConfigureAzureCloudDataAccess(this IServiceCollection services
             , string databaseConnectionString
             , string externalStorageConnectionString)
         {
@@ -79,7 +79,7 @@ namespace InstaLike.Web.Extensions
                             DynamicUpdate.AlwaysTrue())
                         .Conventions.Add<AssociationsMappingConvention>()
                         .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+                        .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
 
                 );
 
