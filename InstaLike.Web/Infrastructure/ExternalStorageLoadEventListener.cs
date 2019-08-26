@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
@@ -18,21 +19,22 @@ namespace InstaLike.Web.Infrastructure
 
         public void OnPreLoad(PreLoadEvent evt)
         {
-            if (evt.Persister.ConcreteProxyClass == typeof(User))
-            {
-                var entity = evt.Entity as User;
-                var profilePicture = _pictureStorageProvider.LoadPictureAsync($"{entity.ID}.jpg", "profiles").Result;
-                entity.SetProfilePicture(profilePicture);
-            }
+            OnPreLoadAsync(evt, default(CancellationToken)).GetAwaiter().GetResult();
         }
 
         public async Task OnPreLoadAsync(PreLoadEvent evt, CancellationToken cancellationToken)
         {
-            if (evt.Persister.ConcreteProxyClass == typeof(User))
+            switch (evt.Entity)
             {
-                var entity = evt.Entity as User;
-                var profilePicture = await _pictureStorageProvider.LoadPictureAsync($"{entity.ID}.jpg", "profiles");
-                entity.SetProfilePicture(profilePicture);
+                case User user:
+                    var profilePicture = await _pictureStorageProvider.LoadPictureAsync($"{user.ID}.jpg", "profiles");
+                    user.SetProfilePicture(profilePicture);
+                    break;
+
+                case Post post:
+                    var postPicture = await _pictureStorageProvider.LoadPictureAsync($"{post.ID}.jpg", "pictures");
+                    typeof(Post).GetProperty("Picture", BindingFlags.NonPublic).SetValue(post, postPicture);
+                    break;
             }
         }
     }

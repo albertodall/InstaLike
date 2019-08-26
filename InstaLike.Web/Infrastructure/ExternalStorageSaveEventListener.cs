@@ -18,21 +18,20 @@ namespace InstaLike.Web.Infrastructure
 
         public bool OnPreInsert(PreInsertEvent evt)
         {
-            if (evt.Persister.ConcreteProxyClass == typeof(User))
-            {
-                var user = evt.Entity as User;
-                _pictureStorageProvider.SavePictureAsync(user.ProfilePicture, $"{user.ID}.jpg", "profiles").GetAwaiter().GetResult();
-            }
-
-            return false;
+            return OnPreInsertAsync(evt, default(CancellationToken)).GetAwaiter().GetResult();
         }
 
         public async Task<bool> OnPreInsertAsync(PreInsertEvent evt, CancellationToken cancellationToken)
         {
-            if (evt.Persister.ConcreteProxyClass == typeof(User))
+            switch (evt.Entity)
             {
-                var user = evt.Entity as User;
-                await _pictureStorageProvider.SavePictureAsync(user.ProfilePicture, $"{user.ID}.jpg", "profiles");
+                case User user:
+                    await _pictureStorageProvider.SavePictureAsync(user.ProfilePicture, $"{user.ID}.jpg", "profiles");
+                    break;
+
+                case Post post:
+                    await _pictureStorageProvider.SavePictureAsync(post.Picture, $"{post.ID}.jpg", "pictures");
+                    break;
             }
 
             return false;
@@ -40,37 +39,35 @@ namespace InstaLike.Web.Infrastructure
 
         public bool OnPreUpdate(PreUpdateEvent evt)
         {
-            if (evt.Persister.ConcreteProxyClass == typeof(User))
-            {
-                var user = evt.Entity as User;
-                var dirtyProperties = evt.Persister.FindDirty(evt.State, evt.OldState, evt.Entity, evt.Session);
-                foreach (var i in dirtyProperties)
-                {
-                    if (evt.Persister.PropertyNames[i].ToUpper() == nameof(User.ProfilePicture).ToUpper())
-                    {
-                        _pictureStorageProvider.SavePictureAsync(user.ProfilePicture, $"{user.ID}.jpg", "profiles").GetAwaiter().GetResult();
-                    }
-                }
-            }
-
-            return false;
+            return OnPreUpdateAsync(evt, default(CancellationToken)).GetAwaiter().GetResult();
         }
 
         public async Task<bool> OnPreUpdateAsync(PreUpdateEvent evt, CancellationToken cancellationToken)
         {
-            if (evt.Persister.ConcreteProxyClass == typeof(User))
+            var dirtyProperties = evt.Persister.FindDirty(evt.State, evt.OldState, evt.Entity, evt.Session);
+            switch (evt.Entity)
             {
-                var user = evt.Entity as User;
-                var dirtyProperties = evt.Persister.FindDirty(evt.State, evt.OldState, evt.Entity, evt.Session);
-                foreach (var i in dirtyProperties)
-                {
-                    if (evt.Persister.PropertyNames[i] == nameof(User.ProfilePicture))
+                case User user:
+                    foreach (var i in dirtyProperties)
                     {
-                        await _pictureStorageProvider.SavePictureAsync(user.ProfilePicture, $"{user.ID}.jpg", "profiles");
+                        if (evt.Persister.PropertyNames[i] == nameof(User.ProfilePicture))
+                        {
+                            await _pictureStorageProvider.SavePictureAsync(user.ProfilePicture, $"{user.ID}.jpg", "profiles");
+                        }
                     }
-                }
-            }
+                    break;
 
+                case Post post:
+                    foreach (var i in dirtyProperties)
+                    {
+                        if (evt.Persister.PropertyNames[i] == nameof(Post.Picture))
+                        {
+                            await _pictureStorageProvider.SavePictureAsync(post.Picture, $"{post.ID}.jpg", "pictures");
+                        }
+                    }
+                    break;
+            }
+            
             return false;
         }
     }
