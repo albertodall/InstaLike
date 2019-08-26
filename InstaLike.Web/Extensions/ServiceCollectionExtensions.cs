@@ -2,12 +2,7 @@
 using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
-using FluentNHibernate.Conventions;
-using FluentNHibernate.Conventions.AcceptanceCriteria;
 using FluentNHibernate.Conventions.Helpers;
-using FluentNHibernate.Conventions.Inspections;
-using FluentNHibernate.Conventions.Instances;
-using FluentNHibernate.Mapping;
 using InstaLike.Web.Data;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
@@ -25,23 +20,9 @@ namespace InstaLike.Web.Extensions
     {
         public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
-            var nhConfig = Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            LazyLoad.Always(),
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
+            var nhConfig = GetFluentConfigurationForDatabase(connectionString)
+                .Mappings(m => m.FluentMappings
+                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
                 );
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
@@ -63,33 +44,21 @@ namespace InstaLike.Web.Extensions
                 new AzureBlobStoragePictureProvider(externalStorageConnectionString)
             );
 
-            var nhConfig = Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(databaseConnectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            LazyLoad.Always(),
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
-
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
+                .Mappings(m => m.FluentMappings
+                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
                 );
 
-            // Attach event listener
+            // Attach event listeners
             services.AddSingleton(sp => 
             {
                 var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureProvider>();
-                nhConfig.ExposeConfiguration(cfg => cfg.AppendListeners(
-                    ListenerType.PreLoad, new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) }
-                ));
+                nhConfig.ExposeConfiguration(cfg =>
+                {
+                    cfg.AppendListeners(ListenerType.PreLoad  , new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) });
+                    cfg.AppendListeners(ListenerType.PreInsert, new[] { new ExternalStorageSaveEventListener(externalStoragePictureLoader) });
+                    cfg.AppendListeners(ListenerType.PreUpdate, new[] { new ExternalStorageSaveEventListener(externalStoragePictureLoader) });
+                });
                 return nhConfig.BuildSessionFactory();
             });
             
@@ -131,40 +100,25 @@ namespace InstaLike.Web.Extensions
 
             return services;
         }
-    }
 
-    internal class AssociationsMappingConvention : IHasManyConvention, IReferenceConvention
-    {
-        public void Apply(IOneToManyCollectionInstance instance)
+        private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
         {
-            instance.LazyLoad();
-            instance.AsBag();
-            instance.Cascade.AllDeleteOrphan();
-            instance.Inverse();
-        }
-
-        public void Apply(IManyToOneInstance instance)
-        {
-            instance.LazyLoad(Laziness.Proxy);
-            instance.Cascade.None();
-            instance.Not.Nullable();
-            instance.ForeignKey($"{instance.EntityType.Name}_{instance.Property.Name}");
-        }
-    }
-
-    /// <summary>
-    /// Set Guid fields not nullable, for filestream references.
-    /// </summary>
-    internal class NotNullGuidTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
-    {
-        public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
-        {
-            criteria.Expect(x => x.Property.PropertyType == typeof(Guid));
-        }
-
-        public void Apply(IPropertyInstance instance)
-        {
-            instance.Not.Nullable();
+            return Fluently.Configure()
+                .Database(
+                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
+                        .DefaultSchema("dbo")
+                        .AdoNetBatchSize(20)
+                        .ShowSql()
+                        .FormatSql()
+                        .UseReflectionOptimizer()
+                )
+                .Mappings(m =>
+                    m.FluentMappings
+                        .Conventions.Add(
+                            LazyLoad.Always(),
+                            DynamicUpdate.AlwaysTrue())
+                        .Conventions.Add<AssociationsMappingConvention>()
+                        .Conventions.Add<NotNullGuidTypeConvention>());
         }
     }
 }

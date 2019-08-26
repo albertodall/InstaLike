@@ -10,6 +10,9 @@ namespace InstaLike.Web.Extensions
 {
     internal static class FluentNHibernateExtensions
     {
+        /// <summary>
+        /// Adds to the fluent mapping container all types that match the supplied condition.
+        /// </summary>
         public static FluentMappingsContainer AddFromAssembly(this FluentMappingsContainer container, Assembly assembly, Predicate<Type> whereCondition)
         {
             if (whereCondition == null)
@@ -20,13 +23,13 @@ namespace InstaLike.Web.Extensions
             var mappingTypes = 
                 assembly.GetTypes()
                     .Where(t => (IsMappingOf<IMappingProvider>(t) ||
-                                IsMappingOf<IIndeterminateSubclassMappingProvider>(t) ||
-                                IsMappingOf<IExternalComponentMappingProvider>(t) ||
-                                IsMappingOf<IFilterDefinition>(t)) && whereCondition(t));
+                                 IsMappingOf<IIndeterminateSubclassMappingProvider>(t) ||
+                                 IsMappingOf<IExternalComponentMappingProvider>(t) ||
+                                 IsMappingOf<IFilterDefinition>(t)) && whereCondition(t));
 
-            foreach (var mapping in mappingTypes)
+            foreach (var mappingType in mappingTypes)
             {
-                container.Add(mapping);
+                container.Add(mappingType);
             }
 
             return container;

@@ -12,6 +12,7 @@ namespace InstaLike.Web.Extensions
             {
                 throw new InvalidOperationException("NameIdentifier not found. Did you authenticate correctly?");
             }
+
             return int.Parse(claimValue);
         }
     }
