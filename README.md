@@ -14,6 +14,7 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - Unit testing and integration testing. 
  - Unstructured data (images) storage.
  - Activity logging.
+ - Cloud-based image recognition.
 
 ## Features
  - User registration. 
@@ -22,6 +23,7 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - Comments on shared pictures. 
  - Follow and unfollow users. 
  - Get notifications when other users interact with the content you shared.
+ - Pictures Auto-tagging.
 
 ## Requirements
 To work with *InstaLike* source code, you need:
