@@ -28,7 +28,7 @@ namespace InstaLike.Web.Services
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
-            var downloadBlobResult = await LoadPictureFromContainer(blobFileName, containerName);
+            var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
             return downloadBlobResult.IsSuccess ?
                 Picture.Create(downloadBlobResult.Value).Value :
                 Picture.MissingPicture;
@@ -36,10 +36,10 @@ namespace InstaLike.Web.Services
 
         public async Task SavePictureAsync(Picture picture, string blobFileName, string containerName)
         {
-            await SavePictureToContainer(picture.RawBytes, blobFileName, containerName);
+            await SavePictureToContainerAsync(picture.RawBytes, blobFileName, containerName);
         }
 
-        private async Task<Result<byte[]>> LoadPictureFromContainer(string blobName, string containerName)
+        private async Task<Result<byte[]>> LoadPictureFromContainerAsync(string blobName, string containerName)
         {
             var container = _client.GetContainerReference(containerName);
             if (!await container.ExistsAsync())
@@ -60,7 +60,7 @@ namespace InstaLike.Web.Services
             }
         }
 
-        private async Task SavePictureToContainer(byte[] byteArray, string blobName, string containerName)
+        private async Task SavePictureToContainerAsync(byte[] byteArray, string blobName, string containerName)
         {
             var container = _client.GetContainerReference(containerName);
             if (!await container.ExistsAsync())

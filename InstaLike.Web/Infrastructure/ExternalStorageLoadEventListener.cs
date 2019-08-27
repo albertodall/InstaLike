@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
@@ -19,7 +18,7 @@ namespace InstaLike.Web.Infrastructure
 
         public void OnPreLoad(PreLoadEvent evt)
         {
-            OnPreLoadAsync(evt, default(CancellationToken)).GetAwaiter().GetResult();
+            OnPreLoadAsync(evt, default).GetAwaiter().GetResult();
         }
 
         public async Task OnPreLoadAsync(PreLoadEvent evt, CancellationToken cancellationToken)
@@ -33,7 +32,7 @@ namespace InstaLike.Web.Infrastructure
 
                 case Post post:
                     var postPicture = await _pictureStorageProvider.LoadPictureAsync($"{post.ID}.jpg", "pictures");
-                    typeof(Post).GetProperty("Picture", BindingFlags.NonPublic).SetValue(post, postPicture);
+                    post.GetType().GetProperty("Picture").SetValue(post, postPicture);
                     break;
             }
         }

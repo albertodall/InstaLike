@@ -18,7 +18,7 @@ namespace InstaLike.Web.Infrastructure
 
         public bool OnPreInsert(PreInsertEvent evt)
         {
-            return OnPreInsertAsync(evt, default(CancellationToken)).GetAwaiter().GetResult();
+            return OnPreInsertAsync(evt, default).GetAwaiter().GetResult();
         }
 
         public async Task<bool> OnPreInsertAsync(PreInsertEvent evt, CancellationToken cancellationToken)
@@ -39,7 +39,7 @@ namespace InstaLike.Web.Infrastructure
 
         public bool OnPreUpdate(PreUpdateEvent evt)
         {
-            return OnPreUpdateAsync(evt, default(CancellationToken)).GetAwaiter().GetResult();
+            return OnPreUpdateAsync(evt, default).GetAwaiter().GetResult();
         }
 
         public async Task<bool> OnPreUpdateAsync(PreUpdateEvent evt, CancellationToken cancellationToken)
