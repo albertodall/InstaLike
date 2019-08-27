@@ -1,9 +1,9 @@
-﻿using FluentNHibernate.Mapping;
+﻿using System;
+using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
 {
-    [CloudDatabaseMapping]
     internal class PostMapping : ClassMap<Post>
     {
         public PostMapping()
@@ -18,6 +18,20 @@ namespace InstaLike.Web.Data.Mapping
 
             Map(p => p.PostDate)
                 .Not.Nullable();
+
+            Component(p => p.Picture, m =>
+            {
+                m.Map(p => p.Identifier).CustomType<Guid>()
+                    .Column("PostGuid")
+                    .Not.Insert()
+                    .Not.Update()
+                    .Not.Nullable();
+                m.Map(p => p.RawBytes)
+                    .Column("[Picture]")
+                    .CustomType<byte[]>()
+                    .Length(2_000_000)
+                    .Not.Nullable();
+            });
 
             References(p => p.Author)
                 .Column("UserID");

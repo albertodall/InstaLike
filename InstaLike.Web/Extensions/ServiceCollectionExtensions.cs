@@ -18,12 +18,11 @@ namespace InstaLike.Web.Extensions
 {
     internal static class ServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
+        public static IServiceCollection ConfigureOnPremDataAccess(
+            this IServiceCollection services, 
+            string connectionString)
         {
-            var nhConfig = GetFluentConfigurationForDatabase(connectionString)
-                .Mappings(m => m.FluentMappings
-                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
-                );
+            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -35,21 +34,19 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureAzureCloudDataAccess(this IServiceCollection services
-            , string databaseConnectionString
-            , string externalStorageConnectionString)
+        public static IServiceCollection ConfigureAzureCloudDataAccess(
+            this IServiceCollection services, 
+            string databaseConnectionString, 
+            string externalStorageConnectionString)
         {
             // External storage picture provider
             services.AddSingleton<IExternalStoragePictureProvider>(
                 new AzureBlobStoragePictureProvider(externalStorageConnectionString)
             );
 
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
-                .Mappings(m => m.FluentMappings
-                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
-                );
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
-            // Attach event listeners
+            // Attach event listeners and register SessionFactory
             services.AddSingleton(sp => 
             {
                 var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureProvider>();
@@ -61,7 +58,6 @@ namespace InstaLike.Web.Extensions
                 });
                 return nhConfig.BuildSessionFactory();
             });
-            
             services.AddScoped(sp =>
             {
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();
@@ -118,7 +114,9 @@ namespace InstaLike.Web.Extensions
                             LazyLoad.Always(),
                             DynamicUpdate.AlwaysTrue())
                         .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>());
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+                );
         }
     }
 }
