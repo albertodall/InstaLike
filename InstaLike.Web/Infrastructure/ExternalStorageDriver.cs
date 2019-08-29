@@ -11,75 +11,73 @@ namespace InstaLike.Web.Infrastructure
 {
     internal class ExternalStorageDriver : IDriver
     {
-        private readonly IDriver _driver;
-
         public ExternalStorageDriver(IDriver driver)
         {
-            _driver = driver ?? throw new ArgumentNullException(nameof(driver));
+            Driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
-        public bool SupportsMultipleOpenReaders => _driver.SupportsMultipleOpenReaders;
+        public bool SupportsMultipleOpenReaders => Driver.SupportsMultipleOpenReaders;
 
-        public bool SupportsMultipleQueries => _driver.SupportsMultipleQueries;
+        public bool SupportsMultipleQueries => Driver.SupportsMultipleQueries;
 
-        public bool RequiresTimeSpanForTime => _driver.RequiresTimeSpanForTime;
+        public bool RequiresTimeSpanForTime => Driver.RequiresTimeSpanForTime;
 
-        public bool SupportsSystemTransactions => _driver.SupportsSystemTransactions;
+        public bool SupportsSystemTransactions => Driver.SupportsSystemTransactions;
 
-        public bool SupportsNullEnlistment => _driver.SupportsNullEnlistment;
+        public bool SupportsNullEnlistment => Driver.SupportsNullEnlistment;
 
-        public bool SupportsEnlistmentWhenAutoEnlistmentIsDisabled => _driver.SupportsEnlistmentWhenAutoEnlistmentIsDisabled;
+        public bool SupportsEnlistmentWhenAutoEnlistmentIsDisabled => Driver.SupportsEnlistmentWhenAutoEnlistmentIsDisabled;
 
-        public bool HasDelayedDistributedTransactionCompletion => _driver.HasDelayedDistributedTransactionCompletion;
+        public bool HasDelayedDistributedTransactionCompletion => Driver.HasDelayedDistributedTransactionCompletion;
 
-        public DateTime MinDate => _driver.MinDate;
+        public DateTime MinDate => Driver.MinDate;
 
-        public IDriver UnderlyingDriver => _driver;
+        public IDriver Driver { get; }
 
         public void Configure(IDictionary<string, string> settings)
         {
-            _driver.Configure(settings);
+            Driver.Configure(settings);
         }
 
         public DbConnection CreateConnection()
         {
-            return _driver.CreateConnection();
+            return Driver.CreateConnection();
         }
 
         public void ExpandQueryParameters(DbCommand cmd, SqlString sqlString, SqlType[] parameterTypes)
         {
-            _driver.ExpandQueryParameters(cmd, sqlString, parameterTypes);
+            Driver.ExpandQueryParameters(cmd, sqlString, parameterTypes);
         }
 
         public void AdjustCommand(DbCommand command)
         {
-            _driver.AdjustCommand(command);
+            Driver.AdjustCommand(command);
         }
 
         public DbCommand GenerateCommand(CommandType type, SqlString sqlString, SqlType[] parameterTypes)
         {
             // External storage doesn't have a "real" connection...
-            return new ExternalStorageDatabaseCommand(null, _driver.GenerateCommand(type, sqlString, parameterTypes));
+            return new ExternalStorageDatabaseCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
         }
 
         public IResultSetsCommand GetResultSetsCommand(ISessionImplementor session)
         {
-            return _driver.GetResultSetsCommand(session);
+            return Driver.GetResultSetsCommand(session);
         }
 
         public void PrepareCommand(DbCommand command)
         {
-            _driver.PrepareCommand(GetUnderlyingCommand(command));
+            Driver.PrepareCommand(GetUnderlyingCommand(command));
         }
 
         public DbParameter GenerateParameter(DbCommand command, string name, SqlType sqlType)
         {
-            return _driver.GenerateParameter(command, name, sqlType);
+            return Driver.GenerateParameter(command, name, sqlType);
         }
 
         public void RemoveUnusedCommandParameters(DbCommand cmd, SqlString sqlString)
         {
-            _driver.RemoveUnusedCommandParameters(GetUnderlyingCommand(cmd), sqlString);
+            Driver.RemoveUnusedCommandParameters(GetUnderlyingCommand(cmd), sqlString);
         }
 
         private static DbCommand GetUnderlyingCommand(DbCommand externalStorageDatabaseCommand)

@@ -3,7 +3,7 @@ using InstaLike.Web.Services;
 
 namespace InstaLike.Web.Infrastructure
 {
-    internal interface IExternalStorageProviderFactory
+    internal interface IExternalStorageConnectionProvider
     {
         void Configure(IDictionary<string, string> settings);
 

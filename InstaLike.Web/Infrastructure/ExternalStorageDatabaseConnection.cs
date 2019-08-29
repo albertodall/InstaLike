@@ -7,6 +7,9 @@ using InstaLike.Web.Services;
 
 namespace InstaLike.Web.Infrastructure
 {
+    /// <summary>
+    /// This connection "connects" the O/RM to both the database and the external storage.
+    /// </summary>
     internal class ExternalStorageDatabaseConnection : DbConnection, IExternalStoragePictureProvider
     {
         private readonly IExternalStoragePictureProvider _externalStorage;
