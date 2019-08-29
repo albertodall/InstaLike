@@ -11,18 +11,20 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
-using NHibernate.Event;
 using Serilog;
 
 namespace InstaLike.Web.Extensions
 {
     internal static class ServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureOnPremDataAccess(
-            this IServiceCollection services, 
-            string connectionString)
+        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
-            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
+            var nhConfig = GetFluentConfigurationForDatabase(connectionString)
+                .Mappings(m => m.FluentMappings
+                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
+                );
+
+            var cfg = nhConfig.BuildConfiguration().SetProperty("", "");
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -34,30 +36,21 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureAzureCloudDataAccess(
-            this IServiceCollection services, 
-            string databaseConnectionString, 
-            string externalStorageConnectionString)
+        public static IServiceCollection ConfigureAzureCloudDataAccess(this IServiceCollection services
+            , string databaseConnectionString
+            , string externalStorageConnectionString)
         {
             // External storage picture provider
             services.AddSingleton<IExternalStoragePictureProvider>(
                 new AzureBlobStoragePictureProvider(externalStorageConnectionString)
             );
 
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
+                .Mappings(m => m.FluentMappings
+                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
+                );
 
-            // Attach event listeners and register SessionFactory
-            services.AddSingleton(sp => 
-            {
-                var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureProvider>();
-                nhConfig.ExposeConfiguration(cfg =>
-                {
-                    cfg.AppendListeners(ListenerType.PreLoad  , new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) });
-                    cfg.AppendListeners(ListenerType.PreInsert, new[] { new ExternalStorageSaveEventListener(externalStoragePictureLoader) });
-                    cfg.AppendListeners(ListenerType.PreUpdate, new[] { new ExternalStorageSaveEventListener(externalStoragePictureLoader) });
-                });
-                return nhConfig.BuildSessionFactory();
-            });
+            services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
             {
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();
@@ -101,7 +94,10 @@ namespace InstaLike.Web.Extensions
         {
             return Fluently.Configure()
                 .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
+                    MsSqlConfiguration.MsSql2012
+                        .Provider<ExternalStorageDriverConnectionProvider>()
+                        .ConnectionString(connectionString)
+                        .Raw(ExternalStorageParameters.ConnectionStringProperty, "InstaLike.Web.Infrastructure")
                         .DefaultSchema("dbo")
                         .AdoNetBatchSize(20)
                         .ShowSql()
@@ -114,9 +110,7 @@ namespace InstaLike.Web.Extensions
                             LazyLoad.Always(),
                             DynamicUpdate.AlwaysTrue())
                         .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly())
-                );
+                        .Conventions.Add<NotNullGuidTypeConvention>());
         }
     }
 }
