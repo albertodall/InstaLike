@@ -5,21 +5,19 @@ namespace InstaLike.Web.Infrastructure
 {
     internal class AzureBlobStorageConnectionProvider : IExternalStorageConnectionProvider
     {
-        private readonly string _storageConnectionString;
-
-        public AzureBlobStorageConnectionProvider(string storageConnectionString)
-        {
-            _storageConnectionString = storageConnectionString;
-        }
+        private string _storageConnectionString;
 
         public void Configure(IDictionary<string, string> settings)
         {
-            // TODO: Set _storageConnectionString using the "settings" parameter.
+            if (settings.TryGetValue(ExternalStorageParameters.ConnectionStringProperty, out string externalStorageConnectionString))
+            {
+                _storageConnectionString = externalStorageConnectionString;
+            }
         }
 
-        public IExternalStoragePictureProvider GetProvider()
+        public IExternalStorageProvider GetProvider()
         {
-            return new AzureBlobStoragePictureProvider(_storageConnectionString);
+            return new AzureBlobStorageProvider(_storageConnectionString);
         }
     }
 }

@@ -9,15 +9,15 @@ using Microsoft.Azure.Storage.Blob;
 namespace InstaLike.Web.Services
 {
     /// <summary>
-    /// Stores and sets all the pictures from a Azure Blob Storage container.
+    /// Stores and gets all pictures from an Azure Blob Storage container.
     /// </summary>
-    internal class AzureBlobStoragePictureProvider : IExternalStoragePictureProvider
+    internal class AzureBlobStorageProvider : IExternalStorageProvider
     {
         private readonly string _storageConnectionString;
         private readonly CloudStorageAccount _storageAccount;
         private readonly CloudBlobClient _client;
 
-        public AzureBlobStoragePictureProvider(string storageConnectionString)
+        public AzureBlobStorageProvider(string storageConnectionString)
         {
             if (string.IsNullOrEmpty(storageConnectionString))
             {

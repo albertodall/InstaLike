@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,8 +30,15 @@ namespace InstaLike.Web.Infrastructure
 
         public void Configure(IDictionary<string, string> settings)
         {
-            _externalStorageConnectionProvider = new AzureBlobStorageConnectionProvider("UseDevelopmentStorage=true");
             _connectionProvider.Configure(settings);
+
+            // Configure external storage, if requested
+            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string typeAsString) && typeAsString != null)
+            {
+                var externalStorageProviderType = Type.GetType(typeAsString);
+                _externalStorageConnectionProvider = (IExternalStorageConnectionProvider)Activator.CreateInstance(externalStorageProviderType);
+                _externalStorageConnectionProvider.Configure(settings);
+            }
         }
 
         public void Dispose()
@@ -48,7 +54,7 @@ namespace InstaLike.Web.Infrastructure
                 return connection;
             }
 
-            return new ExternalStorageDatabaseConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            return new DatabaseAndExternalStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
         }
 
         public async Task<DbConnection> GetConnectionAsync(CancellationToken cancellationToken)
@@ -59,34 +65,7 @@ namespace InstaLike.Web.Infrastructure
                 return connection;
             }
 
-            return new ExternalStorageDatabaseConnection(connection, _externalStorageConnectionProvider.GetProvider());
-        }
-
-        private IExternalStorageConnectionProvider CreateExternalStorageProviderFromConfigurationSettings(IDictionary<string, string> settings)
-        {
-            Type providerType;
-            IExternalStorageConnectionProvider externalStorageConnectionProvider = null;
-            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string connectionProviderAsString) && connectionProviderAsString != null)
-            {
-                providerType = Type.GetType(connectionProviderAsString);
-                externalStorageConnectionProvider = (IExternalStorageConnectionProvider)Activator.CreateInstance(providerType);
-                externalStorageConnectionProvider.Configure(settings);
-            }
-            else if (settings.TryGetValue(ExternalStorageParameters.ConnectionStringNameProperty, out string connectionStringName) && connectionStringName != null)
-            {
-                ConnectionStringSettings connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringName];
-                if (connectionStringSettings != null && !string.IsNullOrEmpty(connectionStringSettings.ProviderName))
-                {
-                    providerType = Type.GetType(connectionStringSettings.ProviderName);
-                    if (typeof(IExternalStorageConnectionProvider).IsAssignableFrom(providerType))
-                    {
-                        externalStorageConnectionProvider = (IExternalStorageConnectionProvider)Activator.CreateInstance(providerType);
-                        externalStorageConnectionProvider.Configure(settings);
-                    }
-                }
-            }
-
-            return externalStorageConnectionProvider;
+            return new DatabaseAndExternalStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
         }
     }
 }

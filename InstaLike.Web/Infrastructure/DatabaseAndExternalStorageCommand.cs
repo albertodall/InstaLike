@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace InstaLike.Web.Infrastructure
 {
-    internal class ExternalStorageDatabaseCommand : DbCommand
+    internal class DatabaseAndExternalStorageCommand : DbCommand
     {
-        private readonly ExternalStorageDatabaseConnection _connection;
+        private readonly DatabaseAndExternalStorageConnection _connection;
         private readonly DbCommand _command;
 
-        public ExternalStorageDatabaseCommand(ExternalStorageDatabaseConnection connection, DbCommand command)
+        public DatabaseAndExternalStorageCommand(DatabaseAndExternalStorageConnection connection, DbCommand command)
         {
             _connection = connection;
             _command = command;
@@ -54,7 +54,7 @@ namespace InstaLike.Web.Infrastructure
         protected override DbConnection DbConnection
         {
             get => _connection;
-            set => _command.Connection = ((ExternalStorageDatabaseConnection)value).DatabaseConnection as DbConnection;
+            set => _command.Connection = ((DatabaseAndExternalStorageConnection)value).DatabaseConnection as DbConnection;
         }
 
         protected override DbParameterCollection DbParameterCollection => _command.Parameters;
@@ -82,7 +82,7 @@ namespace InstaLike.Web.Infrastructure
 
         public override object ExecuteScalar()
         {
-            throw new System.NotImplementedException();
+            return _command.ExecuteScalar();
         }
 
         public override Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)

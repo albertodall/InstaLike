@@ -24,8 +24,6 @@ namespace InstaLike.Web.Extensions
                     .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
                 );
 
-            var cfg = nhConfig.BuildConfiguration().SetProperty("", "");
-
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
             {
@@ -40,15 +38,14 @@ namespace InstaLike.Web.Extensions
             , string databaseConnectionString
             , string externalStorageConnectionString)
         {
-            // External storage picture provider
-            services.AddSingleton<IExternalStoragePictureProvider>(
-                new AzureBlobStoragePictureProvider(externalStorageConnectionString)
-            );
-
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
                 .Mappings(m => m.FluentMappings
                     .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
                 );
+
+            var cfg = nhConfig.BuildConfiguration()
+                .SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName)
+                .SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>

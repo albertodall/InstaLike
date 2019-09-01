@@ -18,7 +18,7 @@ namespace InstaLike.Web.Infrastructure
 
         public override bool IsMutable => true;
 
-        public override string Name => "ExternalPicture";
+        public override string Name => "ExternalStoragePicture";
 
         public override Type ReturnedClass => typeof(Picture);
 
@@ -136,14 +136,14 @@ namespace InstaLike.Web.Infrastructure
             throw new NotImplementedException();
         }
 
-        private IExternalStoragePictureProvider GetExternalBlobConnection(ISessionImplementor session)
+        private IExternalStorageProvider GetExternalBlobConnection(ISessionImplementor session)
         {
             if (session.Connection == null)
             {
                 throw new NullReferenceException("ExternalBlobPictureType requires an open connection.");
             }
 
-            if (!(session.Connection is IExternalStoragePictureProvider connection))
+            if (!(session.Connection is IExternalStorageProvider connection))
             {
                 throw new Exception(
                     "ExternalBlobPictureType requires a IExternalStoragePictureProvider. Make sure you use ExternalStorageDriverConnectionProvider as your connection provider and specify an IExternalBlobConnectionProvider in your NHibernate configuration.");

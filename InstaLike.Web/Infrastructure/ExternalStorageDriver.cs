@@ -57,7 +57,7 @@ namespace InstaLike.Web.Infrastructure
         public DbCommand GenerateCommand(CommandType type, SqlString sqlString, SqlType[] parameterTypes)
         {
             // External storage doesn't have a "real" connection...
-            return new ExternalStorageDatabaseCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
+            return new DatabaseAndExternalStorageCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
         }
 
         public IResultSetsCommand GetResultSetsCommand(ISessionImplementor session)
@@ -80,11 +80,11 @@ namespace InstaLike.Web.Infrastructure
             Driver.RemoveUnusedCommandParameters(GetUnderlyingCommand(cmd), sqlString);
         }
 
-        private static DbCommand GetUnderlyingCommand(DbCommand externalStorageDatabaseCommand)
+        private static DbCommand GetUnderlyingCommand(DbCommand command)
         {
-            return externalStorageDatabaseCommand is ExternalStorageDatabaseCommand innerCommand
-                ? innerCommand.UnderlyingCommand
-                : externalStorageDatabaseCommand;
+            return command is DatabaseAndExternalStorageCommand cmd
+                ? cmd.UnderlyingCommand
+                : command;
         }
     }
 }
