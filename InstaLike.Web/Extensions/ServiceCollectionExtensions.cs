@@ -43,9 +43,13 @@ namespace InstaLike.Web.Extensions
                     .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
                 );
 
-            var cfg = nhConfig.BuildConfiguration()
-                .SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName)
-                .SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
+            // Add Azure-related configuration parameters.
+            nhConfig.ExposeConfiguration(cfg =>
+            {
+                cfg.SetProperty(NHibernate.Cfg.Environment.ConnectionProvider, typeof(ExternalStorageDriverConnectionProvider).AssemblyQualifiedName);
+                cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
+                cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
+            });
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -87,14 +91,19 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
+        public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, string apiKey, string apiUrl)
+        {
+            services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
+
+            return services;
+        }
+
         private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
         {
             return Fluently.Configure()
                 .Database(
                     MsSqlConfiguration.MsSql2012
-                        .Provider<ExternalStorageDriverConnectionProvider>()
                         .ConnectionString(connectionString)
-                        .Raw(ExternalStorageParameters.ConnectionStringProperty, "InstaLike.Web.Infrastructure")
                         .DefaultSchema("dbo")
                         .AdoNetBatchSize(20)
                         .ShowSql()

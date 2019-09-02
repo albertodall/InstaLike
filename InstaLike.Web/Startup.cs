@@ -69,11 +69,9 @@ namespace InstaLike.Web
                     throw new ApplicationException("Unsupported or unknown deployment type. Please specify 'OnPrem' or 'AzureCloud'.");
             }
 
-            services.AddSingleton<IImageRecognitionService>(
-                new AzureComputerVisionRecognition(
-                    Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),
-                    Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl")
-                ));
+            services.ConfigureAzureComputerVision(
+                Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),
+                Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl"));
 
             services.ConfigureAuthentication();
 
