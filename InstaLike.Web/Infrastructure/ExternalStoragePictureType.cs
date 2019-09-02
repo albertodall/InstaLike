@@ -140,13 +140,14 @@ namespace InstaLike.Web.Infrastructure
         {
             if (session.Connection == null)
             {
-                throw new NullReferenceException("ExternalBlobPictureType requires an open connection.");
+                throw new NullReferenceException($"{nameof(ExternalStoragePictureType)} requires an open connection.");
             }
 
             if (!(session.Connection is IExternalStorageProvider connection))
             {
                 throw new Exception(
-                    "ExternalBlobPictureType requires a IExternalStoragePictureProvider. Make sure you use ExternalStorageDriverConnectionProvider as your connection provider and specify an IExternalBlobConnectionProvider in your NHibernate configuration.");
+                    $"{nameof(ExternalStoragePictureType)} requires a {nameof(IExternalStorageProvider)}." +
+                    $"Make sure you use {nameof(ExternalStorageDriverConnectionProvider)} as your connection provider and specify a {nameof(IExternalStorageConnectionProvider)} in your NHibernate configuration.");
             }
 
             return connection;
