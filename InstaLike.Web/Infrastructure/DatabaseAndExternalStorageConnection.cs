@@ -79,5 +79,15 @@ namespace InstaLike.Web.Infrastructure
         }
 
         internal DbConnection DatabaseConnection { get; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is DatabaseAndExternalStorageConnection connection)
+            {
+                return DatabaseConnection.Equals(connection.DatabaseConnection);
+            }
+
+            return base.Equals(obj);
+        }
     }
 }

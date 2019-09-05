@@ -4,13 +4,14 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.SqlTypes;
 using NHibernate.Type;
 
-namespace InstaLike.Web.Infrastructure
+namespace InstaLike.Web.Data
 {
     internal class ExternalStoragePictureType : AbstractType
     {
@@ -136,7 +137,7 @@ namespace InstaLike.Web.Infrastructure
             throw new NotImplementedException();
         }
 
-        private IExternalStorageProvider GetExternalBlobConnection(ISessionImplementor session)
+        private IExternalStorageProvider GetExternalStorageConnection(ISessionImplementor session)
         {
             if (session.Connection == null)
             {

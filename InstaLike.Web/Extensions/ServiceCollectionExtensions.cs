@@ -19,10 +19,7 @@ namespace InstaLike.Web.Extensions
     {
         public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
-            var nhConfig = GetFluentConfigurationForDatabase(connectionString)
-                .Mappings(m => m.FluentMappings
-                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(OnPremDatabaseMappingAttribute)))
-                );
+            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -38,15 +35,11 @@ namespace InstaLike.Web.Extensions
             , string databaseConnectionString
             , string externalStorageConnectionString)
         {
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
-                .Mappings(m => m.FluentMappings
-                    .AddFromAssembly(Assembly.GetExecutingAssembly(), t => t.IsDefined(typeof(CloudDatabaseMappingAttribute)))
-                );
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
             // Add Azure-related configuration parameters.
             nhConfig.ExposeConfiguration(cfg =>
             {
-                cfg.SetProperty(NHibernate.Cfg.Environment.ConnectionProvider, typeof(ExternalStorageDriverConnectionProvider).AssemblyQualifiedName);
                 cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
                 cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
             });
@@ -103,6 +96,7 @@ namespace InstaLike.Web.Extensions
             return Fluently.Configure()
                 .Database(
                     MsSqlConfiguration.MsSql2012
+                        .Provider<ExternalStorageDriverConnectionProvider>()
                         .ConnectionString(connectionString)
                         .DefaultSchema("dbo")
                         .AdoNetBatchSize(20)
@@ -116,7 +110,8 @@ namespace InstaLike.Web.Extensions
                             LazyLoad.Always(),
                             DynamicUpdate.AlwaysTrue())
                         .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>());
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly()));
         }
     }
 }
