@@ -25,7 +25,7 @@ namespace InstaLike.Web.Data
 
         public override object DeepCopy(object val, ISessionFactoryImplementor factory)
         {
-            throw new NotImplementedException();
+            return val;
         }
 
         public override int GetColumnSpan(IMapping mapping)
@@ -38,9 +38,9 @@ namespace InstaLike.Web.Data
             return checkable[0] && IsDirty(old, current, session);
         }
 
-        public override Task<bool> IsDirtyAsync(object old, object current, bool[] checkable, ISessionImplementor session, CancellationToken cancellationToken)
+        public override async Task<bool> IsDirtyAsync(object old, object current, bool[] checkable, ISessionImplementor session, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return checkable[0] && await IsDirtyAsync(old, current, session, cancellationToken);
         }
 
         public override object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
@@ -50,7 +50,18 @@ namespace InstaLike.Web.Data
 
         public override object NullSafeGet(DbDataReader rs, string name, ISessionImplementor session, object owner)
         {
-            throw new NotImplementedException();
+            // This is only a PoC.
+
+            var entity = owner as IEntity<int>;
+
+            int index = rs.GetOrdinal(name);
+
+            if (rs.IsDBNull(index)) return Picture.EmptyPicture;
+
+            IExternalStorageProvider provider = GetExternalStorageProvider(session);
+            var picture = provider.LoadPictureAsync($"{entity.ID}.jpg", "profiles").Result;
+
+            return picture;
         }
 
         public override Task<object> NullSafeGetAsync(DbDataReader rs, string[] names, ISessionImplementor session, object owner, CancellationToken cancellationToken)
@@ -137,7 +148,7 @@ namespace InstaLike.Web.Data
             throw new NotImplementedException();
         }
 
-        private IExternalStorageProvider GetExternalStorageConnection(ISessionImplementor session)
+        private IExternalStorageProvider GetExternalStorageProvider(ISessionImplementor session)
         {
             if (session.Connection == null)
             {

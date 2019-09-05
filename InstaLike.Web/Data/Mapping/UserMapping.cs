@@ -27,17 +27,22 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.RegistrationDate)
                 .Not.Nullable();
 
-            Component(p => p.ProfilePicture, m =>
-            {
-                m.Map(p => p.Identifier).CustomType<Guid>()
-                    .Column("ProfilePictureGuid")
-                    .Not.Insert()
-                    .Not.Update()
-                    .Not.Nullable();
-                m.Map(p => p.RawBytes).CustomType<byte[]>()
-                    .Column("ProfilePicture")
-                    .Not.Nullable();
-            });
+            Map(p => p.ProfilePicture)
+                .CustomType<ExternalStoragePictureType>()
+                .Column("ProfilePicture")
+                .Not.Nullable();
+
+            //Component(p => p.ProfilePicture, m =>
+            //{
+            //    m.Map(p => p.Identifier).CustomType<Guid>()
+            //        .Column("ProfilePictureGuid")
+            //        .Not.Insert()
+            //        .Not.Update()
+            //        .Not.Nullable();
+            //    m.Map(p => p.RawBytes).CustomType<byte[]>()
+            //        .Column("ProfilePicture")
+            //        .Not.Nullable();
+            //});
 
             Component(p => p.FullName, m =>
             {
