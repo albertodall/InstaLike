@@ -57,7 +57,14 @@ namespace InstaLike.Web.Infrastructure
             set
             {
                 _connection = value;
-                _command.Connection = ((DatabaseAndExternalStorageConnection)value).DatabaseConnection as DbConnection;
+                if (value is DatabaseAndExternalStorageConnection)
+                {
+                    _command.Connection = ((DatabaseAndExternalStorageConnection)value).DatabaseConnection;
+                }
+                else
+                {
+                    _command.Connection = value;
+                }
             } 
         }
 
