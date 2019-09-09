@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
@@ -13,6 +14,8 @@ namespace InstaLike.Web.Services
     /// </summary>
     internal class AzureBlobStorageProvider : IExternalStorageProvider
     {
+        private const string Guid_Regex = @"([0-9a-fA-F]{8})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{12})";
+
         private readonly string _storageConnectionString;
         private readonly CloudStorageAccount _storageAccount;
         private readonly CloudBlobClient _client;
@@ -31,15 +34,27 @@ namespace InstaLike.Web.Services
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
+            string blobFileGuid = string.Empty;
             var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
-            return downloadBlobResult.IsSuccess ?
+            
+            if (Regex.IsMatch(blobFileName, Guid_Regex))
+            {
+                blobFileGuid = Regex.Match(blobFileName, Guid_Regex).Value;
+            }
+
+            if (downloadBlobResult.IsFailure)
+            {
+                return Picture.MissingPicture;
+            }
+
+            return string.IsNullOrEmpty(blobFileGuid) ?
                 Picture.Create(downloadBlobResult.Value).Value :
-                Picture.MissingPicture;
+                Picture.Create(downloadBlobResult.Value, new Guid(blobFileGuid)).Value;
         }
 
-        public async Task SavePictureAsync(Picture picture, string blobFileName, string containerName)
+        public async Task SavePictureAsync(Picture picture, string containerName)
         {
-            await SavePictureToContainerAsync(picture.RawBytes, blobFileName, containerName);
+            await SavePictureToContainerAsync(picture.RawBytes, $"{picture.Identifier}.jpg", containerName);
         }
 
         private async Task<Result<byte[]>> LoadPictureFromContainerAsync(string blobName, string containerName)
@@ -72,6 +87,7 @@ namespace InstaLike.Web.Services
             }
 
             CloudBlockBlob blob = container.GetBlockBlobReference(blobName);
+            blob.Properties.ContentType = "image/jpeg";
             await blob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
         }
     }

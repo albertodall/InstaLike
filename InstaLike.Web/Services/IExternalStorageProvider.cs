@@ -7,6 +7,6 @@ namespace InstaLike.Web.Services
     internal interface IExternalStorageProvider
     {
         Task<Picture> LoadPictureAsync(string blobFileName, string containerName);
-        Task SavePictureAsync(Picture picture, string blobFileName, string containerName);
+        Task SavePictureAsync(Picture picture, string containerName);
     }
 }

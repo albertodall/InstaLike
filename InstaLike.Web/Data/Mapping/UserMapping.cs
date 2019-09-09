@@ -1,6 +1,6 @@
-﻿using System;
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping
 {
@@ -26,23 +26,11 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
             Map(p => p.RegistrationDate)
                 .Not.Nullable();
-
             Map(p => p.ProfilePicture)
-                .CustomType<ExternalStoragePictureType>()
-                .Column("ProfilePicture")
-                .Not.Nullable();
-
-            //Component(p => p.ProfilePicture, m =>
-            //{
-            //    m.Map(p => p.Identifier).CustomType<Guid>()
-            //        .Column("ProfilePictureGuid")
-            //        .Not.Insert()
-            //        .Not.Update()
-            //        .Not.Nullable();
-            //    m.Map(p => p.RawBytes).CustomType<byte[]>()
-            //        .Column("ProfilePicture")
-            //        .Not.Nullable();
-            //});
+                .CustomType<ProfilePictureType>()
+                .Columns.Clear()
+                .Columns.Add("ProfilePicture").Not.Nullable()
+                .Columns.Add("ProfilePictureGuid").Not.Nullable();
 
             Component(p => p.FullName, m =>
             {

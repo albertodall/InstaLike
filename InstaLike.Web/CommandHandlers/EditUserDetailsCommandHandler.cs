@@ -18,7 +18,7 @@ namespace InstaLike.Web.CommandHandlers
         public EditUserDetailsCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
-            this._logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
