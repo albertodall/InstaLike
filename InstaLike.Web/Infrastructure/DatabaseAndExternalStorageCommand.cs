@@ -8,7 +8,7 @@ namespace InstaLike.Web.Infrastructure
     internal class DatabaseAndExternalStorageCommand : DbCommand
     {
         private DbConnection _connection;
-        private DbCommand _command;
+        private readonly DbCommand _command;
 
         public DatabaseAndExternalStorageCommand(DbConnection connection, DbCommand command)
         {

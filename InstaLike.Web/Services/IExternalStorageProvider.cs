@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Services

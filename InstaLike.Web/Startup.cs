@@ -3,7 +3,6 @@ using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Infrastructure;
-using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

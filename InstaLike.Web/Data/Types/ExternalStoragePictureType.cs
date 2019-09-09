@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
@@ -63,21 +64,19 @@ namespace InstaLike.Web.Data.Types
             throw new InvalidOperationException($"{nameof(Picture)} is an immutable object. SetPropertyValue is not supported.");
         }
 
-        protected static IExternalStorageProvider GetExternalStorageProvider(ISessionImplementor session)
+        protected static Maybe<IExternalStorageProvider> GetExternalStorageProvider(ISessionImplementor session)
         {
             if (session.Connection == null)
             {
                 throw new NullReferenceException($"{nameof(ExternalStoragePictureType)} requires an open connection.");
             }
 
-            if (!(session.Connection is IExternalStorageProvider connection))
+            if (session.Connection is IExternalStorageProvider connection)
             {
-                throw new Exception(
-                    $"{nameof(ExternalStoragePictureType)} requires a {nameof(IExternalStorageProvider)}." +
-                    $"Make sure you use {nameof(ExternalStorageDriverConnectionProvider)} as your connection provider and specify a {nameof(IExternalStorageConnectionProvider)} in your NHibernate configuration.");
+                return Maybe<IExternalStorageProvider>.From(connection);
             }
 
-            return connection;
+            return Maybe<IExternalStorageProvider>.None;
         }
     }
 }

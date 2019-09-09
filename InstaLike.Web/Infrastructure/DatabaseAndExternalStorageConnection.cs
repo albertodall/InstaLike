@@ -64,9 +64,9 @@ namespace InstaLike.Web.Infrastructure
             return await _externalStorage.LoadPictureAsync(blobFileName, containerName);
         }
 
-        public async Task SavePictureAsync(Picture picture, string blobFileName, string containerName)
+        public async Task SavePictureAsync(Picture picture, string containerName)
         {
-            await _externalStorage.SavePictureAsync(picture, blobFileName, containerName);
+            await _externalStorage.SavePictureAsync(picture, containerName);
         }
 
         protected override void Dispose(bool disposing)
