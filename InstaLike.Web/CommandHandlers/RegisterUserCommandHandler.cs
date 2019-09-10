@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Services;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -13,11 +14,13 @@ namespace InstaLike.Web.CommandHandlers
     internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
     {
         private readonly ISession _session;
+        private readonly ISequentialGuidGenerator _idGenerator;
         private readonly ILogger _logger;
 
-        public RegisterUserCommandHandler(ISession session, ILogger logger)
+        public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialGuidGenerator idGenerator)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
             _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -46,7 +49,8 @@ namespace InstaLike.Web.CommandHandlers
 
             if (request.ProfilePicture != null)
             {
-                userToRegister.SetProfilePicture((Picture)request.ProfilePicture);
+                var profilePicture = Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value;
+                userToRegister.SetProfilePicture(profilePicture);
             }
 
             using (var tx = _session.BeginTransaction())

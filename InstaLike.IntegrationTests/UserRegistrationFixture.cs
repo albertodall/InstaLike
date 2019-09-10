@@ -6,6 +6,7 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
 using InstaLike.Web.CommandHandlers;
+using InstaLike.Web.Services;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,7 +40,7 @@ namespace InstaLike.IntegrationTests
 
             using (var session = _testFixture.OpenSession(_output))
             {
-                var sut = new RegisterUserCommandHandler(session, Log.Logger);
+                var sut = new RegisterUserCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
                 userRegistrationResult = await sut.Handle(userRegistrationCommand, default);
             }
 

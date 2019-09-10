@@ -10,9 +10,10 @@ namespace InstaLike.Web.Data.Types
 {
     internal class ProfilePictureType : ExternalStoragePictureType
     {
+        private const string Profile_Pictures_Container_Name = "profiles";
+
         public override object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
         {
-            // This is only a PoC.
             Picture result;
 
             // Read the picture Guid in the database, to create the link between the database and the external storage.
@@ -27,8 +28,7 @@ namespace InstaLike.Web.Data.Types
             else
             {
                 // Read the picture using the configured external provider
-                // TODO: the blob container name should not be there
-                result = provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", "profiles").Result;
+                result = provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", Profile_Pictures_Container_Name).Result;
             }
 
             return result;
@@ -42,9 +42,6 @@ namespace InstaLike.Web.Data.Types
                 throw new ArgumentNullException(nameof(value), $"Specified value is not a {nameof(Picture)}");
             }
 
-            // Guid reference has always to be saved in the database.
-            NHibernateUtil.Guid.NullSafeSet(cmd, picture.Identifier, index + 1, session);
-
             Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
             if (provider.HasNoValue)
             {
@@ -54,9 +51,12 @@ namespace InstaLike.Web.Data.Types
             else
             {
                 // Save the picture using the configured external storage provider.
-                // TODO: the blob container name should not be there
-                provider.Value.SavePictureAsync(picture, "profiles").GetAwaiter().GetResult();
+                provider.Value.SavePictureAsync(picture, Profile_Pictures_Container_Name).GetAwaiter().GetResult();
+                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, Array.Empty<byte>(), index, session);
             }
+
+            // Guid reference has always to be saved in the database.
+            NHibernateUtil.Guid.NullSafeSet(cmd, picture.Identifier, ++index, session);
         }
     }
 }

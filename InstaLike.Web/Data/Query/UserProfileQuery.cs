@@ -53,7 +53,7 @@ namespace InstaLike.Web.Data.Query
                         .Select(u => u.FullName.Name).WithAlias(() => profile.Name)
                         .Select(u => u.FullName.Surname).WithAlias(() => profile.Surname)
                         .Select(u => u.Biography).WithAlias(() => profile.Bio)
-                        .Select(u => u.ProfilePicture.RawBytes).WithAlias(() => profile.ProfilePicture)
+                        .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePicture)
                     )
                     .TransformUsing(Transformers.AliasToBean<UserProfileModel>());
 

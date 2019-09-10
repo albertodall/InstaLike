@@ -1,4 +1,6 @@
-﻿namespace InstaLike.Web.Models
+﻿using InstaLike.Core.Domain;
+
+namespace InstaLike.Web.Models
 {
     public class UserProfileModel
     {
@@ -12,7 +14,7 @@
         public int NumberOfFollows { get; set; }
         public bool IsCurrentUserProfile { get; set; }
         public bool Following { get; set; }
-        public byte[] ProfilePicture { get; set; }
+        public Picture ProfilePicture { get; set; }
         public PostThumbnailModel[] RecentPosts { get; set; }
     }
 }

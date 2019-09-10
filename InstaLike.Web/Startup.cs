@@ -3,6 +3,7 @@ using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Infrastructure;
+using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -47,6 +48,8 @@ namespace InstaLike.Web
                     flushToDiskInterval: TimeSpan.FromSeconds(Configuration.GetValue<int>("Logging:FlushToDiskIntervalSeconds")));
 
             services.ConfigureLogging(loggerConfig);
+
+            services.AddSingleton<ISequentialGuidGenerator, SequentialGuidGenerator>();
 
             services.ConfigurePipeline();
 
