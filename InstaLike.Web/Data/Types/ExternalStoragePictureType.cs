@@ -2,7 +2,6 @@
 using System.Data.Common;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
-using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using NHibernate;
 using NHibernate.Engine;
@@ -13,9 +12,9 @@ namespace InstaLike.Web.Data.Types
 {
     internal abstract class ExternalStoragePictureType : ICompositeUserType
     {
-        public string[] PropertyNames => new string[2] { "RawBytes", "Identifier" };
+        public string[] PropertyNames => new[] { "RawBytes", "Identifier" };
 
-        public IType[] PropertyTypes => new IType[2] { NHibernateUtil.BinaryBlob, NHibernateUtil.Guid };
+        public IType[] PropertyTypes => new IType[] { NHibernateUtil.BinaryBlob, NHibernateUtil.Guid };
 
         public Type ReturnedClass => typeof(Picture);
 
@@ -47,10 +46,7 @@ namespace InstaLike.Web.Data.Types
             {
                 return picture.RawBytes;
             }
-            else
-            {
-                return picture.Identifier;
-            }
+            return picture.Identifier;
         }
 
         public abstract object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner);     

@@ -2,7 +2,6 @@
 using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -43,7 +42,7 @@ namespace InstaLike.Web
                 .Enrich.WithExceptionDetails()
                 .WriteTo.Console(outputTemplate: LogEntryTemplate)
                 .WriteTo.File(
-                    path: Configuration["Logging:LogFile"],
+                    Configuration["Logging:LogFile"],
                     outputTemplate: LogEntryTemplate,
                     flushToDiskInterval: TimeSpan.FromSeconds(Configuration.GetValue<int>("Logging:FlushToDiskIntervalSeconds")));
 

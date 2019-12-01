@@ -10,7 +10,7 @@ namespace InstaLike.Web.Data.Types
 {
     internal class ProfilePictureType : ExternalStoragePictureType
     {
-        private const string Profile_Pictures_Container_Name = "profiles";
+        private const string ProfilePicturesContainerName = "profiles";
 
         public override object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
         {
@@ -28,7 +28,7 @@ namespace InstaLike.Web.Data.Types
             else
             {
                 // Read the picture using the configured external provider
-                result = provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", Profile_Pictures_Container_Name).Result;
+                result = provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", ProfilePicturesContainerName).Result;
             }
 
             return result;
@@ -51,7 +51,7 @@ namespace InstaLike.Web.Data.Types
             else
             {
                 // Save the picture using the configured external storage provider.
-                provider.Value.SavePictureAsync(picture, Profile_Pictures_Container_Name).GetAwaiter().GetResult();
+                provider.Value.SavePictureAsync(picture, ProfilePicturesContainerName).GetAwaiter().GetResult();
                 NHibernateUtil.BinaryBlob.NullSafeSet(cmd, Array.Empty<byte>(), index, session);
             }
 

@@ -9,9 +9,9 @@ using NHibernate.SqlTypes;
 
 namespace InstaLike.Web.Infrastructure
 {
-    internal class ExternalStorageDriver : IDriver
+    internal class HybridStorageDriver : IDriver
     {
-        public ExternalStorageDriver(IDriver driver)
+        public HybridStorageDriver(IDriver driver)
         {
             Driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
@@ -57,7 +57,7 @@ namespace InstaLike.Web.Infrastructure
         public DbCommand GenerateCommand(CommandType type, SqlString sqlString, SqlType[] parameterTypes)
         {
             // External storage doesn't have a "real" connection...
-            return new DatabaseAndExternalStorageCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
+            return new HybridStorageCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
         }
 
         public IResultSetsCommand GetResultSetsCommand(ISessionImplementor session)
@@ -82,7 +82,7 @@ namespace InstaLike.Web.Infrastructure
 
         private static DbCommand GetUnderlyingCommand(DbCommand command)
         {
-            return command is DatabaseAndExternalStorageCommand cmd
+            return command is HybridStorageCommand cmd
                 ? cmd.UnderlyingCommand
                 : command;
         }

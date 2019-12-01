@@ -11,17 +11,17 @@ namespace InstaLike.Web.Infrastructure
     /// <summary>
     /// Strategy to get a connection to both the database and the external storage.
     /// </summary>
-    internal class ExternalStorageDriverConnectionProvider : IConnectionProvider
+    internal class HybridStorageDriverConnectionProvider : IConnectionProvider
     {
         private readonly IConnectionProvider _connectionProvider;
-        private IExternalStorageConnectionProvider _externalStorageConnectionProvider;
+        private IHybridStorageConnectionProvider _externalStorageConnectionProvider;
 
-        public ExternalStorageDriverConnectionProvider()
+        public HybridStorageDriverConnectionProvider()
         {
             _connectionProvider = new DriverConnectionProvider();
         }
 
-        public IDriver Driver => new ExternalStorageDriver(_connectionProvider.Driver);
+        public IDriver Driver => new HybridStorageDriver(_connectionProvider.Driver);
 
         public void CloseConnection(DbConnection conn)
         {
@@ -36,7 +36,7 @@ namespace InstaLike.Web.Infrastructure
             if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string type) && type != null)
             {
                 var externalStorageProviderType = Type.GetType(type);
-                _externalStorageConnectionProvider = (IExternalStorageConnectionProvider)Activator.CreateInstance(externalStorageProviderType);
+                _externalStorageConnectionProvider = (IHybridStorageConnectionProvider)Activator.CreateInstance(externalStorageProviderType);
                 _externalStorageConnectionProvider.Configure(settings);
             }
         }
@@ -54,7 +54,7 @@ namespace InstaLike.Web.Infrastructure
                 return connection;
             }
 
-            return new DatabaseAndExternalStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            return new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
         }
 
         public async Task<DbConnection> GetConnectionAsync(CancellationToken cancellationToken)
@@ -65,7 +65,7 @@ namespace InstaLike.Web.Infrastructure
                 return connection;
             }
 
-            return new DatabaseAndExternalStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            return new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
         }
     }
 }

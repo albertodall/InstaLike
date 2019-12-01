@@ -1,16 +1,17 @@
 ﻿using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace InstaLike.Web.Infrastructure
 {
-    internal class DatabaseAndExternalStorageCommand : DbCommand
+    internal class HybridStorageCommand : DbCommand
     {
         private DbConnection _connection;
         private readonly DbCommand _command;
 
-        public DatabaseAndExternalStorageCommand(DbConnection connection, DbCommand command)
+        public HybridStorageCommand(DbConnection connection, DbCommand command)
         {
             _connection = connection;
             _command = command;
@@ -21,6 +22,8 @@ namespace InstaLike.Web.Infrastructure
             get { return _command; }
         }
 
+        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", 
+            Justification = "It's a matter of NHibernate behind the scenes.")]
         public override string CommandText
         {
             get => _command.CommandText;
@@ -57,9 +60,9 @@ namespace InstaLike.Web.Infrastructure
             set
             {
                 _connection = value;
-                if (value is DatabaseAndExternalStorageConnection)
+                if (value is HybridStorageConnection)
                 {
-                    _command.Connection = ((DatabaseAndExternalStorageConnection)value).DatabaseConnection;
+                    _command.Connection = ((HybridStorageConnection)value).DatabaseConnection;
                 }
                 else
                 {

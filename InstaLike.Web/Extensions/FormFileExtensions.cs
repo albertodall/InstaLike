@@ -17,7 +17,7 @@ namespace InstaLike.Web.Extensions
             return formFile.ToByteArrayInternalAsync();
         }
 
-        private async static Task<byte[]> ToByteArrayInternalAsync(this IFormFile formFile)
+        private static async Task<byte[]> ToByteArrayInternalAsync(this IFormFile formFile)
         {
             byte[] result;
             using (var stream = new MemoryStream())
@@ -39,7 +39,7 @@ namespace InstaLike.Web.Extensions
             return formFile.ToStreamInternalAsync();
         }
 
-        private async static Task<Stream> ToStreamInternalAsync(this IFormFile formFile)
+        private static async Task<Stream> ToStreamInternalAsync(this IFormFile formFile)
         {
             var stream = new MemoryStream();
             await formFile.CopyToAsync(stream);

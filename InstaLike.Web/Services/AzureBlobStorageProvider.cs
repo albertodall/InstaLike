@@ -14,10 +14,9 @@ namespace InstaLike.Web.Services
     /// </summary>
     internal class AzureBlobStorageProvider : IExternalStorageProvider
     {
-        private const string Guid_Regex = @"([0-9a-fA-F]{8})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{12})";
+        private const string GuidRegex = 
+            @"([0-9a-fA-F]{8})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{12})";
 
-        private readonly string _storageConnectionString;
-        private readonly CloudStorageAccount _storageAccount;
         private readonly CloudBlobClient _client;
 
         public AzureBlobStorageProvider(string storageConnectionString)
@@ -26,10 +25,9 @@ namespace InstaLike.Web.Services
             {
                 throw new ArgumentNullException(nameof(storageConnectionString));
             }
-            _storageConnectionString = storageConnectionString;
 
-            _storageAccount = CloudStorageAccount.Parse(_storageConnectionString);
-            _client = _storageAccount.CreateCloudBlobClient();
+            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+            _client = storageAccount.CreateCloudBlobClient();
         }
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
@@ -37,9 +35,9 @@ namespace InstaLike.Web.Services
             string blobFileGuid = string.Empty;
             var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
             
-            if (Regex.IsMatch(blobFileName, Guid_Regex))
+            if (Regex.IsMatch(blobFileName, GuidRegex))
             {
-                blobFileGuid = Regex.Match(blobFileName, Guid_Regex).Value;
+                blobFileGuid = Regex.Match(blobFileName, GuidRegex).Value;
             }
 
             if (downloadBlobResult.IsFailure)
@@ -86,7 +84,7 @@ namespace InstaLike.Web.Services
                 throw new StorageException($"Container {containerName} does not exist.");
             }
 
-            CloudBlockBlob blob = container.GetBlockBlobReference(blobName);
+            var blob = container.GetBlockBlobReference(blobName);
             blob.Properties.ContentType = "image/jpeg";
             await blob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
         }

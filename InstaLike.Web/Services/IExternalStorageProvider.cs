@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+﻿using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Services

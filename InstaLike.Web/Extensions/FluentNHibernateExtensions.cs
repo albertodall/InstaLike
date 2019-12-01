@@ -25,7 +25,8 @@ namespace InstaLike.Web.Extensions
                     .Where(t => (IsMappingOf<IMappingProvider>(t) ||
                                  IsMappingOf<IIndeterminateSubclassMappingProvider>(t) ||
                                  IsMappingOf<IExternalComponentMappingProvider>(t) ||
-                                 IsMappingOf<IFilterDefinition>(t)) && whereCondition(t));
+                                 IsMappingOf<IFilterDefinition>(t)
+                                ) && whereCondition(t));
 
             foreach (var mappingType in mappingTypes)
             {
@@ -36,7 +37,7 @@ namespace InstaLike.Web.Extensions
         }
 
         /// <summary>
-        /// From FluentNHibernate source (PersistenModel.cs:151)
+        /// From FluentNHibernate source (PersistentModel.cs:151)
         /// </summary>
         private static bool IsMappingOf<T>(Type type)
         {

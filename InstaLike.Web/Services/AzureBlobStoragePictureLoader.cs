@@ -10,8 +10,6 @@ namespace InstaLike.Web.Services
 {
     internal class AzureBlobStoragePictureLoader : IExternalStoragePictureLoader
     {
-        private readonly string _storageConnectionString;
-        private readonly CloudStorageAccount _storageAccount;
         private readonly CloudBlobClient _client;
 
         public AzureBlobStoragePictureLoader(string storageConnectionString)
@@ -20,13 +18,10 @@ namespace InstaLike.Web.Services
             {
                 throw new ArgumentNullException(nameof(storageConnectionString));
             }
-            _storageConnectionString = storageConnectionString;
 
-            _storageAccount = CloudStorageAccount.Parse(_storageConnectionString);
-            _client = _storageAccount.CreateCloudBlobClient();
+            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+            _client = storageAccount.CreateCloudBlobClient();
         }
-
-        
 
         public async Task<Picture> LoadUserProfilePictureAsync(User user, string containerName)
         {

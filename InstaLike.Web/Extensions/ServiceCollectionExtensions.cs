@@ -50,42 +50,33 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services
-            , string databaseConnectionString
-            , string externalStorageConnectionString)
+        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services,
+            string databaseConnectionString,
+            string externalStorageConnectionString)
         {
             // External storage picture provider
             services.AddSingleton<IExternalStoragePictureLoader>(
                 new AzureBlobStoragePictureLoader(externalStorageConnectionString)
             );
 
-            var nhConfig = Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(databaseConnectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            LazyLoad.Always(),
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly())
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
-                );
-
-            // Attach event listener
+            // Configure external storage and attach event listener
             services.AddSingleton(sp => 
             {
                 var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureLoader>();
-                nhConfig.ExposeConfiguration(cfg => cfg.AppendListeners(
-                    ListenerType.PreLoad, new[] { new ExternalStorageLoadEventListener(externalStoragePictureLoader) }
-                ));
+                nhConfig.ExposeConfiguration(cfg => 
+                {
+                    // TODO: Do not bind to Azure
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).FullName);
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
+                    cfg.AppendListeners(
+                        ListenerType.PreLoad, new[] 
+                        { 
+                            new ExternalStorageLoadEventListener(externalStoragePictureLoader) 
+                        });
+                });
+
                 return nhConfig.BuildSessionFactory();
             });
             
@@ -140,7 +131,7 @@ namespace InstaLike.Web.Extensions
             return Fluently.Configure()
                 .Database(
                     MsSqlConfiguration.MsSql2012
-                        .Provider<ExternalStorageDriverConnectionProvider>()
+                        .Provider<HybridStorageDriverConnectionProvider>()
                         .ConnectionString(connectionString)
                         .DefaultSchema("dbo")
                         .AdoNetBatchSize(20)

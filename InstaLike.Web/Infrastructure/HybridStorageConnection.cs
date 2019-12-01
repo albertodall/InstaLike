@@ -10,11 +10,11 @@ namespace InstaLike.Web.Infrastructure
     /// <summary>
     /// This connection "connects" the O/RM to both the database and the external storage.
     /// </summary>
-    internal class DatabaseAndExternalStorageConnection : DbConnection, IExternalStorageProvider
+    internal class HybridStorageConnection : DbConnection, IExternalStorageProvider
     {
         private readonly IExternalStorageProvider _externalStorage;
 
-        public DatabaseAndExternalStorageConnection(DbConnection database, IExternalStorageProvider externalStorage)
+        public HybridStorageConnection(DbConnection database, IExternalStorageProvider externalStorage)
         {
             DatabaseConnection = database ?? throw new ArgumentNullException(nameof(database));
             _externalStorage = externalStorage ?? throw new ArgumentNullException(nameof(externalStorage));
@@ -56,7 +56,7 @@ namespace InstaLike.Web.Infrastructure
 
         protected override DbCommand CreateDbCommand()
         {
-            return new DatabaseAndExternalStorageCommand(this, DatabaseConnection.CreateCommand());
+            return new HybridStorageCommand(this, DatabaseConnection.CreateCommand());
         }
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
