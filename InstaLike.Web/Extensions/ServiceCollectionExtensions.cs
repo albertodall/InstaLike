@@ -19,25 +19,7 @@ namespace InstaLike.Web.Extensions
     {
         public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
-            var nhConfig = Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            LazyLoad.Always(),
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly())
-                        
-                );
+            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -55,13 +37,15 @@ namespace InstaLike.Web.Extensions
         {
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
-            // Configure external storage and attach event listener
-            services.AddSingleton(sp => 
+            // Configure external storage
+            services.AddSingleton<IHybridStorageConnectionProvider, AzureBlobStorageConnectionProvider>();
+            services.AddSingleton(sp =>
             {
+                var connectionProvider = sp.GetRequiredService<IHybridStorageConnectionProvider>();
+
                 nhConfig.ExposeConfiguration(cfg => 
                 {
-                    // TODO: Do not bind to Azure
-                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).FullName);
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, connectionProvider.GetType().FullName);
                     cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
                 });
 

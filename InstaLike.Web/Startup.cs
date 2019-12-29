@@ -2,6 +2,7 @@
 using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -54,10 +55,16 @@ namespace InstaLike.Web
 
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
-            // services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
-            services.ConfigureCloudDataAccess(
-                Configuration.GetConnectionString("DefaultDatabase"),
-                Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
+            if (IsOnPremDeployment())
+            {
+                services.ConfigureOnPremDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+            }
+            else
+            {
+                services.ConfigureCloudDataAccess(
+                    Configuration.GetConnectionString("DefaultDatabase"),
+                    Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
+            }
 
             services.ConfigureAzureComputerVision(
                 Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),
@@ -91,6 +98,11 @@ namespace InstaLike.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private bool IsOnPremDeployment()
+        {
+            return Configuration.GetValue<DeploymentType>("DeploymentType") == DeploymentType.OnPrem;
         }
     }
 }

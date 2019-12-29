@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Extensions;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 
@@ -14,9 +15,6 @@ namespace InstaLike.Web.Services
     /// </summary>
     internal class AzureBlobStorageProvider : IExternalStorageProvider
     {
-        private const string GuidRegex = 
-            @"([0-9a-fA-F]{8})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{12})";
-
         private readonly CloudBlobClient _client;
 
         public AzureBlobStorageProvider(string storageConnectionString)
@@ -32,7 +30,7 @@ namespace InstaLike.Web.Services
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
-            string blobFileGuid = string.Empty;
+            var blobFileGuid = string.Empty;
 
             var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
             if (downloadBlobResult.IsFailure || downloadBlobResult.Value == Array.Empty<byte>())
@@ -40,14 +38,7 @@ namespace InstaLike.Web.Services
                 return Picture.MissingPicture;
             }
 
-            if (Regex.IsMatch(blobFileName, GuidRegex))
-            {
-                blobFileGuid = Regex.Match(blobFileName, GuidRegex).Value;
-            }
-
-            return string.IsNullOrEmpty(blobFileGuid) ?
-                Picture.Create(downloadBlobResult.Value).Value :
-                Picture.Create(downloadBlobResult.Value, new Guid(blobFileGuid)).Value;
+            return Picture.Create(downloadBlobResult.Value, new Guid(blobFileName.ExtractGuid())).Value;
         }
 
         public async Task SavePictureAsync(Picture picture, string containerName)

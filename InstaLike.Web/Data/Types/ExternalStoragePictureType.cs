@@ -42,6 +42,12 @@ namespace InstaLike.Web.Data.Types
         public object GetPropertyValue(object component, int property)
         {
             Picture picture = component as Picture;
+
+            if (picture == null)
+            {
+                throw new ArgumentNullException($"{nameof(component)} is not a valid picture");
+            }
+
             if (property == 0)
             {
                 return picture.RawBytes;

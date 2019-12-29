@@ -16,10 +16,7 @@ namespace InstaLike.Web.Infrastructure
             _command = command;
         }
 
-        public virtual DbCommand UnderlyingCommand
-        {
-            get { return _command; }
-        }
+        public virtual DbCommand UnderlyingCommand => _command;
 
         public override string CommandText
         {
@@ -57,14 +54,9 @@ namespace InstaLike.Web.Infrastructure
             set
             {
                 _connection = value;
-                if (value is HybridStorageConnection)
-                {
-                    _command.Connection = ((HybridStorageConnection)value).DatabaseConnection;
-                }
-                else
-                {
-                    _command.Connection = value;
-                }
+                _command.Connection = value is HybridStorageConnection connection 
+                    ? connection.DatabaseConnection 
+                    : value;
             } 
         }
 
