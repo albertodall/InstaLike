@@ -53,11 +53,11 @@ namespace InstaLike.Web.Data.Query
                         .Select(u => u.FullName.Name).WithAlias(() => profile.Name)
                         .Select(u => u.FullName.Surname).WithAlias(() => profile.Surname)
                         .Select(u => u.Biography).WithAlias(() => profile.Bio)
-                        .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePicture)
+                        .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePictureBytes)
                     )
-                    .TransformUsing(Transformers.AliasToBean<UserProfileModel>());
+                    .TransformUsing(new CastPropertyTransformer<UserProfileModel>());
 
-                // Loads user's information
+                // Load user's information
                 profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>();
 
                 // Number of posts published by this author. 

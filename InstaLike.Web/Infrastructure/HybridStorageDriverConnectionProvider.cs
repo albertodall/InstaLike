@@ -32,7 +32,7 @@ namespace InstaLike.Web.Infrastructure
         {
             _connectionProvider.Configure(settings);
 
-            // Configure external storage, if requested
+            // Configure external storage, if specified
             if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string type) && type != null)
             {
                 var externalStorageProviderType = Type.GetType(type);

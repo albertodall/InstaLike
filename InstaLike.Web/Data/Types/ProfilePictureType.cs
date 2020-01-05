@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Services;
@@ -16,19 +17,21 @@ namespace InstaLike.Web.Data.Types
         {
             Picture result;
 
-            // Read the picture Guid in the database, to create the link between the database and the external storage.
+            // Read the picture Guid in the database, actual link between database and external storage.
             var pictureGuid = dr.GetFieldValue<Guid>(dr.GetOrdinal(names[1]));
             Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
             if (provider.HasNoValue)
             {
-                // No external provider configured, read everything from the database.
+                // No external provider configured, read everything from database.
                 var pictureBytes = dr.GetFieldValue<byte[]>(dr.GetOrdinal(names[0]));
                 result = Picture.Create(pictureBytes, pictureGuid).Value;
             }
             else
             {
                 // Read the picture using the configured external provider
-                result = provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", ProfilePicturesContainerName).Result;
+                result = Task.Run(() =>
+                    provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", ProfilePicturesContainerName)
+                ).Result;
             }
 
             return result;
@@ -51,7 +54,9 @@ namespace InstaLike.Web.Data.Types
             else
             {
                 // Save the picture using the configured external storage provider.
-                provider.Value.SavePictureAsync(picture, ProfilePicturesContainerName).GetAwaiter().GetResult();
+                Task.Run(
+                    () => provider.Value.SavePictureAsync(picture, ProfilePicturesContainerName)
+                ).Wait();
                 NHibernateUtil.BinaryBlob.NullSafeSet(cmd, Array.Empty<byte>(), index, session);
             }
 

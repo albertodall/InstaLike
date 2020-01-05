@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,8 +21,6 @@ namespace InstaLike.Web.Infrastructure
             get { return _command; }
         }
 
-        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", 
-            Justification = "It's a matter of NHibernate behind the scenes.")]
         public override string CommandText
         {
             get => _command.CommandText;

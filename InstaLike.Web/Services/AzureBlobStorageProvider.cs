@@ -33,16 +33,16 @@ namespace InstaLike.Web.Services
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
             string blobFileGuid = string.Empty;
+
             var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
-            
+            if (downloadBlobResult.IsFailure || downloadBlobResult.Value == Array.Empty<byte>())
+            {
+                return Picture.MissingPicture;
+            }
+
             if (Regex.IsMatch(blobFileName, GuidRegex))
             {
                 blobFileGuid = Regex.Match(blobFileName, GuidRegex).Value;
-            }
-
-            if (downloadBlobResult.IsFailure)
-            {
-                return Picture.MissingPicture;
             }
 
             return string.IsNullOrEmpty(blobFileGuid) ?
@@ -58,10 +58,8 @@ namespace InstaLike.Web.Services
         private async Task<Result<byte[]>> LoadPictureFromContainerAsync(string blobName, string containerName)
         {
             var container = _client.GetContainerReference(containerName);
-            if (!await container.ExistsAsync())
-            {
-                throw new StorageException($"Container {containerName} does not exist.");
-            }
+
+            await EnsureBlobContainerExists(container);
 
             var blob = container.GetBlobReference(blobName);
             if (!await blob.ExistsAsync())
@@ -79,14 +77,20 @@ namespace InstaLike.Web.Services
         private async Task SavePictureToContainerAsync(byte[] byteArray, string blobName, string containerName)
         {
             var container = _client.GetContainerReference(containerName);
-            if (!await container.ExistsAsync())
-            {
-                throw new StorageException($"Container {containerName} does not exist.");
-            }
+
+            await EnsureBlobContainerExists(container);
 
             var blob = container.GetBlockBlobReference(blobName);
             blob.Properties.ContentType = "image/jpeg";
             await blob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
+        }
+
+        private static async Task EnsureBlobContainerExists(CloudBlobContainer container)
+        {
+            if (!await container.ExistsAsync())
+            {
+                throw new StorageException($"Container {container.Name} does not exist.");
+            }
         }
     }
 }

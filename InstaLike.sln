@@ -15,6 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaLike.IntegrationTests"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5A4FDE1F-C114-4495-AE00-7E27BAF993C6}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		sonarcloud.cmd = sonarcloud.cmd
 	EndProjectSection
 EndProject

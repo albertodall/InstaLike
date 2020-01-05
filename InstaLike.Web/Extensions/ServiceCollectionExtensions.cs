@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
-using NHibernate.Event;
 using Serilog;
 
 namespace InstaLike.Web.Extensions
@@ -54,27 +53,16 @@ namespace InstaLike.Web.Extensions
             string databaseConnectionString,
             string externalStorageConnectionString)
         {
-            // External storage picture provider
-            services.AddSingleton<IExternalStoragePictureLoader>(
-                new AzureBlobStoragePictureLoader(externalStorageConnectionString)
-            );
-
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
             // Configure external storage and attach event listener
             services.AddSingleton(sp => 
             {
-                var externalStoragePictureLoader = sp.GetRequiredService<IExternalStoragePictureLoader>();
                 nhConfig.ExposeConfiguration(cfg => 
                 {
                     // TODO: Do not bind to Azure
                     cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).FullName);
                     cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
-                    cfg.AppendListeners(
-                        ListenerType.PreLoad, new[] 
-                        { 
-                            new ExternalStorageLoadEventListener(externalStoragePictureLoader) 
-                        });
                 });
 
                 return nhConfig.BuildSessionFactory();
