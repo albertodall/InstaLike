@@ -3,6 +3,7 @@ using System.Data.Common;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Services;
+using Microsoft.AspNetCore.Identity.UI.V3.Pages.Internal.Account;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.Type;
@@ -41,7 +42,7 @@ namespace InstaLike.Web.Data.Types
 
         public object GetPropertyValue(object component, int property)
         {
-            Picture picture = component as Picture;
+            var picture = component as Picture;
 
             if (picture == null)
             {

@@ -43,7 +43,7 @@ namespace InstaLike.Web.Data.Query
 
             _logger.Debug("Reading profile of user {UserID} with parameters {@Request}.", request.CurrentUserID, request);
 
-            using (var tx = _session.BeginTransaction())
+            using (_session.BeginTransaction())
             {
                 var userProfileQuery = _session.QueryOver<User>()
                     .Where(Restrictions.Eq("Nickname", request.Nickname))
@@ -58,13 +58,13 @@ namespace InstaLike.Web.Data.Query
                     .TransformUsing(new CastPropertyTransformer<UserProfileModel>());
 
                 // Load user's information
-                profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>();
+                profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>(cancellationToken);
 
                 // Number of posts published by this author. 
                 var postCountQuery = _session.QueryOver<Post>()
-                   .Where(p => p.Author.ID == profile.UserID)
-                   .Select(Projections.Count<Post>(p => p.ID))
-                   .FutureValue<int>();
+                    .Where(p => p.Author.ID == profile.UserID)
+                    .Select(Projections.Count<Post>(p => p.ID))
+                    .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
                 PostThumbnailModel thumbnailModel = null;
@@ -100,14 +100,14 @@ namespace InstaLike.Web.Data.Query
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
-                profile.NumberOfPosts = await postCountQuery.GetValueAsync();
-                profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync()).ToArray();
-                profile.NumberOfFollowers = await followersCountQuery.GetValueAsync();
-                profile.NumberOfFollows = await followingCountQuery.GetValueAsync();
+                profile.NumberOfPosts = await postCountQuery.GetValueAsync(cancellationToken);
+                profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync(cancellationToken)).ToArray();
+                profile.NumberOfFollowers = await followersCountQuery.GetValueAsync(cancellationToken);
+                profile.NumberOfFollows = await followingCountQuery.GetValueAsync(cancellationToken);
                 profile.IsCurrentUserProfile = profile.UserID == request.CurrentUserID;
 
                 profile.Following = 
-                    await isFollowedByCurrentUserQuery.GetValueAsync() == 1 
+                    await isFollowedByCurrentUserQuery.GetValueAsync(cancellationToken) == 1 
                     || profile.IsCurrentUserProfile;
             }
 
