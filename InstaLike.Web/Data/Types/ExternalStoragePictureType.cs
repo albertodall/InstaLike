@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data.Common;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Services;
-using Microsoft.AspNetCore.Identity.UI.V3.Pages.Internal.Account;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.Type;
@@ -56,7 +56,7 @@ namespace InstaLike.Web.Data.Types
             return picture.Identifier;
         }
 
-        public abstract object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner);     
+        public abstract object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner);
 
         public abstract void NullSafeSet(DbCommand cmd, object value, int index, bool[] settable, ISessionImplementor session);
 
@@ -67,7 +67,52 @@ namespace InstaLike.Web.Data.Types
             throw new InvalidOperationException($"{nameof(Picture)} is an immutable object. SetPropertyValue is not supported.");
         }
 
-        protected static Maybe<IExternalStorageProvider> GetExternalStorageProvider(ISessionImplementor session)
+        protected static Picture LoadPictureFromConfiguredProvider(DbDataReader dr, string guidFieldName, string pictureBytesFieldName, ISessionImplementor session, string containerName)
+        {
+            Picture result;
+
+            // Read the picture Guid in the database, actual link between database and external storage.
+            var pictureGuid = dr.GetFieldValue<Guid>(dr.GetOrdinal(guidFieldName));
+            Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
+            if (provider.HasNoValue)
+            {
+                // No external provider configured, read everything from database.
+                var pictureBytes = dr.GetFieldValue<byte[]>(dr.GetOrdinal(pictureBytesFieldName));
+                result = Picture.Create(pictureBytes, pictureGuid).Value;
+            }
+            else
+            {
+                // Read the picture using the configured external provider
+                result = Task.Run(() =>
+                    provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", containerName)
+                ).Result;
+            }
+
+            return result;
+        }
+
+        protected void SavePictureToConfiguredProvider(DbCommand cmd, Picture picture, int index, ISessionImplementor session, string containerName)
+        {
+            Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
+            if (provider.HasNoValue)
+            {
+                // No external storage provider configured, save the picture in the database
+                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, picture.RawBytes, index, session);
+            }
+            else
+            {
+                // Save the picture using the configured external storage provider.
+                Task.Run(
+                    () => provider.Value.SavePictureAsync(picture, containerName)
+                ).Wait();
+                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, Array.Empty<byte>(), index, session);
+            }
+
+            // Guid reference must always be saved in the database.
+            NHibernateUtil.Guid.NullSafeSet(cmd, picture.Identifier, ++index, session);
+        }
+
+        private static Maybe<IExternalStorageProvider> GetExternalStorageProvider(ISessionImplementor session)
         {
             if (session.Connection == null)
             {

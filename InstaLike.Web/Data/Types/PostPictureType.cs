@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Data.Common;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
-using InstaLike.Web.Services;
-using NHibernate;
 using NHibernate.Engine;
 
 namespace InstaLike.Web.Data.Types
@@ -15,26 +11,10 @@ namespace InstaLike.Web.Data.Types
 
         public override object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
         {
-            Picture result;
+            var guidFieldName = names[1];
+            var pictureBytesFieldName = names[0];
 
-            // Read the picture Guid in the database, actual link between database and external storage.
-            var pictureGuid = dr.GetFieldValue<Guid>(dr.GetOrdinal(names[1]));
-            Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
-            if (provider.HasNoValue)
-            {
-                // No external provider configured, read everything from database.
-                var pictureBytes = dr.GetFieldValue<byte[]>(dr.GetOrdinal(names[0]));
-                result = Picture.Create(pictureBytes, pictureGuid).Value;
-            }
-            else
-            {
-                // Read the picture using the configured external provider
-                result = Task.Run(() =>
-                    provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", PostPicturesContainerName)
-                ).Result;
-            }
-
-            return result;
+            return LoadPictureFromConfiguredProvider(dr, guidFieldName, pictureBytesFieldName, session, PostPicturesContainerName);
         }
 
         public override void NullSafeSet(DbCommand cmd, object value, int index, bool[] settable, ISessionImplementor session)
@@ -42,26 +22,10 @@ namespace InstaLike.Web.Data.Types
             var picture = value as Picture;
             if (picture == null)
             {
-                throw new ArgumentNullException(nameof(value), $"Specified value is not a {nameof(Picture)}");
+                throw new ArgumentException(nameof(value), $"Specified value is not a {nameof(Picture)}");
             }
 
-            Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
-            if (provider.HasNoValue)
-            {
-                // No external storage provider configured, save the picture in the database
-                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, picture.RawBytes, index, session);
-            }
-            else
-            {
-                // Save the picture using the configured external storage provider.
-                Task.Run(
-                    () => provider.Value.SavePictureAsync(picture, PostPicturesContainerName)
-                ).Wait();
-                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, Array.Empty<byte>(), index, session);
-            }
-
-            // Guid reference has always to be saved in the database.
-            NHibernateUtil.Guid.NullSafeSet(cmd, picture.Identifier, ++index, session);
+            SavePictureToConfiguredProvider(cmd, picture, index, session, PostPicturesContainerName);
         }
     }
 }
