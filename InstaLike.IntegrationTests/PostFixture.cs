@@ -9,6 +9,7 @@ using InstaLike.Core.Domain;
 using InstaLike.Web.CommandHandlers;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Models;
+using InstaLike.Web.Services;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -42,7 +43,7 @@ namespace InstaLike.IntegrationTests
             var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
             using (var session = _testFixture.OpenSession(_output))
             {
-                var sut = new PublishPostCommandHandler(session, Log.Logger);
+                var sut = new PublishPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
                 publishCommandResult = await sut.Handle(command, default);
             }
 

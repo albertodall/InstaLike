@@ -73,7 +73,7 @@ namespace InstaLike.Web.Data.Types
 
             // Read the picture Guid in the database, actual link between database and external storage.
             var pictureGuid = dr.GetFieldValue<Guid>(dr.GetOrdinal(guidFieldName));
-            Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
+            var provider = GetExternalStorageProvider(session);
             if (provider.HasNoValue)
             {
                 // No external provider configured, read everything from database.
@@ -91,9 +91,9 @@ namespace InstaLike.Web.Data.Types
             return result;
         }
 
-        protected void SavePictureToConfiguredProvider(DbCommand cmd, Picture picture, int index, ISessionImplementor session, string containerName)
+        protected static void SavePictureToConfiguredProvider(DbCommand cmd, Picture picture, int index, ISessionImplementor session, string containerName)
         {
-            Maybe<IExternalStorageProvider> provider = GetExternalStorageProvider(session);
+            var provider = GetExternalStorageProvider(session);
             if (provider.HasNoValue)
             {
                 // No external storage provider configured, save the picture in the database

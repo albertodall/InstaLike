@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
@@ -30,8 +29,6 @@ namespace InstaLike.Web.Services
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
-            var blobFileGuid = string.Empty;
-
             var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
             if (downloadBlobResult.IsFailure || downloadBlobResult.Value == Array.Empty<byte>())
             {

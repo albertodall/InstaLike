@@ -1,5 +1,4 @@
-﻿using System;
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Data.Types;
 
@@ -23,8 +22,8 @@ namespace InstaLike.Web.Data.Mapping
             Map(memberExpression: p => p.Picture)
                 .CustomType<PostPictureType>()
                 .Columns.Clear()
-                .Columns.Add("PostGuid").Length(2_000_000).Not.Nullable()
-                .Columns.Add("[Picture]").Not.Nullable();
+                .Columns.Add("[Picture]").Not.Nullable()
+                .Columns.Add("PostGuid").Length(2_000_000).Not.Nullable();
                 
             References(p => p.Author)
                 .Column("UserID");

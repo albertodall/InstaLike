@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Services;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -14,11 +15,13 @@ namespace InstaLike.Web.CommandHandlers
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
+        private readonly ISequentialGuidGenerator _idGenerator;
 
-        public PublishPostCommandHandler(ISession session, ILogger logger)
+        public PublishPostCommandHandler(ISession session, ILogger logger, ISequentialGuidGenerator idGenerator)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
             _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
+            _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
         }
 
         public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
@@ -28,11 +31,13 @@ namespace InstaLike.Web.CommandHandlers
                 User author = null;
                 try
                 {
-                    author = await _session.LoadAsync<User>(request.UserID);
-                    var post = new Post(author, (Picture)request.PictureRawBytes, (PostText)request.Text);
+                    author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+                    var postPicture = Picture.Create(request.PictureRawBytes, _idGenerator.GetNextId()).Value;
 
-                    await _session.SaveAsync(post);
-                    await tx.CommitAsync();
+                    var post = new Post(author, postPicture, (PostText)request.Text);
+
+                    await _session.SaveAsync(post, cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
 
                     _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
                         author.Nickname,
@@ -42,7 +47,7 @@ namespace InstaLike.Web.CommandHandlers
                 }
                 catch (ADOException ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Failed to publish a post for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                         author?.Nickname,

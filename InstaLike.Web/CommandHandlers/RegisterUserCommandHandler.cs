@@ -57,8 +57,8 @@ namespace InstaLike.Web.CommandHandlers
             {
                 try
                 {
-                    await _session.SaveAsync(userToRegister);
-                    await tx.CommitAsync();
+                    await _session.SaveAsync(userToRegister, cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
 
                     _logger.Information("User [{Nickname}({UserID})] has just registered.",
                         request.Nickname,
@@ -68,7 +68,7 @@ namespace InstaLike.Web.CommandHandlers
                 }
                 catch (ADOException ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
                         request.Nickname,

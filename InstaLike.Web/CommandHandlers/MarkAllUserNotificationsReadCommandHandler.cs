@@ -34,13 +34,13 @@ namespace InstaLike.Web.CommandHandlers
                     var unreadNotificationsCountQuery = notificationsQuery.GetExecutableQueryOver(_session).ToRowCountQuery().FutureValue<int>();
                     var unreadNotificationsQuery = notificationsQuery.GetExecutableQueryOver(_session).Future<Notification>();
 
-                    foreach (var n in (await unreadNotificationsQuery.GetEnumerableAsync()))
+                    foreach (var n in (await unreadNotificationsQuery.GetEnumerableAsync(cancellationToken)))
                     {
                         n.MarkAsRead();
                     }
 
-                    await tx.CommitAsync();
-                    unreadNotificationsCount = await unreadNotificationsCountQuery.GetValueAsync();
+                    await tx.CommitAsync(cancellationToken);
+                    unreadNotificationsCount = await unreadNotificationsCountQuery.GetValueAsync(cancellationToken);
 
                     if (unreadNotificationsCount > 0)
                     {
@@ -53,7 +53,7 @@ namespace InstaLike.Web.CommandHandlers
                 }
                 catch (ADOException ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Failed to mark {UnreadNotifications} notifications as read for user {UserID}. Error message: {ErrorMessage}",
                         unreadNotificationsCount,

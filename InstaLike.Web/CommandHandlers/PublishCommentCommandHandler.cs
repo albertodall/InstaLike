@@ -28,13 +28,13 @@ namespace InstaLike.Web.CommandHandlers
                 User author = null;
                 try
                 {
-                    author = await _session.LoadAsync<User>(request.UserID);
-                    var post = await _session.LoadAsync<Post>(request.PostID);
+                    author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+                    var post = await _session.LoadAsync<Post>(request.PostID, cancellationToken);
 
                     var comment = new Comment(post, author, (CommentText)request.Text);
                     post.AddComment(comment);
 
-                    await tx.CommitAsync();
+                    await tx.CommitAsync(cancellationToken);
 
                     _logger.Information("User [{NickName}({UserID})] wrote a new comment to post {PostID}",
                         request.UserID,
@@ -45,7 +45,7 @@ namespace InstaLike.Web.CommandHandlers
                 }
                 catch (Exception ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Failed to save comment to post {PostID} written by user [{NickName}({UserID})]. Error message: {ErrorMessage}",
                         request.PostID,

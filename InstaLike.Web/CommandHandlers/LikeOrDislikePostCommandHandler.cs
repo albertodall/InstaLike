@@ -26,11 +26,11 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                var user = await _session.LoadAsync<User>(request.UserID);
-                var post = await GetPostAsync(request.UserID, request.PostID);
+                var user = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+                var post = await GetPostAsync(request.UserID, request.PostID, cancellationToken);
 
                 return await user.PutLikeTo(post)
-                    .OnSuccessTry(async () => await tx.CommitAsync())
+                    .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
                         .OnSuccess(_ => _logger
                             .ForContext<LikePostCommand>()
                             .Information("User [{Nickname}({UserID})] put a 'Like' on post {PostID}",
@@ -39,7 +39,7 @@ namespace InstaLike.Web.CommandHandlers
                                 request.PostID))
                         .OnFailure(async errorMessage =>
                         {
-                            await tx.RollbackAsync();
+                            await tx.RollbackAsync(cancellationToken);
                             _logger
                                 .ForContext<LikePostCommand>()
                                 .Error("Failed to put a 'Like' on post {PostID} by user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
@@ -55,11 +55,11 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                var user = await _session.LoadAsync<User>(request.UserID);
-                var post = await GetPostAsync(request.UserID, request.PostID);
+                var user = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+                var post = await GetPostAsync(request.UserID, request.PostID, cancellationToken);
 
                 return await user.RemoveLikeFrom(post)
-                    .OnSuccessTry(async () => await tx.CommitAsync())
+                    .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
                         .OnSuccess(_ => _logger
                             .ForContext<DislikePostCommand>()
                             .Information("User [{Nickname}({UserID})] removed a 'Like' on post {PostID}",
@@ -68,7 +68,7 @@ namespace InstaLike.Web.CommandHandlers
                                 request.PostID))
                         .OnFailure(async errorMessage => 
                         {
-                            await tx.RollbackAsync();
+                            await tx.RollbackAsync(cancellationToken);
                             _logger
                                 .ForContext<DislikePostCommand>()
                                 .Error("Failed to remove a 'Like' on post {PostID} by user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
@@ -80,7 +80,7 @@ namespace InstaLike.Web.CommandHandlers
             }
         }
 
-        private async Task<Post> GetPostAsync(int userID, int postID)
+        private async Task<Post> GetPostAsync(int userID, int postID, CancellationToken cancellationToken)
         {
             Like likeAlias = null;
             
@@ -93,7 +93,7 @@ namespace InstaLike.Web.CommandHandlers
                         .Add(Restrictions.On(() => likeAlias.User).IsNull)
                     );
 
-            return await postQuery.SingleOrDefaultAsync();
+            return await postQuery.SingleOrDefaultAsync(cancellationToken);
         }
     }
 }
