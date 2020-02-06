@@ -7,7 +7,6 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Data.Query
@@ -43,7 +42,7 @@ namespace InstaLike.Web.Data.Query
 
             _logger.Debug("Reading profile of user {UserID} with parameters {@Request}.", request.CurrentUserID, request);
 
-            using (_session.BeginTransaction())
+            using (var tx = _session.BeginTransaction())
             {
                 var userProfileQuery = _session.QueryOver<User>()
                     .Where(Restrictions.Eq("Nickname", request.Nickname))
@@ -55,7 +54,7 @@ namespace InstaLike.Web.Data.Query
                         .Select(u => u.Biography).WithAlias(() => profile.Bio)
                         .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePictureBytes)
                     )
-                    .TransformUsing(new CastPropertyTransformer<UserProfileModel>());
+                    .TransformUsing(new EntityToModelResultTransformer<UserProfileModel>());
 
                 // Load user's information
                 profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>(cancellationToken);
@@ -74,10 +73,10 @@ namespace InstaLike.Web.Data.Query
                     .Select(Projections.ProjectionList()
                         .Add(Projections.Property<Post>(p => p.ID)
                             .WithAlias(() => thumbnailModel.PostID))
-                        .Add(Projections.Property<Post>(p => p.Picture.RawBytes)
-                            .WithAlias(() => thumbnailModel.Picture))
+                        .Add(Projections.Property<Post>(p => p.Picture)
+                            .WithAlias(() => thumbnailModel.ThumbnailPictureBytes))
                     )
-                    .TransformUsing(Transformers.AliasToBean<PostThumbnailModel>())
+                    .TransformUsing(new EntityToModelResultTransformer<PostThumbnailModel>())
                     .Take(request.NumberOfThumbnails)
                     .Future<PostThumbnailModel>();
 
@@ -109,6 +108,8 @@ namespace InstaLike.Web.Data.Query
                 profile.Following = 
                     await isFollowedByCurrentUserQuery.GetValueAsync(cancellationToken) == 1 
                     || profile.IsCurrentUserProfile;
+
+                await tx.CommitAsync(cancellationToken);
             }
 
             return profile;

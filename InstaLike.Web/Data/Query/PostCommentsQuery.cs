@@ -53,7 +53,7 @@ namespace InstaLike.Web.Data.Query
                     )
                     .TransformUsing(Transformers.AliasToBean<CommentModel>());
 
-                result = (await commentsQuery.ListAsync<CommentModel>()).ToArray();
+                result = (await commentsQuery.ListAsync<CommentModel>(cancellationToken)).ToArray();
             }
 
             return result;

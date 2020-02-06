@@ -3,6 +3,6 @@
     public class PostThumbnailModel
     {
         public int PostID { get; set; }
-        public byte[] Picture { get; set; }
+        public byte[] ThumbnailPictureBytes { get; set; }
     }
 }

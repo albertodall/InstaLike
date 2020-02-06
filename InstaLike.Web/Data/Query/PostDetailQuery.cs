@@ -78,19 +78,19 @@ namespace InstaLike.Web.Data.Query
                     .SelectList(list => list
                         .Select(p => p.ID).WithAlias(() => post.PostID)
                         .Select(p => p.Text).WithAlias(() => post.Text)
-                        .Select(p => p.Picture.RawBytes).WithAlias(() => post.Picture)
+                        .Select(p => p.Picture).WithAlias(() => post.Picture)
                         .Select(p => p.PostDate).WithAlias(() => post.PostDate)
                         .Select(() => postAuthor.Nickname).WithAlias(() => post.AuthorNickName)
-                        .Select(() => postAuthor.ProfilePicture.RawBytes).WithAlias(() => post.AuthorProfilePicture)                        
+                        .Select(() => postAuthor.ProfilePicture).WithAlias(() => post.AuthorProfilePicture)                        
                     )
-                    .TransformUsing(Transformers.AliasToBean<PostModel>())
+                    .TransformUsing(new EntityToModelResultTransformer<PostModel>())
                     .FutureValue<PostModel>();
 
                 // Add related data
-                post = await postQuery.GetValueAsync();
-                post.LikesCount = await postLikesCountQuery.GetValueAsync();
+                post = await postQuery.GetValueAsync(cancellationToken);
+                post.LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken);
                 post.Comments = postCommentsQuery.ToArray();
-                post.IsLikedByCurrentUser = (await isLikedByCurrentUserQuery.GetValueAsync()) > 0;
+                post.IsLikedByCurrentUser = (await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken)) > 0;
             }
 
             return post;

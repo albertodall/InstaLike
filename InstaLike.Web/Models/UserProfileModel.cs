@@ -1,7 +1,4 @@
-﻿using InstaLike.Core.Domain;
-using System;
-
-namespace InstaLike.Web.Models
+﻿namespace InstaLike.Web.Models
 {
     public class UserProfileModel
     {

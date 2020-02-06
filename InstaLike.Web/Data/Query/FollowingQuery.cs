@@ -55,7 +55,7 @@ namespace InstaLike.Web.Data.Query
                     )
                     .TransformUsing(Transformers.AliasToBean<FollowModel>());
 
-                result = (await followersQuery.ListAsync<FollowModel>()).ToArray();
+                result = (await followersQuery.ListAsync<FollowModel>(cancellationToken)).ToArray();
             }
 
             return result;

@@ -2,7 +2,7 @@
 
 namespace InstaLike.Web.Services
 {
-    public interface ISequentialIdGenerator<TId>
+    public interface ISequentialIdGenerator<out TId>
     {
         TId GetNextId();
     }
