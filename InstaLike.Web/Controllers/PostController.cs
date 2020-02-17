@@ -50,10 +50,8 @@ namespace InstaLike.Web.Controllers
                 {
                     return RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    ModelState.AddModelError("", commandResult.Error);
-                }
+
+                ModelState.AddModelError("", commandResult.Error);
             }
             else
             {
@@ -67,6 +65,15 @@ namespace InstaLike.Web.Controllers
         {
             var postQuery = new PostDetailQuery(id, User.GetIdentifier());
             var model = await _dispatcher.Send(postQuery);
+
+            return View(model);
+        }
+
+        [Authorize(Policy = "IsPostAuthor")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var editPostQuery = new EditPostQuery(id, User.GetIdentifier());
+            var model = await _dispatcher.Send(editPostQuery);
 
             return View(model);
         }

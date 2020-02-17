@@ -3,7 +3,7 @@
 @model PublishPostModel
 
 @{
-    ViewBag.Title = "Publish new post";
+    ViewBag.Title = "Edit your post";
 }
 
 <div>
@@ -11,8 +11,8 @@
         var pictureBase64 = Convert.ToBase64String(Model.Picture);
         var picture = $"data:image/jpeg;base64,{pictureBase64}";
     }
-    <h2>Share something with the world</h2>
-    <form method="post" enctype="multipart/form-data" asp-action="Publish" asp-controller="Post" asp-antiforgery="true">
+    <h2>Edit your post</h2>
+    <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Post" asp-antiforgery="true">
         <div class="form_post">
             <div asp-validation-summary="ModelOnly"></div>
             <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
@@ -36,7 +36,7 @@
             </div>
 
             <button type="button" class="autotag-button" title="Automatic tagging"></button>
-            <button type="submit" title="Publish this post">Publish</button>
+            <button type="submit" title="Save">Publish</button>
         </div>
     </form>
 </div>

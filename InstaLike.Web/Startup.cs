@@ -71,6 +71,7 @@ namespace InstaLike.Web
                 Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl"));
 
             services.ConfigureAuthentication();
+            services.ConfigureAuthorization();
 
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

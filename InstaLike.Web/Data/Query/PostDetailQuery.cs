@@ -90,7 +90,7 @@ namespace InstaLike.Web.Data.Query
                 post = await postQuery.GetValueAsync(cancellationToken);
                 post.LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken);
                 post.Comments = postCommentsQuery.ToArray();
-                post.IsLikedByCurrentUser = (await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken)) > 0;
+                post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0;
             }
 
             return post;

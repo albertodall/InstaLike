@@ -5,9 +5,11 @@ using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
 using InstaLike.Web.Data;
 using InstaLike.Web.Infrastructure;
+using InstaLike.Web.Security;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
@@ -71,6 +73,18 @@ namespace InstaLike.Web.Extensions
                     opt.Cookie.HttpOnly = true;
                     opt.LoginPath = new PathString("/Account/Login");
                 });
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
+        {
+            services.AddTransient<IAuthorizationHandler, PostAuthorHandler>();
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsPostAuthor", policy =>
+                    policy.AddRequirements(new PostAuthorRequirement()));
+            });
 
             return services;
         }

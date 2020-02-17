@@ -46,7 +46,7 @@ namespace InstaLike.Core.Domain
         {
             if (rawBytes.Length == 0)
             {
-                return Result.Fail<Picture>("Unable to read picture data");
+                return Result.Ok(MissingPicture);
             }
 
             return Result.Ok(new Picture(rawBytes, identifier));
