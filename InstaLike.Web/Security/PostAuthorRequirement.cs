@@ -30,7 +30,7 @@ namespace InstaLike.Web.Security
                     var post = await _session.LoadAsync<Post>(int.Parse(requestedPostId));
                     var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
                     
-                    if (user.CanEdit(post))
+                    if (post.CanBeEditedBy(user))
                     {
                         context.Succeed(requirement);
                     }

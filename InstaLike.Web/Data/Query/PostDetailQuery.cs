@@ -40,6 +40,8 @@ namespace InstaLike.Web.Data.Query
 
             _logger.Debug("Reading details for post {PostID} with parameters {@Request}", request.PostID, request);
 
+            var currentUser = await _session.LoadAsync<User>(request.CurrentUserID, cancellationToken);
+
             using (var tx = _session.BeginTransaction())
             {
                 // Total likes for this post
@@ -91,6 +93,8 @@ namespace InstaLike.Web.Data.Query
                 post.LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken);
                 post.Comments = postCommentsQuery.ToArray();
                 post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0;
+                post.CanBeEditedByCurrentUser =
+                    (await _session.LoadAsync<Post>(request.PostID, cancellationToken)).CanBeEditedBy(currentUser);
             }
 
             return post;

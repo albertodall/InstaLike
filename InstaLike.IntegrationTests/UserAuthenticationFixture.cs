@@ -23,8 +23,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async void Registered_User_Should_Be_Able_To_Log_In()
         {
-            string testUserName = "testuser2";
-            string testPassword = "password";
+            const string testUserName = "testuser2";
+            const string testPassword = "password";
             Result<User> authenticationResult;
 
             var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
@@ -50,8 +50,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async void Registered_User_Should_Not_Be_Able_To_Log_In_With_Wrong_Password()
         {
-            string testUserName = "testuser3";
-            string testPassword = "password3";
+            const string testUserName = "testuser3";
+            const string testPassword = "password3";
             Result<User> authenticationResult;
 
             var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");

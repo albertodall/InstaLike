@@ -37,6 +37,14 @@
             <strong>
                 <span class="likes-count">@Model.LikesCount</span> likes
             </strong>
+            @{
+                if (Model.CanBeEditedByCurrentUser)
+                {
+                    <span>
+                        <a asp-action="Edit" asp-controller="Post" asp-route-id="@Model.PostID">Edit post</a>
+                    </span>
+                }
+            }
         </div>
 
         <p class="post-author-comment">

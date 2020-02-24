@@ -1,6 +1,6 @@
 ﻿@using InstaLike.Web.Extensions
 
-@model PublishPostModel
+@model EditPostModel
 
 @{
     ViewBag.Title = "Edit your post";
@@ -16,6 +16,7 @@
         <div class="form_post">
             <div asp-validation-summary="ModelOnly"></div>
             <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
+            <input type="hidden" asp-for="PostID" value="@Model.PostID" />
             <div class="picture-placeholder">
                 <div class="posted-picture">
                     <label asp-for="Picture">
@@ -36,7 +37,7 @@
             </div>
 
             <button type="button" class="autotag-button" title="Automatic tagging"></button>
-            <button type="submit" title="Save">Publish</button>
+            <button type="submit" title="Save">Save</button>
         </div>
     </form>
 </div>

@@ -187,10 +187,5 @@ namespace InstaLike.Core.Domain
                 .Ensure(() => post.LikesTo(this), $"User [{Nickname}] did not put any 'Like' on this post.")
                 .OnSuccess(() => post.RemoveLikeBy(this));
         }
-
-        public virtual bool CanEdit(Post post)
-        {
-            return post.Author == this;
-        }
     }
 }

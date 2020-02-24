@@ -38,6 +38,7 @@ namespace InstaLike.Web.Data.Query
         {
             _logger.Debug("Fetching timeline for user {UserID} with parameters {@Request}.", request.UserID, request);
 
+            var currentUser = await _session.LoadAsync<User>(request.UserID, cancellationToken);
             PostModel[] timeline;
 
             using (var tx = _session.BeginTransaction())
@@ -114,7 +115,8 @@ namespace InstaLike.Web.Data.Query
                                 Text = c.Text
                             }).ToArray(),
                         LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
-                        IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID)
+                        IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
+                        CanBeEditedByCurrentUser = p.CanBeEditedBy(currentUser)
                     });
 
                 timeline = timelineList.OrderByDescending(p => p.PostDate).ToArray();
