@@ -240,7 +240,9 @@ namespace InstaLike.Core.Tests
             var postAuthor = CreateTestPostAuthor();
             var sut = new Post(postAuthor, (Picture)TestPictureBase64, (PostText)"test post");
 
-            sut.CanBeEditedBy(null).Should().BeFalse();
+            sut.Invoking(post => post.CanBeEditedBy(null))
+                .Should()
+                .Throw<ArgumentNullException>();
         }
 
         private static User CreateTestPostAuthor()

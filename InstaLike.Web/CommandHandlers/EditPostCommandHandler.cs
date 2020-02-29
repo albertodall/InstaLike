@@ -25,8 +25,17 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                var author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+                var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
                 var postToEdit = await _session.LoadAsync<Post>(request.PostID, cancellationToken);
+
+                if (!postToEdit.CanBeEditedBy(editor))
+                {
+                    _logger.Warning("User [{NickName}({UserID})] tried to edit post {PostID} but he wasn't allowed to.",
+                        editor.Nickname, 
+                        request.UserID, 
+                        request.PostID);
+                    return Result.Fail<int>($"You're not allowed to edit post {postToEdit.ID}.");
+                }
 
                 postToEdit.UpdateText(PostText.Create(request.Text).Value);
                 postToEdit.UpdatePicture(Picture.Create(request.PictureRawBytes, postToEdit.Picture.Identifier).Value);
@@ -35,8 +44,8 @@ namespace InstaLike.Web.CommandHandlers
                     await _session.SaveAsync(postToEdit, cancellationToken);
                     await tx.CommitAsync(cancellationToken);
 
-                    _logger.Information("User [{Nickname}({UserID})] has edited post {PostID}.",
-                        author.Nickname,
+                    _logger.Information("User [{Nickname}({UserID})] edited post {PostID}.",
+                        editor.Nickname,
                         request.UserID,
                         request.PostID);
 
@@ -48,7 +57,7 @@ namespace InstaLike.Web.CommandHandlers
 
                     _logger.Error("Failed to edit post {PostID} for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                         request.PostID,
-                        author?.Nickname,
+                        editor.Nickname,
                         request.UserID,
                         ex.Message);
 

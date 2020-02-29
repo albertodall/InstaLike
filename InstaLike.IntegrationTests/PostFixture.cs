@@ -275,7 +275,7 @@ namespace InstaLike.IntegrationTests
             {
                 result.Should().NotBeNull();
                 result.LikesCount.Should().Be(1);
-                result.Comments.Count().Should().Be(1);
+                result.Comments.Length.Should().Be(1);
                 result.IsLikedByCurrentUser.Should().BeTrue();
             }
         }
@@ -310,6 +310,61 @@ namespace InstaLike.IntegrationTests
             }
 
             timeline.Length.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task User_Can_Edit_His_Own_Posts()
+        {
+            Result editResult;
+            var picture = (Picture) Convert.FromBase64String(_testFixture.GetTestPictureBase64());
+            var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
+            var post = new Post(author, picture, (PostText)"test post 1");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(author);
+                await session.SaveAsync(post);
+            }
+
+            var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", picture);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new EditPostCommandHandler(session, Log.Logger);
+                editResult = await sut.Handle(command, default);
+            }
+
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                using (new AssertionScope())
+                {
+                    session.Load<Post>(post.ID).Text.Value.Should().Be("edited text on post 1");
+                    editResult.IsSuccess.Should().BeTrue();
+                }
+            }
+        }
+
+        [Fact]
+        public async Task User_Cannot_Edit_Post_Published_By_Another_User()
+        {
+            Result editResult;
+            var picture = (Picture) Convert.FromBase64String(_testFixture.GetTestPictureBase64());
+            var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
+            var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
+            var post = new Post(author, picture, (PostText)"test post 1");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(author);
+                await session.SaveAsync(reader);
+                await session.SaveAsync(post);
+            }
+
+            var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", picture);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new EditPostCommandHandler(session, Log.Logger);
+                editResult = await sut.Handle(command, default);
+            }
+
+            editResult.IsSuccess.Should().BeFalse($"You're not allowed to edit post {post.ID}.");
         }
     }
 }

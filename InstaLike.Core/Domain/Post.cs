@@ -97,6 +97,10 @@ namespace InstaLike.Core.Domain
 
         public virtual bool CanBeEditedBy(User user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
             return Author == user;
         }
     }
