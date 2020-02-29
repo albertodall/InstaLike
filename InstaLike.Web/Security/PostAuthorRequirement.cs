@@ -23,21 +23,19 @@ namespace InstaLike.Web.Security
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PostAuthorRequirement requirement)
         {
-            if (context.Resource is AuthorizationFilterContext authContext)
+            if (context.Resource is AuthorizationFilterContext authContext && 
+                authContext.RouteData.Values["id"] is string requestedPostId)
             {
-                if (authContext.RouteData.Values["id"] is string requestedPostId)
+                var post = await _session.LoadAsync<Post>(int.Parse(requestedPostId));
+                var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
+                
+                if (post.CanBeEditedBy(user))
                 {
-                    var post = await _session.LoadAsync<Post>(int.Parse(requestedPostId));
-                    var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
-                    
-                    if (post.CanBeEditedBy(user))
-                    {
-                        context.Succeed(requirement);
-                    }
-                    else
-                    {
-                        context.Fail();
-                    }
+                    context.Succeed(requirement);
+                }
+                else
+                {
+                    context.Fail();
                 }
             }
         }

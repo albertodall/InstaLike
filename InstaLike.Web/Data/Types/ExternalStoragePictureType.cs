@@ -116,7 +116,7 @@ namespace InstaLike.Web.Data.Types
         {
             if (session.Connection == null)
             {
-                throw new NullReferenceException($"{nameof(ExternalStoragePictureType)} requires an open connection.");
+                throw new InvalidOperationException($"{nameof(ExternalStoragePictureType)} requires an open connection.");
             }
 
             if (session.Connection is IExternalStorageProvider connection)

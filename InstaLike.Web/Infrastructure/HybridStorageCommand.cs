@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace InstaLike.Web.Infrastructure
         public override bool DesignTimeVisible
         {
             get => false;
-            set { }
+            set => throw new NotImplementedException();
         }
 
         public override UpdateRowSource UpdatedRowSource

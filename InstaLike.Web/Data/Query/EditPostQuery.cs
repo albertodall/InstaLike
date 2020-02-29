@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Data.Query

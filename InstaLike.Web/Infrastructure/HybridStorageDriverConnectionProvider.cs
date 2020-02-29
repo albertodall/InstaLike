@@ -33,9 +33,14 @@ namespace InstaLike.Web.Infrastructure
             _connectionProvider.Configure(settings);
 
             // Configure external storage, if specified
-            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string type) && type != null)
+            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out var type) && type != null)
             {
                 var externalStorageProviderType = Type.GetType(type);
+                if (externalStorageProviderType == null)
+                {
+                    throw new ArgumentNullException(nameof(type), $"Unknown storage provider type: {type}");
+                }
+
                 _externalStorageConnectionProvider = (IHybridStorageConnectionProvider)Activator.CreateInstance(externalStorageProviderType);
                 _externalStorageConnectionProvider.Configure(settings);
             }
@@ -43,7 +48,16 @@ namespace InstaLike.Web.Infrastructure
 
         public void Dispose()
         {
-            _connectionProvider.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _connectionProvider.Dispose();
+            }
         }
 
         public DbConnection GetConnection()

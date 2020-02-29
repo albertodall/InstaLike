@@ -72,27 +72,25 @@ namespace InstaLike.Core.Tests
 
         private class TestEntity : EntityBase<int>
         {
-            public override int ID { get; protected set; }
+            private TestEntity(int id) : base(id) { }
+
+            public TestEntity() : base(default) { }
 
             public static TestEntity Create(int id)
             {
-                return new TestEntity()
-                {
-                    ID = id
-                };
+                return new TestEntity(id);
             }
         }
 
         private class OtherTestEntity : EntityBase<int>
         {
-            public override int ID { get; protected set; }
+            private OtherTestEntity(int id) : base(id) { }
+
+            public OtherTestEntity() : base(default) { }
 
             public static OtherTestEntity Create(int id)
             {
-                return new OtherTestEntity()
-                {
-                    ID = id
-                };
+                return new OtherTestEntity(id);
             }
         }
     }

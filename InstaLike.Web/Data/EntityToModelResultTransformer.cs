@@ -40,7 +40,7 @@ namespace InstaLike.Web.Data
                 if (tuple[i].GetType() != targetType.GetProperty(currentAlias)?.PropertyType)
                 {
                     differentTypeProperties.Add(aliases[i]);
-                    // Aliases cannot change their position inside the "aliases" array, to not fool NHibernate
+                    // Aliases cannot change their position inside the "aliases" array, we don't want to fool NHibernate
                     sameTypeProperties[i] = null;
                 }
             }
@@ -71,22 +71,22 @@ namespace InstaLike.Web.Data
                     var aliasValue = tuple[aliasToCastIndex];
                     if (aliasValue != null)
                     {
+                        var bindingAttr = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
                         var propertyToCast = targetInstance.GetType()
-                            .GetProperty(aliasToCast, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+                            .GetProperty(aliasToCast, bindingAttr);
 
-                        propertyToCast?.SetValue(targetInstance, Cast(propertyToCast.PropertyType, aliasValue));
+                        propertyToCast?.SetValue(targetInstance, CastValueToDesiredType(propertyToCast.PropertyType, aliasValue));
                     }
                 }
             }
         }
 
-        private static object Cast(Type targetType, object data)
+        private static object CastValueToDesiredType(Type targetType, object data)
         {
             var dataParameter = Expression.Parameter(typeof(object), "data");
             var expressionBody = Expression.Block(
                 Expression.Convert(
-                    Expression.Convert(dataParameter, data.GetType()), targetType))
-                ;
+                    Expression.Convert(dataParameter, data.GetType()), targetType));
 
             var compiledExpression = Expression.Lambda(expressionBody, dataParameter).Compile();
             return compiledExpression.DynamicInvoke(data);

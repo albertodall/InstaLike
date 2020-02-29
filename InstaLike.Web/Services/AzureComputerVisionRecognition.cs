@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;

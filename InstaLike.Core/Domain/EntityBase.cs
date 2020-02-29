@@ -6,7 +6,14 @@ namespace InstaLike.Core.Domain
     {
         private const int HashMultiplier = 29;
 
-        public virtual TId ID { get; protected set; }
+        public virtual TId ID { get; }
+
+        protected EntityBase() { }
+
+        protected EntityBase(TId id)
+        {
+            ID = id;
+        }
 
         public virtual bool IsTransient()
         {
@@ -15,9 +22,7 @@ namespace InstaLike.Core.Domain
 
         public override bool Equals(object obj)
         {
-            var other = obj as IEntity<TId>;
-
-            if (other == null) return false;
+            if (!(obj is IEntity<TId> other)) return false;
 
             if (ReferenceEquals(this, other))
             {
