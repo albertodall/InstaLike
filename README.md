@@ -1,4 +1,14 @@
 # InstaLike
+
+## Code analysis 
+| Metric |  |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Lines of code | [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=albertodall_InstaLike&metric=ncloc)](https://sonarcloud.io/dashboard?id=albertodall_InstaLike) |
+| Maintainability | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=albertodall_InstaLike&amp;metric=sqale_rating)](https://sonarcloud.io/dashboard?id=albertodall_InstaLike) |
+| Reliability | [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=albertodall_InstaLike&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=albertodall_InstaLike) |
+| Security | [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=albertodall_InstaLike&metric=security_rating)](https://sonarcloud.io/dashboard?id=albertodall_InstaLike) |
+
+## Once upon a time...
 This project was born, more or less, two years ago.  
 I was teaching a C# Course in a High School, and I needed a "cool" project to sum up all the concepts I explained throughout the course.
 Since (lucky or not) a Social Network is "cool by default", I decided to create a simple [Instagram](https://www.instagram.com) clone.  
