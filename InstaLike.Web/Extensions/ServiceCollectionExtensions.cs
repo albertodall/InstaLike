@@ -2,16 +2,14 @@
 using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
-using FluentNHibernate.Conventions;
-using FluentNHibernate.Conventions.AcceptanceCriteria;
 using FluentNHibernate.Conventions.Helpers;
-using FluentNHibernate.Conventions.Inspections;
-using FluentNHibernate.Conventions.Instances;
-using FluentNHibernate.Mapping;
+using InstaLike.Web.Data;
 using InstaLike.Web.Infrastructure;
+using InstaLike.Web.Security;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
@@ -21,29 +19,41 @@ namespace InstaLike.Web.Extensions
 {
     internal static class ServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, string connectionString)
+        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
         {
-            var nhConfig = Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            LazyLoad.Always(),
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly())
-                        
-                    );
+            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
+            services.AddScoped(sp =>
+            {
+                var sessionFactory = sp.GetRequiredService<ISessionFactory>();
+                return sessionFactory.OpenSession();
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services,
+            string databaseConnectionString,
+            string externalStorageConnectionString)
+        {
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
+
+            // Configure external storage
+            services.AddSingleton<IHybridStorageConnectionProvider, AzureBlobStorageConnectionProvider>();
+            services.AddSingleton(sp =>
+            {
+                var connectionProvider = sp.GetRequiredService<IHybridStorageConnectionProvider>();
+
+                nhConfig.ExposeConfiguration(cfg => 
+                {
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, connectionProvider.GetType().FullName);
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
+                });
+
+                return nhConfig.BuildSessionFactory();
+            });
+            
             services.AddScoped(sp =>
             {
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();
@@ -67,6 +77,18 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
+        public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
+        {
+            services.AddTransient<IAuthorizationHandler, PostAuthorHandler>();
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsPostAuthor", policy =>
+                    policy.AddRequirements(new PostAuthorRequirement()));
+            });
+
+            return services;
+        }
+
         public static IServiceCollection ConfigureLogging(this IServiceCollection services, LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
@@ -82,40 +104,35 @@ namespace InstaLike.Web.Extensions
 
             return services;
         }
-    }
 
-    internal class AssociationsMappingConvention : IHasManyConvention, IReferenceConvention
-    {
-        public void Apply(IOneToManyCollectionInstance instance)
+        public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, string apiKey, string apiUrl)
         {
-            instance.LazyLoad();
-            instance.AsBag();
-            instance.Cascade.AllDeleteOrphan();
-            instance.Inverse();
+            services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
+
+            return services;
         }
 
-        public void Apply(IManyToOneInstance instance)
+        private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
         {
-            instance.LazyLoad(Laziness.Proxy);
-            instance.Cascade.None();
-            instance.Not.Nullable();
-            instance.ForeignKey($"{instance.EntityType.Name}_{instance.Property.Name}");
-        }
-    }
-
-    /// <summary>
-    /// Set Guid fields not nullable, for filestream references.
-    /// </summary>
-    internal class NotNullGuidTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
-    {
-        public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
-        {
-            criteria.Expect(x => x.Property.PropertyType == typeof(Guid));
-        }
-
-        public void Apply(IPropertyInstance instance)
-        {
-            instance.Not.Nullable();
+            return Fluently.Configure()
+                .Database(
+                    MsSqlConfiguration.MsSql2012
+                        .Provider<HybridStorageDriverConnectionProvider>()
+                        .ConnectionString(connectionString)
+                        .DefaultSchema("dbo")
+                        .AdoNetBatchSize(20)
+                        .ShowSql()
+                        .FormatSql()
+                        .UseReflectionOptimizer()
+                )
+                .Mappings(m =>
+                    m.FluentMappings
+                        .Conventions.Add(
+                            LazyLoad.Always(),
+                            DynamicUpdate.AlwaysTrue())
+                        .Conventions.Add<AssociationsMappingConvention>()
+                        .Conventions.Add<NotNullGuidTypeConvention>()
+                        .AddFromAssembly(Assembly.GetExecutingAssembly()));
         }
     }
 }

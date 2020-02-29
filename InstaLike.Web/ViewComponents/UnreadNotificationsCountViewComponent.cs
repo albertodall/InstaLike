@@ -20,7 +20,7 @@ namespace InstaLike.Web.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync(int userID)
         {
             var query = new UnreadNotificationsQuery(userID);
-            int count = await _dispatcher.Send(query);
+            var count = await _dispatcher.Send(query);
 
             return View(count);
         }

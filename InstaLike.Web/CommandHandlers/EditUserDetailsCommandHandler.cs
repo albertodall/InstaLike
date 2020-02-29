@@ -18,7 +18,7 @@ namespace InstaLike.Web.CommandHandlers
         public EditUserDetailsCommandHandler(ISession session, ILogger logger)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
-            this._logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -41,14 +41,14 @@ namespace InstaLike.Web.CommandHandlers
             {
                 try
                 {
-                    var userToUpdate = await _session.GetAsync<User>(request.UserID);
+                    var userToUpdate = await _session.GetAsync<User>(request.UserID, cancellationToken);
                     userToUpdate.ChangeNickname(nicknameValidationResult.Value);
                     userToUpdate.ChangeEmailAddress(eMailValidationResult.Value);
                     userToUpdate.ChangeFullName(fullNameValidationResult.Value);
                     userToUpdate.UpdateBiography(request.Bio);
                     userToUpdate.SetProfilePicture((Picture)request.ProfilePicture);
 
-                    await tx.CommitAsync();
+                    await tx.CommitAsync(cancellationToken);
 
                     _logger.Information("Successfully updated user profile for user [{Nickname}({UserID})]",
                         request.Nickname,
@@ -58,7 +58,7 @@ namespace InstaLike.Web.CommandHandlers
                 }
                 catch (ADOException ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Error updating user profile for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                         request.Nickname,

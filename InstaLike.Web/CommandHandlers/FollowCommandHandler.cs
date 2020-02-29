@@ -26,13 +26,13 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                var follower = await _session.LoadAsync<User>(request.FollowerID);
+                var follower = await _session.LoadAsync<User>(request.FollowerID, cancellationToken);
                 var followedUser = await _session.QueryOver<User>()
                     .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
-                    .SingleOrDefaultAsync();
+                    .SingleOrDefaultAsync(cancellationToken);
 
                 return await follower.Follow(followedUser)
-                    .OnSuccessTry(async () => await tx.CommitAsync())
+                    .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
                         .OnSuccess(_ =>
                             _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
                                 request.FollowerID,
@@ -41,7 +41,7 @@ namespace InstaLike.Web.CommandHandlers
                         )
                         .OnFailure(async errorMessage =>
                         {
-                            await tx.RollbackAsync();
+                            await tx.RollbackAsync(cancellationToken);
 
                             _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
                                 request.FollowedNickname,

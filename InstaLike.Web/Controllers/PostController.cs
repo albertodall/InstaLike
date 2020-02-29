@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
@@ -50,10 +48,8 @@ namespace InstaLike.Web.Controllers
                 {
                     return RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    ModelState.AddModelError("", commandResult.Error);
-                }
+
+                ModelState.AddModelError("", commandResult.Error);
             }
             else
             {
@@ -69,6 +65,38 @@ namespace InstaLike.Web.Controllers
             var model = await _dispatcher.Send(postQuery);
 
             return View(model);
+        }
+
+        [Authorize(Policy = "IsPostAuthor")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var editPostQuery = new EditPostQuery(id, User.GetIdentifier());
+            var model = await _dispatcher.Send(editPostQuery);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "IsPostAuthor")]
+        public async Task<IActionResult> Edit(EditPostModel editedPost, IFormFile pictureFile)
+        {
+            if (ModelState.IsValid)
+            {
+                var command = new EditPostCommand(User.GetIdentifier(), editedPost.PostID, editedPost.Text, await pictureFile.ToByteArrayAsync());
+                var commandResult = await _dispatcher.Send(command);
+                if (commandResult.IsSuccess)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
+                ModelState.AddModelError("", commandResult.Error);
+            }
+            else
+            {
+                ModelState.AddModelError("Picture", "Please select a picture to share together with your post.");
+            }
+
+            return View(editedPost);
         }
 
         [HttpPost]

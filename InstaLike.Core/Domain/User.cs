@@ -135,7 +135,7 @@ namespace InstaLike.Core.Domain
                 });
         }
 
-        protected internal virtual void AddFollow(Follow follow)
+        protected virtual void AddFollow(Follow follow)
         {
             _followers.Add(follow);
         }
@@ -158,7 +158,7 @@ namespace InstaLike.Core.Domain
                 });
         }
 
-        protected internal virtual void RemoveFollow(Follow follow)
+        protected virtual void RemoveFollow(Follow follow)
         {
             _followers.Remove(follow);
         }

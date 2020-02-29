@@ -9,7 +9,7 @@
 <div>
     @{
         var pictureBase64 = Convert.ToBase64String(Model.Picture);
-        var picture = string.Format("data:image/jpeg;base64,{0}", pictureBase64);
+        var picture = $"data:image/jpeg;base64,{pictureBase64}";
     }
     <h2>Share something with the world</h2>
     <form method="post" enctype="multipart/form-data" asp-action="Publish" asp-controller="Post" asp-antiforgery="true">

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Services;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -13,11 +14,13 @@ namespace InstaLike.Web.CommandHandlers
     internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
     {
         private readonly ISession _session;
+        private readonly ISequentialGuidGenerator _idGenerator;
         private readonly ILogger _logger;
 
-        public RegisterUserCommandHandler(ISession session, ILogger logger)
+        public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialGuidGenerator idGenerator)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
             _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -46,15 +49,16 @@ namespace InstaLike.Web.CommandHandlers
 
             if (request.ProfilePicture != null)
             {
-                userToRegister.SetProfilePicture((Picture)request.ProfilePicture);
+                var profilePicture = Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value;
+                userToRegister.SetProfilePicture(profilePicture);
             }
 
             using (var tx = _session.BeginTransaction())
             {
                 try
                 {
-                    await _session.SaveAsync(userToRegister);
-                    await tx.CommitAsync();
+                    await _session.SaveAsync(userToRegister, cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
 
                     _logger.Information("User [{Nickname}({UserID})] has just registered.",
                         request.Nickname,
@@ -64,7 +68,7 @@ namespace InstaLike.Web.CommandHandlers
                 }
                 catch (ADOException ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
                         request.Nickname,

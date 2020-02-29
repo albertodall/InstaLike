@@ -1,5 +1,4 @@
-﻿using System;
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Data.Mapping
@@ -10,8 +9,7 @@ namespace InstaLike.Web.Data.Mapping
         {
             Table("[Follow]");
 
-            Id(p => p.ID)
-                .GeneratedBy.Native();
+            Id(p => p.ID).GeneratedBy.Native();
 
             Map(p => p.FollowDate)
                 .Not.Nullable();

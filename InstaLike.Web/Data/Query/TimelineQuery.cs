@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +38,8 @@ namespace InstaLike.Web.Data.Query
         {
             _logger.Debug("Fetching timeline for user {UserID} with parameters {@Request}.", request.UserID, request);
 
-            PostModel[] timeline = null;
+            var currentUser = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+            PostModel[] timeline;
 
             using (var tx = _session.BeginTransaction())
             {           
@@ -49,7 +49,7 @@ namespace InstaLike.Web.Data.Query
                 Follow follow = null;
 
                 // Post to show in the timeline (user's own posts and posts published by followed users)
-                var postsToShowInTimelineQuery = QueryOver.Of<Post>()
+                var postIdsToShowInTimelineQuery = QueryOver.Of<Post>()
                     .Inner.JoinAlias(p => p.Author, () => postAuthor)
                         .Left.JoinAlias(() => postAuthor.Followers, () => follow)
                     .Where(
@@ -65,12 +65,14 @@ namespace InstaLike.Web.Data.Query
                 _session.QueryOver<Post>()
                     .Left.JoinAlias(p => p.Comments, () => comment)
                     .Fetch(SelectMode.Fetch, () => comment.Author)
-                    .WithSubquery.WhereProperty(p => p.ID).In(postsToShowInTimelineQuery)
+                    .WithSubquery
+                        .WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
                     .Future<Post>();
 
                 // Number of likes for each post that has likes.
                 var postLikesCountQuery = _session.QueryOver<Like>()
-                    .WithSubquery.WhereProperty(l => l.Post.ID).In(postsToShowInTimelineQuery)
+                    .WithSubquery
+                        .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
                     .SelectList(fields => fields
                         .SelectGroup(l => l.Post.ID)
                         .SelectCount(l => l.ID)
@@ -80,24 +82,22 @@ namespace InstaLike.Web.Data.Query
                 // Posts liked by current user
                 var postsLikedByCurrentUserQuery = _session.QueryOver<Like>()
                     .WithSubquery
-                        .WhereProperty(l => l.Post.ID).In(postsToShowInTimelineQuery)
+                        .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
                         .And(l => l.User.ID == request.UserID)
                     .Select(l => l.Post.ID)
                     .Future<int>();
 
                 var timelineQuery = _session.QueryOver(() => post)
                     .Fetch(SelectMode.FetchLazyProperties, () => post.Author)
-                    .WithSubquery.WhereProperty(p => p.ID).In(postsToShowInTimelineQuery)
+                    .WithSubquery
+                        .WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
                     .Future<Post>();
 
-                var timelineQueryResult = await timelineQuery.GetEnumerableAsync();
+                var timelineQueryResult = await timelineQuery.GetEnumerableAsync(cancellationToken);
                 var postLikesCount = postLikesCountQuery.ToDictionary(o => (int)o[0], o => (int)o[1]);
 
                 // Mapping
-                var timelineList = new List<PostModel>();
-                foreach (var p in timelineQueryResult)
-                {
-                    var postModel = new PostModel()
+                var timelineList = timelineQueryResult.Select(p => new PostModel
                     {
                         PostID = p.ID,
                         AuthorNickName = p.Author.Nickname,
@@ -105,19 +105,23 @@ namespace InstaLike.Web.Data.Query
                         Picture = p.Picture,
                         PostDate = p.PostDate,
                         Text = p.Text,
-                        Comments = p.Comments.Select(c => new CommentModel()
-                        {
-                            PostID = p.ID,
-                            AuthorNickName = c.Author.Nickname,
-                            CommentDate = c.CommentDate,
-                            Text = c.Text
-                        }).ToArray(),
+                        Comments = p.Comments
+                            .OrderByDescending(c => c.CommentDate)
+                            .Select(c => new CommentModel
+                            {
+                                PostID = p.ID,
+                                AuthorNickName = c.Author.Nickname,
+                                CommentDate = c.CommentDate,
+                                Text = c.Text
+                            }).ToArray(),
                         LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
-                        IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID)
-                    };
-                    timelineList.Add(postModel);
-                }
+                        IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
+                        CanBeEditedByCurrentUser = p.CanBeEditedBy(currentUser)
+                    });
+
                 timeline = timelineList.OrderByDescending(p => p.PostDate).ToArray();
+
+                await tx.CommitAsync(cancellationToken);
             }
 
             return timeline;

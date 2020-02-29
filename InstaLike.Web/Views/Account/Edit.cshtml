@@ -7,7 +7,7 @@
 <div>
     @{
         var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePicture);
-        var profilePicture = string.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+        var profilePicture = $"data:image/jpeg;base64,{profilePictureBase64}";
     }
     <div>
         <form method="post" class="form_edit" enctype="multipart/form-data" asp-action="Edit" asp-controller="Account" asp-antiforgery="true">

@@ -2,6 +2,7 @@
 using System.Reflection;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -42,25 +43,35 @@ namespace InstaLike.Web
                 .Enrich.WithExceptionDetails()
                 .WriteTo.Console(outputTemplate: LogEntryTemplate)
                 .WriteTo.File(
-                    path: Configuration["Logging:LogFile"],
+                    Configuration["Logging:LogFile"],
                     outputTemplate: LogEntryTemplate,
                     flushToDiskInterval: TimeSpan.FromSeconds(Configuration.GetValue<int>("Logging:FlushToDiskIntervalSeconds")));
 
             services.ConfigureLogging(loggerConfig);
 
+            services.AddSingleton<ISequentialGuidGenerator, SequentialGuidGenerator>();
+
             services.ConfigurePipeline();
 
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
 
-            services.ConfigureDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+            if (IsOnPremDeployment())
+            {
+                services.ConfigureOnPremDataAccess(Configuration.GetConnectionString("DefaultDatabase"));
+            }
+            else
+            {
+                services.ConfigureCloudDataAccess(
+                    Configuration.GetConnectionString("DefaultDatabase"),
+                    Configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString"));
+            }
 
-            services.AddSingleton<IImageRecognitionService>(
-                new AzureComputerVisionRecognition(
-                    Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),
-                    Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl")
-                ));
+            services.ConfigureAzureComputerVision(
+                Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey"),
+                Configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl"));
 
             services.ConfigureAuthentication();
+            services.ConfigureAuthorization();
 
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -88,6 +99,11 @@ namespace InstaLike.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private bool IsOnPremDeployment()
+        {
+            return Configuration.GetValue<DeploymentType>("DeploymentType") == DeploymentType.OnPrem;
         }
     }
 }

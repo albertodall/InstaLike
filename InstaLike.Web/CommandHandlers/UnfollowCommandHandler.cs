@@ -30,7 +30,7 @@ namespace InstaLike.Web.CommandHandlers
 
                 var userToUnfollow = await _session.QueryOver<User>()
                     .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
-                    .SingleOrDefaultAsync();
+                    .SingleOrDefaultAsync(cancellationToken);
 
                 var followingQuery = _session.QueryOver<User>()
                     .Where(u => u.ID == request.FollowerID)
@@ -40,16 +40,16 @@ namespace InstaLike.Web.CommandHandlers
                         .Add(Restrictions.On(() => follow.Followed).IsNull)
                     );
 
-                var followerUser = await followingQuery.SingleOrDefaultAsync();
+                var followerUser = await followingQuery.SingleOrDefaultAsync(cancellationToken);
                 return await followerUser.Unfollow(userToUnfollow)
-                    .OnSuccessTry(async () => await tx.CommitAsync())
+                    .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
                         .OnSuccess(_ => _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
                             request.FollowerID,
                             request.UnfollowedNickname,
                             userToUnfollow.ID))
                         .OnFailure(async errorMessage =>
                         {
-                            await tx.RollbackAsync();
+                            await tx.RollbackAsync(cancellationToken);
 
                             _logger.Error("Error while unfollowing [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message {ErrorMessage}",
                                 request.UnfollowedNickname,

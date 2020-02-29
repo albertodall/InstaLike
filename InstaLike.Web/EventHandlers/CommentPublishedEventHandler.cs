@@ -39,17 +39,17 @@ namespace InstaLike.Web.EventHandlers
                         .Where(Restrictions.Eq("Nickname", notification.SenderNickname))
                         .FutureValue();
 
-                    var post = await postQuery.GetValueAsync();
+                    var post = await postQuery.GetValueAsync(cancellationToken);
                     var message = string.Format(NotificationMessageTemplate, 
                         notification.SenderProfileUrl, 
                         notification.SenderNickname,
                         notification.PostUrl);
 
-                    sender = await senderQuery.GetValueAsync();
+                    sender = await senderQuery.GetValueAsync(cancellationToken);
                     var notificationToInsert = new Notification(sender, post.Author, message);
-                    await _session.SaveAsync(notificationToInsert);
+                    await _session.SaveAsync(notificationToInsert, cancellationToken);
 
-                    await tx.CommitAsync();
+                    await tx.CommitAsync(cancellationToken);
 
                     _logger.Information("Sent comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]", 
                         notification.PostID,
@@ -58,7 +58,7 @@ namespace InstaLike.Web.EventHandlers
                 }
                 catch (ADOException ex)
                 {
-                    await tx.RollbackAsync();
+                    await tx.RollbackAsync(cancellationToken);
 
                     _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]. Error message {ErrorMessage}", 
                         notification.PostID, 

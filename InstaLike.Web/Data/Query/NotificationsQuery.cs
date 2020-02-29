@@ -64,7 +64,7 @@ namespace InstaLike.Web.Data.Query
                     )
                     .TransformUsing(Transformers.AliasToBean<NotificationModel>());
 
-                notifications = (await notificationsQuery.ListAsync<NotificationModel>()).ToArray();
+                notifications = (await notificationsQuery.ListAsync<NotificationModel>(cancellationToken)).ToArray();
             }
 
             return notifications;

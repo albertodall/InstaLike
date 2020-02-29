@@ -12,8 +12,9 @@ namespace InstaLike.Web.Models
         public DateTimeOffset PostDate { get; set; }
         public byte[] Picture { get; set; }
         public string Text { get; set; }
-        public CommentModel[] Comments { get; set; } = new CommentModel[] { };
+        public CommentModel[] Comments { get; set; } = { };
         public int LikesCount { get; set; }
         public bool IsLikedByCurrentUser { get; set; }
+        public bool CanBeEditedByCurrentUser { get; set; }
     }
 }

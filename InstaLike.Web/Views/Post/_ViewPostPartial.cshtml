@@ -6,7 +6,7 @@
     <div class="author">
         @{
             var profilePictureBase64 = Convert.ToBase64String(Model.AuthorProfilePicture);
-            var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+            var profilePicture = $"data:image/jpeg;base64,{profilePictureBase64}";
         }
         <img src="@profilePicture" alt="User's profile picture" />
 
@@ -22,19 +22,27 @@
     <a asp-action="Detail" asp-controller="Post" asp-route-id="@Model.PostID">
         @{
             var postPictureBase64 = Convert.ToBase64String(Model.Picture);
-            var postPicture = String.Format("data:image/jpeg;base64,{0}", postPictureBase64);
+            var postPicture = $"data:image/jpeg;base64,{postPictureBase64}";
         }
         <img class="image-timeline" src="@postPicture" alt="Post picture" />
     </a>
 
     <div>
         <div class="post-likes">
-            <button class="like-button @(Model.IsLikedByCurrentUser ? "post-liked" : String.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
+            <button class="like-button @(Model.IsLikedByCurrentUser ? "post-liked" : string.Empty)" data-post-id="@Model.PostID" data-user-id="@User.GetIdentifier()">
                 Like
             </button>
             <strong>
                 <span class="likes-count">@Model.LikesCount</span> likes
             </strong>
+            @{
+                if (Model.CanBeEditedByCurrentUser)
+                {
+                    <span>
+                        <a asp-action="Edit" asp-controller="Post" asp-route-id="@Model.PostID">Edit post</a>
+                    </span>
+                }
+            }
         </div>
 
         <p class="post-author-comment">

@@ -1,0 +1,47 @@
+﻿@using InstaLike.Web.Extensions
+
+@model EditPostModel
+
+@{
+    ViewBag.Title = "Edit your post";
+}
+
+<div>
+    @{
+        var pictureBase64 = Convert.ToBase64String(Model.Picture);
+        var picture = $"data:image/jpeg;base64,{pictureBase64}";
+    }
+    <h2>Edit your post</h2>
+    <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Post" asp-antiforgery="true">
+        <div class="form_post">
+            <div asp-validation-summary="ModelOnly"></div>
+            <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
+            <input type="hidden" asp-for="PostID" value="@Model.PostID" />
+            <div class="picture-placeholder">
+                <div class="posted-picture">
+                    <label asp-for="Picture">
+                        <img src="@picture" alt="Image to be published" />
+                    </label>
+                    <input type="file" asp-for="Picture" name="pictureFile" required />
+                </div>
+            </div>
+
+            <div>
+                <input asp-for="Text" placeholder="Write a comment for your post..." />
+                <span asp-validation-for="Text"></span>
+            </div>
+
+            <div class="tags-container">
+                <ul class="tags">
+                </ul>
+            </div>
+
+            <button type="button" class="autotag-button" title="Automatic tagging"></button>
+            <button type="submit" title="Save">Save</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

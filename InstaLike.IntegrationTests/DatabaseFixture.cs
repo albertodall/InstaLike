@@ -2,8 +2,8 @@ using System;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
+using InstaLike.Web.Data;
 using InstaLike.Web.Data.Mapping;
-using InstaLike.Web.Extensions;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
 using Xunit.Abstractions;
@@ -49,7 +49,6 @@ namespace InstaLike.IntegrationTests
                     schemaExport.SetOutputFile($"{DatabaseFileName}_Schema.sql");
                     await schemaExport.DropAsync(true, true);
                     await schemaExport.CreateAsync(true, true);
-
                 })
                 .BuildSessionFactory();
         }

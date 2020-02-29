@@ -32,13 +32,13 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<UserDetailsModel> Handle(UserDetailsQuery request, CancellationToken cancellationToken)
         {
-            UserDetailsModel result = null;
+            UserDetailsModel result;
 
             _logger.Information("Reading user details of user {UserID} with parameters {@Request}", request.CurrentUserId, request);
 
             using (var tx = _session.BeginTransaction())
             {
-                var user = await _session.GetAsync<User>(request.CurrentUserId);
+                var user = await _session.GetAsync<User>(request.CurrentUserId, cancellationToken);
 
                 result = new UserDetailsModel()
                 {
@@ -49,6 +49,8 @@ namespace InstaLike.Web.Data.Query
                     Bio = user.Biography,
                     ProfilePicture = user.ProfilePicture.RawBytes
                 };
+
+                await tx.CommitAsync(cancellationToken);
             }
 
             return result;

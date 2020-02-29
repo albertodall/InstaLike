@@ -30,7 +30,7 @@ namespace InstaLike.Core.Domain
 
         public virtual Picture Picture { get; protected set; }
 
-        private readonly string _text;
+        private string _text;
         public virtual PostText Text => (PostText)_text;
 
         public virtual DateTimeOffset PostDate { get; protected set; }
@@ -38,6 +38,16 @@ namespace InstaLike.Core.Domain
         public virtual IReadOnlyList<Comment> Comments => _comments.ToList();
 
         public virtual IReadOnlyList<Like> Likes => _likes.ToList();
+
+        public virtual void UpdatePicture(Picture picture)
+        {
+            Picture = picture;
+        }
+
+        public virtual void UpdateText(PostText text)
+        {
+            _text = text.Value;
+        }
 
         public virtual bool LikesTo(User user)
         {
@@ -83,6 +93,15 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(comment));
             }
             _comments.Add(comment);
+        }
+
+        public virtual bool CanBeEditedBy(User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            return Author == user;
         }
     }
 }

@@ -7,7 +7,6 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Data.Query
@@ -53,18 +52,18 @@ namespace InstaLike.Web.Data.Query
                         .Select(u => u.FullName.Name).WithAlias(() => profile.Name)
                         .Select(u => u.FullName.Surname).WithAlias(() => profile.Surname)
                         .Select(u => u.Biography).WithAlias(() => profile.Bio)
-                        .Select(u => u.ProfilePicture.RawBytes).WithAlias(() => profile.ProfilePicture)
+                        .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePictureBytes)
                     )
-                    .TransformUsing(Transformers.AliasToBean<UserProfileModel>());
+                    .TransformUsing(new EntityToModelResultTransformer<UserProfileModel>());
 
-                // Loads user's information
-                profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>();
+                // Load user's information
+                profile = await userProfileQuery.SingleOrDefaultAsync<UserProfileModel>(cancellationToken);
 
                 // Number of posts published by this author. 
                 var postCountQuery = _session.QueryOver<Post>()
-                   .Where(p => p.Author.ID == profile.UserID)
-                   .Select(Projections.Count<Post>(p => p.ID))
-                   .FutureValue<int>();
+                    .Where(p => p.Author.ID == profile.UserID)
+                    .Select(Projections.Count<Post>(p => p.ID))
+                    .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
                 PostThumbnailModel thumbnailModel = null;
@@ -74,10 +73,10 @@ namespace InstaLike.Web.Data.Query
                     .Select(Projections.ProjectionList()
                         .Add(Projections.Property<Post>(p => p.ID)
                             .WithAlias(() => thumbnailModel.PostID))
-                        .Add(Projections.Property<Post>(p => p.Picture.RawBytes)
-                            .WithAlias(() => thumbnailModel.Picture))
+                        .Add(Projections.Property<Post>(p => p.Picture)
+                            .WithAlias(() => thumbnailModel.ThumbnailPictureBytes))
                     )
-                    .TransformUsing(Transformers.AliasToBean<PostThumbnailModel>())
+                    .TransformUsing(new EntityToModelResultTransformer<PostThumbnailModel>())
                     .Take(request.NumberOfThumbnails)
                     .Future<PostThumbnailModel>();
 
@@ -100,15 +99,17 @@ namespace InstaLike.Web.Data.Query
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
-                profile.NumberOfPosts = await postCountQuery.GetValueAsync();
-                profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync()).ToArray();
-                profile.NumberOfFollowers = await followersCountQuery.GetValueAsync();
-                profile.NumberOfFollows = await followingCountQuery.GetValueAsync();
+                profile.NumberOfPosts = await postCountQuery.GetValueAsync(cancellationToken);
+                profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync(cancellationToken)).ToArray();
+                profile.NumberOfFollowers = await followersCountQuery.GetValueAsync(cancellationToken);
+                profile.NumberOfFollows = await followingCountQuery.GetValueAsync(cancellationToken);
                 profile.IsCurrentUserProfile = profile.UserID == request.CurrentUserID;
 
                 profile.Following = 
-                    await isFollowedByCurrentUserQuery.GetValueAsync() == 1 
+                    await isFollowedByCurrentUserQuery.GetValueAsync(cancellationToken) == 1 
                     || profile.IsCurrentUserProfile;
+
+                await tx.CommitAsync(cancellationToken);
             }
 
             return profile;

@@ -12,7 +12,7 @@
         public int NumberOfFollows { get; set; }
         public bool IsCurrentUserProfile { get; set; }
         public bool Following { get; set; }
-        public byte[] ProfilePicture { get; set; }
+        public byte[] ProfilePictureBytes { get; set; }
         public PostThumbnailModel[] RecentPosts { get; set; }
     }
 }
