@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using InstaLike.Web.Services;
 using Microsoft.AspNetCore.Http;
-using RT.Comb;
 using Serilog.Context;
 
 namespace InstaLike.Web.Infrastructure
@@ -14,15 +14,17 @@ namespace InstaLike.Web.Infrastructure
         private const string CorrelationIDPropertyName = "CorrelationID";
 
         private readonly RequestDelegate _next;
+        private readonly ISequentialGuidGenerator _guidGenerator;
 
-        public RequestCorrelationMiddleware(RequestDelegate next)
+        public RequestCorrelationMiddleware(RequestDelegate next, ISequentialGuidGenerator guidGenerator)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
+            _guidGenerator = guidGenerator ?? throw new ArgumentNullException(nameof(guidGenerator));
         }
 
         public async Task Invoke(HttpContext context)
         {
-            var correlationID = Provider.Sql.Create();
+            var correlationID = _guidGenerator.GetNextId();
             using (LogContext.PushProperty(CorrelationIDPropertyName, correlationID))
             {
                 await _next.Invoke(context);
