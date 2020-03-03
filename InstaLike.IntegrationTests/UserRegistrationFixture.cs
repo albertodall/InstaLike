@@ -5,8 +5,8 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using InstaLike.Core.Services;
 using InstaLike.Web.CommandHandlers;
-using InstaLike.Web.Services;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -58,8 +58,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Edit_Registered_User_Information()
         {
-            string testUserName = "testuser1";
-            string testPassword = "password";
+            const string testUserName = "testuser1";
+            const string testPassword = "password";
             Result editCommandResult;
 
             var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
@@ -101,8 +101,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Edit_User_Email_If_Email_Is_Not_Valid()
         {
-            string testUserName = "testuser2";
-            string testPassword = "password";
+            const string testUserName = "testuser2";
+            const string testPassword = "password";
             Result editCommandResult;
 
             var testUser = new User((Nickname)testUserName, (FullName)"test2 user2", Password.Create(testPassword).Value, (Email)"testuser2@acme.com", "bio2");
@@ -131,8 +131,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Edit_User_Nickname_If_Nickname_Is_Not_Valid()
         {
-            string testUserName = "testuser3";
-            string testPassword = "password";
+            const string testUserName = "testuser3";
+            const string testPassword = "password";
             Result editCommandResult;
 
             var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");
@@ -161,8 +161,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Edit_User_Full_Name_If_Full_Name_Is_Not_Valid()
         {
-            string testUserName = "testuser4";
-            string testPassword = "password";
+            const string testUserName = "testuser4";
+            const string testPassword = "password";
             Result editCommandResult;
 
             var testUser = new User((Nickname)testUserName, (FullName)"test4 user4", Password.Create(testPassword).Value, (Email)"testuser4@acme.com", "bio4");

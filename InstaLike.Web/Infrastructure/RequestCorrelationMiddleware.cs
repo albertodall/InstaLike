@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using InstaLike.Web.Services;
+using InstaLike.Core.Services;
 using Microsoft.AspNetCore.Http;
 using Serilog.Context;
 

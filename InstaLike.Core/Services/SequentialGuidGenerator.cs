@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace InstaLike.Web.Services
+namespace InstaLike.Core.Services
 {
-    internal class SequentialGuidGenerator : ISequentialGuidGenerator
+    public class SequentialGuidGenerator : ISequentialGuidGenerator
     {
         private const int NumberOfGuidBytes = 10;
         private const int NumberOfSequenceBytes = 6;
@@ -13,7 +13,12 @@ namespace InstaLike.Web.Services
 
         public Guid GetNextId()
         {
-            var sequenceBytes = GetSequenceBytes(DateTime.UtcNow);
+            return GetNextId(DateTime.UtcNow);
+        }
+
+        public static Guid GetNextId(DateTime value)
+        {
+            var sequenceBytes = GetSequenceBytes(value);
             var guidBytes = GetGuidBytes();
             var totalBytes = guidBytes.Concat(sequenceBytes).ToArray();
 

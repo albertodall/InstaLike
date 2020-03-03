@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
-using InstaLike.Web.Services;
+using InstaLike.Core.Services;
 using MediatR;
 using NHibernate;
 using Serilog;
