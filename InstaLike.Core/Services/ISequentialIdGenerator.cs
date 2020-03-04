@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace InstaLike.Core.Services
+﻿namespace InstaLike.Core.Services
 {
     public interface ISequentialIdGenerator<out TId>
     {
