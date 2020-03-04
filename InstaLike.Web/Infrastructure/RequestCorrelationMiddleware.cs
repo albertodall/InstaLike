@@ -14,9 +14,9 @@ namespace InstaLike.Web.Infrastructure
         private const string CorrelationIDPropertyName = "CorrelationID";
 
         private readonly RequestDelegate _next;
-        private readonly ISequentialGuidGenerator _guidGenerator;
+        private readonly ISequentialIdGenerator<Guid> _guidGenerator;
 
-        public RequestCorrelationMiddleware(RequestDelegate next, ISequentialGuidGenerator guidGenerator)
+        public RequestCorrelationMiddleware(RequestDelegate next, ISequentialIdGenerator<Guid> guidGenerator)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _guidGenerator = guidGenerator ?? throw new ArgumentNullException(nameof(guidGenerator));

@@ -6,6 +6,4 @@ namespace InstaLike.Core.Services
     {
         TId GetNextId();
     }
-
-    public interface ISequentialGuidGenerator : ISequentialIdGenerator<Guid> { }
 }

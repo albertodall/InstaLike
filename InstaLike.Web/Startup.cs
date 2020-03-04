@@ -49,7 +49,7 @@ namespace InstaLike.Web
 
             services.ConfigureLogging(loggerConfig);
 
-            services.AddSingleton<ISequentialGuidGenerator, SequentialGuidGenerator>();
+            services.AddSingleton<ISequentialIdGenerator<Guid>, SequentialGuidGenerator>();
 
             services.ConfigurePipeline();
 

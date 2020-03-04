@@ -1,41 +1,46 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace InstaLike.Core.Services
 {
-    public class SequentialGuidGenerator : ISequentialGuidGenerator
+    /// <summary>
+    /// Generates Sequential GUIDs.
+    /// </summary>
+    /// <remarks>
+    /// Replaces the most significant 8 bytes of the GUID (according to SQL Server ordering) 
+    /// with the current UTC-timestamp.
+    /// </remarks>
+    public class SequentialGuidGenerator : ISequentialIdGenerator<Guid>
     {
-        private const int NumberOfGuidBytes = 10;
-        private const int NumberOfSequenceBytes = 6;
+        private const byte NumberOfGuidBytes = 10;
+        private const byte NumberOfSequenceBytes = 6;
 
-        private static readonly DateTime BaseDate = new DateTime(1900, 1, 1);
+        private static long _lastGenerationTicks = -1;
+        private static readonly object SequenceGeneratorLocker = new object();
 
         public Guid GetNextId()
         {
-            return GetNextId(DateTime.UtcNow);
-        }
+            var ticks = DateTime.UtcNow.Ticks;
 
-        public static Guid GetNextId(DateTime value)
-        {
-            var sequenceBytes = GetSequenceBytes(value);
-            var guidBytes = GetGuidBytes();
-            var totalBytes = guidBytes.Concat(sequenceBytes).ToArray();
+            lock (SequenceGeneratorLocker)
+            {
+                if (ticks <= _lastGenerationTicks)
+                {
+                    ticks = _lastGenerationTicks + 1;
+                }
 
-            return new Guid(totalBytes);
-        }
+                _lastGenerationTicks = ticks;
+            }
 
-        private static IEnumerable<byte> GetGuidBytes()
-        {
-            return Guid.NewGuid().ToByteArray().Take(NumberOfGuidBytes).ToArray();
-        }
+            var ticksBytes = BitConverter.GetBytes(ticks);
 
-        private static IEnumerable<byte> GetSequenceBytes(DateTime value)
-        {
-            var ticksUntilNow = value.Ticks - BaseDate.Ticks;
-            var sequenceBytes = BitConverter.GetBytes(ticksUntilNow);
-            var sequenceBytesLongEnough = sequenceBytes.Concat(new byte[NumberOfSequenceBytes]);
-            return sequenceBytesLongEnough.Take(NumberOfSequenceBytes).Reverse();
+            Array.Reverse(ticksBytes);
+
+            var newGuidBytes = Guid.NewGuid().ToByteArray();
+
+            Array.Copy(ticksBytes, 0, newGuidBytes, NumberOfGuidBytes, NumberOfSequenceBytes);
+            Array.Copy(ticksBytes, 6, newGuidBytes, 8, 2);
+
+            return new Guid(newGuidBytes);
         }
     }
 }

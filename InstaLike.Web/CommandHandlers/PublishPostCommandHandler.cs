@@ -15,9 +15,9 @@ namespace InstaLike.Web.CommandHandlers
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
-        private readonly ISequentialGuidGenerator _idGenerator;
+        private readonly ISequentialIdGenerator<Guid> _idGenerator;
 
-        public PublishPostCommandHandler(ISession session, ILogger logger, ISequentialGuidGenerator idGenerator)
+        public PublishPostCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<Guid> idGenerator)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
             _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
