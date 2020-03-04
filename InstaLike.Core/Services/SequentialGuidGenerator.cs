@@ -14,7 +14,7 @@ namespace InstaLike.Core.Services
         private const byte NumberOfGuidBytes = 10;
         private const byte NumberOfSequenceBytes = 6;
 
-        private static long _lastGenerationTicks = -1;
+        private long _lastGenerationTicks = -1;
         private static readonly object SequenceGeneratorLocker = new object();
 
         public Guid GetNextId()
