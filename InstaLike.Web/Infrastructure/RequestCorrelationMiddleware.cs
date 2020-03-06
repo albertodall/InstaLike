@@ -14,9 +14,9 @@ namespace InstaLike.Web.Infrastructure
         private const string CorrelationIDPropertyName = "CorrelationID";
 
         private readonly RequestDelegate _next;
-        private readonly ISequentialIdGenerator<Guid> _guidGenerator;
+        private readonly ISequentialIdGenerator<SequentialGuid> _guidGenerator;
 
-        public RequestCorrelationMiddleware(RequestDelegate next, ISequentialIdGenerator<Guid> guidGenerator)
+        public RequestCorrelationMiddleware(RequestDelegate next, ISequentialIdGenerator<SequentialGuid> guidGenerator)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _guidGenerator = guidGenerator ?? throw new ArgumentNullException(nameof(guidGenerator));
@@ -24,7 +24,7 @@ namespace InstaLike.Web.Infrastructure
 
         public async Task Invoke(HttpContext context)
         {
-            var correlationID = _guidGenerator.GetNextId();
+            var correlationID = _guidGenerator.GetNextId().Value;
             using (LogContext.PushProperty(CorrelationIDPropertyName, correlationID))
             {
                 await _next.Invoke(context);

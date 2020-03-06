@@ -33,12 +33,12 @@ namespace InstaLike.Web.Infrastructure
             _connectionProvider.Configure(settings);
 
             // Configure external storage, if specified
-            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out var type) && type != null)
+            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string type) && type != null)
             {
                 var externalStorageProviderType = Type.GetType(type);
                 if (externalStorageProviderType == null)
                 {
-                    throw new ArgumentNullException(nameof(type), $"Unknown storage provider type: {type}");
+                    throw new ArgumentNullException(type, $"Unknown storage provider type: {type}");
                 }
 
                 _externalStorageConnectionProvider = (IHybridStorageConnectionProvider)Activator.CreateInstance(externalStorageProviderType);
@@ -63,23 +63,17 @@ namespace InstaLike.Web.Infrastructure
         public DbConnection GetConnection()
         {
             var connection = _connectionProvider.GetConnection();
-            if (_externalStorageConnectionProvider == null)
-            {
-                return connection;
-            }
-
-            return new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            return _externalStorageConnectionProvider == null 
+                ? connection 
+                : new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
         }
 
         public async Task<DbConnection> GetConnectionAsync(CancellationToken cancellationToken)
         {
             var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
-            if (_externalStorageConnectionProvider == null)
-            {
-                return connection;
-            }
-
-            return new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            return _externalStorageConnectionProvider == null 
+                ? connection 
+                : new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
         }
     }
 }

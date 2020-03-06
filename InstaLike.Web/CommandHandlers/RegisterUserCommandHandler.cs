@@ -14,10 +14,10 @@ namespace InstaLike.Web.CommandHandlers
     internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
     {
         private readonly ISession _session;
-        private readonly ISequentialIdGenerator<Guid> _idGenerator;
+        private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
         private readonly ILogger _logger;
 
-        public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<Guid> idGenerator)
+        public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
             _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));

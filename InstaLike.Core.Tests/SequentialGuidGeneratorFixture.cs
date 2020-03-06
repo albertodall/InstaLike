@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using InstaLike.Core.Services;
 using Xunit;
 
@@ -12,17 +10,17 @@ namespace InstaLike.Core.Tests
         public void Should_Generate_A_Sequential_Guid()
         {
             var sut = new SequentialGuidGenerator();
-            sut.GetNextId().Should().NotBeEmpty();
+            sut.GetNextId().Value.Should().NotBeEmpty();
         }
 
-        [Fact(Skip = "This test sometimes passes, sometimes doesn't. Maybe I'm testing the wrong thing.")]
+        [Fact]
         public void Guids_Generated_In_Sequence_Should_Be_Sequential()
         {
             var sut = new SequentialGuidGenerator();
             var guid1 = sut.GetNextId();
             var guid2 = sut.GetNextId();
 
-            guid1.CompareTo(guid2).Should().BeLessThan(0);
+            (guid1 < guid2).Should().BeTrue();
         }
     }
 }

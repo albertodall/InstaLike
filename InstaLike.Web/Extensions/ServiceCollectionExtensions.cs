@@ -79,7 +79,7 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
         {
-            services.AddTransient<IAuthorizationHandler, PostAuthorHandler>();
+            services.AddTransient<IAuthorizationHandler, PostAuthorRequirementHandler>();
             services.AddAuthorization(opt =>
             {
                 opt.AddPolicy("IsPostAuthor", policy =>
