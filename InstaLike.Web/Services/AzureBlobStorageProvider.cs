@@ -52,13 +52,13 @@ namespace InstaLike.Web.Services
             var blob = container.GetBlobReference(blobName);
             if (!await blob.ExistsAsync())
             {
-                return Result.Fail<byte[]>($"Blob {blobName} does not exist in container {containerName}.");
+                return Result.Failure<byte[]>($"Blob {blobName} does not exist in container {containerName}.");
             }
 
-            using (var downloadStream = new MemoryStream())
+            await using (var downloadStream = new MemoryStream())
             {
                 await blob.DownloadToStreamAsync(downloadStream);
-                return Result.Ok(downloadStream.ToArray());
+                return Result.Success(downloadStream.ToArray());
             }
         }
 

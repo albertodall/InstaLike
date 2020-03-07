@@ -18,9 +18,9 @@ namespace InstaLike.Core.Domain
         protected Password()
         { }
 
-        private Password(string base64string)
+        private Password(string base64String)
         {
-            HashedValue = base64string;
+            HashedValue = base64String;
         }
 
         private Password(byte[] hash)
@@ -36,23 +36,22 @@ namespace InstaLike.Core.Domain
         {
             if (string.IsNullOrEmpty(password))
             {
-                return Result.Fail<Password>("Password cannot be empty.");
+                return Result.Failure<Password>("Password cannot be empty.");
             }
 
             if (password.Length < MinimumPasswordLength)
             {
-                return Result.Fail<Password>($"Password is too short. Minimum allowed length is {MinimumPasswordLength} characters. ");
+                return Result.Failure<Password>($"Password is too short. Minimum allowed length is {MinimumPasswordLength} characters. ");
             }
 
-            return Result.Ok(new Password(HashPassword(password)));
-
+            return Result.Success(new Password(HashPassword(password)));
         }
 
         public bool HashMatches(string password)
         {
             byte[] hashedPassword;
-            byte[] storedHashedPassword = Convert.FromBase64String(HashedValue);
-            byte[] saltPart = new byte[SaltSize];
+            var storedHashedPassword = Convert.FromBase64String(HashedValue);
+            var saltPart = new byte[SaltSize];
             Array.Copy(storedHashedPassword, 0, saltPart, 0, SaltSize);
             using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltPart, 10000))
             {
@@ -66,13 +65,14 @@ namespace InstaLike.Core.Domain
             return password.HashedValue;
         }
 
-        public static explicit operator Password(string base64password)
+        public static explicit operator Password(string base64Password)
         {
-            if (!IsBase64String(base64password))
+            if (!IsBase64String(base64Password))
             {
                 throw new InvalidCastException("The specified password is not a valid base64 string");
             }
-            return new Password(base64password);
+
+            return new Password(base64Password);
         }
 
         public static explicit operator Password(byte[] hashBytes)

@@ -20,15 +20,15 @@ namespace InstaLike.Core.Domain
 
             if (trimmedText.Length == 0)
             {
-                return Result.Fail<CommentText>("Text for a comment should not be empty.");
+                return Result.Failure<CommentText>("Text for a comment should not be empty.");
             }
 
             if (trimmedText.Length > 200)
             {
-                return Result.Fail<CommentText>("Text for a comment should not be longer than 200 chars.");
+                return Result.Failure<CommentText>("Text for a comment should not be longer than 200 chars.");
             }
 
-            return Result.Ok(new CommentText(trimmedText));
+            return Result.Success(new CommentText(trimmedText));
         }
 
         public static implicit operator string(CommentText text)

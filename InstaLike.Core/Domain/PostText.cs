@@ -21,15 +21,15 @@ namespace InstaLike.Core.Domain
 
             if (trimmedText.Length == 0)
             {
-                return Result.Fail<PostText>("Text for a post should not be empty");
+                return Result.Failure<PostText>("Text for a post should not be empty");
             }
 
             if (trimmedText.Length > 500)
             {
-                return Result.Fail<PostText>("Text for a post should not be longer than 500 chars");
+                return Result.Failure<PostText>("Text for a post should not be longer than 500 chars");
             }
 
-            return Result.Ok(new PostText(trimmedText));
+            return Result.Success(new PostText(trimmedText));
         }
 
         public static implicit operator string(PostText text)

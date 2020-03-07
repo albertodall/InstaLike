@@ -34,7 +34,7 @@ namespace InstaLike.Web.CommandHandlers
                         editor.Nickname, 
                         request.UserID, 
                         request.PostID);
-                    return Result.Fail<int>($"You're not allowed to edit post {postToEdit.ID}.");
+                    return Result.Failure<int>($"You're not allowed to edit post {postToEdit.ID}.");
                 }
 
                 postToEdit.UpdateText(PostText.Create(request.Text).Value);
@@ -49,7 +49,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.UserID,
                         request.PostID);
 
-                    return Result.Ok(postToEdit.ID);
+                    return Result.Success(postToEdit.ID);
                 }
                 catch (ADOException ex)
                 {
@@ -61,7 +61,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.UserID,
                         ex.Message);
 
-                    return Result.Fail<int>(ex.Message);
+                    return Result.Failure<int>(ex.Message);
                 }
             }
         }

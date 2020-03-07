@@ -37,7 +37,7 @@ namespace InstaLike.Web.Services
                 {
                     cvClient.Endpoint = _endpointUrl;
                     var result = await cvClient.AnalyzeImageInStreamAsync(imageStream, Features);
-                    return Result.Ok(
+                    return Result.Success(
                         result.Tags
                             .Select(tag => $"#{tag.Name}".Replace(" ", string.Empty))
                             .OrderBy(tag => tag)
@@ -46,7 +46,7 @@ namespace InstaLike.Web.Services
                 }
                 catch (ComputerVisionErrorException ex)
                 {
-                    return Result.Fail<string[]>(ex.Body != null ? ex.Body.Message : ex.Message);
+                    return Result.Failure<string[]>(ex.Body != null ? ex.Body.Message : ex.Message);
                 }
             }
         }

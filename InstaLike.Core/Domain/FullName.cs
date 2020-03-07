@@ -21,15 +21,15 @@ namespace InstaLike.Core.Domain
         {
             if (string.IsNullOrEmpty(name))
             {
-                return Result.Fail<FullName>("You have to specify a proper name. An empty string is not allowed.");
+                return Result.Failure<FullName>("You have to specify a proper name. An empty string is not allowed.");
             }
 
             if (string.IsNullOrEmpty(surname))
             {
-                return Result.Fail<FullName>("You have to specify a proper surname. An empty string is not allowed.");
+                return Result.Failure<FullName>("You have to specify a proper surname. An empty string is not allowed.");
             }
 
-            return Result.Ok(new FullName(name, surname));
+            return Result.Success(new FullName(name, surname));
         }
 
         public static explicit operator FullName(string fullname)

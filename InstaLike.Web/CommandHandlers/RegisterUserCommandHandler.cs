@@ -37,7 +37,7 @@ namespace InstaLike.Web.CommandHandlers
                 _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
                     request.Nickname,
                     validationResult.Error);
-                return Result.Fail<int>(validationResult.Error);
+                return Result.Failure<int>(validationResult.Error);
             }
 
             var userToRegister = new User(
@@ -64,7 +64,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.Nickname,
                         userToRegister.ID);
 
-                    return Result.Ok(userToRegister.ID);
+                    return Result.Success(userToRegister.ID);
                 }
                 catch (ADOException ex)
                 {
@@ -74,7 +74,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.Nickname,
                         ex.Message);
 
-                    return Result.Fail<int>(ex.Message);
+                    return Result.Failure<int>(ex.Message);
                 }
             }
         }

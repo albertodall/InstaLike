@@ -125,9 +125,9 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Result.Ok()
+            return Result.Success()
                 .Ensure(() => !IsFollowing(user), $"User [{user.Nickname}] is already followed by user [{Nickname}].")
-                .OnSuccess(() =>
+                .Tap(() =>
                 {
                     var follow = new Follow(this, user);
                     _followed.Add(follow);
@@ -151,7 +151,7 @@ namespace InstaLike.Core.Domain
 
             return followed
                 .ToResult($"User [{Nickname}] is not following user [{user.Nickname}].")
-                .OnSuccess(follow =>
+                .Tap(follow =>
                 {
                     _followed.Remove(follow);
                     user.RemoveFollow(follow);
@@ -170,10 +170,10 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(post));
             }
 
-            return Result.Ok()
+            return Result.Success()
                 .Ensure(() => post.Author != this, "You cannot put a 'Like' on your own posts.")
                 .Ensure(() => !post.LikesTo(this), $"User [{Nickname}] already 'Liked' this post.")
-                .OnSuccess(() => post.PutLikeBy(this));
+                .Tap(() => post.PutLikeBy(this));
         }
 
         public virtual Result RemoveLikeFrom(Post post)
@@ -183,9 +183,9 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(post));
             }
 
-            return Result.Ok()
+            return Result.Success()
                 .Ensure(() => post.LikesTo(this), $"User [{Nickname}] did not put any 'Like' on this post.")
-                .OnSuccess(() => post.RemoveLikeBy(this));
+                .Tap(() => post.RemoveLikeBy(this));
         }
     }
 }

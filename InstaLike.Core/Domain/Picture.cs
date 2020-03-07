@@ -46,10 +46,10 @@ namespace InstaLike.Core.Domain
         {
             if (rawBytes.Length == 0)
             {
-                return Result.Ok(MissingPicture);
+                return Result.Success(MissingPicture);
             }
 
-            return Result.Ok(new Picture(rawBytes, identifier));
+            return Result.Success(new Picture(rawBytes, identifier));
         }
 
         public static Result<Picture> Create(byte[] rawBytes)

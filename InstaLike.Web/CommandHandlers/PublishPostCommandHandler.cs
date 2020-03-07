@@ -43,7 +43,7 @@ namespace InstaLike.Web.CommandHandlers
                         author.Nickname,
                         request.UserID);
 
-                    return Result.Ok(post.ID);
+                    return Result.Success(post.ID);
                 }
                 catch (ADOException ex)
                 {
@@ -54,7 +54,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.UserID,
                         ex.Message);
 
-                    return Result.Fail<int>(ex.Message);
+                    return Result.Failure<int>(ex.Message);
                 }
             }
         }

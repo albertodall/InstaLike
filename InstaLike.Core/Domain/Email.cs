@@ -21,15 +21,15 @@ namespace InstaLike.Core.Domain
 
             if (email.Length == 0)
             {
-                return Result.Fail<Email>("Email should not be empty");
+                return Result.Failure<Email>("Email should not be empty");
             }
 
             if (!Regex.IsMatch(email, @"^(.+)@(.+)$"))
             {
-                return Result.Fail<Email>("Email is invalid");
+                return Result.Failure<Email>("Email is invalid");
             }
 
-            return Result.Ok(new Email(email));
+            return Result.Success(new Email(email));
         }
 
         public override string ToString()

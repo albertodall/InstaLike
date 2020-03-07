@@ -21,15 +21,15 @@ namespace InstaLike.Core.Domain
 
             if (nick.Length == 0)
             {
-                return Result.Fail<Nickname>("Nickname should not be empty");
+                return Result.Failure<Nickname>("Nickname should not be empty");
             }
 
             if (nick.Length > 20)
             {
-                return Result.Fail<Nickname>("Nickname is too long (max 20 chars)");
+                return Result.Failure<Nickname>("Nickname is too long (max 20 chars)");
             }
 
-            return Result.Ok(new Nickname(nick));
+            return Result.Success(new Nickname(nick));
         }
 
         public static implicit operator string(Nickname nickname)

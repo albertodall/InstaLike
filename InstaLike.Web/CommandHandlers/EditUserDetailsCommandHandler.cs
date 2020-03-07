@@ -34,7 +34,7 @@ namespace InstaLike.Web.CommandHandlers
                     request.Nickname,
                     request.UserID,
                     validationResult.Error);
-                return Result.Fail(validationResult.Error);
+                return Result.Failure(validationResult.Error);
             }
 
             using (var tx = _session.BeginTransaction())
@@ -54,7 +54,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.Nickname,
                         request.UserID);
 
-                    return Result.Ok(userToUpdate.ID);
+                    return Result.Success(userToUpdate.ID);
                 }
                 catch (ADOException ex)
                 {
@@ -65,7 +65,7 @@ namespace InstaLike.Web.CommandHandlers
                         request.UserID,
                         ex.Message);
 
-                    return Result.Fail(ex.Message);
+                    return Result.Failure(ex.Message);
                 }
             }
         }

@@ -43,7 +43,7 @@ namespace InstaLike.Web.CommandHandlers
                 var followerUser = await followingQuery.SingleOrDefaultAsync(cancellationToken);
                 return await followerUser.Unfollow(userToUnfollow)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
-                        .OnSuccess(_ => _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
+                        .Tap(_ => _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
                             request.FollowerID,
                             request.UnfollowedNickname,
                             userToUnfollow.ID))

@@ -66,10 +66,10 @@ namespace InstaLike.Core.Domain
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Result.Ok()
+            return Result.Success()
                 .Ensure(() => Author != user, $"User [{user.Nickname}] cannot put a 'Like' on their own posts.")
                 .Ensure(() => !LikesTo(user), $"User [{user.Nickname}] has already put a 'Like' to this post.")
-                .OnSuccess(() => _likes.Add(new Like(this, user)));
+                .Tap(() => _likes.Add(new Like(this, user)));
         }
 
         public virtual Result RemoveLikeBy(User user)
@@ -83,7 +83,7 @@ namespace InstaLike.Core.Domain
 
             return likeToRemove
                 .ToResult($"User [{user.Nickname}] did not put any 'Like' on this post.")
-                .OnSuccess(like => _likes.Remove(like));           
+                .Tap(like => _likes.Remove(like));           
         }
 
         public virtual void AddComment(Comment comment)
@@ -92,6 +92,7 @@ namespace InstaLike.Core.Domain
             {
                 throw new ArgumentNullException(nameof(comment));
             }
+
             _comments.Add(comment);
         }
 
@@ -101,6 +102,7 @@ namespace InstaLike.Core.Domain
             {
                 throw new ArgumentNullException(nameof(user));
             }
+
             return Author == user;
         }
     }
