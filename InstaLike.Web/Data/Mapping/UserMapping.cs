@@ -17,7 +17,7 @@ namespace InstaLike.Web.Data.Mapping
                 .LazyLoad();
             Map(p => p.Email).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
-                .Not.Nullable();           
+                .Not.Nullable();
             Map(p => p.Nickname).CustomType<string>()
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
@@ -28,6 +28,7 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
             Map(p => p.ProfilePicture)
                 .CustomType<ProfilePictureType>()
+                .LazyLoad()
                 .Columns.Clear()
                 .Columns.Add("ProfilePicture").Not.Nullable()
                 .Columns.Add("ProfilePictureGuid").Not.Nullable();
