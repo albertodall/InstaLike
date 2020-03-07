@@ -69,7 +69,7 @@ namespace InstaLike.Web.Extensions
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(opt =>
                 {
-                    opt.Cookie.Expiration = TimeSpan.FromMinutes(30);
+                    opt.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                     opt.Cookie.HttpOnly = true;
                     opt.LoginPath = new PathString("/Account/Login");
                 });
