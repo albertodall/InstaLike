@@ -22,10 +22,10 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - CQRS Pattern. 
  - O/RM Based persistence 
  - Unit testing and integration testing. 
- - Unstructured data (images) storage.
+ - Unstructured data (images) storage both on-premises and on the cloud).
  - Activity logging.
- - Cloud-based image recognition.
-
+ - Cloud-based image recognition using [Azure Computer Vision](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/).
+ 
 ## Features
  - User registration. 
  - Sharing of pictures. 
@@ -34,11 +34,12 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - Follow and unfollow users. 
  - Get notifications when other users interact with the content you shared.
  - Pictures Auto-tagging.
+ - Cloud storage compatibility (e.g. [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs)) for pictures.
 
 ## Requirements
 To work with *InstaLike* source code, you need:
- - [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) 2.2.
- - [Visual Studio](https://visualstudio.microsoft.com/) 2017 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
+ - [ASP.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core) 3.1.
+ - [Visual Studio](https://visualstudio.microsoft.com/) 2019 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
  - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 2014 Express or greater.
 
 ## Setup
@@ -66,7 +67,7 @@ dotnet fm migrate --processor SqlServer2014 --connection "Data Source=(local); I
 ## Acknowledgements
 This project has been built using these awesome Open Source projects:
 
-- [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
+- [ASP.NET Core](https://dotnet.microsoft.com/download/dotnet-core)
 - [CSharpFunctionalExtensions](https://github.com/vkhorikov/CSharpFunctionalExtensions)
 - [MediatR](https://github.com/jbogard/MediatR)
 - [NHibernate](https://github.com/nhibernate/nhibernate-core)
@@ -75,5 +76,6 @@ This project has been built using these awesome Open Source projects:
 - [Xunit](https://xunit.net)
 - [FluentAssertions](https://fluentassertions.com)
 - [Serilog](https://serilog.net)
+- [Humanizer](https://github.com/Humanizr/Humanizer)
 
 Many thanks  also to my friend and fellow worker [Matteo](https://github.com/cefla) for the graphic design. I gave him some rough stuff and he made it beautiful!
