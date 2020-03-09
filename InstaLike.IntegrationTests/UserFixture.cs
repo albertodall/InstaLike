@@ -27,10 +27,11 @@ namespace InstaLike.IntegrationTests
         public async Task Should_Load_User_Profile()
         {
             UserProfileModel result;
-            User author = new User((Nickname)"authoruser", (FullName)"author user", Password.Create("password").Value, (Email)"authoruser@acme.com", "my bio");
-            User followed = new User((Nickname)"followeduser", (FullName)"followed user", Password.Create("password").Value, (Email)"followed@acme.com", "my bio");
-            User follower = new User((Nickname)"followeruser", (FullName)"follower user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-            Post post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            
+            var author = new User((Nickname)"authoruser", (FullName)"author user", Password.Create("password").Value, (Email)"authoruser@acme.com", "my bio");
+            var followed = new User((Nickname)"followeduser", (FullName)"followed user", Password.Create("password").Value, (Email)"followed@acme.com", "my bio");
+            var follower = new User((Nickname)"followeruser", (FullName)"follower user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(followed);
@@ -55,7 +56,7 @@ namespace InstaLike.IntegrationTests
                 result.NumberOfFollowers.Should().Be(1);
                 result.NumberOfFollows.Should().Be(1);
                 result.NumberOfPosts.Should().Be(1);
-                result.RecentPosts.Count().Should().Be(1);
+                result.RecentPosts.Length.Should().Be(1);
             }
         }
 
@@ -63,7 +64,8 @@ namespace InstaLike.IntegrationTests
         public async Task Should_Read_User_Details_For_Editing()
         {
             UserDetailsModel result;
-            User user = new User((Nickname)"testuser", (FullName)"test user", Password.Create("password").Value, (Email)"testuser@acme.com", "my bio");
+            
+            var user = new User((Nickname)"testuser", (FullName)"test user", Password.Create("password").Value, (Email)"testuser@acme.com", "my bio");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(user);

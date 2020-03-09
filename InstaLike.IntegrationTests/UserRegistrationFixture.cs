@@ -36,7 +36,7 @@ namespace InstaLike.IntegrationTests
                 "password",
                 "registereduser@acme.com",
                 "registered user bio",
-                Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
+                Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
 
             using (var session = _testFixture.OpenSession(_output))
             {
@@ -76,7 +76,7 @@ namespace InstaLike.IntegrationTests
                 $"{testUser.FullName.Surname}_mod",
                 "new@email.com",
                 "new bio",
-                Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
+                Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
             using (var session = _testFixture.OpenSession(_output))
             {
                 var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
@@ -93,7 +93,7 @@ namespace InstaLike.IntegrationTests
                     modifiedUser.FullName.Should().Be((FullName)$"{testUser.FullName.Name}_mod {testUser.FullName.Surname}_mod");
                     modifiedUser.Email.Should().Be((Email)"new@email.com");
                     modifiedUser.Biography.Should().Be("new bio");
-                    modifiedUser.ProfilePicture.Should().Be((Picture)_testFixture.GetTestPictureBase64());
+                    modifiedUser.ProfilePicture.Should().Be((Picture)DatabaseFixture.GetTestPictureBase64());
                 }
             }
         }

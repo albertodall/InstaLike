@@ -40,7 +40,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(testUser);
             }
 
-            var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(_testFixture.GetTestPictureBase64()));
+            var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
             using (var session = _testFixture.OpenSession(_output))
             {
                 var sut = new PublishPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
@@ -63,7 +63,7 @@ namespace InstaLike.IntegrationTests
             Result<int> commentPostResult;
             var author = new User((Nickname)"author1", (FullName)"author one", Password.Create("password").Value, (Email)"author1@acme.com", "my bio");
             var commenter = new User((Nickname)"commenter1", (FullName)"commenter one", Password.Create("password").Value, (Email)"commenter1@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(author);
@@ -95,7 +95,7 @@ namespace InstaLike.IntegrationTests
             Result likeResult;
             var author = new User((Nickname)"author2", (FullName)"author two", Password.Create("password").Value, (Email)"author2@acme.com", "my bio");
             var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(author);
@@ -126,7 +126,7 @@ namespace InstaLike.IntegrationTests
             Result likeResult;
             var author = new User((Nickname)"author3", (FullName)"author three", Password.Create("password").Value, (Email)"author3@acme.com", "my bio");
             var reader = new User((Nickname)"reader2", (FullName)"reader two", Password.Create("password").Value, (Email)"reader2@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             post.PutLikeBy(reader);
             using (var session = _testFixture.OpenSession(_output))
             {
@@ -158,7 +158,7 @@ namespace InstaLike.IntegrationTests
             Result likeResult;
             var author = new User((Nickname)"author4", (FullName)"author four", Password.Create("password").Value, (Email)"author4@acme.com", "my bio");
             var reader = new User((Nickname)"reader3", (FullName)"reader three", Password.Create("password").Value, (Email)"reader3@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(author);
@@ -182,7 +182,7 @@ namespace InstaLike.IntegrationTests
             Result likeResult;
             var author = new User((Nickname)"author5", (FullName)"author five", Password.Create("password").Value, (Email)"author5@acme.com", "my bio");
             var reader = new User((Nickname)"reader4", (FullName)"reader four", Password.Create("password").Value, (Email)"reader4@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(author);
@@ -206,7 +206,7 @@ namespace InstaLike.IntegrationTests
         {
             Result likeResult;
             var author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");           
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(author);
@@ -228,7 +228,7 @@ namespace InstaLike.IntegrationTests
         {
             CommentModel[] comments;
             var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             var comment = new Comment(post, author, CommentText.Create("First comment").Value);
             using (var session = _testFixture.OpenSession(_output))
             {
@@ -253,7 +253,7 @@ namespace InstaLike.IntegrationTests
             PostModel result;
             var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
             var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
-            var post = new Post(author, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post");
+            var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
             var comment = new Comment(post, reader, CommentText.Create("My comment").Value);
             using (var session = _testFixture.OpenSession(_output))
             {
@@ -287,9 +287,9 @@ namespace InstaLike.IntegrationTests
             var author1 = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
             var author2 = new User((Nickname)"authoruser2", (FullName)"author2 user2", Password.Create("password").Value, (Email)"author2user2@acme.com", "my bio");
             var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
-            var post1 = new Post(author1, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post 1");
-            var post2 = new Post(author1, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post 2");
-            var post3 = new Post(author2, (Picture)Convert.FromBase64String(_testFixture.GetTestPictureBase64()), (PostText)"test post 3");
+            var post1 = new Post(author1, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post 1");
+            var post2 = new Post(author1, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post 2");
+            var post3 = new Post(author2, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post 3");
             using (var session = _testFixture.OpenSession(_output))
             {
                 await session.SaveAsync(author1);
@@ -316,7 +316,7 @@ namespace InstaLike.IntegrationTests
         public async Task User_Can_Edit_His_Own_Posts()
         {
             Result editResult;
-            var picture = (Picture) Convert.FromBase64String(_testFixture.GetTestPictureBase64());
+            var picture = (Picture) Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
             var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
             var post = new Post(author, picture, (PostText)"test post 1");
             using (var session = _testFixture.OpenSession(_output))
@@ -346,7 +346,7 @@ namespace InstaLike.IntegrationTests
         public async Task User_Cannot_Edit_Post_Published_By_Another_User()
         {
             Result editResult;
-            var picture = (Picture) Convert.FromBase64String(_testFixture.GetTestPictureBase64());
+            var picture = (Picture) Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
             var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
             var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
             var post = new Post(author, picture, (PostText)"test post 1");

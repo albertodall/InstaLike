@@ -30,7 +30,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Convert_String_To_Post_Text()
         {
-            var text = "this is my text";
+            const string text = "this is my text";
             var sut = (PostText)text;
 
             sut.Value.Should().Be(text);
@@ -39,7 +39,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Convert_Post_Text_To_String()
         {
-            var text = "this is my text";
+            const string text = "this is my text";
             string sut = PostText.Create(text).Value;
 
             sut.Should().Be(text);

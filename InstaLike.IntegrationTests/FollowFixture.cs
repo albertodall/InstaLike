@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -28,8 +27,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task User_Should_Follow_Another_User()
         {
-            User followerUser = new User((Nickname)"user1", (FullName)"test1 user1", Password.Create("password").Value, (Email)"testuser1@acme.com", "bio1");
-            User followedUser = new User((Nickname)"user2", (FullName)"test2 user2", Password.Create("password").Value, (Email)"testuser2@acme.com", "bio2");
+            var followerUser = new User((Nickname)"user1", (FullName)"test1 user1", Password.Create("password").Value, (Email)"testuser1@acme.com", "bio1");
+            var followedUser = new User((Nickname)"user2", (FullName)"test2 user2", Password.Create("password").Value, (Email)"testuser2@acme.com", "bio2");
             Result followResult;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -50,8 +49,8 @@ namespace InstaLike.IntegrationTests
                 followResult.IsSuccess.Should().BeTrue();
                 using (var session = _testFixture.OpenSession(_output))
                 {
-                    (await session.GetAsync<User>(followerUser.ID)).Followed.Count().Should().Be(1);
-                    (await session.GetAsync<User>(followedUser.ID)).Followers.Count().Should().Be(1);
+                    (await session.GetAsync<User>(followerUser.ID)).Followed.Count.Should().Be(1);
+                    (await session.GetAsync<User>(followedUser.ID)).Followers.Count.Should().Be(1);
                 }
             }
         }
@@ -59,8 +58,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task User_Should_Unfollow_Another_User()
         {
-            User followerUser = new User((Nickname)"user3", (FullName)"test3 user3", Password.Create("password").Value, (Email)"testuser3@acme.com", "bio3");
-            User followedUser = new User((Nickname)"user4", (FullName)"test4 user4", Password.Create("password").Value, (Email)"testuser4@acme.com", "bio4");
+            var followerUser = new User((Nickname)"user3", (FullName)"test3 user3", Password.Create("password").Value, (Email)"testuser3@acme.com", "bio3");
+            var followedUser = new User((Nickname)"user4", (FullName)"test4 user4", Password.Create("password").Value, (Email)"testuser4@acme.com", "bio4");
             Result unfollowResult;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -82,8 +81,8 @@ namespace InstaLike.IntegrationTests
                 unfollowResult.IsSuccess.Should().BeTrue();
                 using (var session = _testFixture.OpenSession(_output))
                 {
-                    (await session.GetAsync<User>(followerUser.ID)).Followed.Count().Should().Be(0);
-                    (await session.GetAsync<User>(followedUser.ID)).Followers.Count().Should().Be(0);
+                    (await session.GetAsync<User>(followerUser.ID)).Followed.Count.Should().Be(0);
+                    (await session.GetAsync<User>(followedUser.ID)).Followers.Count.Should().Be(0);
                 }
             }
         }
@@ -91,8 +90,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Follow_User_Twice()
         {
-            User followerUser = new User((Nickname)"user5", (FullName)"test5 user5", Password.Create("password").Value, (Email)"testuser5@acme.com", "bio5");
-            User followedUser = new User((Nickname)"user6", (FullName)"test6 user6", Password.Create("password").Value, (Email)"testuser6@acme.com", "bio6");
+            var followerUser = new User((Nickname)"user5", (FullName)"test5 user5", Password.Create("password").Value, (Email)"testuser5@acme.com", "bio5");
+            var followedUser = new User((Nickname)"user6", (FullName)"test6 user6", Password.Create("password").Value, (Email)"testuser6@acme.com", "bio6");
             Result followResult;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -105,7 +104,7 @@ namespace InstaLike.IntegrationTests
             using (var session = _testFixture.OpenSession(_output))
             {
                 var handler = new FollowCommandHandler(session, Log.Logger);
-                followResult = await handler.Handle(followCommand, default);
+                await handler.Handle(followCommand, default);
             }
 
             using (var session = _testFixture.OpenSession(_output))
@@ -120,8 +119,8 @@ namespace InstaLike.IntegrationTests
                     .BeFalse($"User [{followedUser.Nickname}] is already followed by user [{followerUser.Nickname}].");
                 using (var session = _testFixture.OpenSession(_output))
                 {
-                    (await session.GetAsync<User>(followerUser.ID)).Followed.Count().Should().Be(1);
-                    (await session.GetAsync<User>(followedUser.ID)).Followers.Count().Should().Be(1);
+                    (await session.GetAsync<User>(followerUser.ID)).Followed.Count.Should().Be(1);
+                    (await session.GetAsync<User>(followedUser.ID)).Followers.Count.Should().Be(1);
                 }
             }
         }
@@ -129,8 +128,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Unfollow_Non_Followed_User()
         {
-            User followerUser = new User((Nickname)"user7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio7");
-            User followedUser = new User((Nickname)"user8", (FullName)"test8 user8", Password.Create("password").Value, (Email)"testuser8@acme.com", "bio8");
+            var followerUser = new User((Nickname)"user7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio7");
+            var followedUser = new User((Nickname)"user8", (FullName)"test8 user8", Password.Create("password").Value, (Email)"testuser8@acme.com", "bio8");
             Result unfollowResult;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -153,8 +152,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task User_Should_Have_One_Follower()
         {
-            User followerUser = new User((Nickname)"user9", (FullName)"test9 user9", Password.Create("password").Value, (Email)"testuser9@acme.com", "bio9");
-            User followedUser = new User((Nickname)"user10", (FullName)"test10 user10", Password.Create("password").Value, (Email)"testuser10@acme.com", "bio10");
+            var followerUser = new User((Nickname)"user9", (FullName)"test9 user9", Password.Create("password").Value, (Email)"testuser9@acme.com", "bio9");
+            var followedUser = new User((Nickname)"user10", (FullName)"test10 user10", Password.Create("password").Value, (Email)"testuser10@acme.com", "bio10");
             FollowModel[] result;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -171,14 +170,14 @@ namespace InstaLike.IntegrationTests
                 result = await sut.Handle(followersQuery, default);
             }
 
-            result.Count().Should().Be(1);
+            result.Length.Should().Be(1);
         }
 
         [Fact]
         public async Task User_Should_Have_Been_Following_One_User()
         {
-            User followerUser = new User((Nickname)"user11", (FullName)"test11 user11", Password.Create("password").Value, (Email)"testuser11@acme.com", "bio11");
-            User followedUser = new User((Nickname)"user12", (FullName)"test12 user12", Password.Create("password").Value, (Email)"testuser12@acme.com", "bio12");
+            var followerUser = new User((Nickname)"user11", (FullName)"test11 user11", Password.Create("password").Value, (Email)"testuser11@acme.com", "bio11");
+            var followedUser = new User((Nickname)"user12", (FullName)"test12 user12", Password.Create("password").Value, (Email)"testuser12@acme.com", "bio12");
             FollowModel[] result;
 
             using (var session = _testFixture.OpenSession(_output))
@@ -195,7 +194,7 @@ namespace InstaLike.IntegrationTests
                 result = await sut.Handle(followingQuery, default);
             }
 
-            result.Count().Should().Be(1);
+            result.Length.Should().Be(1);
         }
     }
 }

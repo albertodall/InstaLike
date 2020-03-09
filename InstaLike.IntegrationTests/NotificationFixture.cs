@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
@@ -26,9 +25,9 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Mark_All_Notifications_Read()
         {
-            int result = 0;
-            User sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-            User recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+            int result;
+            var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
+            var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
             var not1 = new Notification(sender, recipient, "Notification 1");
             var not2 = new Notification(sender, recipient, "Notification 2");
             var not3 = new Notification(sender, recipient, "Notification 3");
@@ -56,9 +55,9 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Count_Unread_Notifications()
         {
-            int result = 0;
-            User sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-            User recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+            int result;
+            var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
+            var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
             var not1 = new Notification(sender, recipient, "Notification 1");
             var not2 = new Notification(sender, recipient, "Notification 2");
             var not3 = new Notification(sender, recipient, "Notification 3");
@@ -88,8 +87,8 @@ namespace InstaLike.IntegrationTests
         public async Task Should_Read_All_Notifications()
         {
             NotificationModel[] result;
-            User sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-            User recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+            var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
+            var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
             var not1 = new Notification(sender, recipient, "Notification 1");
             var not2 = new Notification(sender, recipient, "Notification 2");
             var not3 = new Notification(sender, recipient, "Notification 3");
@@ -112,15 +111,15 @@ namespace InstaLike.IntegrationTests
                 result = await sut.Handle(query, default);
             }
 
-            result.Count().Should().Be(3);
+            result.Length.Should().Be(3);
         }
 
         [Fact]
         public async Task Should_Read_Only_Unread_Notifications()
         {
             NotificationModel[] result;
-            User sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-            User recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+            var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
+            var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
             var not1 = new Notification(sender, recipient, "Notification 1");
             var not2 = new Notification(sender, recipient, "Notification 2");
             var not3 = new Notification(sender, recipient, "Notification 3");
@@ -143,7 +142,7 @@ namespace InstaLike.IntegrationTests
                 result = await sut.Handle(query, default);
             }
 
-            result.Count().Should().Be(2);
+            result.Length.Should().Be(2);
         }
     }
 }
