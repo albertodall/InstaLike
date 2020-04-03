@@ -4,10 +4,9 @@ namespace InstaLike.Core.Domain
 {
     public class Comment : EntityBase<int>
     {
-        protected Comment()
-        { }
+        protected Comment() { }
 
-        public Comment(Post post, User author, CommentText text)
+        public Comment(Post post, User author, CommentText text) : this()
         {
             Post = post;
             Author = author;

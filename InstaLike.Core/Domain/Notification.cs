@@ -4,10 +4,9 @@ namespace InstaLike.Core.Domain
 {
     public class Notification : EntityBase<int>
     {
-        protected Notification()
-        { }
+        protected Notification() { }
 
-        public Notification(User sender, User recipient, string message)
+        public Notification(User sender, User recipient, string message) : this()
         {
             Sender = sender ?? throw new ArgumentNullException(nameof(sender));
             Recipient = recipient ?? throw new ArgumentNullException(nameof(recipient));
@@ -17,11 +16,11 @@ namespace InstaLike.Core.Domain
             NotificationDate = DateTimeOffset.Now;
         }
 
-        public virtual User Sender { get; protected set; }
-        public virtual User Recipient { get; protected set; }
-        public virtual string Message { get; protected set; }
+        public virtual User Sender { get; }
+        public virtual User Recipient { get; }
+        public virtual string Message { get; }
         public virtual bool HasBeenReadByRecipient { get; protected set; }
-        public virtual DateTimeOffset NotificationDate { get; protected set; }
+        public virtual DateTimeOffset NotificationDate { get; }
 
         public virtual void MarkAsRead()
         {

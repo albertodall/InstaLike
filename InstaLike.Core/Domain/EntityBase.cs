@@ -1,8 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
+using NHibernate.Proxy;
 
 namespace InstaLike.Core.Domain
 {
-    public abstract class EntityBase<TId> : IEntity<TId>
+    public abstract class EntityBase<TId>
     {
         private const int HashMultiplier = 29;
 
@@ -11,22 +13,33 @@ namespace InstaLike.Core.Domain
         protected EntityBase() { }
 
         protected EntityBase(TId id)
+            : this()
         {
             ID = id;
         }
 
-        public virtual bool IsTransient()
+        private bool IsTransient()
         {
             return ID == null || ID.Equals(default(TId));
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is IEntity<TId> other)) return false;
+            var other = obj as EntityBase<TId>;
+
+            if (other is null)
+            {
+                return false;
+            }
 
             if (ReferenceEquals(this, other))
             {
                 return true;
+            }
+
+            if (GetUnproxiedType() != other.GetUnproxiedType())
+            {
+                return false;
             }
 
             if (IsTransient() && other.IsTransient())
@@ -37,6 +50,16 @@ namespace InstaLike.Core.Domain
             return ID.Equals(other.ID);
         }
 
+        /// <remarks>
+        /// Small violation of Separation of Concerns here...
+        /// </remarks>
+        private Type GetUnproxiedType()
+        {
+            return GetType().Name.Contains("ProxyForFieldInterceptor") 
+                ? GetType().BaseType 
+                : NHibernateProxyHelper.GetClassWithoutInitializingProxy(this);
+        }
+
         public override int GetHashCode()
         {
             if (IsTransient())
@@ -44,7 +67,7 @@ namespace InstaLike.Core.Domain
                 return RuntimeHelpers.GetHashCode(this);
             }
             
-            return (HashMultiplier * GetType().GetHashCode()) ^ ID.GetHashCode();
+            return (HashMultiplier * GetUnproxiedType().GetHashCode()) ^ ID.GetHashCode();
         }
 
         public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)

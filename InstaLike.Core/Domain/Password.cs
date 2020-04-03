@@ -13,17 +13,16 @@ namespace InstaLike.Core.Domain
         private const byte SaltSize = 16;
         private const byte HashSize = 20;
 
-        public virtual string HashedValue { get; }
+        private string HashedValue { get; }
 
-        protected Password()
-        { }
+        private Password() { }
 
-        private Password(string base64String)
+        private Password(string base64String) : this()
         {
             HashedValue = base64String;
         }
 
-        private Password(byte[] hash)
+        private Password(byte[] hash) : this()
         {
             HashedValue = Convert.ToBase64String(hash);
         }

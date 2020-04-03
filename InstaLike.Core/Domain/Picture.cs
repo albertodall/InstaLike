@@ -15,11 +15,11 @@ namespace InstaLike.Core.Domain
         private static readonly string PicturePlaceholderBase64 = Convert.ToBase64String(Resources.PicturePlaceholder);
         private static readonly string MissingPictureBase64 = Convert.ToBase64String(Resources.MissingPicture);
 
-        public virtual Guid Identifier { get; }
+        public Guid Identifier { get; }
 
-        public virtual byte[] RawBytes { get; }
+        public byte[] RawBytes { get; }
 
-        public virtual long Size => RawBytes.LongLength;
+        public long Size => RawBytes.LongLength;
 
         public static Picture DefaultProfilePicture =>
             Create(Convert.FromBase64String(DefaultProfilePictureBase64), new Guid(DefaultProfilePictureGuid))
@@ -33,10 +33,9 @@ namespace InstaLike.Core.Domain
             Create(Convert.FromBase64String(MissingPictureBase64), new Guid(MissingPictureGuid))
             .Value;
 
-        protected Picture()
-        { }
+        private Picture() { }
 
-        private Picture(byte[] rawBytes, Guid identifier)
+        private Picture(byte[] rawBytes, Guid identifier) : this()
         {
             RawBytes = rawBytes;
             Identifier = identifier;

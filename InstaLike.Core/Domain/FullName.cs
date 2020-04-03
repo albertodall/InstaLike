@@ -9,9 +9,9 @@ namespace InstaLike.Core.Domain
         public string Name { get; }
         public string Surname { get; }
 
-        protected FullName() { }
+        private FullName() { }
 
-        private FullName(string name, string surname)
+        private FullName(string name, string surname) : this()
         {
             Name = name;
             Surname = surname;

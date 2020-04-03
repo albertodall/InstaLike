@@ -6,11 +6,11 @@ namespace InstaLike.Core.Domain
 {
     public class Email : ValueObject
     {
-        public virtual string Value { get; }
+        public string Value { get; }
 
-        protected Email() { }
+        private Email() { }
 
-        private Email(string email)
+        private Email(string email) : this()
         {
             Value = email;
         }

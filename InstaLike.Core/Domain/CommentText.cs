@@ -7,9 +7,9 @@ namespace InstaLike.Core.Domain
     {
         public string Value { get; }
 
-        protected CommentText() { }
+        private CommentText() { }
 
-        private CommentText(string text)
+        private CommentText(string text) : this()
         {
             Value = text;
         }

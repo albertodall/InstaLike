@@ -53,7 +53,7 @@ namespace InstaLike.Web
 
             services.ConfigurePipeline();
 
-            services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IEntity<>).Assembly);
+            services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly);
 
             if (IsOnPremDeployment())
             {

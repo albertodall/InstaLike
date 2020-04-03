@@ -16,7 +16,7 @@ namespace InstaLike.Core.Domain
             _likes = new List<Like>();
         }
 
-        public Post(User author, Picture picture, PostText text)
+        public Post(User author, Picture picture, PostText text) 
             : this()
         {
             Author = author;

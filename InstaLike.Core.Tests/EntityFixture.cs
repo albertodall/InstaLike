@@ -29,12 +29,6 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Entity_With_No_ID_Should_Be_Transient()
-        {
-            new TestEntity().IsTransient().Should().BeTrue();
-        }
-
-        [Fact]
         public void Transient_Entities_Of_Same_Type_Should_Be_Not_Be_Equal()
         {
             new TestEntity().Should().NotBe(new TestEntity());

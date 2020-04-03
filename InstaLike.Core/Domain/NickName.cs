@@ -7,10 +7,9 @@ namespace InstaLike.Core.Domain
     {
         public string Value { get; }
 
-        protected Nickname()
-        { }
+        private Nickname() { }
 
-        private Nickname(string nickname)
+        private Nickname(string nickname) : this()
         {
             Value = nickname;
         }

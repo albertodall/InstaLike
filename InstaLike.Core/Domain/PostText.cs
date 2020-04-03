@@ -7,10 +7,9 @@ namespace InstaLike.Core.Domain
     {
         public string Value { get; }
 
-        protected PostText()
-        { }
+        private PostText() { }
 
-        private PostText(string text)
+        private PostText(string text) : this()
         {
             Value = text;
         }

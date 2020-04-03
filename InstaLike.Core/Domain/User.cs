@@ -16,7 +16,7 @@ namespace InstaLike.Core.Domain
             _followed = new List<Follow>();
         }
 
-        public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
+        public User(Nickname nickname, FullName fullName, Password password, Email email, string biography) 
             : this()
         {
             _nickname = nickname ?? throw new ArgumentNullException(nameof(nickname));
