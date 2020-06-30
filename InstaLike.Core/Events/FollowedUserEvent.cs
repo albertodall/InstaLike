@@ -4,7 +4,7 @@ namespace InstaLike.Core.Events
 {
     public class FollowedUserEvent : INotification
     {
-        public string SenderNickname { get; set; }
+        public string SenderNickname { get; }
         public string SenderProfileUrl { get; }
         public string FollowedNickname { get; }
 

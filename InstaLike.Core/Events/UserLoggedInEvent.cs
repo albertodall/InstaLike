@@ -4,9 +4,9 @@ namespace InstaLike.Core.Events
 {
     public sealed class UserLoggedInEvent : INotification
     {
-        public int UserID { get; private set; }
+        public int UserID { get; }
 
-        public string Nickname { get; private set; }
+        public string Nickname { get; }
 
         public UserLoggedInEvent(int userId, string nickname)
         {
