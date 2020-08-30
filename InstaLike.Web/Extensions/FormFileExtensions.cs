@@ -20,7 +20,7 @@ namespace InstaLike.Web.Extensions
         private static async Task<byte[]> ToByteArrayInternalAsync(this IFormFile formFile)
         {
             byte[] result;
-            using (var stream = new MemoryStream())
+            await using (var stream = new MemoryStream())
             {
                 await formFile.CopyToAsync(stream);
                 result = stream.ToArray();

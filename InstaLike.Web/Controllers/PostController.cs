@@ -160,7 +160,7 @@ namespace InstaLike.Web.Controllers
             {
                 Result<string[]> taggingResult;
 
-                using (var pictureStream = await Request.Form.Files[0].ToStreamAsync())
+                await using (var pictureStream = await Request.Form.Files[0].ToStreamAsync())
                 {
                     taggingResult = await _imageRecognition.AutoTagImage(pictureStream);
                 }

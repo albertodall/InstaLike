@@ -8,7 +8,7 @@ namespace InstaLike.Web.Extensions
         private const string GuidRegex =
             @"([0-9a-fA-F]{8})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{4})\-([0-9a-fA-F]{12})";
 
-        public static bool ContainsGuid(this string stringValue) => Regex.IsMatch(stringValue, GuidRegex);
+        private static bool ContainsGuid(this string stringValue) => Regex.IsMatch(stringValue, GuidRegex);
 
         public static string ExtractGuid(this string stringValue)
         {

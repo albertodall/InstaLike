@@ -61,8 +61,10 @@ namespace InstaLike.Web.Data
         /// Iterates though properties that have a target type different from the source type,
         /// and tries to cast the source type's value to the target property's type.
         /// </summary>
-        private static void MapPropertiesWithDifferentTypes(object[] tuple, List<string> aliasesToCast, object result, IList<string> aliasesList)
+        private static void MapPropertiesWithDifferentTypes(IReadOnlyList<object> tuple, IEnumerable<string> aliasesToCast, object result, IList<string> aliasesList)
         {
+            const BindingFlags bindingAttr = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
+
             if (result is TTarget targetInstance)
             {
                 foreach (var aliasToCast in aliasesToCast)
@@ -71,10 +73,7 @@ namespace InstaLike.Web.Data
                     var aliasValue = tuple[aliasToCastIndex];
                     if (aliasValue != null)
                     {
-                        var bindingAttr = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
-                        var propertyToCast = targetInstance.GetType()
-                            .GetProperty(aliasToCast, bindingAttr);
-
+                        var propertyToCast = targetInstance.GetType().GetProperty(aliasToCast, bindingAttr);
                         propertyToCast?.SetValue(targetInstance, CastValueToDesiredType(propertyToCast.PropertyType, aliasValue));
                     }
                 }

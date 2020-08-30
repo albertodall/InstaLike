@@ -13,10 +13,8 @@ namespace InstaLike.Web.Extensions
             {
                 return date.Humanize(true, DateTimeOffset.UtcNow.DateTime, CultureInfo.CurrentUICulture);
             }
-            else
-            {
-                return date.ToString("dddd dd/MM/yyyy", CultureInfo.CurrentUICulture);
-            }
+
+            return date.ToString("dddd dd/MM/yyyy", CultureInfo.CurrentUICulture);
         }
     }
 }

@@ -164,10 +164,8 @@ namespace InstaLike.Web.Controllers
                 {
                     return RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    ModelState.AddModelError("", processCommandResult.Error);
-                }
+
+                ModelState.AddModelError("", processCommandResult.Error);
             }
 
             return View(newUser);
@@ -229,9 +227,9 @@ namespace InstaLike.Web.Controllers
         /// </summary>
         /// <param name="user">Authenticated user.</param>
         /// <returns>The list of claims.</returns>
-        private static List<Claim> GetUserClaims(User user) 
+        private static IEnumerable<Claim> GetUserClaims(User user) 
         {
-            return new List<Claim>()
+            return new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(), ClaimValueTypes.Integer32),
                 new Claim(ClaimTypes.Name, user.Nickname, ClaimValueTypes.String),
