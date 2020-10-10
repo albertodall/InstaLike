@@ -33,7 +33,7 @@ namespace InstaLike.Web.CommandHandlers
 
                 return await follower.Follow(followedUser)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
-                        .Tap(_ =>
+                        .Tap(() =>
                             _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
                                 request.FollowerID,
                                 request.FollowedNickname,

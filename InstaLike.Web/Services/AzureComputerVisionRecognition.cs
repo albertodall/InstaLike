@@ -14,7 +14,7 @@ namespace InstaLike.Web.Services
         private readonly string _apiKey;
         private readonly string _endpointUrl;
 
-        private static readonly List<VisualFeatureTypes> Features = new List<VisualFeatureTypes>()
+        private static readonly List<VisualFeatureTypes?> Features = new List<VisualFeatureTypes?>()
         {
             VisualFeatureTypes.Categories,
             VisualFeatureTypes.Description,

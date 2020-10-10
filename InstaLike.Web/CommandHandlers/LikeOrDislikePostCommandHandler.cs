@@ -31,7 +31,7 @@ namespace InstaLike.Web.CommandHandlers
 
                 return await user.PutLikeTo(post)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
-                        .Tap(_ => _logger
+                        .Tap(() => _logger
                             .ForContext<LikePostCommand>()
                             .Information("User [{Nickname}({UserID})] put a 'Like' on post {PostID}",
                                 user.Nickname,
@@ -60,7 +60,7 @@ namespace InstaLike.Web.CommandHandlers
 
                 return await user.RemoveLikeFrom(post)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
-                        .Tap(_ => _logger
+                        .Tap(() => _logger
                             .ForContext<DislikePostCommand>()
                             .Information("User [{Nickname}({UserID})] removed a 'Like' on post {PostID}",
                                 user.Nickname,
