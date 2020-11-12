@@ -15,7 +15,7 @@ namespace InstaLike.IntegrationTests
     {
         public DatabaseFixture()
         {
-            var databaseFileName = $"InstaLikeTestDb-{Guid.NewGuid().ToString()}.sqlite";
+            var databaseFileName = $"InstaLikeTestDb-{Guid.NewGuid()}.sqlite";
 
             SessionFactory = Fluently.Configure()
                 .Database(

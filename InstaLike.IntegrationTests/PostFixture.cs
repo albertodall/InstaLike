@@ -202,7 +202,7 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
-        public async Task Author_Cannot_Put_Likes_On_His_Own_Posts()
+        public async Task Author_Cannot_Put_Likes_On_Their_Own_Posts()
         {
             Result likeResult;
             var author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");           

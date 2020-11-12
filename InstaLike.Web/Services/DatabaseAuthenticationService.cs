@@ -30,7 +30,7 @@ namespace InstaLike.Web.Services
             userLoggingIn = await authQuery.SingleOrDefaultAsync();
 
             return userLoggingIn
-                .ToResult($"Username or password are not valid.")
+                .ToResult("Username or password are not valid.")
                 .Ensure(user => user.Password.HashMatches(password), "Username or password are not valid.")
                 .Tap(user => _logger.Debug("User {userName} authenticated correctly.", userName))
                 .OnFailure(user => _logger.Debug("User {userName} did not authenticate correctly.", userName));

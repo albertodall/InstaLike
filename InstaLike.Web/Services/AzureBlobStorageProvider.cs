@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Extensions;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
 
 namespace InstaLike.Web.Services
 {
@@ -14,7 +14,7 @@ namespace InstaLike.Web.Services
     /// </summary>
     internal class AzureBlobStorageProvider : IExternalStorageProvider
     {
-        private readonly CloudBlobClient _client;
+        private readonly string _storageConnectionString;
 
         public AzureBlobStorageProvider(string storageConnectionString)
         {
@@ -23,13 +23,12 @@ namespace InstaLike.Web.Services
                 throw new ArgumentNullException(nameof(storageConnectionString));
             }
 
-            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-            _client = storageAccount.CreateCloudBlobClient();
+            _storageConnectionString = storageConnectionString;
         }
 
         public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
-            var downloadBlobResult = await LoadPictureFromContainerAsync(blobFileName, containerName);
+            var downloadBlobResult = await DownloadPictureFromContainerAsync(blobFileName, containerName);
             if (downloadBlobResult.IsFailure || downloadBlobResult.Value == Array.Empty<byte>())
             {
                 return Picture.MissingPicture;
@@ -43,13 +42,13 @@ namespace InstaLike.Web.Services
             await SavePictureToContainerAsync(picture.RawBytes, $"{picture.Identifier}.jpg", containerName);
         }
 
-        private async Task<Result<byte[]>> LoadPictureFromContainerAsync(string blobName, string containerName)
+        private async Task<Result<byte[]>> DownloadPictureFromContainerAsync(string blobName, string containerName)
         {
-            var container = _client.GetContainerReference(containerName);
-
+            var container = new BlobContainerClient(_storageConnectionString, containerName);
+            
             await EnsureBlobContainerExists(container);
 
-            var blob = container.GetBlobReference(blobName);
+            var blob = container.GetBlobClient(blobName);
             if (!await blob.ExistsAsync())
             {
                 return Result.Failure<byte[]>($"Blob {blobName} does not exist in container {containerName}.");
@@ -57,27 +56,29 @@ namespace InstaLike.Web.Services
 
             await using (var downloadStream = new MemoryStream())
             {
-                await blob.DownloadToStreamAsync(downloadStream);
+                await blob.DownloadToAsync(downloadStream);
                 return Result.Success(downloadStream.ToArray());
             }
         }
 
         private async Task SavePictureToContainerAsync(byte[] byteArray, string blobName, string containerName)
         {
-            var container = _client.GetContainerReference(containerName);
+            var container = new BlobContainerClient(_storageConnectionString, containerName);
 
             await EnsureBlobContainerExists(container);
 
-            var blob = container.GetBlockBlobReference(blobName);
-            blob.Properties.ContentType = "image/jpeg";
-            await blob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
+            var blob = container.GetBlobClient(blobName);
+            await using (var stream = new MemoryStream(byteArray, false))
+            {
+                await blob.UploadAsync(stream, new BlobHttpHeaders { ContentType = "image/jpg" });
+            }
         }
 
-        private static async Task EnsureBlobContainerExists(CloudBlobContainer container)
+        private static async Task EnsureBlobContainerExists(BlobContainerClient container)
         {
             if (!await container.ExistsAsync())
             {
-                throw new StorageException($"Container {container.Name} does not exist.");
+                throw new InvalidOperationException($"Container {container.Name} does not exist.");
             }
         }
     }

@@ -56,15 +56,12 @@ namespace InstaLike.IntegrationTests
         {
             var dateTimeOffset = (DateTimeOffset)component;
 
-            switch (property)
+            return property switch
             {
-                case 0:
-                    return dateTimeOffset.UtcTicks;
-                case 1:
-                    return dateTimeOffset.Offset;
-                default:
-                    throw new InvalidOperationException("Property is invalid.");
-            }
+                0 => dateTimeOffset.UtcTicks,
+                1 => dateTimeOffset.Offset,
+                _ => throw new InvalidOperationException("Property is invalid.")
+            };
         }
 
         public void SetPropertyValue(object component, int property, object value)
