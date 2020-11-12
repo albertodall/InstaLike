@@ -1,0 +1,94 @@
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - azure-pipelines.yml
+      - README.md
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  databaseMigrationsProject: '**/InstaLike.Database.csproj'
+  webApplicationProject: '**/InstaLike.Web.csproj'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+  - stage: Create_Artifacts
+    displayName: 'Build, test and create artifacts'
+    jobs:
+      - job: BuildSolution
+        displayName: 'Build InstaLike Solution'
+        steps:
+          - task: SonarCloudPrepare@1
+            displayName: 'Prepare SonarCloud Analysis'
+            inputs:
+              SonarCloud: $(SonarCloudServiceConnectionName)
+              organization: $(SonarCloudOrganizationName)
+              scannerMode: 'MSBuild'
+              projectKey: $(sonarCloudProjectKey)
+
+          - task: UseDotNet@2
+            displayName: 'Install .NET Core SDK 3.1.x'
+            inputs:
+              packageType: 'sdk'
+              version: '3.1.x'
+          
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet Packages'
+            inputs:
+              command: 'restore'
+              projects: '$(solution)'
+              feedsToUse: 'select'
+          
+          - task: DotNetCoreCLI@2
+            displayName: 'Build solution'
+            inputs:
+              command: 'build'
+              projects: '$(solution)'
+              arguments: '--no-restore --configuration $(buildConfiguration)'
+            
+          - task: DotNetCoreCLI@2
+            displayName: 'Run all tests'
+            inputs:
+              command: 'test'
+              projects: '$(solution)'
+              arguments: '--no-restore --no-build --configuration $(buildConfiguration)'
+            
+          - task: SonarCloudAnalyze@1
+            displayName: 'Run SonarCloud Code Analysis'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Web Application'
+            inputs:
+              command: 'publish'
+              projects: '$(webApplicationProject)'
+              publishWebProjects: true
+              arguments: '--no-restore --no-build --configuration $(buildConfiguration) --output $(build.artifactStagingDirectory)/InstaLikeWebApplication'
+              modifyOutputPath: false
+          
+          - task: DotNetCoreCLI@2
+            displayName: 'Build Database Migrations Library'
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: '$(databaseMigrationsProject)'
+              arguments: '--no-restore --no-build --configuration $(buildConfiguration) --output $(build.artifactStagingDirectory)/InstaLikeDbMigrations'
+              zipAfterPublish: false
+              modifyOutputPath: false
+            
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Web Application Artifact'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/InstaLikeWebApplication'
+              artifact: 'InstaLikeWebApplication'
+          
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Database Migrations Artifact'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/InstaLikeDbMigrations'
+              artifact: 'InstaLikeDbMigrations'
