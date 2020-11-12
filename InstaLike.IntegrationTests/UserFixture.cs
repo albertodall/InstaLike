@@ -5,7 +5,6 @@ using InstaLike.Web.Data.Query;
 using InstaLike.Web.Models;
 using Serilog;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;

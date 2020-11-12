@@ -53,6 +53,7 @@ namespace InstaLike.Web.Data.Types
             {
                 return picture.RawBytes;
             }
+
             return picture.Identifier;
         }
 
@@ -72,7 +73,7 @@ namespace InstaLike.Web.Data.Types
             Picture result;
 
             // Read the picture Guid in the database, actual link between database and external storage.
-            var pictureGuid = dr.GetFieldValue<Guid>(dr.GetOrdinal(guidFieldName));
+            var pictureGuid = dr.GetGuid(dr.GetOrdinal(guidFieldName));
             var provider = GetExternalStorageProvider(session);
             if (provider.HasNoValue)
             {
