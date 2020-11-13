@@ -120,9 +120,9 @@ stages:
             displayName: 'Download Database Migrations Library'
             inputs:
               buildType: 'current'
-              itemPattern: '*.*'
+              artifactName: 'InstaLikeDbMigrations'
+              itemPattern: '**/*'
               targetPath: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
-              artifactName: InstaLikeDbMigrations
           
           - task: DotNetCoreCLI@2
             displayName: 'Apply Database Migrations'
