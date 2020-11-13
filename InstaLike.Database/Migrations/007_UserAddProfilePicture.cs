@@ -16,4 +16,19 @@ namespace Instalike.Database.Migrations
             Execute.Script(@"Scripts\UserRemoveProfilePicture_OnPrem.sql");
         }
     }
+
+    [Tags("SqlAzure")]
+    [Migration(7, "Add profile picture support for 'User' table")]
+    public class UserAddProfilePictureAzureSql : Migration
+    {
+        public override void Up()
+        {
+            Execute.Script(@"Scripts\UserAddProfilePicture_SqlAzure.sql");
+        }
+
+        public override void Down()
+        {
+            Execute.Script(@"Scripts\UserRemoveProfilePicture_SqlAzure.sql");
+        }
+    }
 }

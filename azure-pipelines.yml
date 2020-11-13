@@ -129,4 +129,5 @@ stages:
             inputs:
               command: 'custom'
               custom: 'fm'
-              arguments: 'migrate --processor SqlServer2016 --connection "$(DatabaseConnectionString)" --tag SqlAzure --assembly $(Pipeline.Workspace)/InstaLikeDbMigrations/Instalike.Database.dll up'
+              arguments: 'migrate --processor SqlServer2016 --connection "$(DatabaseConnectionString)" --tag SqlAzure --assembly Instalike.Database.dll up'
+              workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
