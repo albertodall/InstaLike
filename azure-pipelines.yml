@@ -57,7 +57,7 @@ stages:
             inputs:
               command: 'test'
               projects: '$(solution)'
-              arguments: '--no-restore --no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=\"opencover,lcov\" /p:CoverletOutput=../lcov'
+              arguments: '--no-restore --no-build --configuration $(buildConfiguration)'
             
           - task: SonarCloudAnalyze@1
             displayName: 'Run SonarCloud Code Analysis'
@@ -92,3 +92,41 @@ stages:
             inputs:
               targetPath: '$(Build.ArtifactStagingDirectory)/InstaLikeDbMigrations'
               artifact: 'InstaLikeDbMigrations'
+
+  - stage: ApplyDatabaseMigrations
+    displayName: 'Apply database migrations'
+    dependsOn: Create_Artifacts
+    condition: succeeded()
+    jobs:
+      - job: ApplyMigrations
+        displayName: 'Apply database migrations'
+        steps:
+          - checkout: none
+
+          - task: UseDotNet@2
+            displayName: 'Install .NET Core SDK 3.1.x'
+            inputs:
+              packageType: 'sdk'
+              version: '2.1.x'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Install FluentMigrator Command Line Tool'
+            inputs:
+              command: 'custom'
+              custom: 'tool'
+              arguments: 'install -g FluentMigrator.DotNet.Cli'
+          
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Database Migrations Library'
+            inputs:
+              buildType: 'current'
+              itemPattern: '*.*'
+              targetPath: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+              artifactName: InstaLikeDbMigrations
+          
+          - task: DotNetCoreCLI@2
+            displayName: 'Apply Database Migrations'
+            inputs:
+              command: 'custom'
+              custom: 'fm'
+              arguments: 'migrate --processor SqlServer2016 --connection "$(DatabaseConnectionString)" --tag SqlAzure --assembly $(Pipeline.Workspace)/InstaLikeDbMigrations/Instalike.Database.dll up'
