@@ -5,6 +5,7 @@ using InstaLike.Core.Services;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Infrastructure;
 using MediatR;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ namespace InstaLike.Web
 {
     public class Startup
     {
-        private const string LogEntryTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
+        internal const string LogEntryTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
 
         public Startup(IConfiguration configuration)
         {
@@ -39,14 +40,15 @@ namespace InstaLike.Web
             var loggerConfig = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .Enrich.WithMachineName()
+                .Enrich.WithProcessId()
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionDetails()
-                .WriteTo.Console(outputTemplate: LogEntryTemplate)
-                .WriteTo.File(
-                    Configuration["Logging:LogFile"],
-                    outputTemplate: LogEntryTemplate,
-                    flushToDiskInterval: TimeSpan.FromSeconds(Configuration.GetValue<int>("Logging:FlushToDiskIntervalSeconds")));
-
+                .WriteTo.Console(outputTemplate: LogEntryTemplate);
+            
+            loggerConfig.EnableFileLoggingIfConfigured(Configuration);
+            loggerConfig.EnableAppInsightsIfConfigured(Configuration);
+            
             services.ConfigureLogging(loggerConfig);
 
             services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
