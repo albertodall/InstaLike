@@ -16,6 +16,7 @@ variables:
   webApplicationProject: '**/InstaLike.Web.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  azureSubscriptionName: 'AzureDevSubscription'
 
 stages:
   - stage: Create_Artifacts
@@ -93,7 +94,7 @@ stages:
               targetPath: '$(Build.ArtifactStagingDirectory)/InstaLikeDbMigrations'
               artifact: 'InstaLikeDbMigrations'
 
-  - stage: ApplyDatabaseMigrations
+  - stage: Apply_Database_Migrations
     displayName: 'Apply database migrations'
     dependsOn: Create_Artifacts
     condition: succeeded()
@@ -117,7 +118,7 @@ stages:
               arguments: 'install -g FluentMigrator.DotNet.Cli'
           
           - task: DownloadPipelineArtifact@2
-            displayName: 'Download Database Migrations Library'
+            displayName: 'Get Database Migrations Library'
             inputs:
               buildType: 'current'
               artifactName: 'InstaLikeDbMigrations'
@@ -129,5 +130,44 @@ stages:
             inputs:
               command: 'custom'
               custom: 'fm'
-              arguments: 'migrate --processor SqlServer2016 --connection "$(DatabaseConnectionString)" --tag SqlAzure --assembly Instalike.Database.dll up'
+              arguments: 'migrate --processor SqlServer2016 --connection "$(Dev-DatabaseConnectionString)" --tag SqlAzure --assembly Instalike.Database.dll up'
               workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+            
+  - stage: Deploy_Web_App
+    dependsOn: Apply_Database_Migrations
+    condition: succeeded()
+    jobs:
+      - deployment: Deploy
+        displayName: 'Deploy Web Application in Dev Environment'
+        environment: 'Instalike-Dev'
+        
+        variables:
+          DeploymentType: 'AzureCloud'
+          ConnectionStrings.DefaultDatabase: $(Dev-DatabaseConnectionString)
+          ExternalStorage.AzureBlobStorage.StorageConnectionString: $(Dev-AzureBlob-ConnectionString)
+          ImageAnalysis.AzureComputerVision.ApiKey: $(Dev-AzureCV-ApiKey)
+          ImageAnalysis.AzureComputerVision.ApiUrl: $(Dev-AzureCV-ApiUrl)
+          Logging.AppInsightsInstrumentationKey: $(Dev-AIKey)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - checkout: none
+
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Get Web Application Binaries'
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'InstaLikeWebApplication'
+                  itemPattern: '**/*'
+                  targetPath: '$(Pipeline.Workspace)/InstaLikeWebApplication'
+          
+              - task: AzureWebApp@1
+                displayName: 'Deploy Web Application to Azure AppService'
+                inputs:
+                  azureSubscription: $(azureSubscriptionName)
+                  appType: 'webAppLinux'
+                  appName: 'InstaLike-WebApp'
+                  package: '$(Pipeline.Workspace)/InstaLikeWebApplication/*.zip'
+                  runtimeStack: 'DOTNETCORE|3.1'
