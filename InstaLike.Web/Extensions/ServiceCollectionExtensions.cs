@@ -8,12 +8,16 @@ using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Security;
 using InstaLike.Web.Services;
 using MediatR;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
 using Serilog;
+using Serilog.Events;
+using Serilog.Exceptions;
 
 namespace InstaLike.Web.Extensions
 {
@@ -89,11 +93,51 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureLogging(this IServiceCollection services, LoggerConfiguration config)
+        public static IServiceCollection ConfigureLogging(this IServiceCollection services, IConfiguration config)
         {
-            Log.Logger = config.CreateLogger();
+            const string logEntryTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
+
+            var loggerConfig = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .Enrich.WithMachineName()
+                .Enrich.WithProcessId()
+                .Enrich.FromLogContext()
+                .Enrich.WithExceptionDetails()
+                .WriteTo.Console(outputTemplate: logEntryTemplate);
+
+            var appInsightsInstumentationKey = config.GetValue<string>("Logging:AppInsightsInstrumentationKey");
+            if (!string.IsNullOrEmpty(appInsightsInstumentationKey))
+            {
+                var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+                telemetryConfiguration.InstrumentationKey = appInsightsInstumentationKey;
+                loggerConfig.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
+            }
+
+            var logFileName = config.GetValue<string>("Logging:LogFile");
+            if (!string.IsNullOrEmpty(logFileName))
+            {
+                var flushInterval = config.GetValue<int>("Logging:FlushToDiskIntervalSeconds");
+                loggerConfig.WriteTo.File(
+                    logFileName,
+                    outputTemplate: logEntryTemplate,
+                    flushToDiskInterval: TimeSpan.FromSeconds(flushInterval));
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
             services.AddSingleton(Log.Logger);
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, IConfiguration configuration)
+        {
+            var appInsightsInstumentationKey = configuration.GetValue<string>("Logging:AppInsightsInstrumentationKey");
+            if (!string.IsNullOrEmpty(appInsightsInstumentationKey))
+            {
+                services.AddApplicationInsightsTelemetry(appInsightsInstumentationKey);
+            }
 
             return services;
         }

@@ -10,16 +10,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
-using Serilog.Events;
-using Serilog.Exceptions;
 
 namespace InstaLike.Web
 {
     public class Startup
     {
-        internal const string LogEntryTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -35,19 +30,10 @@ namespace InstaLike.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            var loggerConfig = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .Enrich.WithMachineName()
-                .Enrich.WithProcessId()
-                .Enrich.FromLogContext()
-                .Enrich.WithExceptionDetails()
-                .WriteTo.Console(outputTemplate: LogEntryTemplate);
             
-            loggerConfig.EnableFileLoggingIfConfigured(Configuration);
-            loggerConfig.EnableAppInsightsIfConfigured(Configuration);
-            
-            services.ConfigureLogging(loggerConfig);
+            services.ConfigureLogging(Configuration);
+
+            services.ConfigureTelemetry(Configuration);
 
             services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
 
