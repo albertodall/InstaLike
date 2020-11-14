@@ -9,7 +9,7 @@ namespace Instalike.Database.Migrations
         public override void Up()
         {
             Create.Table("Like").InSchema("dbo")
-               .WithColumn("ID").AsInt32().Identity(1, 1);
+                .WithColumn("ID").AsInt32().Identity(1, 1);
 
             Create.Column("PostID")
                 .OnTable("Like").InSchema("dbo")
