@@ -94,51 +94,48 @@ stages:
               targetPath: '$(Build.ArtifactStagingDirectory)/InstaLikeDbMigrations'
               artifact: 'InstaLikeDbMigrations'
 
-  - stage: Apply_Database_Migrations
-    displayName: 'Apply database migrations'
-    dependsOn: Create_Artifacts
+  - stage: Deploy_Dev_Env
+    displayName: 'Deploy in Dev Environment'
     condition: succeeded()
     jobs:
-      - job: ApplyMigrations
-        displayName: 'Apply database migrations'
-        steps:
-          - checkout: none
+      - deployment: DeployDatabaseMigrations
+        displayName: 'Deploy Database Migrations'
+        environment: 'Instalike-Dev'
+        strategy:
+         runOnce:
+           deploy:
+             steps:
+               - task: UseDotNet@2
+                 displayName: 'Install .NET Core SDK 3.1.x'
+                 inputs:
+                   packageType: 'sdk'
+                   version: '2.1.x'
 
-          - task: UseDotNet@2
-            displayName: 'Install .NET Core SDK 3.1.x'
-            inputs:
-              packageType: 'sdk'
-              version: '2.1.x'
+               - task: DotNetCoreCLI@2
+                 displayName: 'Install FluentMigrator Command Line Tool'
+                 inputs:
+                   command: 'custom'
+                   custom: 'tool'
+                   arguments: 'install -g FluentMigrator.DotNet.Cli'
+              
+               - task: DownloadPipelineArtifact@2
+                 displayName: 'Get Database Migrations Library'
+                 inputs:
+                   buildType: 'current'
+                   artifactName: 'InstaLikeDbMigrations'
+                   itemPattern: '**/*'
+                   targetPath: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+              
+               - task: DotNetCoreCLI@2
+                 displayName: 'Apply Database Migrations'
+                 inputs:
+                   command: 'custom'
+                   custom: 'fm'
+                   arguments: 'migrate --processor SqlServer2016 --connection "$(Dev-DatabaseConnectionString)" --tag SqlAzure --assembly Instalike.Database.dll up'
+                   workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
 
-          - task: DotNetCoreCLI@2
-            displayName: 'Install FluentMigrator Command Line Tool'
-            inputs:
-              command: 'custom'
-              custom: 'tool'
-              arguments: 'install -g FluentMigrator.DotNet.Cli'
-          
-          - task: DownloadPipelineArtifact@2
-            displayName: 'Get Database Migrations Library'
-            inputs:
-              buildType: 'current'
-              artifactName: 'InstaLikeDbMigrations'
-              itemPattern: '**/*'
-              targetPath: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
-          
-          - task: DotNetCoreCLI@2
-            displayName: 'Apply Database Migrations'
-            inputs:
-              command: 'custom'
-              custom: 'fm'
-              arguments: 'migrate --processor SqlServer2016 --connection "$(Dev-DatabaseConnectionString)" --tag SqlAzure --assembly Instalike.Database.dll up'
-              workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
-            
-  - stage: Deploy_Web_App
-    dependsOn: Apply_Database_Migrations
-    condition: succeeded()
-    jobs:
-      - deployment: Deploy
-        displayName: 'Deploy Web Application in Dev Environment'
+      - deployment: DeployWebApp
+        displayName: 'Deploy Web Application'
         environment: 'Instalike-Dev'
         
         variables:
