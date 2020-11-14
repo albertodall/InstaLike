@@ -12,3 +12,7 @@ ALTER TABLE [dbo].[Post]
         [PostGuid] ASC
     ) ON [PRIMARY]
 GO
+
+ALTER TABLE [dbo].[Post]
+    ADD [Picture] [varbinary](max)
+GO

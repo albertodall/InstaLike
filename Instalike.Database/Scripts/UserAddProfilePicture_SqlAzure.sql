@@ -12,3 +12,7 @@ ALTER TABLE [dbo].[User]
         [ProfilePictureGuid] ASC
     ) ON [PRIMARY]
 GO
+
+ALTER TABLE [dbo].[User]
+    ADD [ProfilePicture] [varbinary](max)
+GO

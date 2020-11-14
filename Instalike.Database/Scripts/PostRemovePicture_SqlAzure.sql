@@ -9,3 +9,7 @@ GO
 ALTER TABLE [dbo].[Post] 
 	DROP COLUMN [PostGuid] 
 GO
+
+ALTER TABLE [dbo].[Post] 
+	DROP COLUMN [Picture] 
+GO

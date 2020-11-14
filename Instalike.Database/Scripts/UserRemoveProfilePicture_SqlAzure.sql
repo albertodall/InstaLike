@@ -9,3 +9,7 @@ GO
 ALTER TABLE [dbo].[User]
 	DROP COLUMN [ProfilePictureGuid] 
 GO
+
+ALTER TABLE [dbo].[User]
+	DROP COLUMN [ProfilePicture] 
+GO

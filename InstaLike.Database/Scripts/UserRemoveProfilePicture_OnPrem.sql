@@ -3,7 +3,7 @@
 GO
 
 ALTER TABLE [dbo].[User]
-DROP CONSTRAINT [UK_User_ProfilePictureGuid]
+	DROP CONSTRAINT [UK_User_ProfilePictureGuid]
 GO
 
 ALTER TABLE [dbo].[User]
