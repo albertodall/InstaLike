@@ -30,15 +30,14 @@ namespace InstaLike.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            
-            services.ConfigureLogging(Configuration);
+            services.AddHttpContextAccessor();
 
+            services.ConfigureLogging(Configuration);
             services.ConfigureTelemetry(Configuration);
 
             services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
 
             services.ConfigurePipeline();
-
             services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly);
 
             if (IsOnPremDeployment())

@@ -26,7 +26,10 @@ namespace InstaLike.Web.CommandHandlers
             using (var tx = _session.BeginTransaction())
             {
                 var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-                var postToEdit = await _session.LoadAsync<Post>(request.PostID, cancellationToken);
+                var postToEdit = await _session.QueryOver<Post>()
+                    .Fetch(SelectMode.ChildFetch, p => p.Author)
+                    .Where(p => p.ID == request.PostID)
+                    .SingleOrDefaultAsync(cancellationToken);
 
                 if (!postToEdit.CanBeEditedBy(editor))
                 {
