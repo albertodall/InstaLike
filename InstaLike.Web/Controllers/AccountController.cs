@@ -150,6 +150,12 @@ namespace InstaLike.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var profilePicture = Picture.DefaultProfilePicture.RawBytes;
+                if (profilePictureFile != null)
+                {
+                    profilePicture = await profilePictureFile.ToByteArrayAsync();
+                }
+
                 var command = new RegisterUserCommand(
                     newUser.Nickname,
                     newUser.Name,
@@ -157,7 +163,7 @@ namespace InstaLike.Web.Controllers
                     newUser.Password,
                     newUser.Email,
                     newUser.Biography,
-                    await profilePictureFile.ToByteArrayAsync());
+                    profilePicture);
 
                 var processCommandResult = await _dispatcher.Send(command);
                 if (processCommandResult.IsSuccess)
