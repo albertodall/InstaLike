@@ -1,0 +1,24 @@
+﻿@model IEnumerable<FollowModel>
+
+<h1>@ViewBag.Message</h1>
+
+@if (Model != null && Model.Any())
+{
+    <div class="user_list">
+        @foreach (var user in Model)
+        {
+            <div>
+                @{
+                    var profilePictureBase64 = Convert.ToBase64String(user.ProfilePicture);
+                    var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+                }
+                <img src="@profilePicture" alt="User's profile picture" />
+                <a asp-action="Profile" asp-controller="Account" asp-route-id="@user.Nickname">@user.Nickname</a>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="msg">No users found.</div>
+}
