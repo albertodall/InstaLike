@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using FluentMigrator.SqlServer;
 
-namespace Instalike.Database.Migrations
+namespace InstaLike.Database.Migrations
 {
     [Migration(5, "Create 'Like' table in schema 'dbo'")]
     public class CreateLikeTable : AutoReversingMigration

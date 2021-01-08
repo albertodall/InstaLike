@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using FluentMigrator.SqlServer;
 
-namespace Instalike.Database.Migrations
+namespace InstaLike.Database.Migrations
 {
     [Migration(4, "Create 'Comment' table in schema 'dbo'")]
     public class CreateCommentTable : AutoReversingMigration

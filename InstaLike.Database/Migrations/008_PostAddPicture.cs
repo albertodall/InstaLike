@@ -1,6 +1,6 @@
 ﻿using FluentMigrator;
 
-namespace Instalike.Database.Migrations
+namespace InstaLike.Database.Migrations
 {
     [Tags("SqlServerOnPrem")]
     [Migration(8, "Add picture support to 'Post' table")]

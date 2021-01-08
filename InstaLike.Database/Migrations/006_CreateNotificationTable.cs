@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using FluentMigrator.SqlServer;
 
-namespace Instalike.Database.Migrations
+namespace InstaLike.Database.Migrations
 {
     [Migration(6, "Create 'Notification' table in schema 'dbo'")]
     public class CreateNotificationTable : AutoReversingMigration

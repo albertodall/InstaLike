@@ -1,13 +1,14 @@
 ﻿// Highlights hashtags (#string) and Users' nicknames (@string)
+// Nicknames becomes clickable, redirecting the user to the related profile page
 function highlightHashtagsAndNicknames() {
-    const NicknamePattern = new RegExp('@\\w+', 'gi');
-    const HashtagPattern = new RegExp('#\\w+', 'gi');
+    const nicknamePattern = new RegExp('@\\w+', 'gi');
+    const hashtagPattern = new RegExp('#\\w+', 'gi');
 
     $('.post-author-comment, .post-comments > li > p')
         .each(function () {
             var commentText = this.innerHTML;
 
-            commentText = commentText.replace(NicknamePattern, function (nickname) {
+            commentText = commentText.replace(nicknamePattern, function (nickname) {
                 return `<a class='at-nickname' href='/Account/Profile/${nickname.substring(1, nickname.length)}'>${nickname}</a>`;
             });
 
@@ -16,7 +17,7 @@ function highlightHashtagsAndNicknames() {
         .each(function () {
             var commentText = this.innerHTML;
 
-            commentText = commentText.replace(HashtagPattern, function (hashtag) {
+            commentText = commentText.replace(hashtagPattern, function (hashtag) {
                 return `<span class='hashtag'>${hashtag}</span>`;
             });
 
@@ -32,7 +33,7 @@ $(function () {
 // Displays user's profile picture after choosing it
 $(".user-details-profile-picture input").change(function (e) {
     if (e.target.files && e.target.files[0]) {
-        var reader = new FileReader();
+        const reader = new FileReader();
 
         reader.onload = function (e) {
             $('.user-details-profile-picture > label > img').attr('src', e.target.result);
@@ -45,7 +46,7 @@ $(".user-details-profile-picture input").change(function (e) {
 // Displays picture to share after choosing it
 $(".form_post .picture-placeholder .posted-picture > input").change(function (e) {
     if (e.target.files && e.target.files[0]) {
-        var reader = new FileReader();
+        const reader = new FileReader();
 
         reader.onload = function (e) {
             $('.form_post .picture-placeholder .posted-picture > label > img').attr('src', e.target.result);
@@ -62,7 +63,7 @@ $('.form_comment').submit(function (e) {
     e.preventDefault();
 
     var form = $(this),
-        postID = form.find('#PostID').val(),
+        postId = form.find('#PostID').val(),
         comment = form.find('#comment'),
         postComments = form.parent().find('.post-comments'),
         showAllComments = form.parent().find('.show-all-comments'),
@@ -73,14 +74,14 @@ $('.form_comment').submit(function (e) {
         return false;
     }
 
-    $.post("/Post/PublishComment", { PostID: postID, CommentText: commentText }, function (response) {
+    $.post("/Post/PublishComment", { PostID: postId, CommentText: commentText }, function (response) {
         postComments.remove();
         showAllComments.remove();
 
         // Updates markup
         $(response).insertAfter(authorComment);
 
-        // Cleanup comment textbox
+        // Cleanup comment text box
         comment.val('');
 
         highlightHashtagsAndNicknames();
@@ -101,16 +102,16 @@ $('.like-button').click(function (e) {
     var likeButton = $(this),
         likesMarkup = likeButton.next('strong').find('.likes-count'),
         likes = parseInt(likesMarkup.html()),
-        postID = likeButton.attr('data-post-id'),
-        userID = likeButton.attr('data-user-id');
+        postId = likeButton.attr('data-post-id'),
+        userId = likeButton.attr('data-user-id');
 
     var endpoint = likeButton.hasClass('post-liked') ? '/Post/Dislike' : '/Post/Like';
 
-    $.post(endpoint, { PostID: postID, UserID: userID }, function () {
+    $.post(endpoint, { PostID: postId, UserID: userId }, function () {
         likeButton.toggleClass('post-liked');
 
         // Increments o decrements the number of likes.
-        var increment = likeButton.hasClass('post-liked') ? 1 : -1;
+        const increment = likeButton.hasClass('post-liked') ? 1 : -1;
         likesMarkup.html(likes + increment);
     });
 });
@@ -171,14 +172,14 @@ $('.form_post .autotag-button').click(function (e) {
                     e.preventDefault();
 
                     var tagSeparator = '';
-                    var selectedTag = $(e.target);
-                    var textInput = $('.form_post > div > input[type="text"]');
-                    var currentText = textInput.val().trim();
+                    const selectedTag = $(e.target);
+                    const textInput = $('.form_post > div > input[type="text"]');
+                    const currentText = textInput.val().trim();
 
                     selectedTag.toggleClass('tag-selected');
                     if (selectedTag.hasClass('tag-selected')) {
                         if (currentText.length > 0) {
-                            // If there's any text, adds a trailing space before to the tag.
+                            // If there's any text, adds a trailing space to the tag.
                             tagSeparator = ' ';
                         }
                         textInput.val(currentText.concat(tagSeparator, selectedTag.text()));

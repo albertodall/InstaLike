@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using FluentMigrator.SqlServer;
 
-namespace Instalike.Database.Migrations
+namespace InstaLike.Database.Migrations
 {
     [Migration(1, "Create 'User' Table in schema 'dbo'")]
     public class CreateUserTable : AutoReversingMigration

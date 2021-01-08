@@ -1,6 +1,6 @@
 ﻿using FluentMigrator;
 
-namespace Instalike.Database.Migrations
+namespace InstaLike.Database.Migrations
 {
     [Tags("SqlServerOnPrem")]
     [Migration(7, "Add profile picture support for 'User' table")]
