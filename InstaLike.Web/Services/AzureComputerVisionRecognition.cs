@@ -44,9 +44,9 @@ namespace InstaLike.Web.Services
                             .ToArray()
                         );
                 }
-                catch (ComputerVisionErrorException ex)
+                catch (ComputerVisionErrorResponseException ex)
                 {
-                    return Result.Failure<string[]>(ex.Body != null ? ex.Body.Message : ex.Message);
+                    return Result.Failure<string[]>(ex.Body != null ? ex.Body.Error.Message : ex.Message);
                 }
             }
         }
