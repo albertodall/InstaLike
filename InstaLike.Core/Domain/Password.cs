@@ -92,10 +92,7 @@ namespace InstaLike.Core.Domain
         private static string HashPassword(string password)
         {
             byte[] salt = new byte[SaltSize];
-            using (var csp = new RNGCryptoServiceProvider())
-            {
-                csp.GetBytes(salt);
-            }
+            RandomNumberGenerator.Create().GetBytes(salt);
 
             byte[] hash;
             using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000))

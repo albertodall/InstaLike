@@ -1,5 +1,7 @@
 ﻿using System;
 
+#nullable disable
+
 namespace InstaLike.Web.Models
 {
     public class CommentModel

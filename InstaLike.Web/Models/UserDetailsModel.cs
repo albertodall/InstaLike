@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+#nullable disable
+
 namespace InstaLike.Web.Models
 {
-    public class UserDetailsModel
+    public record UserDetailsModel
     {
         public string Nickname { get; set; }
         public string Password { get; set; }

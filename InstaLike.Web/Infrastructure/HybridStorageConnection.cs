@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Services;
 
+#nullable disable
+
 namespace InstaLike.Web.Infrastructure
 {
     /// <summary>

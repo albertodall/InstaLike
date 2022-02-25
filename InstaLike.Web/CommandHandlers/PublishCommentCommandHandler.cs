@@ -8,6 +8,8 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
+#nullable disable
+
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishCommentCommand, Result<int>>

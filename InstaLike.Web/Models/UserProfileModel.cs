@@ -1,6 +1,8 @@
 ﻿namespace InstaLike.Web.Models
 {
-    public class UserProfileModel
+    #nullable disable
+
+    public record UserProfileModel
     {
         public int UserID { get; set; }
         public string Nickname { get; set; }

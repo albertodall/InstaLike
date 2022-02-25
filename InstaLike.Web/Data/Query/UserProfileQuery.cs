@@ -9,6 +9,8 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
+#nullable disable
+
 namespace InstaLike.Web.Data.Query
 {
     public class UserProfileQuery : IRequest<UserProfileModel>

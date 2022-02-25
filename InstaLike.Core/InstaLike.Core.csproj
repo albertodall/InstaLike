@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,9 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpFunctionalExtensions" Version="2.20.0" />
-    <PackageReference Include="MediatR" Version="9.0.0" />
-    <PackageReference Include="NHibernate" Version="5.3.9" />
+    <PackageReference Include="CSharpFunctionalExtensions" Version="2.28.1" />
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="NHibernate" Version="5.3.11" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,6 +10,8 @@ using NHibernate.Criterion;
 using NHibernate.Transform;
 using Serilog;
 
+#nullable disable
+
 namespace InstaLike.Web.Data.Query
 {
     public class FollowingQuery : IRequest<FollowModel[]>
@@ -35,7 +37,7 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<FollowModel[]> Handle(FollowingQuery request, CancellationToken cancellationToken)
         {
-            FollowModel[] result = null;
+            FollowModel[] result;
 
             _logger.Debug("Reading following list for user {Nickname} with parameters {@Request}", request.Nickname, request);
 

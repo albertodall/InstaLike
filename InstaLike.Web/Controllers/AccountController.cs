@@ -82,7 +82,7 @@ namespace InstaLike.Web.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             var userIDClaim = User.GetIdentifier();
-            await _dispatcher.Publish(new UserLoggedOutEvent(userIDClaim, User.Identity.Name));
+            await _dispatcher.Publish(new UserLoggedOutEvent(userIDClaim, User?.Identity?.Name));
 
             return RedirectToAction("Index", "Home");
         }
@@ -203,8 +203,8 @@ namespace InstaLike.Web.Controllers
             if (processCommandResult.IsSuccess)
             {
                 var newFollowerNotification = new FollowedUserEvent(
-                    User.Identity.Name,
-                    Url.Action("Profile", "Account", new { id = User.Identity.Name }),
+                    User?.Identity?.Name,
+                    Url.Action("Profile", "Account", new { id = User?.Identity?.Name }),
                     id);
 
                 await _dispatcher.Publish(newFollowerNotification);

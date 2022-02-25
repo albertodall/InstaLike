@@ -4,6 +4,8 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace InstaLike.Web.Infrastructure
 {
     internal class HybridStorageCommand : DbCommand

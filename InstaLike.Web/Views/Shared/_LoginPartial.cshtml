@@ -12,11 +12,11 @@
     <li class="btn_alert">
         <a asp-action="Index" asp-controller="Notification">
             Notifications
-            @await Component.InvokeAsync("UnreadNotificationsCount", User.GetIdentifier())
+            @await Component.InvokeAsync("UnreadNotificationsCount", User?.GetIdentifier())
         </a>
     </li>
     <li class="btn_user">
-        <a asp-action="Profile" asp-controller="Account" , asp-route-id="@User.Identity.Name" title="User profile">
+        <a asp-action="Profile" asp-controller="Account" , asp-route-id="@User?.Identity?.Name" title="User profile">
             User profile
         </a>
     </li>

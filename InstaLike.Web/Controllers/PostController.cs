@@ -108,8 +108,8 @@ namespace InstaLike.Web.Controllers
             if (commandResult.IsSuccess)
             {
                 var newCommentNotification = new CommentPublishedEvent(
-                    User.Identity.Name,
-                    Url.Action("Profile", "Account", new { id = User.Identity.Name }),
+                    User?.Identity?.Name,
+                    Url.Action("Profile", "Account", new { id = User?.Identity?.Name }),
                     newComment.PostID,
                     Url.Action("Detail", "Post", new { id = newComment.PostID })
                 );
@@ -131,8 +131,8 @@ namespace InstaLike.Web.Controllers
             if (commandResult.IsSuccess)
             {
                 var postLikedNotification = new PostLikedEvent(
-                    User.Identity.Name,
-                    Url.Action("Profile", "Account", new { id = User.Identity.Name }),
+                    User?.Identity?.Name,
+                    Url.Action("Profile", "Account", new { id = User?.Identity?.Name }),
                     like.PostID,
                     Url.Action("Detail", "Post", new { id = like.PostID })
                 );

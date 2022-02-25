@@ -27,7 +27,7 @@ namespace InstaLike.Web.EventHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User sender = null;
+                User? sender = null;
                 try
                 {
                     var postQuery = _session.QueryOver<Post>()

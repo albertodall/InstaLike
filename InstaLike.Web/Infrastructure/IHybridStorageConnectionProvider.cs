@@ -7,6 +7,6 @@ namespace InstaLike.Web.Infrastructure
     {
         void Configure(IDictionary<string, string> settings);
 
-        IExternalStorageProvider GetProvider();
+        IExternalStorageProvider? GetProvider();
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+#nullable disable
+
 namespace InstaLike.Web.Models
 {
     public class RegisterUserModel

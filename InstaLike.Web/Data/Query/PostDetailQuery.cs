@@ -9,6 +9,8 @@ using NHibernate;
 using NHibernate.Transform;
 using Serilog;
 
+#nullable disable
+
 namespace InstaLike.Web.Data.Query
 {
     public class PostDetailQuery : IRequest<PostModel>

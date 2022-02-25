@@ -20,10 +20,10 @@ namespace InstaLike.Core.Services
         private const short PermutationsOfAByte = 256;
         
         private static readonly long MaximumPermutations = (long)Math.Pow(PermutationsOfAByte, NumberOfSequenceBytes);
-        private static readonly object SynchronizationObject = new object();
+        private static readonly object SynchronizationObject = new();
         
-        private static readonly DateTime SequencePeriodStart = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc); // Start = 000000
-        private static readonly DateTime SequencePeriodEnd = new DateTime(2500, 1, 1, 0, 0, 0, DateTimeKind.Utc); // End   = FFFFFF
+        private static readonly DateTime SequencePeriodStart = new(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc); // Start = 000000
+        private static readonly DateTime SequencePeriodEnd = new(2500, 1, 1, 0, 0, 0, DateTimeKind.Utc); // End   = FFFFFF
         private static readonly int[] IndexOrderingHighLow = { 10, 11, 12, 13, 14, 15, 8, 9, 7, 6, 5, 4, 3, 2, 1, 0 };
 
         private static long _lastSequence;

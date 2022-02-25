@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
+#nullable disable
+
 namespace InstaLike.Web.Models
 {
     [Bind("PostID, AuthorID, Text")]

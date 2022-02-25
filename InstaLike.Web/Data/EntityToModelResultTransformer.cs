@@ -31,7 +31,7 @@ namespace InstaLike.Web.Data
             var targetType = typeof(TTarget);
 
             var aliasesList = new List<string>(aliases);
-            var sameTypeProperties = new List<string>(aliases);
+            var sameTypeProperties = new List<string?>(aliases);
             var differentTypeProperties = new List<string>();
 
             for (var i = 0; i < aliasesList.Count; i++)
@@ -80,7 +80,7 @@ namespace InstaLike.Web.Data
             }
         }
 
-        private static object CastValueToDesiredType(Type targetType, object data)
+        private static object? CastValueToDesiredType(Type targetType, object data)
         {
             var dataParameter = Expression.Parameter(typeof(object), "data");
             var expressionBody = Expression.Block(

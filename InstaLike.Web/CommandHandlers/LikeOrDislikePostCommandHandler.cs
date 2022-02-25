@@ -9,6 +9,8 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
+#nullable disable
+
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>

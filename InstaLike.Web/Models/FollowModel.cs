@@ -1,4 +1,6 @@
-﻿namespace InstaLike.Web.Models
+﻿#nullable disable
+
+namespace InstaLike.Web.Models
 {
     public class FollowModel
     {

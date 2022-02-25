@@ -23,8 +23,9 @@ namespace InstaLike.Web.Extensions
 {
     internal static class ServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, string connectionString)
+        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
+            string connectionString = configuration.GetConnectionString("DefaultDatabase");
             var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
@@ -37,10 +38,11 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services,
-            string databaseConnectionString,
-            string externalStorageConnectionString)
+        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
+            string databaseConnectionString = configuration.GetConnectionString("DefaultDatabase");
+            string externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString");
+
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
             // Configure external storage
@@ -114,10 +116,10 @@ namespace InstaLike.Web.Extensions
                 loggerConfig.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
             }
 
-            var logFileName = config.GetValue<string>("Logging:LogFile");
+            var logFileName = config.GetValue<string>("LogSettings:LogFile");
             if (!string.IsNullOrEmpty(logFileName))
             {
-                var flushInterval = config.GetValue<int>("Logging:FlushToDiskIntervalSeconds");
+                var flushInterval = config.GetValue<int>("LogSettings:FlushToDiskIntervalSeconds");
                 loggerConfig.WriteTo.File(
                     logFileName,
                     outputTemplate: logEntryTemplate,
@@ -126,7 +128,6 @@ namespace InstaLike.Web.Extensions
 
             Log.Logger = loggerConfig.CreateLogger();
             services.AddSingleton(Log.Logger);
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
 
             return services;
         }
@@ -149,8 +150,10 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, string apiKey, string apiUrl)
+        public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, IConfiguration configuration)
         {
+            var apiKey = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey");
+            var apiUrl = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl");
             services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
 
             return services;

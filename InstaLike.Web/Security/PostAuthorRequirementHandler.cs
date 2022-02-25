@@ -22,8 +22,8 @@ namespace InstaLike.Web.Security
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PostAuthorRequirement requirement)
         {
-            var routeData = _httpContextAccessor.HttpContext.GetRouteData();
-            if (routeData.Values["id"] is string requestedPostId)
+            var routeData = _httpContextAccessor.HttpContext?.GetRouteData();
+            if (routeData?.Values["id"] is string requestedPostId)
             {
                 if (!int.TryParse(requestedPostId, out var postId))
                 {

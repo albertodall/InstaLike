@@ -14,7 +14,7 @@ namespace InstaLike.Web.EventHandlers
     {
         private const string NotificationMessageTemplate = "<a href=\"{0}\">{1}</a> wrote a comment <a href=\"{2}\">about your post.</a>";
 
-        private readonly ISession _session;
+        private readonly NHibernate.ISession _session;
         private readonly ILogger _logger;
 
         public CommentPublishedEventHandler(ISession session, ILogger logger)
@@ -27,7 +27,7 @@ namespace InstaLike.Web.EventHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User sender = null;
+                User? sender = null;
                 try
                 {
                     var postQuery = _session.QueryOver<Post>()

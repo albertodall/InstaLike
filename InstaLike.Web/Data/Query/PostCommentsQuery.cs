@@ -9,6 +9,8 @@ using NHibernate;
 using NHibernate.Transform;
 using Serilog;
 
+#nullable disable
+
 namespace InstaLike.Web.Data.Query
 {
     public class PostCommentsQuery : IRequest<CommentModel[]>
@@ -34,7 +36,7 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<CommentModel[]> Handle(PostCommentsQuery request, CancellationToken cancellationToken)
         {
-            CommentModel[] result = null;
+            CommentModel[] result;
 
             _logger.Debug("Reading comments list for post {PostID} with parameters {@Request}", request.PostID, request);
 

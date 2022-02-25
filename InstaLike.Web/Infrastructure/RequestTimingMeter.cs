@@ -8,6 +8,7 @@ using Serilog;
 namespace InstaLike.Web.Infrastructure
 {
     internal sealed class RequestTimingMeter<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
     {
         private readonly ILogger _logger;
         private readonly Stopwatch _chronometer = new Stopwatch();

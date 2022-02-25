@@ -14,7 +14,7 @@ namespace InstaLike.Web.Infrastructure
     internal class HybridStorageDriverConnectionProvider : IConnectionProvider
     {
         private readonly IConnectionProvider _connectionProvider;
-        private IHybridStorageConnectionProvider _externalStorageConnectionProvider;
+        private IHybridStorageConnectionProvider? _externalStorageConnectionProvider;
 
         public HybridStorageDriverConnectionProvider()
         {
@@ -33,7 +33,7 @@ namespace InstaLike.Web.Infrastructure
             _connectionProvider.Configure(settings);
 
             // Configure external storage, if specified
-            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string type) && type != null)
+            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string? type) && type != null)
             {
                 var externalStorageProviderType = Type.GetType(type);
                 if (externalStorageProviderType == null)
@@ -41,8 +41,8 @@ namespace InstaLike.Web.Infrastructure
                     throw new ArgumentNullException(type, $"Unknown storage provider type: {type}");
                 }
 
-                _externalStorageConnectionProvider = (IHybridStorageConnectionProvider)Activator.CreateInstance(externalStorageProviderType);
-                _externalStorageConnectionProvider.Configure(settings);
+                _externalStorageConnectionProvider = (IHybridStorageConnectionProvider?)Activator.CreateInstance(externalStorageProviderType);
+                _externalStorageConnectionProvider?.Configure(settings);
             }
         }
 
