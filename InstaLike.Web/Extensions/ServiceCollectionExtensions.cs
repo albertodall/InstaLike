@@ -108,11 +108,11 @@ namespace InstaLike.Web.Extensions
                 .Enrich.WithExceptionDetails()
                 .WriteTo.Console(outputTemplate: logEntryTemplate);
 
-            var appInsightsInstumentationKey = config.GetValue<string>("Logging:AppInsightsInstrumentationKey");
-            if (!string.IsNullOrEmpty(appInsightsInstumentationKey))
+            var appInsightsConnectionString = config.GetValue<string>("ApplicationInsights:ConnectionString");
+            if (!string.IsNullOrEmpty(appInsightsConnectionString))
             {
                 var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-                telemetryConfiguration.InstrumentationKey = appInsightsInstumentationKey;
+                telemetryConfiguration.ConnectionString = appInsightsConnectionString;
                 loggerConfig.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
             }
 
@@ -134,10 +134,10 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, IConfiguration configuration)
         {
-            var appInsightsInstumentationKey = configuration.GetValue<string>("Logging:AppInsightsInstrumentationKey");
-            if (!string.IsNullOrEmpty(appInsightsInstumentationKey))
+            var appInsightsConnectionString = configuration.GetValue<string>("ApplicationInsights:ConnectionString");
+            if (!string.IsNullOrEmpty(appInsightsConnectionString))
             {
-                services.AddApplicationInsightsTelemetry(appInsightsInstumentationKey);
+                services.AddApplicationInsightsTelemetry(opt => opt.ConnectionString = appInsightsConnectionString);
             }
 
             return services;

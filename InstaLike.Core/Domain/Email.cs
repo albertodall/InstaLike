@@ -1,19 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
-    public class Email : ValueObject
+    public class Email : SimpleValueObject<string>
     {
-        public string Value { get; }
+        private Email() : base(string.Empty) { }
 
-        private Email() { }
-
-        private Email(string email) : this()
-        {
-            Value = email;
-        }
+        private Email(string email) : base(email) { }
 
         public static Result<Email> Create(string email)
         {
@@ -32,11 +26,6 @@ namespace InstaLike.Core.Domain
             return Result.Success(new Email(email));
         }
 
-        public override string ToString()
-        {
-            return Value;
-        }
-
         public static explicit operator Email(string email)
         {
             return Create(email).Value;
@@ -45,11 +34,6 @@ namespace InstaLike.Core.Domain
         public static implicit operator string(Email email)
         {
             return email.Value;
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return Value.ToLowerInvariant();
         }
     }
 }

@@ -3,16 +3,13 @@ using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
-    public class CommentText : ValueObject
+    public class CommentText : SimpleValueObject<string>
     {
-        public string Value { get; }
+        // public string Value { get; }
 
-        private CommentText() { }
+        private CommentText() : base(string.Empty) { }
 
-        private CommentText(string text) : this()
-        {
-            Value = text;
-        }
+        private CommentText(string text) : base(text) { }
 
         public static Result<CommentText> Create(string text)
         {
@@ -44,11 +41,6 @@ namespace InstaLike.Core.Domain
         public override string ToString()
         {
             return Value;
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return Value.ToUpperInvariant();
         }
     }
 }

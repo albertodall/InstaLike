@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
@@ -49,7 +50,7 @@ namespace InstaLike.Core.Domain
             return $"{Name} {Surname}";
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<IComparable> GetEqualityComponents()
         {
             yield return Name.ToUpperInvariant();
             yield return Surname.ToUpperInvariant();

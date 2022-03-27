@@ -9,9 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpFunctionalExtensions" Version="2.28.1" />
-    <PackageReference Include="MediatR" Version="10.0.1" />
-    <PackageReference Include="NHibernate" Version="5.3.11" />
+    <PackageReference Include="CSharpFunctionalExtensions" Version="2.39.2" />
+    <PackageReference Include="MediatR" Version="12.0.1" />
+    <PackageReference Include="NHibernate" Version="5.4.2" />
   </ItemGroup>
 
   <ItemGroup>

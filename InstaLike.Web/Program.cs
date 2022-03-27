@@ -34,7 +34,10 @@ namespace InstaLike.Web
             builder.Services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
 
             builder.Services.ConfigurePipeline();
-            builder.Services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly);
+            builder.Services.AddMediatR(cfg => {
+                cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly);
+            });
+            
 
             if (IsOnPremDeployment(builder.Configuration))
             {

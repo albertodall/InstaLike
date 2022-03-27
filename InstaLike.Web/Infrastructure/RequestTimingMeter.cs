@@ -18,7 +18,7 @@ namespace InstaLike.Web.Infrastructure
             _logger = logger?.ForContext<TRequest>() ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             _chronometer.Start();
             _logger.Debug("Begin Request");

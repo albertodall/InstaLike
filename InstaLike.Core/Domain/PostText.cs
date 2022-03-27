@@ -1,18 +1,12 @@
-﻿using System.Collections.Generic;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
-    public class PostText : ValueObject
+    public class PostText : SimpleValueObject<string>
     {
-        public string Value { get; }
+        private PostText() : base(string.Empty) { }
 
-        private PostText() { }
-
-        private PostText(string text) : this()
-        {
-            Value = text;
-        }
+        private PostText(string text) : base(text) { }
 
         public static Result<PostText> Create(string text)
         {
@@ -39,16 +33,6 @@ namespace InstaLike.Core.Domain
         public static explicit operator PostText(string text)
         {
             return Create(text).Value;
-        }
-
-        public override string ToString()
-        {
-            return Value;
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return Value.ToUpperInvariant();
         }
     }
 }

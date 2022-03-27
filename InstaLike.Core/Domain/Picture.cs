@@ -71,7 +71,7 @@ namespace InstaLike.Core.Domain
             return picture.RawBytes;
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<IComparable> GetEqualityComponents()
         {
             yield return Convert.ToBase64String(RawBytes);
             yield return Identifier;

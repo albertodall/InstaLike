@@ -84,7 +84,7 @@ namespace InstaLike.Core.Domain
             return HashedValue;
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<IComparable> GetEqualityComponents()
         {
             yield return HashedValue;
         }
