@@ -4,6 +4,7 @@ trigger:
       - master
   paths:
     exclude:
+      - infra/*
       - azure-pipelines.yml
       - README.md
 
