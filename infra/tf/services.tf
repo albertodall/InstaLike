@@ -9,10 +9,23 @@ resource "azurerm_key_vault" "instalike_key_vault" {
   sku_name                    = "standard"
   soft_delete_retention_days  = 90
   purge_protection_enabled    = false
-  enable_rbac_authorization   = true
 
   depends_on = [
     azurerm_resource_group.instalike_resource_group
+  ]
+}
+
+resource "azurerm_key_vault_certificate" "cloudflare_origin_server" {
+  name         = "cloudflare-origin-server"
+  key_vault_id = azurerm_key_vault.instalike_key_vault.id
+
+  certificate {
+    contents = filebase64("cloudflare_origin_server_certificate.pfx")
+    password = var.origin_server_certificate_password
+  }
+
+  depends_on = [
+    azurerm_key_vault.instalike_key_vault
   ]
 }
 
@@ -70,8 +83,8 @@ resource "azurerm_cognitive_account" "instalike_autotag_service" {
   location            = azurerm_resource_group.instalike_resource_group.location
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
   kind                = "ComputerVision"
-  
-  sku_name            = "F0"
+
+  sku_name = "F0"
 
   depends_on = [
     azurerm_resource_group.instalike_resource_group # See global.tf

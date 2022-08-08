@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.17.0"
     }
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+      version = "3.20.0"
+    }
   }
   backend "azurerm" {
     resource_group_name  = "SharedInfraServices"
@@ -20,6 +24,11 @@ provider "azurerm" {
       recover_soft_deleted_key_vaults = true
     }
   }
+}
+
+provider "cloudflare" {
+  email   = var.cloudflare_user_email
+  api_key = var.cloudflare_api_key
 }
 
 resource "azurerm_resource_group" "instalike_resource_group" {
