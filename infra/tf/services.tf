@@ -1,5 +1,21 @@
 data "azurerm_client_config" "current" {}
 
+resource "azurerm_key_vault" "instalike_key_vault" {
+  name                        = "InstaLike-secrets-vault"
+  location                    = azurerm_resource_group.instalike_resource_group.location
+  resource_group_name         = azurerm_resource_group.instalike_resource_group.name
+  enabled_for_disk_encryption = false
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  sku_name                    = "standard"
+  soft_delete_retention_days  = 90
+  purge_protection_enabled    = false
+  enable_rbac_authorization   = true
+
+  depends_on = [
+    azurerm_resource_group.instalike_resource_group
+  ]
+}
+
 resource "azurerm_storage_account" "instalike_storage_account" {
   name                      = "instalikepicturesstorage"
   resource_group_name       = azurerm_resource_group.instalike_resource_group.name
@@ -54,6 +70,7 @@ resource "azurerm_cognitive_account" "instalike_autotag_service" {
   location            = azurerm_resource_group.instalike_resource_group.location
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
   kind                = "ComputerVision"
+  
   sku_name            = "F0"
 
   depends_on = [

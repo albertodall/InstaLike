@@ -2,12 +2,12 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.14.0"
+      version = "~> 3.17.0"
     }
   }
   backend "azurerm" {
     resource_group_name  = "SharedInfraServices"
-    storage_account_name = "addevsharedstorage"
+    storage_account_name = "adinfrasharedstorage"
     container_name       = "tfstate"
     key                  = "instalike-terraform.tfstate"
   }
