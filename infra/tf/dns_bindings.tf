@@ -27,7 +27,7 @@ resource "azurerm_app_service_custom_hostname_binding" "instalike_app_binding" {
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
 
   # Ignore ssl_state and thumbprint as they are managed using
-  # azurerm_app_service_certificate_binding.example
+  # "azurerm_app_service_certificate_binding" resource
   lifecycle {
     ignore_changes = [ssl_state, thumbprint]
   }
@@ -39,20 +39,12 @@ resource "azurerm_app_service_custom_hostname_binding" "instalike_app_binding" {
   ]
 }
 
-resource "azurerm_app_service_managed_certificate" "instalike_app_certificate" {
-  custom_hostname_binding_id = azurerm_app_service_custom_hostname_binding.instalike_app_binding.id
-
-  depends_on = [
-    azurerm_app_service_custom_hostname_binding.instalike_app_binding
-  ]
-}
-
 resource "azurerm_app_service_certificate_binding" "instalike_ssl_binding" {
   hostname_binding_id = azurerm_app_service_custom_hostname_binding.instalike_app_binding.id
-  certificate_id      = azurerm_app_service_managed_certificate.instalike_app_certificate.id
+  certificate_id      = azurerm_app_service_certificate.cloudflare_origin_server_cert.id
   ssl_state           = "SniEnabled"
 
   depends_on = [
-    azurerm_app_service_managed_certificate.instalike_app_certificate
+    azurerm_app_service_custom_hostname_binding.instalike_app_binding
   ]
 }
