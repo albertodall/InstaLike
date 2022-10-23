@@ -13,11 +13,12 @@ terraform {
       version = "3.26.0"
     }
   }
-  backend "azurerm" {
-    resource_group_name  = "SharedInfraServices"
-    storage_account_name = "stsharedinfraweu"
-    container_name       = "tfstate"
-    key                  = "instalike-terraform.tfstate"
+  cloud {
+    organization = "albertodallagiacoma"
+
+    workspaces {
+      name = "InstaLike"
+    }
   }
 }
 
