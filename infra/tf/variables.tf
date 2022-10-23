@@ -13,22 +13,22 @@ variable "origin_server_certificate_password" {
   type        = string
 }
 
-variable "web_application_endpoint" {
-  description = "Endpoint on which the application will accept requests"
+variable "web_application_domain" {
+  description = "Web application root domain"
   type        = string
 }
 
-variable "cloudflare_user_email" {
-  description = "CloudFlare user E-Mail"
+variable "dns_cname_record_value" {
+  description = "The DNS CNAME record value for the application"
   type        = string
 }
 
-variable "cloudflare_api_key" {
-  description = "CloudFlare API Key"
+variable "cloudflare_api_token" {
+  description = "CloudFlare API Token"
   type        = string
 }
 
 variable "cloudflare_dns_zone_id" {
-  description = "CloudFlare DNS zone ID"
+  description = "CloudFlare DNS zone ID of albertodallagiacoma.it"
   type        = string
 }
