@@ -10,6 +10,8 @@ resource "azurerm_key_vault" "instalike_key_vault" {
   soft_delete_retention_days  = 90
   purge_protection_enabled    = false
 
+  tags = local.common_tags
+
   depends_on = [
     azurerm_resource_group.instalike_resource_group
   ]
@@ -39,6 +41,8 @@ resource "azurerm_storage_account" "instalike_storage_account" {
   access_tier               = "Hot"
   min_tls_version           = "TLS1_2"
   shared_access_key_enabled = true
+
+  tags = local.common_tags
 
   depends_on = [
     azurerm_resource_group.instalike_resource_group # See global.tf
@@ -73,6 +77,8 @@ resource "azurerm_service_plan" "instalike_appservice_plan" {
   sku_name               = "B1"
   zone_balancing_enabled = false
 
+  tags = local.common_tags
+
   depends_on = [
     azurerm_resource_group.instalike_resource_group # See global.tf
   ]
@@ -85,6 +91,8 @@ resource "azurerm_cognitive_account" "instalike_autotag_service" {
   kind                = "ComputerVision"
 
   sku_name = "F0"
+
+  tags = local.common_tags
 
   depends_on = [
     azurerm_resource_group.instalike_resource_group # See global.tf

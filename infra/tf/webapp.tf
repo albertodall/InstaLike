@@ -16,7 +16,7 @@ resource "azurerm_linux_web_app" "instalike_app" {
   }
 
   app_settings = {
-    ConnectionStrings__DefaultDatabase                         = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.name}.database.windows.net,1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Persist Security Info=False;User ID=${var.azure_sql_database_admin_username};Password=${var.azure_sql_database_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    ConnectionStrings__DefaultDatabase                         = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Persist Security Info=False;User ID=${var.azure_sql_database_admin_username};Password=${var.azure_sql_database_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
     DeploymentType                                             = "AzureCloud"
     ExternalStorage__AzureBlobStorage__StorageConnectionString = azurerm_storage_account.instalike_storage_account.primary_connection_string
     ImageAnalysis__AzureComputerVision__ApiKey                 = azurerm_cognitive_account.instalike_autotag_service.primary_access_key
@@ -24,6 +24,8 @@ resource "azurerm_linux_web_app" "instalike_app" {
     Logging__AppInsightsInstrumentationKey                     = azurerm_application_insights.instalike_appinsights.instrumentation_key
   }
 
+  tags = local.common_tags
+  
   depends_on = [
     azurerm_service_plan.instalike_appservice_plan,
     azurerm_mssql_database.instalike_database,

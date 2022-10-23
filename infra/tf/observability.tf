@@ -5,6 +5,8 @@ resource "azurerm_log_analytics_workspace" "instalike_loganalytics_ws" {
   sku                 = "PerGB2018"
   retention_in_days   = 30
 
+  tags = local.common_tags
+
   depends_on = [
     azurerm_resource_group.instalike_resource_group # See global.tf
   ]
@@ -16,6 +18,8 @@ resource "azurerm_application_insights" "instalike_appinsights" {
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
   workspace_id        = azurerm_log_analytics_workspace.instalike_loganalytics_ws.id
   application_type    = "web"
+
+  tags = local.common_tags
 
   depends_on = [
     azurerm_log_analytics_workspace.instalike_loganalytics_ws

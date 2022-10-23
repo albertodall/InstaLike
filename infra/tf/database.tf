@@ -7,6 +7,8 @@ resource "azurerm_mssql_server" "instalike_sql_server" {
   administrator_login          = var.azure_sql_database_admin_username
   administrator_login_password = var.azure_sql_database_admin_password
 
+  tags = local.common_tags
+
   depends_on = [
     azurerm_resource_group.instalike_resource_group
   ]
@@ -21,6 +23,8 @@ resource "azurerm_mssql_database" "instalike_database" {
   sku_name             = "GP_S_Gen5_2"
   storage_account_type = "Local"
   zone_redundant       = false
+
+  tags = local.common_tags
 
   depends_on = [
     azurerm_mssql_server.instalike_sql_server
