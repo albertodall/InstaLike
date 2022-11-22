@@ -17,7 +17,6 @@ variables:
   webApplicationProject: '**/InstaLike.Web.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  azureSubscriptionName: 'AzureDevSubscription'
 
 stages:
   - stage: Create_Artifacts
@@ -164,7 +163,7 @@ stages:
               - task: AzureWebApp@1
                 displayName: 'Deploy Web Application to Azure AppService'
                 inputs:
-                  azureSubscription: $(azureSubscriptionName)
+                  azureSubscription: $(AzureServiceConnectionName)
                   appType: 'webAppLinux'
                   appName: 'InstaLike-WebApp'
                   package: '$(Pipeline.Workspace)/InstaLikeWebApplication/*.zip'
