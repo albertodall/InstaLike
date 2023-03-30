@@ -1,5 +1,3 @@
-data "azurerm_client_config" "current" {}
-
 resource "azurerm_key_vault" "instalike_key_vault" {
   name                        = "InstaLike-secrets-vault"
   location                    = azurerm_resource_group.instalike_resource_group.location
@@ -14,20 +12,6 @@ resource "azurerm_key_vault" "instalike_key_vault" {
 
   depends_on = [
     azurerm_resource_group.instalike_resource_group
-  ]
-}
-
-resource "azurerm_key_vault_certificate" "cloudflare_origin_server" {
-  name         = "cloudflare-origin-server"
-  key_vault_id = azurerm_key_vault.instalike_key_vault.id
-
-  certificate {
-    contents = filebase64("cloudflare_origin_server_certificate.pfx")
-    password = var.origin_server_certificate_password
-  }
-
-  depends_on = [
-    azurerm_key_vault.instalike_key_vault
   ]
 }
 

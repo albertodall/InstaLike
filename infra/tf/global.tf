@@ -6,7 +6,7 @@ locals {
 }
 
 resource "azurerm_resource_group" "instalike_resource_group" {
-  name     = "InstaLike"
+  name     = "rg-instalike-prd-we"
   location = "West Europe"
 
   tags = local.common_tags
