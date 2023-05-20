@@ -33,7 +33,9 @@ namespace InstaLike.Core.Domain
             Create(Convert.FromBase64String(MissingPictureBase64), new Guid(MissingPictureGuid))
             .Value;
 
+#pragma warning disable CS8618
         private Picture() { }
+#pragma warning restore CS8618
 
         private Picture(byte[] rawBytes, Guid identifier) : this()
         {

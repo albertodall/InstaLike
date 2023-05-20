@@ -7,7 +7,6 @@ namespace InstaLike.Core.Commands
     {
         public int UserID { get; }
         public string Nickname { get; }
-        public string Password { get; }
         public string Name { get; }
         public string Surname { get; }
         public string Email { get; }

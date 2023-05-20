@@ -10,7 +10,9 @@ namespace InstaLike.Core.Domain
         public string Name { get; }
         public string Surname { get; }
 
+#pragma warning disable CS8618
         private FullName() { }
+#pragma warning restore CS8618
 
         private FullName(string name, string surname) : this()
         {

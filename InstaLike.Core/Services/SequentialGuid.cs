@@ -176,19 +176,14 @@ namespace InstaLike.Core.Services
             return !(value1 == value2);
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
-            switch (obj)
+            return obj switch
             {
-                case SequentialGuid seqGuid:
-                    return CompareTo(seqGuid);
-
-                case Guid guid:
-                    return CompareTo(guid);
-
-                default:
-                    throw new ArgumentException("Parameter is neither a Guid not a SequentialGuid.");
-            }
+                SequentialGuid seqGuid => CompareTo(seqGuid),
+                Guid guid => CompareTo(guid),
+                _ => throw new ArgumentException("Parameter is neither a Guid nor a SequentialGuid."),
+            };
         }
 
         public int CompareTo(SequentialGuid other)
@@ -211,7 +206,7 @@ namespace InstaLike.Core.Services
                 .FirstOrDefault(r => r != 0);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is SequentialGuid || obj is Guid)
             {

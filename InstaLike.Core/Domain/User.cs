@@ -10,20 +10,22 @@ namespace InstaLike.Core.Domain
         private readonly IList<Follow> _followers;
         private readonly IList<Follow> _followed;
 
+#pragma warning disable CS8618
         protected User()
         {
             _followers = new List<Follow>();
             _followed = new List<Follow>();
         }
+#pragma warning restore CS8618
 
         public User(Nickname nickname, FullName fullName, Password password, Email email, string biography) 
             : this()
         {
-            _nickname = nickname ?? throw new ArgumentNullException(nameof(nickname));
-            _email = email ?? throw new ArgumentNullException(nameof(email));
-            _password = password ?? throw new ArgumentNullException(nameof(password));
-            _fullName = fullName ?? throw new ArgumentNullException(nameof(fullName));
-            Biography = biography ?? throw new ArgumentNullException(nameof(biography));
+            _nickname = nickname;
+            _email = email;
+            _password = password;
+            _fullName = fullName;
+            Biography = biography;
 
             ProfilePicture = Picture.DefaultProfilePicture;
             RegistrationDate = DateTimeOffset.Now;
@@ -100,31 +102,16 @@ namespace InstaLike.Core.Domain
 
         public virtual bool IsFollowing(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             return _followed.Any(f => f.Followed == user);
         }
 
         public virtual bool IsFollowedBy(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             return _followers.Any(f => f.Follower == user);
         }
 
         public virtual Result Follow(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             return Result.Success()
                 .Ensure(() => !IsFollowing(user), $"User [{user.Nickname}] is already followed by user [{Nickname}].")
                 .Tap(() =>
@@ -142,20 +129,17 @@ namespace InstaLike.Core.Domain
 
         public virtual Result Unfollow(User user)
         {
-            if (user == null)
+            Follow? followed = _followed.SingleOrDefault(f => f.Followed == user);
+
+            if (followed is null)
             {
-                throw new ArgumentNullException(nameof(user));
+                return Result.Failure($"User [{Nickname}] is not following user [{user.Nickname}].");
             }
 
-            Maybe<Follow> followed = _followed.SingleOrDefault(f => f.Followed == user);
+            _followed.Remove(followed);
+            user.RemoveFollow(followed);
 
-            return followed
-                .ToResult($"User [{Nickname}] is not following user [{user.Nickname}].")
-                .Tap(follow =>
-                {
-                    _followed.Remove(follow);
-                    user.RemoveFollow(follow);
-                });
+            return Result.Success();
         }
 
         protected virtual void RemoveFollow(Follow follow)
@@ -165,11 +149,6 @@ namespace InstaLike.Core.Domain
 
         public virtual Result PutLikeTo(Post post)
         {
-            if (post == null)
-            {
-                throw new ArgumentNullException(nameof(post));
-            }
-
             return Result.Success()
                 .Ensure(() => post.Author != this, "You cannot put a 'Like' on your own posts.")
                 .Ensure(() => !post.LikesTo(this), $"User [{Nickname}] already 'Liked' this post.")
@@ -178,11 +157,6 @@ namespace InstaLike.Core.Domain
 
         public virtual Result RemoveLikeFrom(Post post)
         {
-            if (post == null)
-            {
-                throw new ArgumentNullException(nameof(post));
-            }
-
             return Result.Success()
                 .Ensure(() => post.LikesTo(this), $"User [{Nickname}] did not put any 'Like' on this post.")
                 .Tap(() => post.RemoveLikeBy(this));
