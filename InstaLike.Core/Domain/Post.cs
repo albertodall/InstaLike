@@ -10,11 +10,13 @@ namespace InstaLike.Core.Domain
         private readonly IList<Comment> _comments;
         private readonly IList<Like> _likes;
 
+#pragma warning disable CS8618
         protected Post()
         {
             _comments = new List<Comment>();
             _likes = new List<Like>();
         }
+#pragma warning restore CS8618
 
         public Post(User author, Picture picture, PostText text) 
             : this()
@@ -51,21 +53,11 @@ namespace InstaLike.Core.Domain
 
         public virtual bool LikesTo(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             return _likes.Any(like => like.User == user);
         }
 
         public virtual Result PutLikeBy(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             return Result.Success()
                 .Ensure(() => Author != user, $"User [{user.Nickname}] cannot put a 'Like' on their own posts.")
                 .Ensure(() => !LikesTo(user), $"User [{user.Nickname}] has already put a 'Like' to this post.")
@@ -74,35 +66,25 @@ namespace InstaLike.Core.Domain
 
         public virtual Result RemoveLikeBy(User user)
         {
-            if (user == null)
+            Like? likeToRemove = _likes.SingleOrDefault(like => like.User == user);
+
+            if (likeToRemove is null)
             {
-                throw new ArgumentNullException(nameof(user));
+                return Result.Failure($"User [{user.Nickname}] did not put any 'Like' on this post.");
             }
 
-            Maybe<Like> likeToRemove = _likes.SingleOrDefault(like => like.User == user);
+            _likes.Remove(likeToRemove);
 
-            return likeToRemove
-                .ToResult($"User [{user.Nickname}] did not put any 'Like' on this post.")
-                .Tap(like => _likes.Remove(like));           
+            return Result.Success();
         }
 
         public virtual void AddComment(Comment comment)
         {
-            if (comment == null)
-            {
-                throw new ArgumentNullException(nameof(comment));
-            }
-
             _comments.Add(comment);
         }
 
         public virtual bool CanBeEditedBy(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
             return Author == user;
         }
     }

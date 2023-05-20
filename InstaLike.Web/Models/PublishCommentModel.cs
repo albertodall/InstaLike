@@ -1,10 +1,8 @@
-﻿#nullable disable
-
-namespace InstaLike.Web.Models
+﻿namespace InstaLike.Web.Models
 {
     public class PublishCommentModel
     {
         public int PostID { get; set; }
-        public string CommentText { get; set; }
+        public string CommentText { get; set; } = string.Empty;
     }
 }

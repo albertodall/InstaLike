@@ -4,13 +4,16 @@ using NHibernate.Proxy;
 
 namespace InstaLike.Core.Domain
 {
-    public abstract class EntityBase<TId>
+    public abstract class EntityBase<TId> 
+        where TId : notnull
     {
         private const int HashMultiplier = 29;
 
         public virtual TId ID { get; }
 
+#pragma warning disable CS8618
         protected EntityBase() { }
+#pragma warning restore CS8618
 
         protected EntityBase(TId id)
             : this()
@@ -23,11 +26,9 @@ namespace InstaLike.Core.Domain
             return ID == null || ID.Equals(default(TId));
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as EntityBase<TId>;
-
-            if (other is null)
+            if (obj is not EntityBase<TId> other)
             {
                 return false;
             }
@@ -55,8 +56,8 @@ namespace InstaLike.Core.Domain
         /// </remarks>
         private Type GetUnproxiedType()
         {
-            return GetType().Name.Contains("ProxyForFieldInterceptor") 
-                ? GetType().BaseType 
+            return GetType().Name.Contains("ProxyForFieldInterceptor")
+                ? GetType().BaseType!
                 : NHibernateProxyHelper.GetClassWithoutInitializingProxy(this);
         }
 

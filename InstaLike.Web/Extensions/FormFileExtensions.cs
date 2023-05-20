@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -9,11 +8,6 @@ namespace InstaLike.Web.Extensions
     {
         public static Task<byte[]> ToByteArrayAsync(this IFormFile formFile)
         {
-            if (formFile == null)
-            {
-                throw new ArgumentNullException(nameof(formFile));
-            }
-
             return formFile.ToByteArrayInternalAsync();
         }
 
@@ -31,11 +25,6 @@ namespace InstaLike.Web.Extensions
 
         public static Task<Stream> ToStreamAsync(this IFormFile formFile)
         {
-            if (formFile == null)
-            {
-                throw new ArgumentNullException(nameof(formFile));
-            }
-
             return formFile.ToStreamInternalAsync();
         }
 

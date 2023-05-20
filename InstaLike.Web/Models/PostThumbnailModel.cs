@@ -1,10 +1,10 @@
-﻿#nullable disable
+﻿using System;
 
 namespace InstaLike.Web.Models
 {
     public class PostThumbnailModel
     {
         public int PostID { get; set; }
-        public byte[] ThumbnailPictureBytes { get; set; }
+        public byte[] ThumbnailPictureBytes { get; set; } = Array.Empty<byte>();
     }
 }

@@ -181,42 +181,6 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Checking_If_User_Is_Following_Null_User_Should_Throw_Exception()
-        {
-            var sut = CreateTestUser();
-
-            sut.Invoking(obj => obj.IsFollowing(null))
-                .Should().Throw<ArgumentNullException>();
-        }
-
-        [Fact]
-        public void Checking_If_User_Is_Followed_By_Null_User_Should_Throw_Exception()
-        {
-            var sut = CreateTestUser();
-
-            sut.Invoking(obj => obj.IsFollowedBy(null))
-                .Should().Throw<ArgumentNullException>();
-        }
-
-        [Fact]
-        public void Following_Null_User_Should_Throw_Exception()
-        {
-            var sut = CreateTestUser();
-
-            sut.Invoking(obj => obj.Follow(null))
-                .Should().Throw<ArgumentNullException>();
-        }
-
-        [Fact]
-        public void Unfollowing_Null_User_Should_Throw_Exception()
-        {
-            var sut = CreateTestUser();
-
-            sut.Invoking(obj => obj.Unfollow(null))
-                .Should().Throw<ArgumentNullException>();
-        }
-
-        [Fact]
         public void Should_Put_A_Like_On_A_Post()
         {
             var sut = CreateTestUser();
@@ -233,15 +197,6 @@ namespace InstaLike.Core.Tests
                 sut.PutLikeTo(post).IsSuccess.Should().BeTrue();
                 post.LikesTo(sut).Should().BeTrue();
             }
-        }
-
-        [Fact]
-        public void Putting_A_Like_On_Null_Post_Should_Thow_Exception()
-        {
-            var sut = CreateTestUser();
-
-            sut.Invoking(obj => obj.PutLikeTo(null))
-                .Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
@@ -287,15 +242,6 @@ namespace InstaLike.Core.Tests
             sut.PutLikeTo(post);
 
             sut.RemoveLikeFrom(post).IsSuccess.Should().BeTrue();
-        }
-
-        [Fact]
-        public void Removing_A_Like_From_Null_Post_Should_Thow_Exception()
-        {
-            var sut = CreateTestUser();
-
-            sut.Invoking(obj => obj.RemoveLikeFrom(null))
-                .Should().Throw<ArgumentNullException>();
         }
 
         [Fact]

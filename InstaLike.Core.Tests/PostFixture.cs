@@ -31,17 +31,6 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Adding_Null_Comment_To_Post_Should_Throw_Exception()
-        {
-            var postAuthor = CreateTestPostAuthor();
-            var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
-
-            sut.Invoking(obj => obj.AddComment(null))
-                .Should()
-                .Throw<ArgumentNullException>();
-        }
-
-        [Fact]
         public void Should_Add_Like_To_Post()
         {
             var postAuthor = CreateTestPostAuthor();
@@ -60,16 +49,6 @@ namespace InstaLike.Core.Tests
                 sut.LikesTo(postReader).Should().BeTrue();
                 sut.Likes.Count.Should().Be(1);
             }
-        }
-
-        [Fact]
-        public void Null_User_Should_Not_Put_Like_To_Post()
-        {
-            var postAuthor = CreateTestPostAuthor();
-            var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
-
-            sut.Invoking(obj => obj.PutLikeBy(null))
-                .Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
@@ -146,28 +125,6 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Null_User_Cannot_Put_Like_To_Post()
-        {
-            var postAuthor = CreateTestPostAuthor();
-            var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
-
-            sut.Invoking(obj => obj.PutLikeBy(null))
-                .Should()
-                .Throw<ArgumentNullException>();
-        }
-
-        [Fact]
-        public void Null_User_Cannot_Remove_Like_From_Post()
-        {
-            var postAuthor = CreateTestPostAuthor();
-            var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
-
-            sut.Invoking(obj => obj.RemoveLikeBy(null))
-                .Should()
-                .Throw<ArgumentNullException>();
-        }
-
-        [Fact]
         public void Post_Should_Be_Liked_By_User()
         {
             var postAuthor = CreateTestPostAuthor();
@@ -200,17 +157,6 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
-        public void Checking_Like_For_Null_User_Should_Throw_Exception()
-        {
-            var postAuthor = CreateTestPostAuthor();
-            var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
-
-            sut.Invoking(obj => obj.LikesTo(null))
-                .Should()
-                .Throw<ArgumentNullException>();
-        }
-
-        [Fact]
         public void Author_Can_Edit_His_Own_Post()
         {
             var postAuthor = CreateTestPostAuthor();
@@ -233,17 +179,6 @@ namespace InstaLike.Core.Tests
                 "My Bio");
 
             sut.CanBeEditedBy(otherUser).Should().BeFalse();
-        }
-
-        [Fact]
-        public void Null_User_Cannot_Edit_Post()
-        {
-            var postAuthor = CreateTestPostAuthor();
-            var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
-
-            sut.Invoking(post => post.CanBeEditedBy(null))
-                .Should()
-                .Throw<ArgumentNullException>();
         }
 
         private static User CreateTestPostAuthor()

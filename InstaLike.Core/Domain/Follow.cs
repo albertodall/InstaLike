@@ -4,13 +4,15 @@ namespace InstaLike.Core.Domain
 {
     public class Follow : EntityBase<int>
     {
+#pragma warning disable CS8618
         protected Follow() { }
+#pragma warning restore CS8618
 
         public Follow(User follower, User followed) 
             : this()
         {
-            Follower = follower ?? throw new ArgumentNullException(nameof(follower));
-            Followed = followed ?? throw new ArgumentNullException(nameof(followed));
+            Follower = follower;
+            Followed = followed;
             FollowDate = DateTimeOffset.Now;
         }
 

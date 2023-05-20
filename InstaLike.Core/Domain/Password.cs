@@ -15,7 +15,9 @@ namespace InstaLike.Core.Domain
 
         private string HashedValue { get; }
 
+#pragma warning disable CS8618
         private Password() { }
+#pragma warning restore CS8618
 
         private Password(string base64String) : this()
         {

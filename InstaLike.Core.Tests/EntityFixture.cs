@@ -11,7 +11,7 @@ namespace InstaLike.Core.Tests
         {
             var e1 = TestEntity.Create(1);
 
-            ((object)null).Should().NotBe(e1);
+            e1.Should().NotBeNull();
         }
 
         [Fact]

@@ -4,7 +4,9 @@ namespace InstaLike.Core.Domain
 {
     public class Comment : EntityBase<int>
     {
+#pragma warning disable CS8618
         protected Comment() { }
+#pragma warning restore CS8618
 
         public Comment(Post post, User author, CommentText text) : this()
         {

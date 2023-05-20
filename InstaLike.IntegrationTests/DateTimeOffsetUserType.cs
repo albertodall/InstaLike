@@ -7,6 +7,7 @@ using NHibernate.UserTypes;
 
 namespace InstaLike.IntegrationTests
 {
+#nullable disable
     /// <summary>
     /// User Type for managing DateTimeOffset fields.
     /// SQLite doesn't have a DateTimeOffset type, so, to address that, this user type splits the original DateTimeOffset value
@@ -97,4 +98,5 @@ namespace InstaLike.IntegrationTests
             NHibernateUtil.TimeSpan.NullSafeSet(cmd, offset, index, session);
         }
     }
+#nullable enable
 }
