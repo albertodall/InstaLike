@@ -49,7 +49,7 @@ namespace InstaLike.Web.CommandHandlers
                             request.FollowerID,
                             request.UnfollowedNickname,
                             userToUnfollow.ID))
-                        .OnFailure(async errorMessage =>
+                        .TapError(async errorMessage =>
                         {
                             await tx.RollbackAsync(cancellationToken);
 

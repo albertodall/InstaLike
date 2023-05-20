@@ -39,7 +39,7 @@ namespace InstaLike.Web.CommandHandlers
                                 user.Nickname,
                                 request.UserID,
                                 request.PostID))
-                        .OnFailure(async errorMessage =>
+                        .TapError(async errorMessage =>
                         {
                             await tx.RollbackAsync(cancellationToken);
                             _logger
@@ -68,7 +68,7 @@ namespace InstaLike.Web.CommandHandlers
                                 user.Nickname,
                                 request.UserID,
                                 request.PostID))
-                        .OnFailure(async errorMessage => 
+                        .TapError(async errorMessage => 
                         {
                             await tx.RollbackAsync(cancellationToken);
                             _logger

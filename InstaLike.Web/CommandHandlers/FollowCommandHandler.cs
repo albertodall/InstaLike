@@ -39,7 +39,7 @@ namespace InstaLike.Web.CommandHandlers
                                 request.FollowedNickname,
                                 followedUser.ID)
                         )
-                        .OnFailure(async errorMessage =>
+                        .TapError(async errorMessage =>
                         {
                             await tx.RollbackAsync(cancellationToken);
 
