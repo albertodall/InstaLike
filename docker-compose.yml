@@ -1,0 +1,50 @@
+version: '3.4'
+
+services:
+  instalike.web:
+    container_name: instalike-web
+    image: ${DOCKER_REGISTRY-}instalikeweb
+    build:
+      context: .
+      dockerfile: InstaLike.Web/Dockerfile
+    depends_on:
+      - instalike.db.mssql
+      - instalike.storage.azureblob
+    networks:
+      - instalike.network
+
+  instalike.db.mssql:
+    container_name: instalike-db-mssql
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Pa55w0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433/tcp"
+      - "1434:1434/udp"
+    hostname: mssql
+    volumes:
+      - "./.containers/db/mssql/data/:/var/opt/mssql/data/"
+      - "./.containers/db/mssql/log/:/var/opt/mssql/log/"
+      - "./.containers/db/mssql/secrets/:/var/opt/mssql/secrets/"
+    networks:
+      - instalike.network
+
+  instalike.storage.azureblob:
+    container_name: instalike-storage-azurite
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    hostname: azurite
+    command: "azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --location /workspace"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - "./.containers/storage/azurite:/workspace"
+    networks:
+      - instalike.network
+
+networks:
+  instalike.network:
+    driver: bridge

@@ -9,7 +9,7 @@
 | Security | [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=albertodall_InstaLike&metric=security_rating)](https://sonarcloud.io/dashboard?id=albertodall_InstaLike) |
 
 ## Once upon a time...
-This project was born, more or less, two years ago.  
+This project was born, more or less, in April 2016.  
 I was teaching a C# Course in a High School, and I needed a "cool" project to sum up all the concepts I explained throughout the course.
 Since (lucky or not) a Social Network is "cool by default", I decided to create a simple [Instagram](https://www.instagram.com) clone.  
 The guys attending the course appreciated the idea a lot, so I did my best to create a working web project that was also simple but with a significant set of features.  
@@ -17,12 +17,13 @@ The original project was a .NET Framework 4.6.2 web application created using AS
 
 ## Evolution
 The project looked interesting, so I decided to use it as my preferred playground for testing new technologies and patterns. Today *InstaLike* is a web application built using some interesting stuff:
+ - Cloud-based
  - Domain Driven Design. 
  - ASP.NET Core.
  - CQRS Pattern. 
  - O/RM Based persistence 
  - Unit testing and integration testing. 
- - Unstructured data (images) storage both on-premises and on the cloud).
+ - Unstructured data (images) storage.
  - Activity logging.
  - Cloud-based image recognition using [Azure Computer Vision](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/).
  
@@ -38,31 +39,35 @@ The project looked interesting, so I decided to use it as my preferred playgroun
 
 ## Requirements
 To work with *InstaLike* source code, you need:
- - [ASP.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core) 3.1.
- - [Visual Studio](https://visualstudio.microsoft.com/) 2019 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
- - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 2014 Express or greater.
+ - [ASP.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core) 6.0.
+ - [Visual Studio](https://visualstudio.microsoft.com/) 2022 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
+ - [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ## Setup
 1. Download the code.
 2. Install the [dotnet.exe](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet)-based [FluentMigrator Runner](https://fluentmigrator.github.io/articles/runners/dotnet-fm.html)
-```
+```shell
 dotnet tool install -g FluentMigrator.DotNet.Cli
 ```
-3. Build *InstaLike.Database* project
+3. Start the Docker-based environment:
+```shell
+docker compose up -d
 ```
+4. Build *InstaLike.Database* project
+```shell
 cd InstaLike.Database
 dotnet build Instalike.Database.csproj
 ```
-4. Create the database using the provided script
-```
+5. Create the database using the provided script (run the script in command prompt window)
+```shell
 cd bin\Debug\netstandard2.0\Scripts
 sqlcmd -S (local) -E -i DatabaseDefinition.sql -v DatabaseName="InstaLike" StoragePath="<path where you want to store data files>"
 ```
-5. Run migrations to create database objects
-```
+6. Run migrations to create database objects
+```shell
 dotnet fm migrate --processor SqlServer2014 --connection "Data Source=(local); Initial Catalog=InstaLike; Integrated Security=True" --tag SqlServerOnPrem --assembly Instalike.Database.dll up
 ```
-6. Build and run the solution
+7. Build and run the solution
 
 ## Acknowledgements
 This project has been built using these awesome Open Source projects:
@@ -78,4 +83,4 @@ This project has been built using these awesome Open Source projects:
 - [Serilog](https://serilog.net)
 - [Humanizer](https://github.com/Humanizr/Humanizer)
 
-Many thanks  also to my friend and fellow worker [Matteo](https://github.com/cefla) for the graphic design. I gave him some rough stuff and he made it beautiful!
+Many thanks also to my friend and fellow worker [Matteo](https://github.com/cefla) for the graphic design. I gave him some rough stuff and he made it beautiful!

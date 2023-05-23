@@ -7,6 +7,7 @@
 *.userosscache
 *.sln.docstates
 sonar.token
+/.containers/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
