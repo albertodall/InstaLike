@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Domain
 {
     public class CommentText : SimpleValueObject<string>
     {
-        // public string Value { get; }
+        private const int CommentTextMaxLength = 200;
 
         private CommentText() : base(string.Empty) { }
 
@@ -20,9 +19,9 @@ namespace InstaLike.Core.Domain
                 return Result.Failure<CommentText>("Text for a comment should not be empty.");
             }
 
-            if (trimmedText.Length > 200)
+            if (trimmedText.Length > CommentTextMaxLength)
             {
-                return Result.Failure<CommentText>("Text for a comment should not be longer than 200 chars.");
+                return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
             }
 
             return Result.Success(new CommentText(trimmedText));

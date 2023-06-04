@@ -5,25 +5,27 @@ namespace InstaLike.Core.Domain
 {
     public class Email : SimpleValueObject<string>
     {
+        private const string EMailValidationRegEx = @"^(.+)@(.+)$";
+
         private Email() : base(string.Empty) { }
 
         private Email(string email) : base(email) { }
 
-        public static Result<Email> Create(string email)
+        public static Result<Email> Create(string input)
         {
-            email = (email ?? string.Empty).Trim();
+            input = (input ?? string.Empty).Trim();
 
-            if (email.Length == 0)
+            if (input.Length == 0)
             {
                 return Result.Failure<Email>("Email should not be empty");
             }
 
-            if (!Regex.IsMatch(email, @"^(.+)@(.+)$"))
+            if (!Regex.IsMatch(input, EMailValidationRegEx))
             {
                 return Result.Failure<Email>("Email is invalid");
             }
 
-            return Result.Success(new Email(email));
+            return Result.Success(new Email(input));
         }
 
         public static explicit operator Email(string email)

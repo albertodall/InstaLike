@@ -4,25 +4,27 @@ namespace InstaLike.Core.Domain
 {
     public class Nickname : SimpleValueObject<string>
     {
+        private const int NickNameMaxLength = 20;
+
         private Nickname() : base(string.Empty) { }
 
         private Nickname(string nickname) : base(nickname) { }
 
         public static Result<Nickname> Create(string nickname)
         {
-            var nick = (nickname ?? string.Empty).Trim();
+            var input = (nickname ?? string.Empty).Trim();
 
-            if (nick.Length == 0)
+            if (input.Length == 0)
             {
                 return Result.Failure<Nickname>("Nickname should not be empty");
             }
 
-            if (nick.Length > 20)
+            if (input.Length > NickNameMaxLength)
             {
-                return Result.Failure<Nickname>("Nickname is too long (max 20 chars)");
+                return Result.Failure<Nickname>($"Nickname is too long (max {NickNameMaxLength} chars)");
             }
 
-            return Result.Success(new Nickname(nick));
+            return Result.Success(new Nickname(input));
         }
 
         public static implicit operator string(Nickname nickname)
