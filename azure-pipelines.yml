@@ -8,9 +8,6 @@ trigger:
       - azure-pipelines.yml
       - README.md
 
-pool:
-  vmImage: 'windows-latest'
-
 variables:
   solution: '**/*.sln'
   databaseMigrationsProject: '**/InstaLike.Database.csproj'
@@ -21,6 +18,8 @@ variables:
 stages:
   - stage: Create_Artifacts
     displayName: 'Build, test and create artifacts'
+    pool:
+      vmImage: ubuntu-latest
     jobs:
       - job: BuildSolution
         displayName: 'Build InstaLike Solution'
@@ -34,10 +33,10 @@ stages:
               projectKey: $(sonarCloudProjectKey)
 
           - task: UseDotNet@2
-            displayName: 'Install .NET Core SDK 3.1.x'
+            displayName: 'Install .NET Core SDK'
             inputs:
               packageType: 'sdk'
-              version: '3.1.x'
+              version: '6.x'
           
           - task: DotNetCoreCLI@2
             displayName: 'Restore NuGet Packages'
@@ -106,10 +105,10 @@ stages:
            deploy:
              steps:
                - task: UseDotNet@2
-                 displayName: 'Install .NET Core SDK 3.1.x'
+                 displayName: 'Install .NET Core SDK'
                  inputs:
                    packageType: 'sdk'
-                   version: '2.1.x'
+                   version: '6.x'
 
                - task: DotNetCoreCLI@2
                  displayName: 'Install FluentMigrator Command Line Tool'
@@ -137,6 +136,7 @@ stages:
       - deployment: DeployWebApp
         displayName: 'Deploy Web Application'
         environment: 'Instalike-Dev'
+        pool: ubuntu-latest
         
         variables:
           DeploymentType: 'AzureCloud'
@@ -167,4 +167,4 @@ stages:
                   appType: 'webAppLinux'
                   appName: 'InstaLike-WebApp'
                   package: '$(Pipeline.Workspace)/InstaLikeWebApplication/*.zip'
-                  runtimeStack: 'DOTNETCORE|3.1'
+                  runtimeStack: 'DOTNETCORE|6.0'
