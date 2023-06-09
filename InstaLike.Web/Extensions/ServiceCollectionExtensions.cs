@@ -8,16 +8,12 @@ using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Security;
 using InstaLike.Web.Services;
 using MediatR;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
-using Serilog;
-using Serilog.Events;
-using Serilog.Exceptions;
 
 namespace InstaLike.Web.Extensions
 {
@@ -40,8 +36,10 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
+            var x = configuration.GetSection("ConnectionStrings");
+
             string databaseConnectionString = configuration.GetConnectionString("DefaultDatabase");
-            string externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:StorageConnectionString");
+            string externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString");
 
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
@@ -95,50 +93,12 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureLogging(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, bool isDevelopmentEnvironment)
         {
-            const string logEntryTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] - Req: {CorrelationID}/{SourceContext} - {Message:lj}{NewLine}{Exception}";
-
-            var loggerConfig = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .Enrich.WithMachineName()
-                .Enrich.WithProcessId()
-                .Enrich.FromLogContext()
-                .Enrich.WithExceptionDetails()
-                .WriteTo.Console(outputTemplate: logEntryTemplate);
-
-            var appInsightsConnectionString = config.GetValue<string>("ApplicationInsights:ConnectionString");
-            if (!string.IsNullOrEmpty(appInsightsConnectionString))
+            services.AddApplicationInsightsTelemetry(opt =>
             {
-                var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-                telemetryConfiguration.ConnectionString = appInsightsConnectionString;
-                loggerConfig.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
-            }
-
-            var logFileName = config.GetValue<string>("LogSettings:LogFile");
-            if (!string.IsNullOrEmpty(logFileName))
-            {
-                var flushInterval = config.GetValue<int>("LogSettings:FlushToDiskIntervalSeconds");
-                loggerConfig.WriteTo.File(
-                    logFileName,
-                    outputTemplate: logEntryTemplate,
-                    flushToDiskInterval: TimeSpan.FromSeconds(flushInterval));
-            }
-
-            Log.Logger = loggerConfig.CreateLogger();
-            services.AddSingleton(Log.Logger);
-
-            return services;
-        }
-
-        public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, IConfiguration configuration)
-        {
-            var appInsightsConnectionString = configuration.GetValue<string>("ApplicationInsights:ConnectionString");
-            if (!string.IsNullOrEmpty(appInsightsConnectionString))
-            {
-                services.AddApplicationInsightsTelemetry(opt => opt.ConnectionString = appInsightsConnectionString);
-            }
+                opt.DeveloperMode = isDevelopmentEnvironment;
+            });
 
             return services;
         }
