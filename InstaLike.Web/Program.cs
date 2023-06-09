@@ -3,7 +3,6 @@ using InstaLike.Core.Domain;
 using InstaLike.Core.Services;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Infrastructure;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -25,11 +24,10 @@ namespace InstaLike.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            builder.Host.UseSerilog(dispose: true);
+            builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.ConfigureLogging(builder.Configuration);
-            builder.Services.ConfigureTelemetry(builder.Configuration);
+            builder.Services.ConfigureTelemetry(builder.Environment.IsDevelopment());
 
             builder.Services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
 
@@ -56,7 +54,6 @@ namespace InstaLike.Web
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
-
             
             if (builder.Environment.IsDevelopment())
             {
@@ -85,7 +82,7 @@ namespace InstaLike.Web
 
         private static bool IsOnPremDeployment(IConfiguration configuration)
         {
-            return configuration.GetValue<DeploymentType>("AppSettings:DeploymentType") == DeploymentType.OnPrem;
+            return configuration.GetValue<DeploymentType>("Settings:DeploymentType") == DeploymentType.OnPrem;
         }
     }
 }
