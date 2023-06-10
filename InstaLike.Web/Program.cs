@@ -35,7 +35,6 @@ namespace InstaLike.Web
             builder.Services.AddMediatR(cfg => {
                 cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly);
             });
-            
 
             if (IsOnPremDeployment(builder.Configuration))
             {

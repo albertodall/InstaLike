@@ -21,7 +21,7 @@ namespace InstaLike.Web.Extensions
     {
         public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
-            string connectionString = configuration.GetConnectionString("DefaultDatabase");
+            string connectionString = configuration.GetConnectionString("InstalikeDatabase");
             var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
@@ -36,9 +36,7 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
-            var x = configuration.GetSection("ConnectionStrings");
-
-            string databaseConnectionString = configuration.GetConnectionString("DefaultDatabase");
+            string databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase");
             string externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString");
 
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
