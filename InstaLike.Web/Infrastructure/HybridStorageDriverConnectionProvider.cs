@@ -35,12 +35,7 @@ namespace InstaLike.Web.Infrastructure
             // Configure external storage, if specified
             if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string? type) && type != null)
             {
-                var externalStorageProviderType = Type.GetType(type);
-                if (externalStorageProviderType == null)
-                {
-                    throw new ArgumentNullException(type, $"Unknown storage provider type: {type}");
-                }
-
+                var externalStorageProviderType = Type.GetType(type) ?? throw new ArgumentNullException(type, $"Unknown storage provider type: {type}");
                 _externalStorageConnectionProvider = (IHybridStorageConnectionProvider?)Activator.CreateInstance(externalStorageProviderType);
                 _externalStorageConnectionProvider?.Configure(settings);
             }
