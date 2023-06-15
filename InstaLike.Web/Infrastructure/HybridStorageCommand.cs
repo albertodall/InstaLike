@@ -4,16 +4,14 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable disable
-
 namespace InstaLike.Web.Infrastructure
 {
     internal class HybridStorageCommand : DbCommand
     {
-        private DbConnection _connection;
+        private DbConnection? _connection;
         private readonly DbCommand _command;
 
-        public HybridStorageCommand(DbConnection connection, DbCommand command)
+        public HybridStorageCommand(DbConnection? connection, DbCommand command)
         {
             _connection = connection;
             _command = command;
@@ -21,11 +19,13 @@ namespace InstaLike.Web.Infrastructure
 
         public virtual DbCommand UnderlyingCommand => _command;
 
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         public override string CommandText
         {
             get => _command.CommandText;
             set => _command.CommandText = value;
         }
+#pragma warning restore CS8765
 
         public override int CommandTimeout
         {
@@ -39,10 +39,10 @@ namespace InstaLike.Web.Infrastructure
             set => _command.CommandType = value;
         }
 
-        public override bool DesignTimeVisible
-        {
-            get => false;
-            set => throw new NotImplementedException();
+        public override bool DesignTimeVisible 
+        { 
+            get => false; 
+            set => throw new NotImplementedException(); 
         }
 
         public override UpdateRowSource UpdatedRowSource
@@ -51,24 +51,24 @@ namespace InstaLike.Web.Infrastructure
             set => _command.UpdatedRowSource = value;
         }
 
-        protected override DbConnection DbConnection
-        {
-            get => _connection;
-            set
+        protected override DbConnection? DbConnection 
+        { 
+            get => _connection; 
+            set  
             {
                 _connection = value;
-                _command.Connection = value is HybridStorageConnection connection 
-                    ? connection.DatabaseConnection 
+                _command.Connection = value is HybridStorageConnection connection
+                    ? connection.DatabaseConnection
                     : value;
-            } 
+            }
         }
 
         protected override DbParameterCollection DbParameterCollection => _command.Parameters;
 
-        protected override DbTransaction DbTransaction
-        {
-            get => _command.Transaction;
-            set => _command.Transaction = value;
+        protected override DbTransaction? DbTransaction 
+        { 
+            get => _command.Transaction; 
+            set => _command.Transaction = value; 
         }
 
         public override void Cancel()
@@ -86,12 +86,12 @@ namespace InstaLike.Web.Infrastructure
             return _command.ExecuteNonQueryAsync(cancellationToken);
         }
 
-        public override object ExecuteScalar()
+        public override object? ExecuteScalar()
         {
             return _command.ExecuteScalar();
         }
 
-        public override Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
+        public override Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
             return _command.ExecuteScalarAsync(cancellationToken);
         }
