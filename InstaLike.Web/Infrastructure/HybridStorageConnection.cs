@@ -5,34 +5,34 @@ using System.Threading.Tasks;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Services;
 
-#nullable disable
-
 namespace InstaLike.Web.Infrastructure
 {
     /// <summary>
     /// This connection "connects" the O/RM to both the database and the external storage.
     /// </summary>
-    internal class HybridStorageConnection : DbConnection, IExternalStorageProvider
+    internal class HybridStorageConnection : DbConnection
     {
         private readonly IExternalStorageProvider _externalStorage;
 
-        public HybridStorageConnection(DbConnection database, IExternalStorageProvider externalStorage)
+        public HybridStorageConnection(DbConnection databaseConnection, IExternalStorageProvider externalStorage)
         {
-            DatabaseConnection = database ?? throw new ArgumentNullException(nameof(database));
+            DatabaseConnection = databaseConnection ?? throw new ArgumentNullException(nameof(databaseConnection));
             _externalStorage = externalStorage ?? throw new ArgumentNullException(nameof(externalStorage));
         }
 
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         public override string ConnectionString
         {
             get => DatabaseConnection.ConnectionString;
             set => DatabaseConnection.ConnectionString = value;
         }
+#pragma warning restore CS8765
 
         public override string Database => DatabaseConnection.Database;
 
-        public override string DataSource => null;
+        public override string DataSource => string.Empty;
 
-        public override string ServerVersion => null;
+        public override string ServerVersion => string.Empty;
 
         public override ConnectionState State => DatabaseConnection.State;
 
@@ -61,9 +61,9 @@ namespace InstaLike.Web.Infrastructure
             return new HybridStorageCommand(this, DatabaseConnection.CreateCommand());
         }
 
-        public async Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
+        public Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
         {
-            return await _externalStorage.LoadPictureAsync(blobFileName, containerName);
+            return _externalStorage.LoadPictureAsync(blobFileName, containerName);
         }
 
         public async Task SavePictureAsync(Picture picture, string containerName)
@@ -80,6 +80,6 @@ namespace InstaLike.Web.Infrastructure
             base.Dispose(disposing);
         }
 
-        internal DbConnection DatabaseConnection { get; }
+        public DbConnection DatabaseConnection { get; }
     }
 }

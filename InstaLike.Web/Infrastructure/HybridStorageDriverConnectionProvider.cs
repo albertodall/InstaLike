@@ -58,17 +58,29 @@ namespace InstaLike.Web.Infrastructure
         public DbConnection GetConnection()
         {
             var connection = _connectionProvider.GetConnection();
-            return _externalStorageConnectionProvider == null 
-                ? connection 
-                : new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            if (_externalStorageConnectionProvider == null)
+            {
+                return connection;
+            }
+
+            var externalStorageProvider = _externalStorageConnectionProvider.GetProvider();
+            return externalStorageProvider == null
+                ? throw new InvalidOperationException("External storage provider has not been properly configured")
+                : new HybridStorageConnection(connection, externalStorageProvider);
         }
 
         public async Task<DbConnection> GetConnectionAsync(CancellationToken cancellationToken)
         {
             var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
-            return _externalStorageConnectionProvider == null 
-                ? connection 
-                : new HybridStorageConnection(connection, _externalStorageConnectionProvider.GetProvider());
+            if (_externalStorageConnectionProvider == null)
+            {
+                return connection;
+            }
+
+            var externalStorageProvider = _externalStorageConnectionProvider.GetProvider();
+            return externalStorageProvider == null
+                ? throw new InvalidOperationException("External storage provider has not been properly configured")
+                : new HybridStorageConnection(connection, externalStorageProvider);
         }
     }
 }
