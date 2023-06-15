@@ -11,7 +11,7 @@ namespace InstaLike.Web.Infrastructure
         where TRequest : IRequest<TResponse>
     {
         private readonly ILogger _logger;
-        private readonly Stopwatch _chronometer = new Stopwatch();
+        private readonly Stopwatch _stopWatch = new();
 
         public RequestTimingMeter(ILogger logger)
         {
@@ -20,11 +20,11 @@ namespace InstaLike.Web.Infrastructure
 
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
-            _chronometer.Start();
+            _stopWatch.Start();
             _logger.Debug("Begin Request");
             var response = await next();
-            _chronometer.Stop();
-            _logger.Debug($"End Request. Elapsed time: {_chronometer.ElapsedMilliseconds} ms.");
+            _stopWatch.Stop();
+            _logger.Debug($"End Request. Elapsed time: {_stopWatch.ElapsedMilliseconds} ms.");
 
             return response;
         }
