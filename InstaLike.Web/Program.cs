@@ -8,13 +8,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
 builder.Services.AddSerilog((services, cfg) => cfg
     .ReadFrom.Configuration(builder.Configuration)
-    .ReadFrom.Services(services));
+    .ReadFrom.Services(services),
+    writeToProviders: true);
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -55,9 +58,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
+app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRequestCorrelation();
 app.UseCookiePolicy();
 
 app.MapDefaultControllerRoute();
