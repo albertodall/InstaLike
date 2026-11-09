@@ -20,46 +20,21 @@ namespace InstaLike.Web.Extensions
 {
     internal static class ServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, IConfiguration configuration)
-        {
-            var connectionString = configuration.GetConnectionString("InstalikeDatabase")
-                ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
-            var nhConfig = GetFluentConfigurationForDatabase(connectionString);
-
-            services.AddSingleton(nhConfig.BuildSessionFactory());
-            services.AddScoped(sp =>
-            {
-                var sessionFactory = sp.GetRequiredService<ISessionFactory>();
-                return sessionFactory.OpenSession();
-            });
-
-            return services;
-        }
-
-        public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
             var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
                 ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
             var externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString")
                 ?? throw new InvalidOperationException("Setting 'ExternalStorage:AzureBlobStorage:ConnectionString' has not been configured.");
 
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
-
-            // Configure external storage
-            services.AddSingleton<IHybridStorageConnectionProvider, AzureBlobStorageConnectionProvider>();
-            services.AddSingleton(sp =>
-            {
-                var connectionProvider = sp.GetRequiredService<IHybridStorageConnectionProvider>();
-
-                nhConfig.ExposeConfiguration(cfg => 
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
+                .ExposeConfiguration(cfg =>
                 {
-                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, connectionProvider.GetType().FullName);
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
                     cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
                 });
 
-                return nhConfig.BuildSessionFactory();
-            });
-            
+            services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
             {
                 var sessionFactory = sp.GetRequiredService<ISessionFactory>();

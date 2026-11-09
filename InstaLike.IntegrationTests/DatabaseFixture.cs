@@ -5,6 +5,7 @@ using FluentNHibernate.Conventions.Helpers;
 using InstaLike.IntegrationTests.Properties;
 using InstaLike.Web.Data;
 using InstaLike.Web.Data.Mapping;
+using InstaLike.Web.Infrastructure;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
 using Xunit.Abstractions;
@@ -20,6 +21,7 @@ namespace InstaLike.IntegrationTests
             SessionFactory = Fluently.Configure()
                 .Database(
                     SQLiteConfiguration.Standard
+                        .Provider<HybridStorageDriverConnectionProvider>()
                         .ConnectionString(BuildTestDatabaseConnectionString(databaseFileName))
                         .AdoNetBatchSize(20)
                         .ShowSql()
@@ -44,6 +46,8 @@ namespace InstaLike.IntegrationTests
                 )
                 .ExposeConfiguration(async cfg =>
                 {
+                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(InMemoryStorageConnectionProvider).AssemblyQualifiedName);
+
                     var schemaExport = new SchemaExport(cfg);
                     schemaExport.SetOutputFile($"{databaseFileName}_Schema.sql");
                     await schemaExport.DropAsync(true, true);

@@ -17,14 +17,14 @@ namespace InstaLike.Web.Infrastructure
             }
         }
 
-        public IExternalStorageProvider? GetProvider()
+        public IExternalStorageProvider GetProvider()
         {
             if (_provider is null)
             {
                 throw new InvalidOperationException("External storage provider has not been configured correctly.");
             }
 
-            return _provider?.Value;
+            return _provider.Value;
         }
     }
 }

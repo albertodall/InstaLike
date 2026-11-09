@@ -4,7 +4,6 @@ BEGIN
 	(
 		[ID] [int] IDENTITY(1,1) NOT NULL,
 		[UserID] [int] NOT NULL,
-		[Picture] [varbinary](max) NOT NULL,
 		[Text] [varchar](500) NOT NULL,
 		[PostDate] [datetimeoffset](7) NOT NULL,
 		[PostGuid] [uniqueidentifier] ROWGUIDCOL NOT NULL

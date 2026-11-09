@@ -9,7 +9,6 @@ BEGIN
 		[Surname] [varchar](50) NOT NULL,
 		[Email] [varchar](50) NOT NULL,
 		[Biography] [varchar](500) NOT NULL,
-		[ProfilePicture] [varbinary](max) NULL,
 		[RegistrationDate] [datetimeoffset](7) NOT NULL,
 		[ProfilePictureGuid] [uniqueidentifier] ROWGUIDCOL NOT NULL
 	)
@@ -35,8 +34,6 @@ BEGIN
 	ALTER TABLE [dbo].[User] ADD CONSTRAINT [DF_User_Email] DEFAULT ('') FOR [Email]
 								 
 	ALTER TABLE [dbo].[User] ADD CONSTRAINT [DF_User_Biography] DEFAULT ('') FOR [Biography]
-								 
-	ALTER TABLE [dbo].[User] ADD CONSTRAINT [DF_User_ProfilePicture] DEFAULT (0x) FOR [ProfilePicture]
 								 
 	ALTER TABLE [dbo].[User] ADD CONSTRAINT [DF_User_RegistrationDate] DEFAULT (sysdatetimeoffset()) FOR [RegistrationDate]
 								 

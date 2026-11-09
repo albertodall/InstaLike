@@ -2,10 +2,8 @@
 using InstaLike.Core.Domain;
 using InstaLike.Core.Services;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -34,14 +32,7 @@ builder.Services.ConfigurePipeline();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly));
 
-if (IsOnPremDeployment(builder.Configuration))
-{
-    builder.Services.ConfigureOnPremDataAccess(builder.Configuration);
-}
-else
-{
-    builder.Services.ConfigureCloudDataAccess(builder.Configuration);
-}
+builder.Services.ConfigureDataAccess(builder.Configuration);
 builder.Services.ConfigureAzureComputerVision(builder.Configuration);
 
 builder.Services.ConfigureAuthentication();
@@ -66,6 +57,3 @@ app.UseCookiePolicy();
 app.MapDefaultControllerRoute();
 
 app.Run();
-
-static bool IsOnPremDeployment(IConfiguration configuration) =>
-    configuration.GetValue<DeploymentType>("Settings:DeploymentType") == DeploymentType.OnPrem;

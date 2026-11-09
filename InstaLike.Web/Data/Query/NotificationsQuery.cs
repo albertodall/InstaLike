@@ -6,7 +6,6 @@ using InstaLike.Core.Domain;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Data.Query
@@ -58,11 +57,11 @@ namespace InstaLike.Web.Data.Query
                     .OrderBy(n => n.NotificationDate).Desc
                     .SelectList(fields => fields
                         .Select(() => recipient.Nickname).WithAlias(() => notification.SenderNickname)
-                        .Select(() => recipient.ProfilePicture.RawBytes).WithAlias(() => notification.SenderProfilePicture)
+                        .Select(() => recipient.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
                         .Select(n => n.Message).WithAlias(() => notification.Message)
                         .Select(n => n.NotificationDate).WithAlias(() => notification.NotificationDate)
                     )
-                    .TransformUsing(Transformers.AliasToBean<NotificationModel>());
+                    .TransformUsing(new EntityToModelResultTransformer<NotificationModel>());
 
                 notifications = (await notificationsQuery.ListAsync<NotificationModel>(cancellationToken)).ToArray();
             }

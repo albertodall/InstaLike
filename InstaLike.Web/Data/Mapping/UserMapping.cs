@@ -28,10 +28,9 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
             Map(p => p.ProfilePicture)
                 .CustomType<ProfilePictureType>()
-                .LazyLoad()
-                .Columns.Clear()
-                .Columns.Add("ProfilePicture").Not.Nullable()
-                .Columns.Add("ProfilePictureGuid").Not.Nullable();
+                .Column("ProfilePictureGuid")
+                .Not.Nullable()
+                .LazyLoad();
 
             Component(p => p.FullName, m =>
             {

@@ -1,131 +1,74 @@
 ﻿using System;
 using System.Data.Common;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
+using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 using NHibernate;
 using NHibernate.Engine;
-using NHibernate.Type;
+using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
 namespace InstaLike.Web.Data.Types
 {
-    internal abstract class ExternalStoragePictureType : ICompositeUserType
+    /// <summary>
+    /// Maps a <see cref="Picture"/> stored in Azure Blob Storage.
+    /// The database only keeps the picture Guid, which is the link to the blob.
+    /// </summary>
+    internal abstract class ExternalStoragePictureType : IUserType
     {
-        public string[] PropertyNames => new[] { "RawBytes", "Identifier" };
+        protected ExternalStoragePictureType(string containerName)
+        {
+            ContainerName = containerName;
+        }
 
-        public IType[] PropertyTypes => new IType[] { NHibernateUtil.BinaryBlob, NHibernateUtil.Guid };
+        public SqlType[] SqlTypes => [SqlTypeFactory.Guid];
 
-        public Type ReturnedClass => typeof(Picture);
+        public Type ReturnedType => typeof(Picture);
 
         public bool IsMutable => false;
 
-        public object Assemble(object cached, ISessionImplementor session, object owner) => DeepCopy(cached);
+        private string ContainerName { get; }
 
-        public object DeepCopy(object value)
+        public object Assemble(object cached, object owner) => cached;
+
+        public object DeepCopy(object value) => value;
+
+        public object Disassemble(object value) => value;
+
+        public new bool Equals(object x, object y) => Object.Equals(x, y);
+
+        public int GetHashCode(object x) => x.GetHashCode();
+
+        public object Replace(object original, object target, object owner) => original;
+
+        public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
         {
-            var picture = value as Picture;
-            if (picture == null)
+            if (NHibernateUtil.Guid.NullSafeGet(rs, names[0], session) is not Guid pictureGuid)
             {
                 return Picture.MissingPicture;
             }
 
-            return Picture.Create(picture.RawBytes, picture.Identifier).Value;
+            return GetExternalStorageProvider(session).LoadPicture(pictureGuid, ContainerName);
         }
 
-        public object Disassemble(object value, ISessionImplementor session) => DeepCopy(value);
-
-        public new bool Equals(object x, object y) => x.Equals(y);
-
-        public int GetHashCode(object x) => x.GetHashCode();
-
-        public object GetPropertyValue(object component, int property)
+        public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor session)
         {
-            var picture = component as Picture;
-
-            if (picture == null)
+            if (value is not Picture picture)
             {
-                throw new ArgumentNullException($"{nameof(component)} is not a valid picture");
+                throw new ArgumentException($"Specified value is not a {nameof(Picture)}", nameof(value));
             }
 
-            if (property == 0)
-            {
-                return picture.RawBytes;
-            }
+            GetExternalStorageProvider(session).SavePicture(picture, ContainerName);
 
-            return picture.Identifier;
+            NHibernateUtil.Guid.NullSafeSet(cmd, picture.Identifier, index, session);
         }
 
-        public abstract object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner);
-
-        public abstract void NullSafeSet(DbCommand cmd, object value, int index, bool[] settable, ISessionImplementor session);
-
-        public object Replace(object original, object target, ISessionImplementor session, object owner) => original;
-
-        public void SetPropertyValue(object component, int property, object value)
+        private static IExternalStorageProvider GetExternalStorageProvider(ISessionImplementor session)
         {
-            throw new InvalidOperationException($"{nameof(Picture)} is an immutable object. SetPropertyValue is not supported.");
-        }
-
-        protected static Picture LoadPictureFromConfiguredProvider(DbDataReader dr, string guidFieldName, string pictureBytesFieldName, ISessionImplementor session, string containerName)
-        {
-            Picture result;
-
-            // Read the picture Guid in the database, actual link between database and external storage.
-            var pictureGuid = dr.GetGuid(dr.GetOrdinal(guidFieldName));
-            var provider = GetExternalStorageProvider(session);
-            if (provider.HasNoValue)
-            {
-                // No external provider configured, read everything from database.
-                var pictureBytes = dr.GetFieldValue<byte[]>(dr.GetOrdinal(pictureBytesFieldName));
-                result = Picture.Create(pictureBytes, pictureGuid).Value;
-            }
-            else
-            {
-                // Read the picture using the configured external provider
-                result = Task.Run(() =>
-                    provider.Value.LoadPictureAsync($"{pictureGuid.ToString().ToLowerInvariant()}.jpg", containerName)
-                ).Result;
-            }
-
-            return result;
-        }
-
-        protected static void SavePictureToConfiguredProvider(DbCommand cmd, Picture picture, int index, ISessionImplementor session, string containerName)
-        {
-            var provider = GetExternalStorageProvider(session);
-            if (provider.HasNoValue)
-            {
-                // No external storage provider configured, save the picture in the database
-                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, picture.RawBytes, index, session);
-            }
-            else
-            {
-                // Save the picture using the configured external storage provider.
-                Task.Run(
-                    () => provider.Value.SavePictureAsync(picture, containerName)
-                ).Wait();
-                NHibernateUtil.BinaryBlob.NullSafeSet(cmd, Array.Empty<byte>(), index, session);
-            }
-
-            // Guid reference must always be saved in the database.
-            NHibernateUtil.Guid.NullSafeSet(cmd, picture.Identifier, ++index, session);
-        }
-
-        private static Maybe<IExternalStorageProvider> GetExternalStorageProvider(ISessionImplementor session)
-        {
-            if (session.Connection == null)
-            {
-                throw new InvalidOperationException($"{nameof(ExternalStoragePictureType)} requires an open connection.");
-            }
-
-            if (session.Connection is IExternalStorageProvider connection)
-            {
-                return Maybe<IExternalStorageProvider>.From(connection);
-            }
-
-            return Maybe<IExternalStorageProvider>.None;
+            return session.Connection is HybridStorageConnection connection
+                ? connection.ExternalStorage
+                : throw new InvalidOperationException(
+                    $"{nameof(ExternalStoragePictureType)} requires a {nameof(HybridStorageConnection)}. Check that the external storage is configured.");
         }
     }
 }
