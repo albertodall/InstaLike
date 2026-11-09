@@ -10,7 +10,7 @@ trigger:
 
 variables:
   solution: '**/*.sln'
-  databaseMigrationsProject: '**/InstaLike.Database.csproj'
+  databaseMigrationsProject: '**/InstaLike.Database.Migrator.csproj'
   webApplicationProject: '**/InstaLike.Web.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
@@ -33,10 +33,10 @@ stages:
               projectKey: $(sonarCloudProjectKey)
 
           - task: UseDotNet@2
-            displayName: 'Install .NET Core SDK'
+            displayName: 'Install .NET SDK'
             inputs:
               packageType: 'sdk'
-              version: '6.x'
+              version: '10.x'
           
           - task: DotNetCoreCLI@2
             displayName: 'Restore NuGet Packages'
@@ -72,7 +72,7 @@ stages:
               modifyOutputPath: false
           
           - task: DotNetCoreCLI@2
-            displayName: 'Build Database Migrations Library'
+            displayName: 'Publish Database Migrator'
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -93,58 +93,48 @@ stages:
               targetPath: '$(Build.ArtifactStagingDirectory)/InstaLikeDbMigrations'
               artifact: 'InstaLikeDbMigrations'
 
-  - stage: Deploy_Dev_Env
-    displayName: 'Deploy in Dev Environment'
+  - stage: Deploy_Azure
+    displayName: 'Deploy to Azure'
     condition: succeeded()
     jobs:
       - deployment: DeployDatabaseMigrations
         displayName: 'Deploy Database Migrations'
-        environment: 'Instalike-Dev'
+        environment: 'InstaLike-Azure'
         strategy:
          runOnce:
            deploy:
              steps:
                - task: UseDotNet@2
-                 displayName: 'Install .NET Core SDK'
+                 displayName: 'Install .NET Runtime'
                  inputs:
-                   packageType: 'sdk'
-                   version: '6.x'
-
-               - task: DotNetCoreCLI@2
-                 displayName: 'Install FluentMigrator Command Line Tool'
-                 inputs:
-                   command: 'custom'
-                   custom: 'tool'
-                   arguments: 'install -g FluentMigrator.DotNet.Cli'
+                   packageType: 'runtime'
+                   version: '10.x'
               
                - task: DownloadPipelineArtifact@2
-                 displayName: 'Get Database Migrations Library'
+                 displayName: 'Get Database Migrator'
                  inputs:
                    buildType: 'current'
                    artifactName: 'InstaLikeDbMigrations'
                    itemPattern: '**/*'
                    targetPath: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
               
-               - task: DotNetCoreCLI@2
+               - script: dotnet InstaLike.Database.Migrator.dll
                  displayName: 'Apply Database Migrations'
-                 inputs:
-                   command: 'custom'
-                   custom: 'fm'
-                   arguments: 'migrate --processor SqlServer2016 --connection "$(Dev-DatabaseConnectionString)" --tag SqlAzure --assembly Instalike.Database.dll up'
-                   workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+                 workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+                 env:
+                   ConnectionStrings__InstalikeDatabase: $(Azure-Database-ConnectionString)
 
       - deployment: DeployWebApp
         displayName: 'Deploy Web Application'
-        environment: 'Instalike-Dev'
+        environment: 'InstaLike-Azure'
         pool: ubuntu-latest
         
         variables:
-          DeploymentType: 'AzureCloud'
-          ConnectionStrings.DefaultDatabase: $(Dev-DatabaseConnectionString)
-          ExternalStorage.AzureBlobStorage.StorageConnectionString: $(Dev-AzureBlob-ConnectionString)
+          ConnectionStrings.InstalikeDatabase: $(Azure-Database-ConnectionString)
+          ExternalStorage.AzureBlobStorage.ConnectionString: $(Azure-Blob-ConnectionString)
           ImageAnalysis.AzureComputerVision.ApiKey: $(Dev-AzureCV-ApiKey)
           ImageAnalysis.AzureComputerVision.ApiUrl: $(Dev-AzureCV-ApiUrl)
-          Logging.AppInsightsInstrumentationKey: $(Dev-AIKey)
+          ApplicationInsights.ConnectionString: $(Azure-AppInsights-ConnectionString)
 
         strategy:
           runOnce:
@@ -167,4 +157,4 @@ stages:
                   appType: 'webAppLinux'
                   appName: 'InstaLike-WebApp'
                   package: '$(Pipeline.Workspace)/InstaLikeWebApplication/*.zip'
-                  runtimeStack: 'DOTNETCORE|6.0'
+                  runtimeStack: 'DOTNETCORE|10.0'
