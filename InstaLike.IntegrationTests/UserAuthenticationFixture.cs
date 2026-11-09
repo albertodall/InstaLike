@@ -1,4 +1,5 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Domain;
@@ -21,7 +22,7 @@ namespace InstaLike.IntegrationTests
         }       
 
         [Fact]
-        public async void Registered_User_Should_Be_Able_To_Log_In()
+        public async Task Registered_User_Should_Be_Able_To_Log_In()
         {
             const string testUserName = "testuser2";
             const string testPassword = "password";
@@ -48,7 +49,7 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
-        public async void Registered_User_Should_Not_Be_Able_To_Log_In_With_Wrong_Password()
+        public async Task Registered_User_Should_Not_Be_Able_To_Log_In_With_Wrong_Password()
         {
             const string testUserName = "testuser3";
             const string testPassword = "password3";
@@ -70,7 +71,7 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
-        public async void Unregistered_User_Should_Not_Be_Able_To_Log_In()
+        public async Task Unregistered_User_Should_Not_Be_Able_To_Log_In()
         {
             Result<User> authenticationResult;
 
