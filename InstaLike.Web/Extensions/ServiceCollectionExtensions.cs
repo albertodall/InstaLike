@@ -74,12 +74,12 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, bool isDevelopmentEnvironment)
+        public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddApplicationInsightsTelemetry(opt =>
+            if (!string.IsNullOrEmpty(configuration.GetValue<string>("ApplicationInsights:ConnectionString")))
             {
-                opt.DeveloperMode = isDevelopmentEnvironment;
-            });
+                services.AddApplicationInsightsTelemetry();
+            }
 
             return services;
         }
