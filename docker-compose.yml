@@ -23,7 +23,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
       ImageAnalysis__Endpoint: "http://ollama:11434/v1/"
     ports:
-      - "5080:8080"
+      - "5000:8080"
+      - "5001:8081"
     depends_on:
       instalike.db.migrator:
         condition: service_completed_successfully

@@ -5,7 +5,7 @@
       "commandVersion": "1.0",
       "composeLaunchAction": "LaunchBrowser",
       "composeLaunchServiceName": "instalike.web",
-      "composeLaunchUrl": "http://localhost:5080",
+      "composeLaunchUrl": "https://localhost:5001",
       "serviceActions": {
         "instalike.web": "StartDebugging",
         "instalike.db.migrator": "StartWithoutDebugging",

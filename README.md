@@ -49,7 +49,7 @@ Locally, SQL Server and [Azurite](https://github.com/Azure/Azurite) (the Azure S
 
 | Service | Container | Local endpoint |
 |---|---|---|
-| Web application | `instalike-web` | http://localhost:5080 |
+| Web application | `instalike-web` | https://localhost:5001 (HTTP on http://localhost:5000) |
 | SQL Server 2022 | `instalike-db-mssql` | `localhost,1433` (user `sa`, password `Pa55w0rd`) |
 | Azurite (Blob Storage) | `instalike-storage-azurite` | http://localhost:10000 |
 | Aspire Dashboard (logs, traces, metrics) | `instalike-dashboard` | http://localhost:18888 (OTLP on `localhost:4317`) |
@@ -61,6 +61,13 @@ docker compose up --build
 ```
 The database migrator ([DbUp](https://dbup.readthedocs.io)) creates the database and applies the scripts in `InstaLike.Database.Migrator/mssql` once SQL Server is healthy, then the web application starts and creates the blob containers if they are missing.
 Data is persisted under `.containers/`. Delete that folder to start from scratch.
+
+HTTPS uses the ASP.NET Core development certificate. Visual Studio exports it for you; from the command line, export it once and store its password in the web application's user secrets:
+```shell
+dotnet dev-certs https --trust
+dotnet dev-certs https -ep "%APPDATA%\ASP.NET\Https\InstaLike.Web.pfx" -p <password>
+dotnet user-secrets --project InstaLike.Web set "Kestrel:Certificates:Development:Password" "<password>"
+```
 
 The web application sends its logs, traces and metrics through OpenTelemetry to the [Aspire Dashboard](https://aspire.dev/dashboard/standalone/), where they can be searched and correlated by trace. In Azure, the same data goes to Application Insights.
 
