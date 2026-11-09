@@ -31,7 +31,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
     public PostDetailQueryHandler(ISession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<PostDetailQuery>() ?? throw new ArgumentNullException(nameof(logger)) ;
+        _logger = logger?.ForContext<PostDetailQuery>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
         using (var tx = _session.BeginTransaction())
         {
             // Total likes for this post
-            var postLikesCountQuery =_session.QueryOver<Like>()
+            var postLikesCountQuery = _session.QueryOver<Like>()
                 .Where(l => l.Post.ID == request.PostID)
                 .ToRowCountQuery()
                 .FutureValue<int>();
@@ -83,7 +83,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
                     .Select(p => p.Picture).WithAlias(() => post.Picture)
                     .Select(p => p.PostDate).WithAlias(() => post.PostDate)
                     .Select(() => postAuthor.Nickname).WithAlias(() => post.AuthorNickName)
-                    .Select(() => postAuthor.ProfilePicture).WithAlias(() => post.AuthorProfilePicture)                        
+                    .Select(() => postAuthor.ProfilePicture).WithAlias(() => post.AuthorProfilePicture)
                 )
                 .TransformUsing(new EntityToModelResultTransformer<PostModel>())
                 .FutureValue<PostModel>();

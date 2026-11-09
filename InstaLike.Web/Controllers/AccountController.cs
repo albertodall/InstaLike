@@ -238,7 +238,7 @@ public class AccountController : Controller
     /// </summary>
     /// <param name="user">Authenticated user.</param>
     /// <returns>The list of claims.</returns>
-    private static IEnumerable<Claim> GetUserClaims(User user) 
+    private static IEnumerable<Claim> GetUserClaims(User user)
     {
         return new List<Claim>
         {

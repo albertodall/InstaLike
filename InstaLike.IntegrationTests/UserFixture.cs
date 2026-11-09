@@ -1,11 +1,11 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Threading.Tasks;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Domain;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Models;
 using Serilog;
-using System;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,7 +26,7 @@ public class UserFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Load_User_Profile()
     {
         UserProfileModel result;
-        
+
         var author = new User((Nickname)"authoruser", (FullName)"author user", Password.Create("password").Value, (Email)"authoruser@acme.com", "my bio");
         var followed = new User((Nickname)"followeduser", (FullName)"followed user", Password.Create("password").Value, (Email)"followed@acme.com", "my bio");
         var follower = new User((Nickname)"followeruser", (FullName)"follower user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
@@ -63,7 +63,7 @@ public class UserFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Read_User_Details_For_Editing()
     {
         UserDetailsModel result;
-        
+
         var user = new User((Nickname)"testuser", (FullName)"test user", Password.Create("password").Value, (Email)"testuser@acme.com", "my bio");
         using (var session = _testFixture.OpenSession(_output))
         {

@@ -6,7 +6,7 @@ using InstaLike.Core.Properties;
 namespace InstaLike.Core.Domain;
 
 public class Picture : ValueObject
-{ 
+{
     private const string DefaultProfilePictureGuid = "00010000-0000-0000-0000-000000000000";
     private const string PicturePlaceholderGuid = "00000100-0000-0000-0000-000000000000";
     private const string MissingPictureGuid = "00000001-0000-0000-0000-000000000000";

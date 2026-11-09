@@ -1,4 +1,4 @@
-namespace InstaLike.Web.Models;
+﻿namespace InstaLike.Web.Models;
 
 public class ErrorViewModel
 {

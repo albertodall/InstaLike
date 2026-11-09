@@ -18,10 +18,10 @@ public struct SequentialGuid : IComparable<SequentialGuid>, IComparable<Guid>, I
     private const byte NumberOfGuidBytes = 10;
     private const byte NumberOfSequenceBytes = 6;
     private const short PermutationsOfAByte = 256;
-    
+
     private static readonly long MaximumPermutations = (long)Math.Pow(PermutationsOfAByte, NumberOfSequenceBytes);
     private static readonly object SynchronizationObject = new();
-    
+
     private static readonly DateTime SequencePeriodStart = new(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc); // Start = 000000
     private static readonly DateTime SequencePeriodEnd = new(2500, 1, 1, 0, 0, 0, DateTimeKind.Utc); // End   = FFFFFF
     private static readonly int[] IndexOrderingHighLow = { 10, 11, 12, 13, 14, 15, 8, 9, 7, 6, 5, 4, 3, 2, 1, 0 };
@@ -47,7 +47,7 @@ public struct SequentialGuid : IComparable<SequentialGuid>, IComparable<Guid>, I
         // Outside the range, use regular Guid
         if (value < SequencePeriodStart || value >= SequencePeriodEnd)
         {
-            return Guid.NewGuid(); 
+            return Guid.NewGuid();
         }
 
         var sequence = GetCurrentSequence(value);
@@ -73,7 +73,7 @@ public struct SequentialGuid : IComparable<SequentialGuid>, IComparable<Guid>, I
         var resultDecimal = factor * MaximumPermutations;
         return (long)resultDecimal;
     }
-    
+
     private static IEnumerable<byte> GetSequenceBytes(long sequence)
     {
         var sequenceBytes = BitConverter.GetBytes(sequence);

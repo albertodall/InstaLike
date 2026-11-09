@@ -42,7 +42,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
         PostModel[] timeline;
 
         using (var tx = _session.BeginTransaction())
-        {           
+        {
             Post post = null!;
             Comment comment = null!;
             User postAuthor = null!;
@@ -98,14 +98,14 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
 
             // Mapping
             var timelineList = timelineQueryResult.Select(p => new PostModel
-                {
-                    PostID = p.ID,
-                    AuthorNickName = p.Author.Nickname,
-                    AuthorProfilePicture = p.Author.ProfilePicture,
-                    Picture = p.Picture,
-                    PostDate = p.PostDate,
-                    Text = p.Text,
-                    Comments = p.Comments
+            {
+                PostID = p.ID,
+                AuthorNickName = p.Author.Nickname,
+                AuthorProfilePicture = p.Author.ProfilePicture,
+                Picture = p.Picture,
+                PostDate = p.PostDate,
+                Text = p.Text,
+                Comments = p.Comments
                         .OrderByDescending(c => c.CommentDate)
                         .Select(c => new CommentModel
                         {
@@ -114,10 +114,10 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                             CommentDate = c.CommentDate,
                             Text = c.Text
                         }).ToArray(),
-                    LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
-                    IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
-                    CanBeEditedByCurrentUser = p.CanBeEditedBy(currentUser)
-                });
+                LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
+                IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
+                CanBeEditedByCurrentUser = p.CanBeEditedBy(currentUser)
+            });
 
             timeline = timelineList.OrderByDescending(p => p.PostDate).ToArray();
 

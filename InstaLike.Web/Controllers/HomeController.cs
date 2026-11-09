@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using InstaLike.Web.Models;
 using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using InstaLike.Web.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Controllers;
 

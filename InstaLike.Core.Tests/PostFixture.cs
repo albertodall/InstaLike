@@ -53,7 +53,7 @@ public class PostFixture
 
     [Fact]
     public void Post_Author_Should_Not_Put_Like_To_His_Posts()
-     {
+    {
         var postAuthor = CreateTestPostAuthor();
         var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
 
@@ -172,10 +172,10 @@ public class PostFixture
         var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
 
         var otherUser = new User(
-            (Nickname)"user2", 
-            (FullName)"Test User 2", 
-            (Password)"password", 
-            (Email)"user2@acme.com", 
+            (Nickname)"user2",
+            (FullName)"Test User 2",
+            (Password)"password",
+            (Email)"user2@acme.com",
             "My Bio");
 
         sut.CanBeEditedBy(otherUser).Should().BeFalse();

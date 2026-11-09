@@ -74,7 +74,7 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
                             user.Nickname,
                             request.UserID,
                             request.PostID))
-                    .TapError(async errorMessage => 
+                    .TapError(async errorMessage =>
                     {
                         await tx.RollbackAsync(cancellationToken);
                         _logger
@@ -91,7 +91,7 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
     private async Task<Post?> GetPostAsync(int userID, int postID, CancellationToken cancellationToken)
     {
         Like likeAlias = null!;
-        
+
         var postQuery = _session.QueryOver<Post>()
             .Left.JoinAlias(p => p.Likes, () => likeAlias)
             .Where(p => p.ID == postID)

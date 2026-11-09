@@ -60,7 +60,7 @@ public class FollowedUserEventHandler : INotificationHandler<FollowedUserEvent>
             {
                 await tx.RollbackAsync(cancellationToken);
 
-                _logger.Error("Failed to send follow notification to user [{FollowedNickname}({FollowedID})]. Error message: {ErrorMessage})", 
+                _logger.Error("Failed to send follow notification to user [{FollowedNickname}({FollowedID})]. Error message: {ErrorMessage})",
                     recipient?.Nickname,
                     recipient?.ID,
                     ex.Message);
