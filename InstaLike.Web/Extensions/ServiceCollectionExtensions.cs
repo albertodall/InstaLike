@@ -7,7 +7,6 @@ using InstaLike.Web.Data;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Security;
 using InstaLike.Web.Services;
-using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +14,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
 using NHibernate.Driver;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace InstaLike.Web.Extensions
 {
@@ -80,9 +84,26 @@ namespace InstaLike.Web.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigurePipeline(this IServiceCollection services)
+        public static IServiceCollection ConfigureOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestTimingMeter<,>));
+            var openTelemetry = services.AddOpenTelemetry()
+                .ConfigureResource(resource => resource.AddService("InstaLike.Web"))
+                .WithTracing(tracing => tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddSqlClientInstrumentation())
+                .WithMetrics(metrics => metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddMeter("System.Runtime"))
+                .WithLogging();
+
+            services.Configure<OpenTelemetryLoggerOptions>(options => options.IncludeFormattedMessage = true);
+
+            if (!string.IsNullOrEmpty(configuration.GetValue<string>("OTEL_EXPORTER_OTLP_ENDPOINT")))
+            {
+                openTelemetry.UseOtlpExporter();
+            }
 
             return services;
         }

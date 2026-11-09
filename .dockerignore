@@ -1,10 +1,13 @@
 **/.classpath
+**/.containers
 **/.dockerignore
 **/.env
 **/.git
 **/.gitignore
 **/.project
 **/.settings
+**/.sonarqube
+**/.terraform
 **/.toolstarget
 **/.vs
 **/.vscode
@@ -21,5 +24,8 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+infra
 LICENSE
 README.md
+sonar.token
+sonarcloud.cmd

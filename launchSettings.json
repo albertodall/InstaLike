@@ -3,8 +3,15 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "instalike.web",
+      "composeLaunchUrl": "http://localhost:5080",
       "serviceActions": {
-        "instalike.web": "StartDebugging"
+        "instalike.web": "StartDebugging",
+        "instalike.db.migrator": "StartWithoutDebugging",
+        "instalike.db.mssql": "StartWithoutDebugging",
+        "instalike.storage.azureblob": "StartWithoutDebugging",
+        "instalike.dashboard": "StartWithoutDebugging"
       }
     }
   }
