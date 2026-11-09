@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 using InstaLike.Core.Domain;
 
 namespace InstaLike.Web.Services
 {
     internal interface IExternalStorageProvider
     {
-        Task<Picture> LoadPictureAsync(string blobFileName, string containerName);
-        Task SavePictureAsync(Picture picture, string containerName);
+        Picture LoadPicture(Guid identifier, string containerName);
+        void SavePicture(Picture picture, string containerName);
     }
 }

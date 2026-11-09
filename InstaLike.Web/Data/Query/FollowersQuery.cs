@@ -7,7 +7,6 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Data.Query
@@ -51,9 +50,9 @@ namespace InstaLike.Web.Data.Query
                     .Where(Restrictions.Eq(Projections.Property(() => followed.Nickname), request.Nickname))
                     .SelectList(fields => fields
                         .Select(f => follower.Nickname).WithAlias(() => model.Nickname)
-                        .Select(f => follower.ProfilePicture.RawBytes).WithAlias(() => model.ProfilePicture)
+                        .Select(f => follower.ProfilePicture).WithAlias(() => model.ProfilePicture)
                     )
-                    .TransformUsing(Transformers.AliasToBean<FollowModel>());
+                    .TransformUsing(new EntityToModelResultTransformer<FollowModel>());
 
                 result = (await followersQuery.ListAsync<FollowModel>(cancellationToken)).ToArray();
             }

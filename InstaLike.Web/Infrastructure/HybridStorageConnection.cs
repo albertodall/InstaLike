@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
-using System.Threading.Tasks;
-using InstaLike.Core.Domain;
 using InstaLike.Web.Services;
 
 namespace InstaLike.Web.Infrastructure
@@ -12,12 +10,10 @@ namespace InstaLike.Web.Infrastructure
     /// </summary>
     internal class HybridStorageConnection : DbConnection
     {
-        private readonly IExternalStorageProvider _externalStorage;
-
         public HybridStorageConnection(DbConnection databaseConnection, IExternalStorageProvider externalStorage)
         {
             DatabaseConnection = databaseConnection ?? throw new ArgumentNullException(nameof(databaseConnection));
-            _externalStorage = externalStorage ?? throw new ArgumentNullException(nameof(externalStorage));
+            ExternalStorage = externalStorage ?? throw new ArgumentNullException(nameof(externalStorage));
         }
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
@@ -61,16 +57,6 @@ namespace InstaLike.Web.Infrastructure
             return new HybridStorageCommand(this, DatabaseConnection.CreateCommand());
         }
 
-        public Task<Picture> LoadPictureAsync(string blobFileName, string containerName)
-        {
-            return _externalStorage.LoadPictureAsync(blobFileName, containerName);
-        }
-
-        public async Task SavePictureAsync(Picture picture, string containerName)
-        {
-            await _externalStorage.SavePictureAsync(picture, containerName);
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -81,5 +67,7 @@ namespace InstaLike.Web.Infrastructure
         }
 
         public DbConnection DatabaseConnection { get; }
+
+        public IExternalStorageProvider ExternalStorage { get; }
     }
 }

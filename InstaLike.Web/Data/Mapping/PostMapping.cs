@@ -19,12 +19,11 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.PostDate)
                 .Not.Nullable();
 
-            Map(memberExpression: p => p.Picture)
+            Map(p => p.Picture)
                 .CustomType<PostPictureType>()
-                .Columns.Clear()
-                .Columns.Add("[Picture]").Not.Nullable()
-                .Columns.Add("PostGuid").Length(2_000_000).Not.Nullable();
-                
+                .Column("PostGuid")
+                .Not.Nullable();
+
             References(p => p.Author)
                 .Column("UserID");
 

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using InstaLike.Web.Services;
 using NHibernate.Connection;
 using NHibernate.Driver;
 
 namespace InstaLike.Web.Infrastructure
 {
     /// <summary>
-    /// Strategy to get a connection to both the database and the external storage.
+    /// Strategy to get a connection to both the database and the external storage (Azure Blob Storage) holding pictures.
     /// </summary>
     internal class HybridStorageDriverConnectionProvider : IConnectionProvider
     {
@@ -32,13 +33,15 @@ namespace InstaLike.Web.Infrastructure
         {
             _connectionProvider.Configure(settings);
 
-            // Configure external storage, if specified
-            if (settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string? type) && type != null)
+            if (!settings.TryGetValue(ExternalStorageParameters.ConnectionProviderProperty, out string? type) || string.IsNullOrEmpty(type))
             {
-                var externalStorageProviderType = Type.GetType(type) ?? throw new ArgumentNullException(type, $"Unknown storage provider type: {type}");
-                _externalStorageConnectionProvider = (IHybridStorageConnectionProvider?)Activator.CreateInstance(externalStorageProviderType);
-                _externalStorageConnectionProvider?.Configure(settings);
+                throw new InvalidOperationException($"External storage provider has not been configured. Set the '{ExternalStorageParameters.ConnectionProviderProperty}' property.");
             }
+
+            var externalStorageProviderType = Type.GetType(type) ?? throw new ArgumentException($"Unknown storage provider type: {type}", nameof(settings));
+            _externalStorageConnectionProvider = (IHybridStorageConnectionProvider?)Activator.CreateInstance(externalStorageProviderType)
+                ?? throw new InvalidOperationException($"Unable to create storage provider of type {type}");
+            _externalStorageConnectionProvider.Configure(settings);
         }
 
         public void Dispose()
@@ -57,30 +60,18 @@ namespace InstaLike.Web.Infrastructure
 
         public DbConnection GetConnection()
         {
-            var connection = _connectionProvider.GetConnection();
-            if (_externalStorageConnectionProvider == null)
-            {
-                return connection;
-            }
-
-            var externalStorageProvider = _externalStorageConnectionProvider.GetProvider();
-            return externalStorageProvider == null
-                ? throw new InvalidOperationException("External storage provider has not been properly configured")
-                : new HybridStorageConnection(connection, externalStorageProvider);
+            return new HybridStorageConnection(_connectionProvider.GetConnection(), GetExternalStorageProvider());
         }
 
         public async Task<DbConnection> GetConnectionAsync(CancellationToken cancellationToken)
         {
-            var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
-            if (_externalStorageConnectionProvider == null)
-            {
-                return connection;
-            }
+            return new HybridStorageConnection(await _connectionProvider.GetConnectionAsync(cancellationToken), GetExternalStorageProvider());
+        }
 
-            var externalStorageProvider = _externalStorageConnectionProvider.GetProvider();
-            return externalStorageProvider == null
-                ? throw new InvalidOperationException("External storage provider has not been properly configured")
-                : new HybridStorageConnection(connection, externalStorageProvider);
+        private IExternalStorageProvider GetExternalStorageProvider()
+        {
+            return _externalStorageConnectionProvider?.GetProvider()
+                ?? throw new InvalidOperationException("External storage provider has not been configured.");
         }
     }
 }
