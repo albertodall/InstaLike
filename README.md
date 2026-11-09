@@ -39,35 +39,50 @@ The project looked interesting, so I decided to use it as my preferred playgroun
 
 ## Requirements
 To work with *InstaLike* source code, you need:
- - [ASP.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core) 6.0.
- - [Visual Studio](https://visualstudio.microsoft.com/) 2022 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
+ - [.NET SDK](https://dotnet.microsoft.com/download) 10.0.
+ - [Visual Studio](https://visualstudio.microsoft.com/) 2026 or greater (the free [Community Edition](https://visualstudio.microsoft.com/vs/community/) is enough), or the IDE you like.
  - [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-## Setup
-1. Download the code.
-2. Install the [dotnet.exe](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet)-based [FluentMigrator Runner](https://fluentmigrator.github.io/articles/runners/dotnet-fm.html)
+## Architecture at a glance
+*InstaLike* is a cloud application: data lives in SQL Server (Azure SQL in the cloud), while pictures are stored in [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs), in the `posts` and `profiles` containers. The database keeps only the picture identifiers.
+Locally, SQL Server and [Azurite](https://github.com/Azure/Azurite) (the Azure Storage emulator) run in containers.
+
+| Service | Container | Local endpoint |
+|---|---|---|
+| Web application | `instalike-web` | http://localhost:5080 |
+| SQL Server 2022 | `instalike-db-mssql` | `localhost,1433` (user `sa`, password `Pa55w0rd`) |
+| Azurite (Blob Storage) | `instalike-storage-azurite` | http://localhost:10000 |
+| Aspire Dashboard (logs, traces, metrics) | `instalike-dashboard` | http://localhost:18888 (OTLP on `localhost:4317`) |
+| Database migrator (runs once) | `instalike-db-migrator` | - |
+
+## Run everything in containers
 ```shell
-dotnet tool install -g FluentMigrator.DotNet.Cli
+docker compose up --build
 ```
-3. Start the Docker-based environment:
+The database migrator ([DbUp](https://dbup.readthedocs.io)) creates the database and applies the scripts in `InstaLike.Database.Migrator/mssql` once SQL Server is healthy, then the web application starts and creates the blob containers if they are missing.
+Data is persisted under `.containers/`. Delete that folder to start from scratch.
+
+The web application sends its logs, traces and metrics through OpenTelemetry to the [Aspire Dashboard](https://aspire.dev/dashboard/standalone/), where they can be searched and correlated by trace. In Azure, the same data goes to Application Insights.
+
+In Visual Studio, set the `docker-compose` project as the startup project to debug the web application inside its container. The other services, including the one-shot migrator, start without the debugger.
+
+## Run the web application from your IDE
+1. Start the infrastructure only:
 ```shell
-docker compose up -d
+docker compose up -d instalike.db.mssql instalike.storage.azureblob instalike.db.migrator instalike.dashboard
 ```
-4. Build *InstaLike.Database* project
+2. Run the `InstaLike.Web` project with the `Development` environment: `appsettings.Development.json` points to the containerized SQL Server and to Azurite (`UseDevelopmentStorage=true`).
+
+To apply new database scripts without containers:
 ```shell
-cd InstaLike.Database
-dotnet build Instalike.Database.csproj
+dotnet run --project InstaLike.Database.Migrator -- "Data Source=localhost,1433; Initial Catalog=InstaLike; User ID=sa; Password=Pa55w0rd; TrustServerCertificate=True"
 ```
-5. Create the database using the provided script (run the script in command prompt window)
+
+## Tests
 ```shell
-cd bin\Debug\netstandard2.0\Scripts
-sqlcmd -S (local) -E -i DatabaseDefinition.sql -v DatabaseName="InstaLike" StoragePath="<path where you want to store data files>"
+dotnet test
 ```
-6. Run migrations to create database objects
-```shell
-dotnet fm migrate --processor SqlServer2014 --connection "Data Source=(local); Initial Catalog=InstaLike; Integrated Security=True" --tag SqlServerOnPrem --assembly Instalike.Database.dll up
-```
-7. Build and run the solution
+Integration tests run on SQLite with an in-memory picture store, so they do not need any container.
 
 ## Acknowledgements
 This project has been built using these awesome Open Source projects:
@@ -77,7 +92,7 @@ This project has been built using these awesome Open Source projects:
 - [MediatR](https://github.com/jbogard/MediatR)
 - [NHibernate](https://github.com/nhibernate/nhibernate-core)
 - [FluentNHibernate](https://github.com/FluentNHibernate/fluent-nhibernate)
-- [FluentMigrator](https://fluentmigrator.github.io)
+- [DbUp](https://dbup.readthedocs.io)
 - [Xunit](https://xunit.net)
 - [FluentAssertions](https://fluentassertions.com)
 - [Serilog](https://serilog.net)
