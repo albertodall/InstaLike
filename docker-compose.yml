@@ -21,6 +21,7 @@ services:
       # Well-known Azurite development account key (not a secret).
       ExternalStorage__AzureBlobStorage__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      ImageAnalysis__Endpoint: "http://ollama:11434/v1/"
     ports:
       - "5080:8080"
     depends_on:
@@ -100,6 +101,28 @@ services:
       instalike.network:
         aliases:
           - dashboard
+
+  instalike.ai.ollama:
+    container_name: instalike-ai-ollama
+    logging: *default-logging
+    image: ollama/ollama:0.40.15
+    # Downloads the model on first start, then keeps serving it.
+    entrypoint: ["/bin/sh", "-c", "ollama serve & pid=$$!; trap 'kill $$pid; wait $$pid; exit 0' INT TERM; until ollama list > /dev/null 2>&1; do sleep 1; done; ollama show qwen2.5vl:3b > /dev/null 2>&1 || ollama pull qwen2.5vl:3b; wait $$pid"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - "./.containers/ollama:/root/.ollama"
+    healthcheck:
+      test: ["CMD", "ollama", "show", "qwen2.5vl:3b"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30m
+      start_interval: 2s
+    networks:
+      instalike.network:
+        aliases:
+          - ollama
 
 networks:
   instalike.network:

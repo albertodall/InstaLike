@@ -160,9 +160,9 @@ public class PostController : Controller
         {
             Result<string[]> taggingResult;
 
-            await using (var pictureStream = await Request.Form.Files[0].ToStreamAsync())
+            await using (var pictureStream = await formFiles[0].ToStreamAsync())
             {
-                taggingResult = await _imageRecognition.AutoTagImage(pictureStream);
+                taggingResult = await _imageRecognition.AutoTagImage(pictureStream, formFiles[0].ContentType);
             }
 
             if (taggingResult.IsSuccess)
