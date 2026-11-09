@@ -7,84 +7,83 @@ using NHibernate.Engine;
 using NHibernate.SqlCommand;
 using NHibernate.SqlTypes;
 
-namespace InstaLike.Web.Infrastructure
+namespace InstaLike.Web.Infrastructure;
+
+internal class HybridStorageDriver : IDriver
 {
-    internal class HybridStorageDriver : IDriver
+    public HybridStorageDriver(IDriver driver)
     {
-        public HybridStorageDriver(IDriver driver)
-        {
-            Driver = driver ?? throw new ArgumentNullException(nameof(driver));
-        }
+        Driver = driver ?? throw new ArgumentNullException(nameof(driver));
+    }
 
-        public bool SupportsMultipleOpenReaders => Driver.SupportsMultipleOpenReaders;
+    public bool SupportsMultipleOpenReaders => Driver.SupportsMultipleOpenReaders;
 
-        public bool SupportsMultipleQueries => Driver.SupportsMultipleQueries;
+    public bool SupportsMultipleQueries => Driver.SupportsMultipleQueries;
 
-        public bool RequiresTimeSpanForTime => Driver.RequiresTimeSpanForTime;
+    public bool RequiresTimeSpanForTime => Driver.RequiresTimeSpanForTime;
 
-        public bool SupportsSystemTransactions => Driver.SupportsSystemTransactions;
+    public bool SupportsSystemTransactions => Driver.SupportsSystemTransactions;
 
-        public bool SupportsNullEnlistment => Driver.SupportsNullEnlistment;
+    public bool SupportsNullEnlistment => Driver.SupportsNullEnlistment;
 
-        public bool SupportsEnlistmentWhenAutoEnlistmentIsDisabled => Driver.SupportsEnlistmentWhenAutoEnlistmentIsDisabled;
+    public bool SupportsEnlistmentWhenAutoEnlistmentIsDisabled => Driver.SupportsEnlistmentWhenAutoEnlistmentIsDisabled;
 
-        public bool HasDelayedDistributedTransactionCompletion => Driver.HasDelayedDistributedTransactionCompletion;
+    public bool HasDelayedDistributedTransactionCompletion => Driver.HasDelayedDistributedTransactionCompletion;
 
-        public DateTime MinDate => Driver.MinDate;
+    public DateTime MinDate => Driver.MinDate;
 
-        public IDriver Driver { get; }
+    public IDriver Driver { get; }
 
-        public void Configure(IDictionary<string, string> settings)
-        {
-            Driver.Configure(settings);
-        }
+    public void Configure(IDictionary<string, string> settings)
+    {
+        Driver.Configure(settings);
+    }
 
-        public DbConnection CreateConnection()
-        {
-            return Driver.CreateConnection();
-        }
+    public DbConnection CreateConnection()
+    {
+        return Driver.CreateConnection();
+    }
 
-        public void ExpandQueryParameters(DbCommand cmd, SqlString sqlString, SqlType[] parameterTypes)
-        {
-            Driver.ExpandQueryParameters(cmd, sqlString, parameterTypes);
-        }
+    public void ExpandQueryParameters(DbCommand cmd, SqlString sqlString, SqlType[] parameterTypes)
+    {
+        Driver.ExpandQueryParameters(cmd, sqlString, parameterTypes);
+    }
 
-        public void AdjustCommand(DbCommand command)
-        {
-            Driver.AdjustCommand(command);
-        }
+    public void AdjustCommand(DbCommand command)
+    {
+        Driver.AdjustCommand(command);
+    }
 
-        public DbCommand GenerateCommand(CommandType type, SqlString sqlString, SqlType[] parameterTypes)
-        {
-            // External storage doesn't have a "real" connection...
-            return new HybridStorageCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
-        }
+    public DbCommand GenerateCommand(CommandType type, SqlString sqlString, SqlType[] parameterTypes)
+    {
+        // External storage doesn't have a "real" connection...
+        return new HybridStorageCommand(null, Driver.GenerateCommand(type, sqlString, parameterTypes));
+    }
 
-        public IResultSetsCommand GetResultSetsCommand(ISessionImplementor session)
-        {
-            return Driver.GetResultSetsCommand(session);
-        }
+    public IResultSetsCommand GetResultSetsCommand(ISessionImplementor session)
+    {
+        return Driver.GetResultSetsCommand(session);
+    }
 
-        public void PrepareCommand(DbCommand command)
-        {
-            Driver.PrepareCommand(GetUnderlyingCommand(command));
-        }
+    public void PrepareCommand(DbCommand command)
+    {
+        Driver.PrepareCommand(GetUnderlyingCommand(command));
+    }
 
-        public DbParameter GenerateParameter(DbCommand command, string name, SqlType sqlType)
-        {
-            return Driver.GenerateParameter(command, name, sqlType);
-        }
+    public DbParameter GenerateParameter(DbCommand command, string name, SqlType sqlType)
+    {
+        return Driver.GenerateParameter(command, name, sqlType);
+    }
 
-        public void RemoveUnusedCommandParameters(DbCommand cmd, SqlString sqlString)
-        {
-            Driver.RemoveUnusedCommandParameters(GetUnderlyingCommand(cmd), sqlString);
-        }
+    public void RemoveUnusedCommandParameters(DbCommand cmd, SqlString sqlString)
+    {
+        Driver.RemoveUnusedCommandParameters(GetUnderlyingCommand(cmd), sqlString);
+    }
 
-        private static DbCommand GetUnderlyingCommand(DbCommand command)
-        {
-            return command is HybridStorageCommand cmd
-                ? cmd.UnderlyingCommand
-                : command;
-        }
+    private static DbCommand GetUnderlyingCommand(DbCommand command)
+    {
+        return command is HybridStorageCommand cmd
+            ? cmd.UnderlyingCommand
+            : command;
     }
 }

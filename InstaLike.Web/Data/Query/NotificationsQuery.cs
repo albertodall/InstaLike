@@ -8,65 +8,64 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.Data.Query
-{
-    public class NotificationsQuery : IRequest<NotificationModel[]>
-    {
-        public int UserID { get; }
-        public bool IncludeReadNotifications { get; }
+namespace InstaLike.Web.Data.Query;
 
-        public NotificationsQuery(int userID, bool includeReadNotifications)
-        {
-            UserID = userID;
-            IncludeReadNotifications = includeReadNotifications;
-        }
+public class NotificationsQuery : IRequest<NotificationModel[]>
+{
+    public int UserID { get; }
+    public bool IncludeReadNotifications { get; }
+
+    public NotificationsQuery(int userID, bool includeReadNotifications)
+    {
+        UserID = userID;
+        IncludeReadNotifications = includeReadNotifications;
+    }
+}
+
+internal class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, NotificationModel[]>
+{
+    private readonly ISession _session;
+    private readonly ILogger _logger;
+
+    public NotificationsQueryHandler(ISession session, ILogger logger)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<NotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    internal class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, NotificationModel[]>
+    public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
+        NotificationModel[] notifications;
 
-        public NotificationsQueryHandler(ISession session, ILogger logger)
+        _logger.Debug("Reading notifications for user {UserID} with parameters: {@Request}", request.UserID, request);
+
+        using (var tx = _session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<NotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));
-        }
+            NotificationModel notification = null!;
+            User recipient = null!;
 
-        public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)
-        {
-            NotificationModel[] notifications;
+            var notificationsQuery = _session.QueryOver<Notification>()
+                .Inner.JoinAlias(n => n.Recipient, () => recipient)
+                .Where(n => n.Recipient.ID == request.UserID);
 
-            _logger.Debug("Reading notifications for user {UserID} with parameters: {@Request}", request.UserID, request);
-
-            using (var tx = _session.BeginTransaction())
+            if (!request.IncludeReadNotifications)
             {
-                NotificationModel notification = null!;
-                User recipient = null!;
-
-                var notificationsQuery = _session.QueryOver<Notification>()
-                    .Inner.JoinAlias(n => n.Recipient, () => recipient)
-                    .Where(n => n.Recipient.ID == request.UserID);
-
-                if (!request.IncludeReadNotifications)
-                {
-                    notificationsQuery.And(n => !n.HasBeenReadByRecipient);
-                }
-
-                notificationsQuery
-                    .OrderBy(n => n.NotificationDate).Desc
-                    .SelectList(fields => fields
-                        .Select(() => recipient.Nickname).WithAlias(() => notification.SenderNickname)
-                        .Select(() => recipient.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
-                        .Select(n => n.Message).WithAlias(() => notification.Message)
-                        .Select(n => n.NotificationDate).WithAlias(() => notification.NotificationDate)
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<NotificationModel>());
-
-                notifications = (await notificationsQuery.ListAsync<NotificationModel>(cancellationToken)).ToArray();
+                notificationsQuery.And(n => !n.HasBeenReadByRecipient);
             }
 
-            return notifications;
+            notificationsQuery
+                .OrderBy(n => n.NotificationDate).Desc
+                .SelectList(fields => fields
+                    .Select(() => recipient.Nickname).WithAlias(() => notification.SenderNickname)
+                    .Select(() => recipient.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
+                    .Select(n => n.Message).WithAlias(() => notification.Message)
+                    .Select(n => n.NotificationDate).WithAlias(() => notification.NotificationDate)
+                )
+                .TransformUsing(new EntityToModelResultTransformer<NotificationModel>());
+
+            notifications = (await notificationsQuery.ListAsync<NotificationModel>(cancellationToken)).ToArray();
         }
+
+        return notifications;
     }
 }

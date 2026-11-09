@@ -1,45 +1,44 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Domain
+namespace InstaLike.Core.Domain;
+
+public class CommentText : SimpleValueObject<string>
 {
-    public class CommentText : SimpleValueObject<string>
+    private const int CommentTextMaxLength = 200;
+
+    private CommentText() : base(string.Empty) { }
+
+    private CommentText(string text) : base(text) { }
+
+    public static Result<CommentText> Create(string text)
     {
-        private const int CommentTextMaxLength = 200;
+        var trimmedText = (text ?? string.Empty).Trim();
 
-        private CommentText() : base(string.Empty) { }
-
-        private CommentText(string text) : base(text) { }
-
-        public static Result<CommentText> Create(string text)
+        if (trimmedText.Length == 0)
         {
-            var trimmedText = (text ?? string.Empty).Trim();
-
-            if (trimmedText.Length == 0)
-            {
-                return Result.Failure<CommentText>("Text for a comment should not be empty.");
-            }
-
-            if (trimmedText.Length > CommentTextMaxLength)
-            {
-                return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
-            }
-
-            return Result.Success(new CommentText(trimmedText));
+            return Result.Failure<CommentText>("Text for a comment should not be empty.");
         }
 
-        public static implicit operator string(CommentText text)
+        if (trimmedText.Length > CommentTextMaxLength)
         {
-            return text.Value;
+            return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
         }
 
-        public static explicit operator CommentText(string text)
-        {
-            return Create(text).Value;
-        }
+        return Result.Success(new CommentText(trimmedText));
+    }
 
-        public override string ToString()
-        {
-            return Value;
-        }
+    public static implicit operator string(CommentText text)
+    {
+        return text.Value;
+    }
+
+    public static explicit operator CommentText(string text)
+    {
+        return Create(text).Value;
+    }
+
+    public override string ToString()
+    {
+        return Value;
     }
 }

@@ -8,3 +8,6 @@ dotnet_diagnostic.CA2100.severity = none
 
 # IDE0063: Use simple 'using' statement
 csharp_prefer_simple_using_statement = false:suggestion
+
+# IDE0161: Use file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning

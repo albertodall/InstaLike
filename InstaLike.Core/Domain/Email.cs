@@ -1,41 +1,40 @@
 ﻿using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Domain
+namespace InstaLike.Core.Domain;
+
+public class Email : SimpleValueObject<string>
 {
-    public class Email : SimpleValueObject<string>
+    private const string EMailValidationRegEx = @"^(.+)@(.+)$";
+
+    private Email() : base(string.Empty) { }
+
+    private Email(string email) : base(email) { }
+
+    public static Result<Email> Create(string input)
     {
-        private const string EMailValidationRegEx = @"^(.+)@(.+)$";
+        input = (input ?? string.Empty).Trim();
 
-        private Email() : base(string.Empty) { }
-
-        private Email(string email) : base(email) { }
-
-        public static Result<Email> Create(string input)
+        if (input.Length == 0)
         {
-            input = (input ?? string.Empty).Trim();
-
-            if (input.Length == 0)
-            {
-                return Result.Failure<Email>("Email should not be empty");
-            }
-
-            if (!Regex.IsMatch(input, EMailValidationRegEx))
-            {
-                return Result.Failure<Email>("Email is invalid");
-            }
-
-            return Result.Success(new Email(input));
+            return Result.Failure<Email>("Email should not be empty");
         }
 
-        public static explicit operator Email(string email)
+        if (!Regex.IsMatch(input, EMailValidationRegEx))
         {
-            return Create(email).Value;
+            return Result.Failure<Email>("Email is invalid");
         }
 
-        public static implicit operator string(Email email)
-        {
-            return email.Value;
-        }
+        return Result.Success(new Email(input));
+    }
+
+    public static explicit operator Email(string email)
+    {
+        return Create(email).Value;
+    }
+
+    public static implicit operator string(Email email)
+    {
+        return email.Value;
     }
 }

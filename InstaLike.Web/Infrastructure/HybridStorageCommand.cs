@@ -4,116 +4,115 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace InstaLike.Web.Infrastructure
+namespace InstaLike.Web.Infrastructure;
+
+internal class HybridStorageCommand : DbCommand
 {
-    internal class HybridStorageCommand : DbCommand
+    private DbConnection? _connection;
+    private readonly DbCommand _command;
+
+    public HybridStorageCommand(DbConnection? connection, DbCommand command)
     {
-        private DbConnection? _connection;
-        private readonly DbCommand _command;
+        _connection = connection;
+        _command = command;
+    }
 
-        public HybridStorageCommand(DbConnection? connection, DbCommand command)
-        {
-            _connection = connection;
-            _command = command;
-        }
-
-        public virtual DbCommand UnderlyingCommand => _command;
+    public virtual DbCommand UnderlyingCommand => _command;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
-        public override string CommandText
-        {
-            get => _command.CommandText;
-            set => _command.CommandText = value;
-        }
+    public override string CommandText
+    {
+        get => _command.CommandText;
+        set => _command.CommandText = value;
+    }
 #pragma warning restore CS8765
 
-        public override int CommandTimeout
+    public override int CommandTimeout
+    {
+        get => _command.CommandTimeout;
+        set => _command.CommandTimeout = value;
+    }
+
+    public override CommandType CommandType
+    {
+        get => _command.CommandType;
+        set => _command.CommandType = value;
+    }
+
+    public override bool DesignTimeVisible 
+    { 
+        get => false; 
+        set => throw new NotImplementedException(); 
+    }
+
+    public override UpdateRowSource UpdatedRowSource
+    {
+        get => _command.UpdatedRowSource;
+        set => _command.UpdatedRowSource = value;
+    }
+
+    protected override DbConnection? DbConnection 
+    { 
+        get => _connection; 
+        set  
         {
-            get => _command.CommandTimeout;
-            set => _command.CommandTimeout = value;
+            _connection = value;
+            _command.Connection = value is HybridStorageConnection connection
+                ? connection.DatabaseConnection
+                : value;
         }
+    }
 
-        public override CommandType CommandType
-        {
-            get => _command.CommandType;
-            set => _command.CommandType = value;
-        }
+    protected override DbParameterCollection DbParameterCollection => _command.Parameters;
 
-        public override bool DesignTimeVisible 
-        { 
-            get => false; 
-            set => throw new NotImplementedException(); 
-        }
+    protected override DbTransaction? DbTransaction 
+    { 
+        get => _command.Transaction; 
+        set => _command.Transaction = value; 
+    }
 
-        public override UpdateRowSource UpdatedRowSource
-        {
-            get => _command.UpdatedRowSource;
-            set => _command.UpdatedRowSource = value;
-        }
+    public override void Cancel()
+    {
+        _command.Cancel();
+    }
 
-        protected override DbConnection? DbConnection 
-        { 
-            get => _connection; 
-            set  
-            {
-                _connection = value;
-                _command.Connection = value is HybridStorageConnection connection
-                    ? connection.DatabaseConnection
-                    : value;
-            }
-        }
+    public override int ExecuteNonQuery()
+    {
+        return _command.ExecuteNonQuery();
+    }
 
-        protected override DbParameterCollection DbParameterCollection => _command.Parameters;
+    public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
+    {
+        return _command.ExecuteNonQueryAsync(cancellationToken);
+    }
 
-        protected override DbTransaction? DbTransaction 
-        { 
-            get => _command.Transaction; 
-            set => _command.Transaction = value; 
-        }
+    public override object? ExecuteScalar()
+    {
+        return _command.ExecuteScalar();
+    }
 
-        public override void Cancel()
-        {
-            _command.Cancel();
-        }
+    public override Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
+    {
+        return _command.ExecuteScalarAsync(cancellationToken);
+    }
 
-        public override int ExecuteNonQuery()
-        {
-            return _command.ExecuteNonQuery();
-        }
+    public override void Prepare()
+    {
+        _command.Prepare();
+    }
 
-        public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
-        {
-            return _command.ExecuteNonQueryAsync(cancellationToken);
-        }
+    protected override DbParameter CreateDbParameter()
+    {
+        return _command.CreateParameter();
+    }
 
-        public override object? ExecuteScalar()
-        {
-            return _command.ExecuteScalar();
-        }
+    protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+    {
+        return _command.ExecuteReader(behavior);
+    }
 
-        public override Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
-        {
-            return _command.ExecuteScalarAsync(cancellationToken);
-        }
-
-        public override void Prepare()
-        {
-            _command.Prepare();
-        }
-
-        protected override DbParameter CreateDbParameter()
-        {
-            return _command.CreateParameter();
-        }
-
-        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
-        {
-            return _command.ExecuteReader(behavior);
-        }
-
-        protected override Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
-        {
-            return _command.ExecuteReaderAsync(behavior, cancellationToken);
-        }
+    protected override Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+    {
+        return _command.ExecuteReaderAsync(behavior, cancellationToken);
     }
 }

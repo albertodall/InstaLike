@@ -9,47 +9,46 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-namespace InstaLike.Web.CommandHandlers
+namespace InstaLike.Web.CommandHandlers;
+
+internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Result>
 {
-    internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Result>
+    private readonly ISession _session;
+    private readonly ILogger _logger;
+
+    public FollowCommandHandler(ISession session, ILogger logger)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<FollowCommand>() ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public FollowCommandHandler(ISession session, ILogger logger)
+    public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)
+    {
+        using (var tx = _session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<FollowCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        }
+            var follower = await _session.LoadAsync<User>(request.FollowerID, cancellationToken);
+            var followedUser = await _session.QueryOver<User>()
+                .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
+                .SingleOrDefaultAsync(cancellationToken);
 
-        public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)
-        {
-            using (var tx = _session.BeginTransaction())
-            {
-                var follower = await _session.LoadAsync<User>(request.FollowerID, cancellationToken);
-                var followedUser = await _session.QueryOver<User>()
-                    .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
-                    .SingleOrDefaultAsync(cancellationToken);
+            return await follower.Follow(followedUser)
+                .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
+                    .Tap(() =>
+                        _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
+                            request.FollowerID,
+                            request.FollowedNickname,
+                            followedUser.ID)
+                    )
+                    .TapError(async errorMessage =>
+                    {
+                        await tx.RollbackAsync(cancellationToken);
 
-                return await follower.Follow(followedUser)
-                    .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
-                        .Tap(() =>
-                            _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})])",
-                                request.FollowerID,
-                                request.FollowedNickname,
-                                followedUser.ID)
-                        )
-                        .TapError(async errorMessage =>
-                        {
-                            await tx.RollbackAsync(cancellationToken);
-
-                            _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                                request.FollowedNickname,
-                                followedUser.ID,
-                                request.FollowerID,
-                                errorMessage);
-                        });
-            }
+                        _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
+                            request.FollowedNickname,
+                            followedUser.ID,
+                            request.FollowerID,
+                            errorMessage);
+                    });
         }
     }
 }

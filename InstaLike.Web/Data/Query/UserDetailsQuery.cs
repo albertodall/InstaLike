@@ -7,53 +7,52 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.Data.Query
-{
-    internal sealed class UserDetailsQuery : IRequest<UserDetailsModel>
-    {
-        public int CurrentUserId { get; }
+namespace InstaLike.Web.Data.Query;
 
-        public UserDetailsQuery(int currentUserId)
-        {
-            CurrentUserId = currentUserId;
-        }
+internal sealed class UserDetailsQuery : IRequest<UserDetailsModel>
+{
+    public int CurrentUserId { get; }
+
+    public UserDetailsQuery(int currentUserId)
+    {
+        CurrentUserId = currentUserId;
+    }
+}
+
+internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery, UserDetailsModel>
+{
+    private readonly ISession _session;
+    private readonly ILogger _logger;
+
+    public UserDetailsQueryHandler(ISession session, ILogger logger)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery, UserDetailsModel>
+    public async Task<UserDetailsModel> Handle(UserDetailsQuery request, CancellationToken cancellationToken)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
+        UserDetailsModel result;
 
-        public UserDetailsQueryHandler(ISession session, ILogger logger)
+        _logger.Information("Reading user details of user {UserID} with parameters {@Request}", request.CurrentUserId, request);
+
+        using (var tx = _session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
-        }
+            var user = await _session.GetAsync<User>(request.CurrentUserId, cancellationToken);
 
-        public async Task<UserDetailsModel> Handle(UserDetailsQuery request, CancellationToken cancellationToken)
-        {
-            UserDetailsModel result;
-
-            _logger.Information("Reading user details of user {UserID} with parameters {@Request}", request.CurrentUserId, request);
-
-            using (var tx = _session.BeginTransaction())
+            result = new UserDetailsModel()
             {
-                var user = await _session.GetAsync<User>(request.CurrentUserId, cancellationToken);
+                Nickname = user.Nickname,
+                Name = user.FullName.Name,
+                Surname = user.FullName.Surname,
+                Email = user.Email,
+                Bio = user.Biography,
+                ProfilePicture = user.ProfilePicture.RawBytes
+            };
 
-                result = new UserDetailsModel()
-                {
-                    Nickname = user.Nickname,
-                    Name = user.FullName.Name,
-                    Surname = user.FullName.Surname,
-                    Email = user.Email,
-                    Bio = user.Biography,
-                    ProfilePicture = user.ProfilePicture.RawBytes
-                };
-
-                await tx.CommitAsync(cancellationToken);
-            }
-
-            return result;
+            await tx.CommitAsync(cancellationToken);
         }
+
+        return result;
     }
 }

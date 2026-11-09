@@ -1,19 +1,18 @@
 ﻿using CSharpFunctionalExtensions;
 using MediatR;
 
-namespace InstaLike.Core.Commands
-{
-    public sealed class PublishCommentCommand : IRequest<Result<int>>
-    {
-        public int PostID { get; }
-        public string Text { get; }
-        public int UserID { get; }
+namespace InstaLike.Core.Commands;
 
-        public PublishCommentCommand(int postID, string text, int userID)
-        {
-            PostID = postID;
-            Text = text;
-            UserID = userID;
-        }
+public sealed class PublishCommentCommand : IRequest<Result<int>>
+{
+    public int PostID { get; }
+    public string Text { get; }
+    public int UserID { get; }
+
+    public PublishCommentCommand(int postID, string text, int userID)
+    {
+        PostID = postID;
+        Text = text;
+        UserID = userID;
     }
 }

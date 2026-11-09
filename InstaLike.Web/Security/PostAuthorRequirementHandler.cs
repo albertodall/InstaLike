@@ -7,44 +7,43 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using NHibernate;
 
-namespace InstaLike.Web.Security
+namespace InstaLike.Web.Security;
+
+internal class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorRequirement>
 {
-    internal class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorRequirement>
+    private readonly NHibernate.ISession _session;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public PostAuthorRequirementHandler(NHibernate.ISession session, IHttpContextAccessor httpContextAccessor)
     {
-        private readonly NHibernate.ISession _session;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public PostAuthorRequirementHandler(NHibernate.ISession session, IHttpContextAccessor httpContextAccessor)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PostAuthorRequirement requirement)
+    {
+        var routeData = _httpContextAccessor.HttpContext?.GetRouteData();
+        if (routeData?.Values["id"] is string requestedPostId)
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PostAuthorRequirement requirement)
-        {
-            var routeData = _httpContextAccessor.HttpContext?.GetRouteData();
-            if (routeData?.Values["id"] is string requestedPostId)
+            if (!int.TryParse(requestedPostId, out var postId))
             {
-                if (!int.TryParse(requestedPostId, out var postId))
-                {
-                    return;
-                }
+                return;
+            }
 
-                var post = await _session.QueryOver<Post>()
-                    .Fetch(SelectMode.ChildFetch, p => p.Author)
-                    .Where(p => p.ID == postId)
-                    .SingleOrDefaultAsync();
+            var post = await _session.QueryOver<Post>()
+                .Fetch(SelectMode.ChildFetch, p => p.Author)
+                .Where(p => p.ID == postId)
+                .SingleOrDefaultAsync();
 
-                var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
-                
-                if (post.CanBeEditedBy(user))
-                {
-                    context.Succeed(requirement);
-                }
-                else
-                {
-                    context.Fail();
-                }
+            var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
+            
+            if (post.CanBeEditedBy(user))
+            {
+                context.Succeed(requirement);
+            }
+            else
+            {
+                context.Fail();
             }
         }
     }

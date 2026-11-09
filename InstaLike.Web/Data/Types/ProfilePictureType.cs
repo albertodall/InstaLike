@@ -1,9 +1,8 @@
 ﻿using InstaLike.Web.Services;
 
-namespace InstaLike.Web.Data.Types
+namespace InstaLike.Web.Data.Types;
+
+internal class ProfilePictureType : ExternalStoragePictureType
 {
-    internal class ProfilePictureType : ExternalStoragePictureType
-    {
-        public ProfilePictureType() : base(PictureContainers.Profiles) { }
-    }
+    public ProfilePictureType() : base(PictureContainers.Profiles) { }
 }

@@ -7,48 +7,47 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.Data.Query
+namespace InstaLike.Web.Data.Query;
+
+public class EditPostQuery : IRequest<EditPostModel>
 {
-    public class EditPostQuery : IRequest<EditPostModel>
+    public int PostID { get; }
+
+    public int CurrentUserID { get; }
+
+    public EditPostQuery(int postID, int currentUserID)
     {
-        public int PostID { get; }
+        PostID = postID;
+        CurrentUserID = currentUserID;
+    }
+}
 
-        public int CurrentUserID { get; }
+internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, EditPostModel>
+{
+    private readonly ISession _session;
+    private readonly ILogger _logger;
 
-        public EditPostQuery(int postID, int currentUserID)
-        {
-            PostID = postID;
-            CurrentUserID = currentUserID;
-        }
+    public EditPostQueryHandler(ISession session, ILogger logger)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<EditPostQuery>() ?? throw new ArgumentNullException(nameof(logger)) ;
     }
 
-    internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, EditPostModel>
+    public async Task<EditPostModel> Handle(EditPostQuery request, CancellationToken cancellationToken)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
+        _logger.Debug("User {UserID} requested to edit post {PostID} with parameters {@Request}", request.CurrentUserID, request.PostID, request);
 
-        public EditPostQueryHandler(ISession session, ILogger logger)
+        using (_session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<EditPostQuery>() ?? throw new ArgumentNullException(nameof(logger)) ;
-        }
+            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
 
-        public async Task<EditPostModel> Handle(EditPostQuery request, CancellationToken cancellationToken)
-        {
-            _logger.Debug("User {UserID} requested to edit post {PostID} with parameters {@Request}", request.CurrentUserID, request.PostID, request);
-
-            using (_session.BeginTransaction())
+            return new EditPostModel()
             {
-                var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
-
-                return new EditPostModel()
-                {
-                    PostID = post.ID,
-                    AuthorID = post.Author.ID,
-                    Picture = post.Picture.RawBytes,
-                    Text = post.Text
-                };
-            }
+                PostID = post.ID,
+                AuthorID = post.Author.ID,
+                Picture = post.Picture.RawBytes,
+                Text = post.Text
+            };
         }
     }
 }

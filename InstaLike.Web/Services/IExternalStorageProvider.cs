@@ -1,11 +1,10 @@
 ﻿using System;
 using InstaLike.Core.Domain;
 
-namespace InstaLike.Web.Services
+namespace InstaLike.Web.Services;
+
+internal interface IExternalStorageProvider
 {
-    internal interface IExternalStorageProvider
-    {
-        Picture LoadPicture(Guid identifier, string containerName);
-        void SavePicture(Picture picture, string containerName);
-    }
+    Picture LoadPicture(Guid identifier, string containerName);
+    void SavePicture(Picture picture, string containerName);
 }

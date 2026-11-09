@@ -2,108 +2,107 @@
 using System.Runtime.CompilerServices;
 using NHibernate.Proxy;
 
-namespace InstaLike.Core.Domain
+namespace InstaLike.Core.Domain;
+
+public abstract class EntityBase<TId> : IEquatable<EntityBase<TId>>
+    where TId : notnull
 {
-    public abstract class EntityBase<TId> : IEquatable<EntityBase<TId>>
-        where TId : notnull
-    {
-        private const int HashMultiplier = 29;
+    private const int HashMultiplier = 29;
 
 #pragma warning disable CS8618
-        protected EntityBase() { }
+    protected EntityBase() { }
 #pragma warning restore CS8618
 
-        protected EntityBase(TId id)
-            : this()
+    protected EntityBase(TId id)
+        : this()
+    {
+        ID = id;
+    }
+
+    public virtual TId ID { get; private init; }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null)
         {
-            ID = id;
+            return false;
         }
 
-        public virtual TId ID { get; private init; }
-
-        public override bool Equals(object? obj)
+        if (obj is not EntityBase<TId> other)
         {
-            if (obj is null)
-            {
-                return false;
-            }
-
-            if (obj is not EntityBase<TId> other)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            if (GetUnproxiedType() != other.GetUnproxiedType())
-            {
-                return false;
-            }
-
-            if (IsTransient() && other.IsTransient())
-            {
-                return ReferenceEquals(this, other);
-            }
-
-            return ID.Equals(other.ID);
+            return false;
         }
 
-        public override int GetHashCode()
+        if (ReferenceEquals(this, other))
         {
-            if (IsTransient())
-            {
-                return RuntimeHelpers.GetHashCode(this);
-            }
-            
-            return (HashMultiplier * GetUnproxiedType().GetHashCode()) ^ ID.GetHashCode();
+            return true;
         }
 
-        public virtual bool Equals(EntityBase<TId>? other)
+        if (GetUnproxiedType() != other.GetUnproxiedType())
         {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (GetUnproxiedType() != other.GetUnproxiedType())
-            {
-                return false;
-            }
-
-            if (IsTransient() && other.IsTransient())
-            {
-                return ReferenceEquals(this, other);
-            }
-
-            return ID.Equals(other.ID);
+            return false;
         }
 
-        public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
+        if (IsTransient() && other.IsTransient())
         {
-            return left is not null && right is not null && left.Equals(right);
+            return ReferenceEquals(this, other);
         }
 
-        public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
+        return ID.Equals(other.ID);
+    }
+
+    public override int GetHashCode()
+    {
+        if (IsTransient())
         {
-            return !(left == right);
+            return RuntimeHelpers.GetHashCode(this);
+        }
+        
+        return (HashMultiplier * GetUnproxiedType().GetHashCode()) ^ ID.GetHashCode();
+    }
+
+    public virtual bool Equals(EntityBase<TId>? other)
+    {
+        if (other is null)
+        {
+            return false;
         }
 
-        private bool IsTransient()
+        if (GetUnproxiedType() != other.GetUnproxiedType())
         {
-            return ID == null || ID.Equals(default(TId));
+            return false;
         }
 
-        /// <remarks>
-        /// Small violation of Separation of Concerns here...
-        /// </remarks>
-        private Type GetUnproxiedType()
+        if (IsTransient() && other.IsTransient())
         {
-            return GetType().Name.Contains("ProxyForFieldInterceptor")
-                ? GetType().BaseType!
-                : NHibernateProxyHelper.GetClassWithoutInitializingProxy(this);
+            return ReferenceEquals(this, other);
         }
+
+        return ID.Equals(other.ID);
+    }
+
+    public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
+    {
+        return left is not null && right is not null && left.Equals(right);
+    }
+
+    public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
+    {
+        return !(left == right);
+    }
+
+    private bool IsTransient()
+    {
+        return ID == null || ID.Equals(default(TId));
+    }
+
+    /// <remarks>
+    /// Small violation of Separation of Concerns here...
+    /// </remarks>
+    private Type GetUnproxiedType()
+    {
+        return GetType().Name.Contains("ProxyForFieldInterceptor")
+            ? GetType().BaseType!
+            : NHibernateProxyHelper.GetClassWithoutInitializingProxy(this);
     }
 }

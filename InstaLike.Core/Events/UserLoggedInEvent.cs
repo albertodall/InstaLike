@@ -1,17 +1,16 @@
 ﻿using MediatR;
 
-namespace InstaLike.Core.Events
+namespace InstaLike.Core.Events;
+
+public sealed class UserLoggedInEvent : INotification
 {
-    public sealed class UserLoggedInEvent : INotification
+    public int UserID { get; }
+
+    public string Nickname { get; }
+
+    public UserLoggedInEvent(int userId, string nickname)
     {
-        public int UserID { get; }
-
-        public string Nickname { get; }
-
-        public UserLoggedInEvent(int userId, string nickname)
-        {
-            UserID = userId;
-            Nickname = nickname;
-        }
+        UserID = userId;
+        Nickname = nickname;
     }
 }

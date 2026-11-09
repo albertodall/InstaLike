@@ -9,53 +9,52 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.CommandHandlers
+namespace InstaLike.Web.CommandHandlers;
+
+internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<int>>
 {
-    internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<int>>
+    private readonly ISession _session;
+    private readonly ILogger _logger;
+    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
+
+    public PublishPostCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
-        private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
+    }
 
-        public PublishPostCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+    public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
+    {
+        using (var tx = _session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
-            _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
-        }
-
-        public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
-        {
-            using (var tx = _session.BeginTransaction())
+            User? author = null;
+            try
             {
-                User? author = null;
-                try
-                {
-                    author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-                    var postPicture = Picture.Create(request.PictureRawBytes, _idGenerator.GetNextId()).Value;
+                author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+                var postPicture = Picture.Create(request.PictureRawBytes, _idGenerator.GetNextId()).Value;
 
-                    var post = new Post(author, postPicture, (PostText)request.Text);
+                var post = new Post(author, postPicture, (PostText)request.Text);
 
-                    await _session.SaveAsync(post, cancellationToken);
-                    await tx.CommitAsync(cancellationToken);
+                await _session.SaveAsync(post, cancellationToken);
+                await tx.CommitAsync(cancellationToken);
 
-                    _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
-                        author.Nickname,
-                        request.UserID);
+                _logger.Information("User [{Nickname}({UserID})] has just shared a new post.",
+                    author.Nickname,
+                    request.UserID);
 
-                    return Result.Success(post.ID);
-                }
-                catch (ADOException ex)
-                {
-                    await tx.RollbackAsync(cancellationToken);
+                return Result.Success(post.ID);
+            }
+            catch (ADOException ex)
+            {
+                await tx.RollbackAsync(cancellationToken);
 
-                    _logger.Error("Failed to publish a post for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
-                        author?.Nickname,
-                        request.UserID,
-                        ex.Message);
+                _logger.Error("Failed to publish a post for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
+                    author?.Nickname,
+                    request.UserID,
+                    ex.Message);
 
-                    return Result.Failure<int>(ex.Message);
-                }
+                return Result.Failure<int>(ex.Message);
             }
         }
     }

@@ -16,238 +16,237 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InstaLike.Web.Controllers
+namespace InstaLike.Web.Controllers;
+
+[Authorize]
+public class AccountController : Controller
 {
-    [Authorize]
-    public class AccountController : Controller
+    private const int MaxThumbnailsInUserProfile = 20;
+
+    private readonly IUserAuthenticationService _authenticationService;
+    private readonly IMediator _dispatcher;
+
+    public AccountController(IUserAuthenticationService authenticationService, IMediator dispatcher)
     {
-        private const int MaxThumbnailsInUserProfile = 20;
+        _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
+        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+    }
 
-        private readonly IUserAuthenticationService _authenticationService;
-        private readonly IMediator _dispatcher;
-
-        public AccountController(IUserAuthenticationService authenticationService, IMediator dispatcher)
+    [AllowAnonymous]
+    public IActionResult Login(string returnUrl)
+    {
+        var model = new LoginModel()
         {
-            _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
-            _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
-        }
+            ReturnUrl = returnUrl
+        };
 
-        [AllowAnonymous]
-        public IActionResult Login(string returnUrl)
+        return View(model);
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login(LoginModel model)
+    {
+        if (ModelState.IsValid)
         {
-            var model = new LoginModel()
+            var authenticationResult = await _authenticationService.AuthenticateUser(model.Username, model.Password);
+            if (authenticationResult.IsFailure)
             {
-                ReturnUrl = returnUrl
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var authenticationResult = await _authenticationService.AuthenticateUser(model.Username, model.Password);
-                if (authenticationResult.IsFailure)
-                {
-                    ModelState.AddModelError("", authenticationResult.Error);
-                }
-                else
-                {
-                    var userIdentity = new ClaimsIdentity(
-                        GetUserClaims(authenticationResult.Value),
-                        CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(userIdentity),
-                        new AuthenticationProperties()
-                        {
-                            IsPersistent = model.RememberMe
-                        });
-
-                    await _dispatcher.Publish(new UserLoggedInEvent(authenticationResult.Value.ID, authenticationResult.Value.Nickname));
-
-                    return Url.IsLocalUrl(model.ReturnUrl)
-                        ? LocalRedirect(model.ReturnUrl)
-                        : RedirectToAction("Index", "Home");
-                }
+                ModelState.AddModelError("", authenticationResult.Error);
             }
-
-            return View(model);
-        }
-
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            var userIDClaim = User.GetIdentifier();
-            if (User.Identity != null && User.Identity.Name != null)
+            else
             {
-                await _dispatcher.Publish(new UserLoggedOutEvent(userIDClaim, User.Identity.Name));
+                var userIdentity = new ClaimsIdentity(
+                    GetUserClaims(authenticationResult.Value),
+                    CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(userIdentity),
+                    new AuthenticationProperties()
+                    {
+                        IsPersistent = model.RememberMe
+                    });
+
+                await _dispatcher.Publish(new UserLoggedInEvent(authenticationResult.Value.ID, authenticationResult.Value.Nickname));
+
+                return Url.IsLocalUrl(model.ReturnUrl)
+                    ? LocalRedirect(model.ReturnUrl)
+                    : RedirectToAction("Index", "Home");
             }
-
-            return RedirectToAction("Index", "Home");
         }
 
-        public async Task<IActionResult> Profile(string id)
-        {
-            var currentUserID = User.GetIdentifier();
-            var query = new UserProfileQuery(currentUserID, id, MaxThumbnailsInUserProfile);
-            var model = await _dispatcher.Send(query);
+        return View(model);
+    }
 
-            return View(model);
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        var userIDClaim = User.GetIdentifier();
+        if (User.Identity != null && User.Identity.Name != null)
+        {
+            await _dispatcher.Publish(new UserLoggedOutEvent(userIDClaim, User.Identity.Name));
         }
 
-        public async Task<IActionResult> Edit()
+        return RedirectToAction("Index", "Home");
+    }
+
+    public async Task<IActionResult> Profile(string id)
+    {
+        var currentUserID = User.GetIdentifier();
+        var query = new UserProfileQuery(currentUserID, id, MaxThumbnailsInUserProfile);
+        var model = await _dispatcher.Send(query);
+
+        return View(model);
+    }
+
+    public async Task<IActionResult> Edit()
+    {
+        var currentUserID = User.GetIdentifier();
+        var query = new UserDetailsQuery(currentUserID);
+        var model = await _dispatcher.Send(query);
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(UserDetailsModel userDetails, IFormFile profilePictureFile)
+    {
+        if (ModelState.IsValid)
         {
-            var currentUserID = User.GetIdentifier();
-            var query = new UserDetailsQuery(currentUserID);
-            var model = await _dispatcher.Send(query);
+            var command = new EditUserDetailsCommand(
+                User.GetIdentifier(),
+                userDetails.Nickname,
+                userDetails.Name,
+                userDetails.Surname,
+                userDetails.Email,
+                userDetails.Bio,
+                await profilePictureFile.ToByteArrayAsync());
 
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(UserDetailsModel userDetails, IFormFile profilePictureFile)
-        {
-            if (ModelState.IsValid)
-            {
-                var command = new EditUserDetailsCommand(
-                    User.GetIdentifier(),
-                    userDetails.Nickname,
-                    userDetails.Name,
-                    userDetails.Surname,
-                    userDetails.Email,
-                    userDetails.Bio,
-                    await profilePictureFile.ToByteArrayAsync());
-
-                var processCommandResult = await _dispatcher.Send(command);
-                if (processCommandResult.IsSuccess)
-                {
-                    return RedirectToAction(nameof(Edit));
-                }
-                else
-                {
-                    ModelState.AddModelError("", processCommandResult.Error);
-                }
-            }
-
-            return View(userDetails);
-        }
-
-        [AllowAnonymous]
-        public IActionResult Register()
-        {
-            var model = new RegisterUserModel()
-            {
-                ProfilePicture = Picture.DefaultProfilePicture
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterUserModel newUser, IFormFile profilePictureFile)
-        {
-            if (ModelState.IsValid)
-            {
-                var profilePicture = Picture.DefaultProfilePicture.RawBytes;
-                if (profilePictureFile != null)
-                {
-                    profilePicture = await profilePictureFile.ToByteArrayAsync();
-                }
-
-                var command = new RegisterUserCommand(
-                    newUser.Nickname,
-                    newUser.Name,
-                    newUser.Surname,
-                    newUser.Password,
-                    newUser.Email,
-                    newUser.Biography,
-                    profilePicture);
-
-                var processCommandResult = await _dispatcher.Send(command);
-                if (processCommandResult.IsSuccess)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-
-                ModelState.AddModelError("", processCommandResult.Error);
-            }
-
-            return View(newUser);
-        }
-
-        public async Task<IActionResult> Followers(string id)
-        {
-            ViewBag.Message = $"Users following {id}";
-            var query = new FollowersQuery(id);
-            var followersList = await _dispatcher.Send(query);
-
-            return PartialView("_UserListPartial", followersList);
-        }
-
-        public async Task<IActionResult> Following(string id)
-        {
-            ViewBag.Message = $"Users followed by {id}";
-            var query = new FollowingQuery(id);
-            var followedList = await _dispatcher.Send(query);
-
-            return PartialView("_UserListPartial", followedList);
-        }
-
-        public async Task<IActionResult> Follow(string id)
-        {
-            var command = new FollowCommand(User.GetIdentifier(), id);
             var processCommandResult = await _dispatcher.Send(command);
-
-            if (processCommandResult.IsSuccess && User.Identity != null && User.Identity.Name != null)
-            {
-                var newFollowerNotification = new FollowedUserEvent(
-                    User.Identity.Name,
-                    Url.Action("Profile", "Account", new { id = User.Identity.Name })!,
-                    id);
-
-                await _dispatcher.Publish(newFollowerNotification);
-
-                return RedirectToAction(nameof(Profile), new { id });
-            }
-
-            return RedirectToAction("Error", "Home");
-        }
-
-        public async Task<IActionResult> Unfollow(string id)
-        {
-            var command = new UnfollowCommand(User.GetIdentifier(), id);
-            var processCommandResult = await _dispatcher.Send(command);
-
             if (processCommandResult.IsSuccess)
             {
-                return RedirectToAction(nameof(Profile), new { id });
+                return RedirectToAction(nameof(Edit));
+            }
+            else
+            {
+                ModelState.AddModelError("", processCommandResult.Error);
+            }
+        }
+
+        return View(userDetails);
+    }
+
+    [AllowAnonymous]
+    public IActionResult Register()
+    {
+        var model = new RegisterUserModel()
+        {
+            ProfilePicture = Picture.DefaultProfilePicture
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Register(RegisterUserModel newUser, IFormFile profilePictureFile)
+    {
+        if (ModelState.IsValid)
+        {
+            var profilePicture = Picture.DefaultProfilePicture.RawBytes;
+            if (profilePictureFile != null)
+            {
+                profilePicture = await profilePictureFile.ToByteArrayAsync();
             }
 
-            return RedirectToAction("Error", "Home");
+            var command = new RegisterUserCommand(
+                newUser.Nickname,
+                newUser.Name,
+                newUser.Surname,
+                newUser.Password,
+                newUser.Email,
+                newUser.Biography,
+                profilePicture);
+
+            var processCommandResult = await _dispatcher.Send(command);
+            if (processCommandResult.IsSuccess)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError("", processCommandResult.Error);
         }
 
-        /// <summary>
-        /// Builds the list of claims for the authenticated user.
-        /// </summary>
-        /// <param name="user">Authenticated user.</param>
-        /// <returns>The list of claims.</returns>
-        private static IEnumerable<Claim> GetUserClaims(User user) 
+        return View(newUser);
+    }
+
+    public async Task<IActionResult> Followers(string id)
+    {
+        ViewBag.Message = $"Users following {id}";
+        var query = new FollowersQuery(id);
+        var followersList = await _dispatcher.Send(query);
+
+        return PartialView("_UserListPartial", followersList);
+    }
+
+    public async Task<IActionResult> Following(string id)
+    {
+        ViewBag.Message = $"Users followed by {id}";
+        var query = new FollowingQuery(id);
+        var followedList = await _dispatcher.Send(query);
+
+        return PartialView("_UserListPartial", followedList);
+    }
+
+    public async Task<IActionResult> Follow(string id)
+    {
+        var command = new FollowCommand(User.GetIdentifier(), id);
+        var processCommandResult = await _dispatcher.Send(command);
+
+        if (processCommandResult.IsSuccess && User.Identity != null && User.Identity.Name != null)
         {
-            return new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(), ClaimValueTypes.Integer32),
-                new Claim(ClaimTypes.Name, user.Nickname, ClaimValueTypes.String),
-                new Claim(ClaimTypes.GivenName, user.FullName.Name, ClaimValueTypes.String),
-                new Claim(ClaimTypes.Surname, user.FullName.Surname, ClaimValueTypes.String),
-                new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.Email)
-            };
+            var newFollowerNotification = new FollowedUserEvent(
+                User.Identity.Name,
+                Url.Action("Profile", "Account", new { id = User.Identity.Name })!,
+                id);
+
+            await _dispatcher.Publish(newFollowerNotification);
+
+            return RedirectToAction(nameof(Profile), new { id });
         }
+
+        return RedirectToAction("Error", "Home");
+    }
+
+    public async Task<IActionResult> Unfollow(string id)
+    {
+        var command = new UnfollowCommand(User.GetIdentifier(), id);
+        var processCommandResult = await _dispatcher.Send(command);
+
+        if (processCommandResult.IsSuccess)
+        {
+            return RedirectToAction(nameof(Profile), new { id });
+        }
+
+        return RedirectToAction("Error", "Home");
+    }
+
+    /// <summary>
+    /// Builds the list of claims for the authenticated user.
+    /// </summary>
+    /// <param name="user">Authenticated user.</param>
+    /// <returns>The list of claims.</returns>
+    private static IEnumerable<Claim> GetUserClaims(User user) 
+    {
+        return new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(), ClaimValueTypes.Integer32),
+            new Claim(ClaimTypes.Name, user.Nickname, ClaimValueTypes.String),
+            new Claim(ClaimTypes.GivenName, user.FullName.Name, ClaimValueTypes.String),
+            new Claim(ClaimTypes.Surname, user.FullName.Surname, ClaimValueTypes.String),
+            new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.Email)
+        };
     }
 }

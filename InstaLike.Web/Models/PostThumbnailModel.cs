@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace InstaLike.Web.Models
+namespace InstaLike.Web.Models;
+
+public class PostThumbnailModel
 {
-    public class PostThumbnailModel
-    {
-        public int PostID { get; set; }
-        public byte[] ThumbnailPictureBytes { get; set; } = Array.Empty<byte>();
-    }
+    public int PostID { get; set; }
+    public byte[] ThumbnailPictureBytes { get; set; } = Array.Empty<byte>();
 }

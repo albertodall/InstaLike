@@ -20,126 +20,125 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace InstaLike.Web.Extensions
+namespace InstaLike.Web.Extensions;
+
+internal static class ServiceCollectionExtensions
 {
-    internal static class ServiceCollectionExtensions
+    public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, IConfiguration configuration)
-        {
-            var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
-                ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
-            var externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString")
-                ?? throw new InvalidOperationException("Setting 'ExternalStorage:AzureBlobStorage:ConnectionString' has not been configured.");
+        var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
+            ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
+        var externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString")
+            ?? throw new InvalidOperationException("Setting 'ExternalStorage:AzureBlobStorage:ConnectionString' has not been configured.");
 
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
-                .ExposeConfiguration(cfg =>
-                {
-                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
-                    cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
-                });
-
-            services.AddSingleton(nhConfig.BuildSessionFactory());
-            services.AddScoped(sp =>
+        var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
+            .ExposeConfiguration(cfg =>
             {
-                var sessionFactory = sp.GetRequiredService<ISessionFactory>();
-                return sessionFactory.OpenSession();
+                cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
+                cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
             });
 
-            return services;
-        }
-
-        public static IServiceCollection ConfigureAuthentication(this IServiceCollection services)
+        services.AddSingleton(nhConfig.BuildSessionFactory());
+        services.AddScoped(sp =>
         {
-            services.AddScoped<IUserAuthenticationService, DatabaseAuthenticationService>();
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(opt =>
-                {
-                    opt.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-                    opt.Cookie.HttpOnly = true;
-                    opt.LoginPath = new PathString("/Account/Login");
-                });
+            var sessionFactory = sp.GetRequiredService<ISessionFactory>();
+            return sessionFactory.OpenSession();
+        });
 
-            return services;
-        }
+        return services;
+    }
 
-        public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
-        {
-            services.AddTransient<IAuthorizationHandler, PostAuthorRequirementHandler>();
-            services.AddAuthorization(opt =>
+    public static IServiceCollection ConfigureAuthentication(this IServiceCollection services)
+    {
+        services.AddScoped<IUserAuthenticationService, DatabaseAuthenticationService>();
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(opt =>
             {
-                opt.AddPolicy("IsPostAuthor", policy =>
-                    policy.AddRequirements(new PostAuthorRequirement()));
+                opt.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                opt.Cookie.HttpOnly = true;
+                opt.LoginPath = new PathString("/Account/Login");
             });
 
-            return services;
-        }
+        return services;
+    }
 
-        public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
+    {
+        services.AddTransient<IAuthorizationHandler, PostAuthorRequirementHandler>();
+        services.AddAuthorization(opt =>
         {
-            if (!string.IsNullOrEmpty(configuration.GetValue<string>("ApplicationInsights:ConnectionString")))
-            {
-                services.AddApplicationInsightsTelemetry();
-            }
+            opt.AddPolicy("IsPostAuthor", policy =>
+                policy.AddRequirements(new PostAuthorRequirement()));
+        });
 
-            return services;
-        }
+        return services;
+    }
 
-        public static IServiceCollection ConfigureOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureTelemetry(this IServiceCollection services, IConfiguration configuration)
+    {
+        if (!string.IsNullOrEmpty(configuration.GetValue<string>("ApplicationInsights:ConnectionString")))
         {
-            var openTelemetry = services.AddOpenTelemetry()
-                .ConfigureResource(resource => resource.AddService("InstaLike.Web"))
-                .WithTracing(tracing => tracing
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddSqlClientInstrumentation())
-                .WithMetrics(metrics => metrics
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddMeter("System.Runtime"))
-                .WithLogging();
-
-            services.Configure<OpenTelemetryLoggerOptions>(options => options.IncludeFormattedMessage = true);
-
-            if (!string.IsNullOrEmpty(configuration.GetValue<string>("OTEL_EXPORTER_OTLP_ENDPOINT")))
-            {
-                openTelemetry.UseOtlpExporter();
-            }
-
-            return services;
+            services.AddApplicationInsightsTelemetry();
         }
 
-        public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, IConfiguration configuration)
+        return services;
+    }
+
+    public static IServiceCollection ConfigureOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
+    {
+        var openTelemetry = services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService("InstaLike.Web"))
+            .WithTracing(tracing => tracing
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddSqlClientInstrumentation())
+            .WithMetrics(metrics => metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddMeter("System.Runtime"))
+            .WithLogging();
+
+        services.Configure<OpenTelemetryLoggerOptions>(options => options.IncludeFormattedMessage = true);
+
+        if (!string.IsNullOrEmpty(configuration.GetValue<string>("OTEL_EXPORTER_OTLP_ENDPOINT")))
         {
-            // Auto-tagging is optional: when not configured, tagging requests just fail.
-            var apiKey = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey") ?? string.Empty;
-            var apiUrl = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl") ?? string.Empty;
-            services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
-
-            return services;
+            openTelemetry.UseOtlpExporter();
         }
 
-        private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
-        {
-            return Fluently.Configure()
-                .Database(
-                    MsSqlConfiguration.MsSql2012
-                        .Driver<MicrosoftDataSqlClientDriver>()
-                        .Provider<HybridStorageDriverConnectionProvider>()
-                        .ConnectionString(connectionString)
-                        .DefaultSchema("dbo")
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            LazyLoad.Always(),
-                            DynamicUpdate.AlwaysTrue())
-                        .Conventions.Add<AssociationsMappingConvention>()
-                        .Conventions.Add<NotNullGuidTypeConvention>()
-                        .AddFromAssembly(Assembly.GetExecutingAssembly()));
-        }
+        return services;
+    }
+
+    public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Auto-tagging is optional: when not configured, tagging requests just fail.
+        var apiKey = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey") ?? string.Empty;
+        var apiUrl = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl") ?? string.Empty;
+        services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
+
+        return services;
+    }
+
+    private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
+    {
+        return Fluently.Configure()
+            .Database(
+                MsSqlConfiguration.MsSql2012
+                    .Driver<MicrosoftDataSqlClientDriver>()
+                    .Provider<HybridStorageDriverConnectionProvider>()
+                    .ConnectionString(connectionString)
+                    .DefaultSchema("dbo")
+                    .AdoNetBatchSize(20)
+                    .ShowSql()
+                    .FormatSql()
+                    .UseReflectionOptimizer()
+            )
+            .Mappings(m =>
+                m.FluentMappings
+                    .Conventions.Add(
+                        LazyLoad.Always(),
+                        DynamicUpdate.AlwaysTrue())
+                    .Conventions.Add<AssociationsMappingConvention>()
+                    .Conventions.Add<NotNullGuidTypeConvention>()
+                    .AddFromAssembly(Assembly.GetExecutingAssembly()));
     }
 }
