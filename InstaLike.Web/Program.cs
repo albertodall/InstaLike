@@ -24,7 +24,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.ConfigureTelemetry(builder.Environment.IsDevelopment());
+builder.Services.ConfigureTelemetry(builder.Configuration);
 builder.Services.ConfigureOpenTelemetry(builder.Configuration);
 
 builder.Services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
