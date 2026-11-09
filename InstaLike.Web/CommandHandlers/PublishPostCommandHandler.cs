@@ -9,8 +9,6 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<int>>
@@ -30,7 +28,7 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                User author = null;
+                User? author = null;
                 try
                 {
                     author = await _session.LoadAsync<User>(request.UserID, cancellationToken);

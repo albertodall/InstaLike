@@ -7,7 +7,6 @@ using NHibernate.UserTypes;
 
 namespace InstaLike.IntegrationTests
 {
-#nullable disable
     /// <summary>
     /// User Type for managing DateTimeOffset fields.
     /// SQLite doesn't have a DateTimeOffset type, so, to address that, this user type splits the original DateTimeOffset value
@@ -70,7 +69,7 @@ namespace InstaLike.IntegrationTests
             throw new InvalidOperationException($"{nameof(DateTimeOffset)} is an immutable object. SetPropertyValue is not supported.");
         }
 
-        public object NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
+        public object? NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
         {
             if (dr.IsDBNull(dr.GetOrdinal(names[0])))
             {
@@ -85,8 +84,8 @@ namespace InstaLike.IntegrationTests
 
         public void NullSafeSet(DbCommand cmd, object value, int index, bool[] settable, ISessionImplementor session)
         {
-            object utcTicks = null;
-            object offset = null;
+            object? utcTicks = null;
+            object? offset = null;
 
             if (value != null)
             {
@@ -98,5 +97,4 @@ namespace InstaLike.IntegrationTests
             NHibernateUtil.TimeSpan.NullSafeSet(cmd, offset, index, session);
         }
     }
-#nullable enable
 }

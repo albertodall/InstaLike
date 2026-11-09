@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Transform;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.Data.Query
 {
     public class NotificationsQuery : IRequest<NotificationModel[]>
@@ -44,8 +42,8 @@ namespace InstaLike.Web.Data.Query
 
             using (var tx = _session.BeginTransaction())
             {
-                NotificationModel notification = null;
-                User recipient = null;
+                NotificationModel notification = null!;
+                User recipient = null!;
 
                 var notificationsQuery = _session.QueryOver<Notification>()
                     .Inner.JoinAlias(n => n.Recipient, () => recipient)

@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.Data.Query
 {
     public class UserProfileQuery : IRequest<UserProfileModel>
@@ -40,7 +38,7 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<UserProfileModel> Handle(UserProfileQuery request, CancellationToken cancellationToken)
         {
-            UserProfileModel profile = null;
+            UserProfileModel profile = null!;
 
             _logger.Debug("Reading profile of user {UserID} with parameters {@Request}.", request.CurrentUserID, request);
 
@@ -68,7 +66,7 @@ namespace InstaLike.Web.Data.Query
                     .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
-                PostThumbnailModel thumbnailModel = null;
+                PostThumbnailModel thumbnailModel = null!;
                 var thumbnailsQuery = _session.QueryOver<Post>()
                     .Where(p => p.Author.ID == profile.UserID)
                     .OrderBy(p => p.PostDate).Desc()

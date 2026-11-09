@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.Data.Query
 {
     public class TimelineQuery : IRequest<PostModel[]>
@@ -45,10 +43,10 @@ namespace InstaLike.Web.Data.Query
 
             using (var tx = _session.BeginTransaction())
             {           
-                Post post = null;
-                Comment comment = null;
-                User postAuthor = null;
-                Follow follow = null;
+                Post post = null!;
+                Comment comment = null!;
+                User postAuthor = null!;
+                Follow follow = null!;
 
                 // Post to show in the timeline (user's own posts and posts published by followed users)
                 var postIdsToShowInTimelineQuery = QueryOver.Of<Post>()

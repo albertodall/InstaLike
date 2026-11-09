@@ -10,8 +10,6 @@ using NHibernate.Criterion;
 using NHibernate.Transform;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.Data.Query
 {
     public class FollowingQuery : IRequest<FollowModel[]>
@@ -43,9 +41,9 @@ namespace InstaLike.Web.Data.Query
 
             using (var tx = _session.BeginTransaction())
             {
-                FollowModel model = null;
-                User followed = null;
-                User follower = null;
+                FollowModel model = null!;
+                User followed = null!;
+                User follower = null!;
 
                 var followersQuery = _session.QueryOver<Follow>()
                     .Inner.JoinAlias(f => f.Followed, () => followed)

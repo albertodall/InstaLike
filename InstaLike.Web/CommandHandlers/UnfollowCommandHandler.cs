@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class UnfollowCommandHandler : IRequestHandler<UnfollowCommand, Result>
@@ -28,11 +26,16 @@ namespace InstaLike.Web.CommandHandlers
         {
             using (var tx = _session.BeginTransaction())
             {
-                Follow follow = null;
+                Follow follow = null!;
 
-                var userToUnfollow = await _session.QueryOver<User>()
+                User? userToUnfollow = await _session.QueryOver<User>()
                     .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
                     .SingleOrDefaultAsync(cancellationToken);
+
+                if (userToUnfollow is null)
+                {
+                    return Result.Failure($"User [{request.UnfollowedNickname}] does not exist.");
+                }
 
                 var followingQuery = _session.QueryOver<User>()
                     .Where(u => u.ID == request.FollowerID)
@@ -42,7 +45,12 @@ namespace InstaLike.Web.CommandHandlers
                         .Add(Restrictions.On(() => follow.Followed).IsNull)
                     );
 
-                var followerUser = await followingQuery.SingleOrDefaultAsync(cancellationToken);
+                User? followerUser = await followingQuery.SingleOrDefaultAsync(cancellationToken);
+                if (followerUser is null)
+                {
+                    return Result.Failure($"User {request.FollowerID} does not exist.");
+                }
+
                 return await followerUser.Unfollow(userToUnfollow)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
                         .Tap(() => _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
@@ -55,7 +63,7 @@ namespace InstaLike.Web.CommandHandlers
 
                             _logger.Error("Error while unfollowing [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message {ErrorMessage}",
                                 request.UnfollowedNickname,
-                                userToUnfollow?.ID,
+                                userToUnfollow.ID,
                                 request.FollowerID);
                         });
             }

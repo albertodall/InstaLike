@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Transform;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.Data.Query
 {
     public class PostCommentsQuery : IRequest<CommentModel[]>
@@ -42,8 +40,8 @@ namespace InstaLike.Web.Data.Query
 
             using (var tx = _session.BeginTransaction())
             {
-                CommentModel comment = null;
-                User commentAuthor = null;
+                CommentModel comment = null!;
+                User commentAuthor = null!;
                 var commentsQuery = _session.QueryOver<Comment>()
                     .Where(c => c.Post.ID == request.PostID)
                     .OrderBy(c => c.CommentDate).Asc

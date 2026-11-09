@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Transform;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.Data.Query
 {
     public class PostDetailQuery : IRequest<PostModel>
@@ -38,7 +36,7 @@ namespace InstaLike.Web.Data.Query
 
         public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)
         {
-            PostModel post = null;
+            PostModel post = null!;
 
             _logger.Debug("Reading details for post {PostID} with parameters {@Request}", request.PostID, request);
 
@@ -53,8 +51,8 @@ namespace InstaLike.Web.Data.Query
                     .FutureValue<int>();
 
                 // Comments for this post
-                User commentAuthor = null;
-                CommentModel comment = null;
+                User commentAuthor = null!;
+                CommentModel comment = null!;
                 var postCommentsQuery = _session.QueryOver<Comment>()
                     .Where(c => c.Post.ID == request.PostID)
                     .OrderBy(c => c.CommentDate).Asc
@@ -75,7 +73,7 @@ namespace InstaLike.Web.Data.Query
                     .FutureValue<int>();
 
                 // Post to show
-                User postAuthor = null;
+                User postAuthor = null!;
                 var postQuery = _session.QueryOver<Post>()
                     .Where(p => p.ID == request.PostID)
                     .Inner.JoinQueryOver(p => p.Author, () => postAuthor)
