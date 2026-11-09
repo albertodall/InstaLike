@@ -25,10 +25,10 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureTelemetry(builder.Environment.IsDevelopment());
+builder.Services.ConfigureOpenTelemetry(builder.Configuration);
 
 builder.Services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
 
-builder.Services.ConfigurePipeline();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly));
 

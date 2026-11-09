@@ -6,7 +6,7 @@
     <ProjectGuid>0f8884fa-7fcb-446b-8491-f0f89a442bd0</ProjectGuid>
     <DockerComposeProjectName>instalike</DockerComposeProjectName>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
+    <DockerServiceUrl>http://localhost:5080</DockerServiceUrl>
     <DockerServiceName>instalike.web</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>

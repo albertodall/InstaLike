@@ -1,41 +1,81 @@
-version: '3.4'
+name: instalike
+
+x-database-connection-string: &database-connection-string "Data Source=mssql,1433; Initial Catalog=InstaLike; User ID=sa; Password=${MSSQL_SA_PASSWORD:-Pa55w0rd}; TrustServerCertificate=True"
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
   instalike.web:
     container_name: instalike-web
+    logging: *default-logging
     image: ${DOCKER_REGISTRY-}instalikeweb
     build:
       context: .
       dockerfile: InstaLike.Web/Dockerfile
+    environment:
+      ConnectionStrings__InstalikeDatabase: *database-connection-string
+      # Well-known Azurite development account key (not a secret).
+      ExternalStorage__AzureBlobStorage__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+    ports:
+      - "5080:8080"
     depends_on:
-      - instalike.db.mssql
-      - instalike.storage.azureblob
+      instalike.db.migrator:
+        condition: service_completed_successfully
+      instalike.storage.azureblob:
+        condition: service_started
+    networks:
+      - instalike.network
+
+  instalike.db.migrator:
+    container_name: instalike-db-migrator
+    logging: *default-logging
+    image: ${DOCKER_REGISTRY-}instalikedbmigrator
+    build:
+      context: .
+      dockerfile: InstaLike.Database.Migrator/Dockerfile
+    environment:
+      ConnectionStrings__InstalikeDatabase: *database-connection-string
+    depends_on:
+      instalike.db.mssql:
+        condition: service_healthy
     networks:
       - instalike.network
 
   instalike.db.mssql:
     container_name: instalike-db-mssql
+    logging: *default-logging
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Pa55w0rd
-      - MSSQL_PID=Developer
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Pa55w0rd}
+      MSSQL_PID: Developer
     ports:
-      - "1433:1433/tcp"
-      - "1434:1434/udp"
-    hostname: mssql
+      - "1433:1433"
     volumes:
       - "./.containers/db/mssql/data/:/var/opt/mssql/data/"
       - "./.containers/db/mssql/log/:/var/opt/mssql/log/"
       - "./.containers/db/mssql/secrets/:/var/opt/mssql/secrets/"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     networks:
-      - instalike.network
+      instalike.network:
+        aliases:
+          - mssql
 
   instalike.storage.azureblob:
     container_name: instalike-storage-azurite
+    logging: *default-logging
     image: mcr.microsoft.com/azure-storage/azurite:latest
-    hostname: azurite
-    command: "azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --location /workspace"
+    command: "azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --location /workspace --skipApiVersionCheck --loose"
     ports:
       - "10000:10000"
       - "10001:10001"
@@ -43,7 +83,23 @@ services:
     volumes:
       - "./.containers/storage/azurite:/workspace"
     networks:
-      - instalike.network
+      instalike.network:
+        aliases:
+          - azurite
+
+  instalike.dashboard:
+    container_name: instalike-dashboard
+    logging: *default-logging
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.4
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      - "18888:18888"
+      - "4317:18889"
+    networks:
+      instalike.network:
+        aliases:
+          - dashboard
 
 networks:
   instalike.network:
