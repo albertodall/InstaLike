@@ -132,8 +132,8 @@ stages:
         variables:
           ConnectionStrings.InstalikeDatabase: $(Azure-Database-ConnectionString)
           ExternalStorage.AzureBlobStorage.ConnectionString: $(Azure-Blob-ConnectionString)
-          ImageAnalysis.AzureComputerVision.ApiKey: $(Dev-AzureCV-ApiKey)
-          ImageAnalysis.AzureComputerVision.ApiUrl: $(Dev-AzureCV-ApiUrl)
+          ImageAnalysis.Endpoint: $(Azure-OpenAI-Endpoint)
+          ImageAnalysis.ApiKey: $(Azure-OpenAI-ApiKey)
           ApplicationInsights.ConnectionString: $(Azure-AppInsights-ConnectionString)
 
         strategy:
