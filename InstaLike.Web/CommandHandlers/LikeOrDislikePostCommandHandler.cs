@@ -9,8 +9,6 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-#nullable disable
-
 namespace InstaLike.Web.CommandHandlers
 {
     internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>
@@ -30,6 +28,10 @@ namespace InstaLike.Web.CommandHandlers
             {
                 var user = await _session.LoadAsync<User>(request.UserID, cancellationToken);
                 var post = await GetPostAsync(request.UserID, request.PostID, cancellationToken);
+                if (post is null)
+                {
+                    return Result.Failure($"Post {request.PostID} does not exist.");
+                }
 
                 return await user.PutLikeTo(post)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
@@ -59,6 +61,10 @@ namespace InstaLike.Web.CommandHandlers
             {
                 var user = await _session.LoadAsync<User>(request.UserID, cancellationToken);
                 var post = await GetPostAsync(request.UserID, request.PostID, cancellationToken);
+                if (post is null)
+                {
+                    return Result.Failure($"Post {request.PostID} does not exist.");
+                }
 
                 return await user.RemoveLikeFrom(post)
                     .OnSuccessTry(async () => await tx.CommitAsync(cancellationToken))
@@ -82,9 +88,9 @@ namespace InstaLike.Web.CommandHandlers
             }
         }
 
-        private async Task<Post> GetPostAsync(int userID, int postID, CancellationToken cancellationToken)
+        private async Task<Post?> GetPostAsync(int userID, int postID, CancellationToken cancellationToken)
         {
-            Like likeAlias = null;
+            Like likeAlias = null!;
             
             var postQuery = _session.QueryOver<Post>()
                 .Left.JoinAlias(p => p.Likes, () => likeAlias)
