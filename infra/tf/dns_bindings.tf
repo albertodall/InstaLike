@@ -1,8 +1,9 @@
-resource "cloudflare_record" "instalike_dns_record" {
+resource "cloudflare_dns_record" "instalike_dns_record" {
   zone_id = var.cloudflare_dns_zone_id
-  name    = var.dns_cname_record_value
-  value   = lower("${azurerm_linux_web_app.instalike_app.name}.azurewebsites.net")
+  name    = "${var.dns_cname_record_value}.${var.web_application_domain}"
+  content = lower("${azurerm_linux_web_app.instalike_app.name}.azurewebsites.net")
   type    = "CNAME"
+  ttl     = 1 # Automatic
   proxied = true
 
   depends_on = [
@@ -10,11 +11,12 @@ resource "cloudflare_record" "instalike_dns_record" {
   ]
 }
 
-resource "cloudflare_record" "instalike_dns_txt_record" {
+resource "cloudflare_dns_record" "instalike_dns_txt_record" {
   zone_id = var.cloudflare_dns_zone_id
-  name    = "asuid.${var.dns_cname_record_value}"
-  value   = azurerm_linux_web_app.instalike_app.custom_domain_verification_id
+  name    = "asuid.${var.dns_cname_record_value}.${var.web_application_domain}"
+  content = azurerm_linux_web_app.instalike_app.custom_domain_verification_id
   type    = "TXT"
+  ttl     = 1 # Automatic
 
   depends_on = [
     azurerm_linux_web_app.instalike_app
@@ -34,8 +36,8 @@ resource "azurerm_app_service_custom_hostname_binding" "instalike_app_binding" {
 
   depends_on = [
     azurerm_linux_web_app.instalike_app,
-    cloudflare_record.instalike_dns_record,
-    cloudflare_record.instalike_dns_txt_record
+    cloudflare_dns_record.instalike_dns_record,
+    cloudflare_dns_record.instalike_dns_txt_record
   ]
 }
 

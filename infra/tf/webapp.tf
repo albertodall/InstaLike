@@ -11,21 +11,20 @@ resource "azurerm_linux_web_app" "instalike_app" {
     websockets_enabled  = false
 
     application_stack {
-      dotnet_version = "3.1"
+      dotnet_version = "10.0"
     }
   }
 
   app_settings = {
-    ConnectionStrings__DefaultDatabase                         = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Persist Security Info=False;User ID=${var.azure_sql_database_admin_username};Password=${var.azure_sql_database_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-    DeploymentType                                             = "AzureCloud"
-    ExternalStorage__AzureBlobStorage__StorageConnectionString = azurerm_storage_account.instalike_storage_account.primary_connection_string
-    ImageAnalysis__AzureComputerVision__ApiKey                 = azurerm_cognitive_account.instalike_autotag_service.primary_access_key
-    ImageAnalysis__AzureComputerVision__ApiUrl                 = azurerm_cognitive_account.instalike_autotag_service.endpoint
-    Logging__AppInsightsInstrumentationKey                     = azurerm_application_insights.instalike_appinsights.instrumentation_key
+    ConnectionStrings__InstalikeDatabase                = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Persist Security Info=False;User ID=${var.azure_sql_database_admin_username};Password=${var.azure_sql_database_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    ExternalStorage__AzureBlobStorage__ConnectionString = azurerm_storage_account.instalike_storage_account.primary_connection_string
+    ImageAnalysis__AzureComputerVision__ApiKey          = azurerm_cognitive_account.instalike_autotag_service.primary_access_key
+    ImageAnalysis__AzureComputerVision__ApiUrl          = azurerm_cognitive_account.instalike_autotag_service.endpoint
+    ApplicationInsights__ConnectionString               = azurerm_application_insights.instalike_appinsights.connection_string
   }
 
   tags = local.common_tags
-  
+
   depends_on = [
     azurerm_service_plan.instalike_appservice_plan,
     azurerm_mssql_database.instalike_database,
@@ -42,9 +41,9 @@ resource "azurerm_key_vault_access_policy" "instalike_app_keyvault_access_policy
   tenant_id = azurerm_key_vault.instalike_key_vault.tenant_id
   object_id = data.azuread_service_principal.web_app_resource_provider.id
 
-  secret_permissions = [ "Get" ]
+  secret_permissions = ["Get"]
 
-  certificate_permissions = [ "Get" ]
+  certificate_permissions = ["Get"]
 
   depends_on = [
     azurerm_key_vault.instalike_key_vault,

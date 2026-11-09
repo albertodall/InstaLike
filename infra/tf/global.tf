@@ -1,7 +1,7 @@
 locals {
   common_tags = {
-    ApplicationName    = "InstaLike"
-    Env                = "prd"
+    ApplicationName = "InstaLike"
+    Env             = "prd"
   }
 }
 

@@ -7,6 +7,7 @@ resource "azurerm_key_vault" "instalike_key_vault" {
   sku_name                    = "standard"
   soft_delete_retention_days  = 90
   purge_protection_enabled    = false
+  rbac_authorization_enabled  = false # Access is granted through access policies
 
   tags = local.common_tags
 
@@ -26,6 +27,9 @@ resource "azurerm_storage_account" "instalike_storage_account" {
   min_tls_version           = "TLS1_2"
   shared_access_key_enabled = true
 
+  # The picture containers allow anonymous read access to blobs (container_access_type = "blob").
+  allow_nested_items_to_be_public = true
+
   tags = local.common_tags
 
   depends_on = [
@@ -35,7 +39,7 @@ resource "azurerm_storage_account" "instalike_storage_account" {
 
 resource "azurerm_storage_container" "instalike_posts_container" {
   name                  = "posts"
-  storage_account_name  = azurerm_storage_account.instalike_storage_account.name
+  storage_account_id    = azurerm_storage_account.instalike_storage_account.id
   container_access_type = "blob"
 
   depends_on = [
@@ -45,7 +49,7 @@ resource "azurerm_storage_container" "instalike_posts_container" {
 
 resource "azurerm_storage_container" "instalike_profiles_container" {
   name                  = "profiles"
-  storage_account_name  = azurerm_storage_account.instalike_storage_account.name
+  storage_account_id    = azurerm_storage_account.instalike_storage_account.id
   container_access_type = "blob"
 
   depends_on = [
