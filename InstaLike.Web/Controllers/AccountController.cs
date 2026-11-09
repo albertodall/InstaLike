@@ -70,7 +70,9 @@ namespace InstaLike.Web.Controllers
 
                     await _dispatcher.Publish(new UserLoggedInEvent(authenticationResult.Value.ID, authenticationResult.Value.Nickname));
 
-                    return Redirect(model.ReturnUrl);
+                    return Url.IsLocalUrl(model.ReturnUrl)
+                        ? LocalRedirect(model.ReturnUrl)
+                        : RedirectToAction("Index", "Home");
                 }
             }
 
