@@ -10,78 +10,59 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace InstaLike.Web
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSerilog((services, cfg) => cfg
+    .ReadFrom.Configuration(builder.Configuration)
+    .ReadFrom.Services(services));
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
 
-            builder.Services.Configure<CookiePolicyOptions>(options =>
-            {
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
+builder.Services.AddHttpContextAccessor();
+builder.Services.ConfigureTelemetry(builder.Environment.IsDevelopment());
 
-            builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
-            builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
 
-            builder.Services.ConfigureTelemetry(builder.Environment.IsDevelopment());
+builder.Services.ConfigurePipeline();
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly));
 
-            builder.Services.AddSingleton<ISequentialIdGenerator<SequentialGuid>, SequentialGuidGenerator>();
-
-            builder.Services.ConfigurePipeline();
-            builder.Services.AddMediatR(cfg => {
-                cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly);
-            });
-
-            if (IsOnPremDeployment(builder.Configuration))
-            {
-                builder.Services.ConfigureOnPremDataAccess(builder.Configuration);
-            }
-            else
-            {
-                builder.Services.ConfigureCloudDataAccess(builder.Configuration);
-            }
-
-            builder.Services.ConfigureAzureComputerVision(builder.Configuration);
-
-            builder.Services.ConfigureAuthentication();
-            builder.Services.ConfigureAuthorization();
-
-            builder.Services.AddControllersWithViews();
-
-            var app = builder.Build();
-            
-            if (builder.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
-
-            app.UseStaticFiles();
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseRequestCorrelation();
-            app.UseCookiePolicy();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapDefaultControllerRoute();
-            });
-
-            app.Run();
-        }
-
-        private static bool IsOnPremDeployment(IConfiguration configuration)
-        {
-            return configuration.GetValue<DeploymentType>("Settings:DeploymentType") == DeploymentType.OnPrem;
-        }
-    }
+if (IsOnPremDeployment(builder.Configuration))
+{
+    builder.Services.ConfigureOnPremDataAccess(builder.Configuration);
 }
+else
+{
+    builder.Services.ConfigureCloudDataAccess(builder.Configuration);
+}
+builder.Services.ConfigureAzureComputerVision(builder.Configuration);
+
+builder.Services.ConfigureAuthentication();
+builder.Services.ConfigureAuthorization();
+
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRequestCorrelation();
+app.UseCookiePolicy();
+
+app.MapDefaultControllerRoute();
+
+app.Run();
+
+static bool IsOnPremDeployment(IConfiguration configuration) =>
+    configuration.GetValue<DeploymentType>("Settings:DeploymentType") == DeploymentType.OnPrem;

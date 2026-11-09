@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
+using NHibernate.Driver;
 
 namespace InstaLike.Web.Extensions
 {
@@ -21,7 +22,8 @@ namespace InstaLike.Web.Extensions
     {
         public static IServiceCollection ConfigureOnPremDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
-            string connectionString = configuration.GetConnectionString("InstalikeDatabase");
+            var connectionString = configuration.GetConnectionString("InstalikeDatabase")
+                ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
             var nhConfig = GetFluentConfigurationForDatabase(connectionString);
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
@@ -36,8 +38,10 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureCloudDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
-            string databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase");
-            string externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString");
+            var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
+                ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
+            var externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString")
+                ?? throw new InvalidOperationException("Setting 'ExternalStorage:AzureBlobStorage:ConnectionString' has not been configured.");
 
             var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
@@ -110,8 +114,9 @@ namespace InstaLike.Web.Extensions
 
         public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, IConfiguration configuration)
         {
-            var apiKey = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey");
-            var apiUrl = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl");
+            // Auto-tagging is optional: when not configured, tagging requests just fail.
+            var apiKey = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey") ?? string.Empty;
+            var apiUrl = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl") ?? string.Empty;
             services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
 
             return services;
@@ -122,6 +127,7 @@ namespace InstaLike.Web.Extensions
             return Fluently.Configure()
                 .Database(
                     MsSqlConfiguration.MsSql2012
+                        .Driver<MicrosoftDataSqlClientDriver>()
                         .Provider<HybridStorageDriverConnectionProvider>()
                         .ConnectionString(connectionString)
                         .DefaultSchema("dbo")
