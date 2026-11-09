@@ -9,7 +9,7 @@ trigger:
       - README.md
 
 variables:
-  solution: '**/*.sln'
+  solution: '**/*.slnx'
   databaseMigrationsProject: '**/InstaLike.Database.Migrator.csproj'
   webApplicationProject: '**/InstaLike.Web.csproj'
   buildPlatform: 'Any CPU'

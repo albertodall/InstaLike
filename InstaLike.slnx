@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="azure-pipelines.yml" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+    <File Path="sonarcloud.cmd" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="InstaLike.Core.Tests/InstaLike.Core.Tests.csproj" />
+  <Project Path="InstaLike.Core/InstaLike.Core.csproj" />
+  <Project Path="InstaLike.Database.Migrator/InstaLike.Database.Migrator.csproj" />
+  <Project Path="InstaLike.IntegrationTests/InstaLike.IntegrationTests.csproj" />
+  <Project Path="InstaLike.Web/InstaLike.Web.csproj" />
+</Solution>
