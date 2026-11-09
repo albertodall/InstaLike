@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -49,6 +51,17 @@ namespace InstaLike.Web.Services
             blob.Upload(
                 BinaryData.FromBytes(picture.RawBytes),
                 new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" } });
+        }
+
+        public static async Task EnsureContainersExistAsync(string storageConnectionString, CancellationToken cancellationToken = default)
+        {
+            var blobServiceClient = new BlobServiceClient(storageConnectionString);
+            foreach (var containerName in PictureContainers.All)
+            {
+                await blobServiceClient
+                    .GetBlobContainerClient(containerName)
+                    .CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+            }
         }
 
         private static string GetBlobName(Guid identifier) => $"{identifier.ToString().ToLowerInvariant()}.jpg";

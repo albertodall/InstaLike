@@ -56,4 +56,5 @@ app.UseCookiePolicy();
 
 app.MapDefaultControllerRoute();
 
-app.Run();
+await app.EnsurePictureContainersExistAsync();
+await app.RunAsync();
