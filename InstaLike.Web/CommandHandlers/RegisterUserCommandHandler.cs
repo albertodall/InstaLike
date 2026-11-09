@@ -41,9 +41,9 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
         }
 
         var userToRegister = new User(
-            nicknameValidationResult.Value, 
+            nicknameValidationResult.Value,
             fullNameValidationResult.Value,
-            passwordValidationResult.Value, 
+            passwordValidationResult.Value,
             eMailValidationResult.Value,
             request.Biography);
 

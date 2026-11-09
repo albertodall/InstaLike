@@ -34,8 +34,8 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             if (!postToEdit.CanBeEditedBy(editor))
             {
                 _logger.Warning("User [{NickName}({UserID})] tried to edit post {PostID} but he wasn't allowed to.",
-                    editor.Nickname, 
-                    request.UserID, 
+                    editor.Nickname,
+                    request.UserID,
                     request.PostID);
                 return Result.Failure<int>($"You're not allowed to edit post {postToEdit.ID}.");
             }

@@ -39,10 +39,10 @@ internal class HybridStorageCommand : DbCommand
         set => _command.CommandType = value;
     }
 
-    public override bool DesignTimeVisible 
-    { 
-        get => false; 
-        set => throw new NotImplementedException(); 
+    public override bool DesignTimeVisible
+    {
+        get => false;
+        set => throw new NotImplementedException();
     }
 
     public override UpdateRowSource UpdatedRowSource
@@ -51,10 +51,10 @@ internal class HybridStorageCommand : DbCommand
         set => _command.UpdatedRowSource = value;
     }
 
-    protected override DbConnection? DbConnection 
-    { 
-        get => _connection; 
-        set  
+    protected override DbConnection? DbConnection
+    {
+        get => _connection;
+        set
         {
             _connection = value;
             _command.Connection = value is HybridStorageConnection connection
@@ -65,10 +65,10 @@ internal class HybridStorageCommand : DbCommand
 
     protected override DbParameterCollection DbParameterCollection => _command.Parameters;
 
-    protected override DbTransaction? DbTransaction 
-    { 
-        get => _command.Transaction; 
-        set => _command.Transaction = value; 
+    protected override DbTransaction? DbTransaction
+    {
+        get => _command.Transaction;
+        set => _command.Transaction = value;
     }
 
     public override void Cancel()

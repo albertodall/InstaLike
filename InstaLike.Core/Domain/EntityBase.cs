@@ -57,7 +57,7 @@ public abstract class EntityBase<TId> : IEquatable<EntityBase<TId>>
         {
             return RuntimeHelpers.GetHashCode(this);
         }
-        
+
         return (HashMultiplier * GetUnproxiedType().GetHashCode()) ^ ID.GetHashCode();
     }
 

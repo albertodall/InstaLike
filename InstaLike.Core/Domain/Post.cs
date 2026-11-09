@@ -18,7 +18,7 @@ public class Post : EntityBase<int>
     }
 #pragma warning restore CS8618
 
-    public Post(User author, Picture picture, PostText text) 
+    public Post(User author, Picture picture, PostText text)
         : this()
     {
         Author = author;

@@ -1,4 +1,4 @@
-namespace InstaLike.Web.Services;
+﻿namespace InstaLike.Web.Services;
 
 internal static class PictureContainers
 {

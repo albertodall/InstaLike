@@ -18,7 +18,7 @@ public class User : EntityBase<int>
     }
 #pragma warning restore CS8618
 
-    public User(Nickname nickname, FullName fullName, Password password, Email email, string biography) 
+    public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
         : this()
     {
         _nickname = nickname;
@@ -51,14 +51,14 @@ public class User : EntityBase<int>
         get => (Password)_password;
         set => _password = value;
     }
-    
+
     private string _email;
     public virtual Email Email
     {
         get => (Email)_email;
         set => _email = value;
     }
-    
+
     public virtual Picture ProfilePicture { get; protected set; }
     public virtual string Biography { get; protected set; }
     public virtual DateTimeOffset RegistrationDate { get; protected set; }

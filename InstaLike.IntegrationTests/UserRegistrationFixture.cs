@@ -70,7 +70,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         }
 
         var command = new EditUserDetailsCommand(
-            testUser.ID, 
+            testUser.ID,
             $"{testUser.Nickname}_mod",
             $"{testUser.FullName.Name}_mod",
             $"{testUser.FullName.Surname}_mod",

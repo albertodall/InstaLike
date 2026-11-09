@@ -36,7 +36,7 @@ internal class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorReq
                 .SingleOrDefaultAsync();
 
             var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
-            
+
             if (post.CanBeEditedBy(user))
             {
                 context.Succeed(requirement);

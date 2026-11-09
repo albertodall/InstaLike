@@ -105,8 +105,8 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
             profile.NumberOfFollows = await followingCountQuery.GetValueAsync(cancellationToken);
             profile.IsCurrentUserProfile = profile.UserID == request.CurrentUserID;
 
-            profile.Following = 
-                await isFollowedByCurrentUserQuery.GetValueAsync(cancellationToken) == 1 
+            profile.Following =
+                await isFollowedByCurrentUserQuery.GetValueAsync(cancellationToken) == 1
                 || profile.IsCurrentUserProfile;
 
             await tx.CommitAsync(cancellationToken);

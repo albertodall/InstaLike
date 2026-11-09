@@ -51,8 +51,8 @@ public class PostLikedEventHandler : INotificationHandler<PostLikedEvent>
                 await _session.SaveAsync(notificationToInsert, cancellationToken);
                 await tx.CommitAsync(cancellationToken);
 
-                _logger.Information("Sent notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]", 
-                    notification.PostID, 
+                _logger.Information("Sent notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]",
+                    notification.PostID,
                     notification.SenderNickname,
                     sender.ID);
             }
@@ -60,7 +60,7 @@ public class PostLikedEventHandler : INotificationHandler<PostLikedEvent>
             {
                 await tx.RollbackAsync(cancellationToken);
 
-                _logger.Error("Failed to send notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]. Error message: {ErrorMessage}", 
+                _logger.Error("Failed to send notification for a 'Like' put to post {PostID} by [{SenderNickName}({UserID})]. Error message: {ErrorMessage}",
                     notification.PostID,
                     notification.SenderNickname,
                     sender?.ID,

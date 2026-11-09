@@ -13,7 +13,7 @@ namespace InstaLike.Web.Data.Query;
 
 public class PostCommentsQuery : IRequest<CommentModel[]>
 {
-    public int PostID { get;  }
+    public int PostID { get; }
 
     public PostCommentsQuery(int postID)
     {

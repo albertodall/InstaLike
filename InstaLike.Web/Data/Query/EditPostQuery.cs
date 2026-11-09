@@ -30,7 +30,7 @@ internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, Edit
     public EditPostQueryHandler(ISession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<EditPostQuery>() ?? throw new ArgumentNullException(nameof(logger)) ;
+        _logger = logger?.ForContext<EditPostQuery>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<EditPostModel> Handle(EditPostQuery request, CancellationToken cancellationToken)

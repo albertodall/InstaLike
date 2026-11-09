@@ -16,7 +16,7 @@ namespace InstaLike.Web.Data;
 /// It's useful for value objects, when you want to project them partially.
 /// </summary>
 /// <typeparam name="TTarget">Target model type.</typeparam>
-internal class EntityToModelResultTransformer<TTarget> : IResultTransformer 
+internal class EntityToModelResultTransformer<TTarget> : IResultTransformer
     where TTarget : class
 {
     private readonly AliasToBeanResultTransformer _innerTransformer;

@@ -205,7 +205,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Author_Cannot_Put_Likes_On_Their_Own_Posts()
     {
         Result likeResult;
-        var author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");           
+        var author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");
         var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -316,7 +316,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task User_Can_Edit_His_Own_Posts()
     {
         Result editResult;
-        var picture = (Picture) Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
+        var picture = (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
         var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
         var post = new Post(author, picture, (PostText)"test post 1");
         using (var session = _testFixture.OpenSession(_output))
@@ -346,7 +346,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task User_Cannot_Edit_Post_Published_By_Another_User()
     {
         Result editResult;
-        var picture = (Picture) Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
+        var picture = (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
         var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
         var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
         var post = new Post(author, picture, (PostText)"test post 1");

@@ -19,7 +19,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     {
         _testFixture = fixture;
         _output = output;
-    }       
+    }
 
     [Fact]
     public async Task Registered_User_Should_Be_Able_To_Log_In()

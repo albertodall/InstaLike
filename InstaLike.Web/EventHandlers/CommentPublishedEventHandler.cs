@@ -40,8 +40,8 @@ public class CommentPublishedEventHandler : INotificationHandler<CommentPublishe
                     .FutureValue();
 
                 var post = await postQuery.GetValueAsync(cancellationToken);
-                var message = string.Format(NotificationMessageTemplate, 
-                    notification.SenderProfileUrl, 
+                var message = string.Format(NotificationMessageTemplate,
+                    notification.SenderProfileUrl,
                     notification.SenderNickname,
                     notification.PostUrl);
 
@@ -51,7 +51,7 @@ public class CommentPublishedEventHandler : INotificationHandler<CommentPublishe
 
                 await tx.CommitAsync(cancellationToken);
 
-                _logger.Information("Sent comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]", 
+                _logger.Information("Sent comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]",
                     notification.PostID,
                     notification.SenderNickname,
                     sender.ID);
@@ -60,8 +60,8 @@ public class CommentPublishedEventHandler : INotificationHandler<CommentPublishe
             {
                 await tx.RollbackAsync(cancellationToken);
 
-                _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]. Error message {ErrorMessage}", 
-                    notification.PostID, 
+                _logger.Error("Failed to send comment notification for post {PostID}. Notification sender: [{SenderNickname}({UserID})]. Error message {ErrorMessage}",
+                    notification.PostID,
                     notification.SenderNickname,
                     sender?.ID,
                     ex.Message);

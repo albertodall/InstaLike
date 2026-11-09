@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;

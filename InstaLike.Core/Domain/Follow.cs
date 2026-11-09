@@ -8,7 +8,7 @@ public class Follow : EntityBase<int>
     protected Follow() { }
 #pragma warning restore CS8618
 
-    public Follow(User follower, User followed) 
+    public Follow(User follower, User followed)
         : this()
     {
         Follower = follower;

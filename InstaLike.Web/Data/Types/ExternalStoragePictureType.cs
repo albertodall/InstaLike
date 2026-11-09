@@ -35,7 +35,7 @@ internal abstract class ExternalStoragePictureType : IUserType
 
     public object Disassemble(object value) => value;
 
-    public new bool Equals(object x, object y) => Object.Equals(x, y);
+    public new bool Equals(object x, object y) => object.Equals(x, y);
 
     public int GetHashCode(object x) => x.GetHashCode();
 

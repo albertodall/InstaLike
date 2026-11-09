@@ -39,10 +39,14 @@ internal class DateTimeOffsetUserType : ICompositeUserType
     public new bool Equals(object x, object y)
     {
         if (x is null && y is null)
+        {
             return true;
+        }
 
         if (x is null || y is null)
+        {
             return false;
+        }
 
         return x.Equals(y);
     }
