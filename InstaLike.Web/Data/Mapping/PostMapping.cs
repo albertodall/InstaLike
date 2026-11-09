@@ -2,40 +2,39 @@
 using InstaLike.Core.Domain;
 using InstaLike.Web.Data.Types;
 
-namespace InstaLike.Web.Data.Mapping
+namespace InstaLike.Web.Data.Mapping;
+
+internal class PostMapping : ClassMap<Post>
 {
-    internal class PostMapping : ClassMap<Post>
+    public PostMapping()
     {
-        public PostMapping()
-        {
-            Table("[Post]");
+        Table("[Post]");
 
-            Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).GeneratedBy.Native();
 
-            Map(p => p.Text).CustomType<string>()
-                .Access.CamelCaseField(Prefix.Underscore)
-                .Not.Nullable();
+        Map(p => p.Text).CustomType<string>()
+            .Access.CamelCaseField(Prefix.Underscore)
+            .Not.Nullable();
 
-            Map(p => p.PostDate)
-                .Not.Nullable();
+        Map(p => p.PostDate)
+            .Not.Nullable();
 
-            Map(p => p.Picture)
-                .CustomType<PostPictureType>()
-                .Column("PostGuid")
-                .Not.Nullable();
+        Map(p => p.Picture)
+            .CustomType<PostPictureType>()
+            .Column("PostGuid")
+            .Not.Nullable();
 
-            References(p => p.Author)
-                .Column("UserID");
+        References(p => p.Author)
+            .Column("UserID");
 
-            HasMany(p => p.Comments)
-                .KeyColumn("PostID")
-                .Access.CamelCaseField(Prefix.Underscore);
+        HasMany(p => p.Comments)
+            .KeyColumn("PostID")
+            .Access.CamelCaseField(Prefix.Underscore);
 
-            HasMany(p => p.Likes)
-                .KeyColumn("PostID")
-                .Access.CamelCaseField(Prefix.Underscore);
+        HasMany(p => p.Likes)
+            .KeyColumn("PostID")
+            .Access.CamelCaseField(Prefix.Underscore);
 
-            DynamicInsert();
-        }
+        DynamicInsert();
     }
 }

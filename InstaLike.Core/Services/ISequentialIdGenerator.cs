@@ -1,7 +1,6 @@
-﻿namespace InstaLike.Core.Services
+﻿namespace InstaLike.Core.Services;
+
+public interface ISequentialIdGenerator<out TId>
 {
-    public interface ISequentialIdGenerator<out TId>
-    {
-        TId GetNextId();
-    }
+    TId GetNextId();
 }

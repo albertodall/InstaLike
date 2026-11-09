@@ -2,51 +2,50 @@
 using InstaLike.Core.Domain;
 using InstaLike.Web.Data.Types;
 
-namespace InstaLike.Web.Data.Mapping
+namespace InstaLike.Web.Data.Mapping;
+
+internal class UserMapping : ClassMap<User>
 {
-    internal class UserMapping : ClassMap<User>
+    public UserMapping()
     {
-        public UserMapping()
+        Table("[User]");
+
+        Id(p => p.ID).GeneratedBy.Native();
+
+        Map(p => p.Biography).CustomType<string>()
+            .Not.Nullable()
+            .LazyLoad();
+        Map(p => p.Email).CustomType<string>()
+            .Access.CamelCaseField(Prefix.Underscore)
+            .Not.Nullable();
+        Map(p => p.Nickname).CustomType<string>()
+            .Access.CamelCaseField(Prefix.Underscore)
+            .Not.Nullable();
+        Map(p => p.Password).CustomType<string>()
+            .Access.CamelCaseField(Prefix.Underscore)
+            .Not.Nullable();
+        Map(p => p.RegistrationDate)
+            .Not.Nullable();
+        Map(p => p.ProfilePicture)
+            .CustomType<ProfilePictureType>()
+            .Column("ProfilePictureGuid")
+            .Not.Nullable()
+            .LazyLoad();
+
+        Component(p => p.FullName, m =>
         {
-            Table("[User]");
+            m.Map(p => p.Name).CustomType<string>().Not.Nullable();
+            m.Map(p => p.Surname).CustomType<string>().Not.Nullable();
+        });
 
-            Id(p => p.ID).GeneratedBy.Native();
+        HasMany(p => p.Followers)
+            .KeyColumn("FollowedID")
+            .Access.CamelCaseField(Prefix.Underscore);
 
-            Map(p => p.Biography).CustomType<string>()
-                .Not.Nullable()
-                .LazyLoad();
-            Map(p => p.Email).CustomType<string>()
-                .Access.CamelCaseField(Prefix.Underscore)
-                .Not.Nullable();
-            Map(p => p.Nickname).CustomType<string>()
-                .Access.CamelCaseField(Prefix.Underscore)
-                .Not.Nullable();
-            Map(p => p.Password).CustomType<string>()
-                .Access.CamelCaseField(Prefix.Underscore)
-                .Not.Nullable();
-            Map(p => p.RegistrationDate)
-                .Not.Nullable();
-            Map(p => p.ProfilePicture)
-                .CustomType<ProfilePictureType>()
-                .Column("ProfilePictureGuid")
-                .Not.Nullable()
-                .LazyLoad();
+        HasMany(p => p.Followed)
+            .KeyColumn("FollowerID")
+            .Access.CamelCaseField(Prefix.Underscore);
 
-            Component(p => p.FullName, m =>
-            {
-                m.Map(p => p.Name).CustomType<string>().Not.Nullable();
-                m.Map(p => p.Surname).CustomType<string>().Not.Nullable();
-            });
-
-            HasMany(p => p.Followers)
-                .KeyColumn("FollowedID")
-                .Access.CamelCaseField(Prefix.Underscore);
-
-            HasMany(p => p.Followed)
-                .KeyColumn("FollowerID")
-                .Access.CamelCaseField(Prefix.Underscore);
-
-            DynamicInsert();
-        }
+        DynamicInsert();
     }
 }

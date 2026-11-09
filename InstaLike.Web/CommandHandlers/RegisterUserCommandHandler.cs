@@ -9,73 +9,72 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.CommandHandlers
-{
-    internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
-    {
-        private readonly ISession _session;
-        private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
-        private readonly ILogger _logger;
+namespace InstaLike.Web.CommandHandlers;
 
-        public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
+{
+    private readonly ISession _session;
+    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
+    private readonly ILogger _logger;
+
+    public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
+        _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task<Result<int>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    {
+        var nicknameValidationResult = Nickname.Create(request.Nickname);
+        var eMailValidationResult = Email.Create(request.Email);
+        var passwordValidationResult = Password.Create(request.Password);
+        var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
+
+        var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
+        if (validationResult.IsFailure)
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
-            _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
+            _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
+                request.Nickname,
+                validationResult.Error);
+            return Result.Failure<int>(validationResult.Error);
         }
 
-        public async Task<Result<int>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        var userToRegister = new User(
+            nicknameValidationResult.Value, 
+            fullNameValidationResult.Value,
+            passwordValidationResult.Value, 
+            eMailValidationResult.Value,
+            request.Biography);
+
+        if (request.ProfilePicture != null)
         {
-            var nicknameValidationResult = Nickname.Create(request.Nickname);
-            var eMailValidationResult = Email.Create(request.Email);
-            var passwordValidationResult = Password.Create(request.Password);
-            var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
+            var profilePicture = Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value;
+            userToRegister.SetProfilePicture(profilePicture);
+        }
 
-            var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
-            if (validationResult.IsFailure)
+        using (var tx = _session.BeginTransaction())
+        {
+            try
             {
-                _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
+                await _session.SaveAsync(userToRegister, cancellationToken);
+                await tx.CommitAsync(cancellationToken);
+
+                _logger.Information("User [{Nickname}({UserID})] has just registered.",
                     request.Nickname,
-                    validationResult.Error);
-                return Result.Failure<int>(validationResult.Error);
+                    userToRegister.ID);
+
+                return Result.Success(userToRegister.ID);
             }
-
-            var userToRegister = new User(
-                nicknameValidationResult.Value, 
-                fullNameValidationResult.Value,
-                passwordValidationResult.Value, 
-                eMailValidationResult.Value,
-                request.Biography);
-
-            if (request.ProfilePicture != null)
+            catch (ADOException ex)
             {
-                var profilePicture = Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value;
-                userToRegister.SetProfilePicture(profilePicture);
-            }
+                await tx.RollbackAsync(cancellationToken);
 
-            using (var tx = _session.BeginTransaction())
-            {
-                try
-                {
-                    await _session.SaveAsync(userToRegister, cancellationToken);
-                    await tx.CommitAsync(cancellationToken);
+                _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
+                    request.Nickname,
+                    ex.Message);
 
-                    _logger.Information("User [{Nickname}({UserID})] has just registered.",
-                        request.Nickname,
-                        userToRegister.ID);
-
-                    return Result.Success(userToRegister.ID);
-                }
-                catch (ADOException ex)
-                {
-                    await tx.RollbackAsync(cancellationToken);
-
-                    _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
-                        request.Nickname,
-                        ex.Message);
-
-                    return Result.Failure<int>(ex.Message);
-                }
+                return Result.Failure<int>(ex.Message);
             }
         }
     }

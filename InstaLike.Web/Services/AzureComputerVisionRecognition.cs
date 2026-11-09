@@ -7,47 +7,46 @@ using CSharpFunctionalExtensions;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 
-namespace InstaLike.Web.Services
+namespace InstaLike.Web.Services;
+
+internal class AzureComputerVisionRecognition : IImageRecognitionService
 {
-    internal class AzureComputerVisionRecognition : IImageRecognitionService
+    private readonly string _apiKey;
+    private readonly string _endpointUrl;
+
+    private static readonly List<VisualFeatureTypes?> Features = new List<VisualFeatureTypes?>()
     {
-        private readonly string _apiKey;
-        private readonly string _endpointUrl;
+        VisualFeatureTypes.Categories,
+        VisualFeatureTypes.Description,
+        VisualFeatureTypes.Faces,
+        VisualFeatureTypes.Tags
+    };
 
-        private static readonly List<VisualFeatureTypes?> Features = new List<VisualFeatureTypes?>()
-        {
-            VisualFeatureTypes.Categories,
-            VisualFeatureTypes.Description,
-            VisualFeatureTypes.Faces,
-            VisualFeatureTypes.Tags
-        };
+    public AzureComputerVisionRecognition(string apiKey, string endpointUrl)
+    {
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
+        _endpointUrl = endpointUrl ?? throw new ArgumentNullException(nameof(endpointUrl));
+    }
 
-        public AzureComputerVisionRecognition(string apiKey, string endpointUrl)
+    public async Task<Result<string[]>> AutoTagImage(Stream imageStream)
+    {
+        var apiCredentials = new ApiKeyServiceClientCredentials(_apiKey);
+        using (var cvClient = new ComputerVisionClient(apiCredentials))
         {
-            _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
-            _endpointUrl = endpointUrl ?? throw new ArgumentNullException(nameof(endpointUrl));
-        }
-    
-        public async Task<Result<string[]>> AutoTagImage(Stream imageStream)
-        {
-            var apiCredentials = new ApiKeyServiceClientCredentials(_apiKey);
-            using (var cvClient = new ComputerVisionClient(apiCredentials))
+            try
             {
-                try
-                {
-                    cvClient.Endpoint = _endpointUrl;
-                    var result = await cvClient.AnalyzeImageInStreamAsync(imageStream, Features);
-                    return Result.Success(
-                        result.Tags
-                            .Select(tag => $"#{tag.Name}".Replace(" ", string.Empty))
-                            .OrderBy(tag => tag)
-                            .ToArray()
-                        );
-                }
-                catch (ComputerVisionErrorResponseException ex)
-                {
-                    return Result.Failure<string[]>(ex.Body != null ? ex.Body.Error.Message : ex.Message);
-                }
+                cvClient.Endpoint = _endpointUrl;
+                var result = await cvClient.AnalyzeImageInStreamAsync(imageStream, Features);
+                return Result.Success(
+                    result.Tags
+                        .Select(tag => $"#{tag.Name}".Replace(" ", string.Empty))
+                        .OrderBy(tag => tag)
+                        .ToArray()
+                    );
+            }
+            catch (ComputerVisionErrorResponseException ex)
+            {
+                return Result.Failure<string[]>(ex.Body != null ? ex.Body.Error.Message : ex.Message);
             }
         }
     }

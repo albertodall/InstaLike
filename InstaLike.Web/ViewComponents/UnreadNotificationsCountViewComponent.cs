@@ -5,24 +5,23 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InstaLike.Web.ViewComponents
+namespace InstaLike.Web.ViewComponents;
+
+[Authorize]
+public class UnreadNotificationsCountViewComponent : ViewComponent
 {
-    [Authorize]
-    public class UnreadNotificationsCountViewComponent : ViewComponent
+    private readonly IMediator _dispatcher;
+
+    public UnreadNotificationsCountViewComponent(IMediator dispatcher)
     {
-        private readonly IMediator _dispatcher;
+        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+    }
 
-        public UnreadNotificationsCountViewComponent(IMediator dispatcher)
-        {
-            _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
-        }
+    public async Task<IViewComponentResult> InvokeAsync(int userID)
+    {
+        var query = new UnreadNotificationsQuery(userID);
+        var count = await _dispatcher.Send(query);
 
-        public async Task<IViewComponentResult> InvokeAsync(int userID)
-        {
-            var query = new UnreadNotificationsQuery(userID);
-            var count = await _dispatcher.Send(query);
-
-            return View(count);
-        }
+        return View(count);
     }
 }

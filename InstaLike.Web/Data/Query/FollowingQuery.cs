@@ -9,55 +9,54 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-namespace InstaLike.Web.Data.Query
-{
-    public class FollowingQuery : IRequest<FollowModel[]>
-    {
-        public string Nickname { get; }
+namespace InstaLike.Web.Data.Query;
 
-        public FollowingQuery(string nickname)
-        {
-            Nickname = nickname;
-        }
+public class FollowingQuery : IRequest<FollowModel[]>
+{
+    public string Nickname { get; }
+
+    public FollowingQuery(string nickname)
+    {
+        Nickname = nickname;
+    }
+}
+
+internal sealed class FollowingQueryHandler : IRequestHandler<FollowingQuery, FollowModel[]>
+{
+    private readonly ISession _session;
+    private readonly ILogger _logger;
+
+    public FollowingQueryHandler(ISession session, ILogger logger)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<FollowingQuery>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    internal sealed class FollowingQueryHandler : IRequestHandler<FollowingQuery, FollowModel[]>
+    public async Task<FollowModel[]> Handle(FollowingQuery request, CancellationToken cancellationToken)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
+        FollowModel[] result;
 
-        public FollowingQueryHandler(ISession session, ILogger logger)
+        _logger.Debug("Reading following list for user {Nickname} with parameters {@Request}", request.Nickname, request);
+
+        using (var tx = _session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<FollowingQuery>() ?? throw new ArgumentNullException(nameof(logger));
+            FollowModel model = null!;
+            User followed = null!;
+            User follower = null!;
+
+            var followersQuery = _session.QueryOver<Follow>()
+                .Inner.JoinAlias(f => f.Followed, () => followed)
+                .Inner.JoinAlias(f => f.Follower, () => follower)
+                .Where(Restrictions.Eq(Projections.Property(() => follower.Nickname), request.Nickname))
+                .SelectList(fields => fields
+                    .Select(f => followed.Nickname).WithAlias(() => model.Nickname)
+                    .Select(f => followed.ProfilePicture).WithAlias(() => model.ProfilePicture)
+                )
+                .TransformUsing(new EntityToModelResultTransformer<FollowModel>());
+
+            result = (await followersQuery.ListAsync<FollowModel>(cancellationToken)).ToArray();
         }
 
-        public async Task<FollowModel[]> Handle(FollowingQuery request, CancellationToken cancellationToken)
-        {
-            FollowModel[] result;
-
-            _logger.Debug("Reading following list for user {Nickname} with parameters {@Request}", request.Nickname, request);
-
-            using (var tx = _session.BeginTransaction())
-            {
-                FollowModel model = null!;
-                User followed = null!;
-                User follower = null!;
-
-                var followersQuery = _session.QueryOver<Follow>()
-                    .Inner.JoinAlias(f => f.Followed, () => followed)
-                    .Inner.JoinAlias(f => f.Follower, () => follower)
-                    .Where(Restrictions.Eq(Projections.Property(() => follower.Nickname), request.Nickname))
-                    .SelectList(fields => fields
-                        .Select(f => followed.Nickname).WithAlias(() => model.Nickname)
-                        .Select(f => followed.ProfilePicture).WithAlias(() => model.ProfilePicture)
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<FollowModel>());
-
-                result = (await followersQuery.ListAsync<FollowModel>(cancellationToken)).ToArray();
-            }
-
-            return result;
-        }
+        return result;
     }
 }

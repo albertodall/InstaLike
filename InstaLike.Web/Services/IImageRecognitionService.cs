@@ -2,10 +2,9 @@
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 
-namespace InstaLike.Web.Services
+namespace InstaLike.Web.Services;
+
+public interface IImageRecognitionService
 {
-    public interface IImageRecognitionService
-    {
-        Task<Result<string[]>> AutoTagImage(Stream imageStream);
-    }
+    Task<Result<string[]>> AutoTagImage(Stream imageStream);
 }

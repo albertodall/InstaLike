@@ -6,64 +6,63 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using InstaLike.Core.Domain;
 
-namespace InstaLike.Web.Services
+namespace InstaLike.Web.Services;
+
+/// <summary>
+/// Stores and gets all pictures from Azure Blob Storage containers.
+/// </summary>
+internal class AzureBlobStorageProvider : IExternalStorageProvider
 {
-    /// <summary>
-    /// Stores and gets all pictures from Azure Blob Storage containers.
-    /// </summary>
-    internal class AzureBlobStorageProvider : IExternalStorageProvider
+    private readonly BlobServiceClient _blobServiceClient;
+
+    public AzureBlobStorageProvider(string storageConnectionString)
     {
-        private readonly BlobServiceClient _blobServiceClient;
-
-        public AzureBlobStorageProvider(string storageConnectionString)
+        if (string.IsNullOrEmpty(storageConnectionString))
         {
-            if (string.IsNullOrEmpty(storageConnectionString))
-            {
-                throw new ArgumentNullException(nameof(storageConnectionString));
-            }
-
-            _blobServiceClient = new BlobServiceClient(storageConnectionString);
+            throw new ArgumentNullException(nameof(storageConnectionString));
         }
 
-        public Picture LoadPicture(Guid identifier, string containerName)
-        {
-            var blob = _blobServiceClient
-                .GetBlobContainerClient(containerName)
-                .GetBlobClient(GetBlobName(identifier));
-
-            try
-            {
-                var content = blob.DownloadContent();
-                return Picture.Create(content.Value.Content.ToArray(), identifier).Value;
-            }
-            catch (RequestFailedException ex) when (ex.Status == 404)
-            {
-                return Picture.MissingPicture;
-            }
-        }
-
-        public void SavePicture(Picture picture, string containerName)
-        {
-            var blob = _blobServiceClient
-                .GetBlobContainerClient(containerName)
-                .GetBlobClient(GetBlobName(picture.Identifier));
-
-            blob.Upload(
-                BinaryData.FromBytes(picture.RawBytes),
-                new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" } });
-        }
-
-        public static async Task EnsureContainersExistAsync(string storageConnectionString, CancellationToken cancellationToken = default)
-        {
-            var blobServiceClient = new BlobServiceClient(storageConnectionString);
-            foreach (var containerName in PictureContainers.All)
-            {
-                await blobServiceClient
-                    .GetBlobContainerClient(containerName)
-                    .CreateIfNotExistsAsync(cancellationToken: cancellationToken);
-            }
-        }
-
-        private static string GetBlobName(Guid identifier) => $"{identifier.ToString().ToLowerInvariant()}.jpg";
+        _blobServiceClient = new BlobServiceClient(storageConnectionString);
     }
+
+    public Picture LoadPicture(Guid identifier, string containerName)
+    {
+        var blob = _blobServiceClient
+            .GetBlobContainerClient(containerName)
+            .GetBlobClient(GetBlobName(identifier));
+
+        try
+        {
+            var content = blob.DownloadContent();
+            return Picture.Create(content.Value.Content.ToArray(), identifier).Value;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            return Picture.MissingPicture;
+        }
+    }
+
+    public void SavePicture(Picture picture, string containerName)
+    {
+        var blob = _blobServiceClient
+            .GetBlobContainerClient(containerName)
+            .GetBlobClient(GetBlobName(picture.Identifier));
+
+        blob.Upload(
+            BinaryData.FromBytes(picture.RawBytes),
+            new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" } });
+    }
+
+    public static async Task EnsureContainersExistAsync(string storageConnectionString, CancellationToken cancellationToken = default)
+    {
+        var blobServiceClient = new BlobServiceClient(storageConnectionString);
+        foreach (var containerName in PictureContainers.All)
+        {
+            await blobServiceClient
+                .GetBlobContainerClient(containerName)
+                .CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        }
+    }
+
+    private static string GetBlobName(Guid identifier) => $"{identifier.ToString().ToLowerInvariant()}.jpg";
 }

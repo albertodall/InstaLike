@@ -8,64 +8,63 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.CommandHandlers
+namespace InstaLike.Web.CommandHandlers;
+
+internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, Result<int>>
 {
-    internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, Result<int>>
+    private readonly ISession _session;
+    private readonly ILogger _logger;
+
+    public EditPostCommandHandler(ISession session, ILogger logger)
     {
-        private readonly ISession _session;
-        private readonly ILogger _logger;
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public EditPostCommandHandler(ISession session, ILogger logger)
+    public async Task<Result<int>> Handle(EditPostCommand request, CancellationToken cancellationToken)
+    {
+        using (var tx = _session.BeginTransaction())
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        }
+            var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
+            var postToEdit = await _session.QueryOver<Post>()
+                .Fetch(SelectMode.ChildFetch, p => p.Author)
+                .Where(p => p.ID == request.PostID)
+                .SingleOrDefaultAsync(cancellationToken);
 
-        public async Task<Result<int>> Handle(EditPostCommand request, CancellationToken cancellationToken)
-        {
-            using (var tx = _session.BeginTransaction())
+            if (!postToEdit.CanBeEditedBy(editor))
             {
-                var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-                var postToEdit = await _session.QueryOver<Post>()
-                    .Fetch(SelectMode.ChildFetch, p => p.Author)
-                    .Where(p => p.ID == request.PostID)
-                    .SingleOrDefaultAsync(cancellationToken);
+                _logger.Warning("User [{NickName}({UserID})] tried to edit post {PostID} but he wasn't allowed to.",
+                    editor.Nickname, 
+                    request.UserID, 
+                    request.PostID);
+                return Result.Failure<int>($"You're not allowed to edit post {postToEdit.ID}.");
+            }
 
-                if (!postToEdit.CanBeEditedBy(editor))
-                {
-                    _logger.Warning("User [{NickName}({UserID})] tried to edit post {PostID} but he wasn't allowed to.",
-                        editor.Nickname, 
-                        request.UserID, 
-                        request.PostID);
-                    return Result.Failure<int>($"You're not allowed to edit post {postToEdit.ID}.");
-                }
+            postToEdit.UpdateText(PostText.Create(request.Text).Value);
+            postToEdit.UpdatePicture(Picture.Create(request.PictureRawBytes, postToEdit.Picture.Identifier).Value);
+            try
+            {
+                await _session.SaveAsync(postToEdit, cancellationToken);
+                await tx.CommitAsync(cancellationToken);
 
-                postToEdit.UpdateText(PostText.Create(request.Text).Value);
-                postToEdit.UpdatePicture(Picture.Create(request.PictureRawBytes, postToEdit.Picture.Identifier).Value);
-                try
-                {
-                    await _session.SaveAsync(postToEdit, cancellationToken);
-                    await tx.CommitAsync(cancellationToken);
+                _logger.Information("User [{Nickname}({UserID})] edited post {PostID}.",
+                    editor.Nickname,
+                    request.UserID,
+                    request.PostID);
 
-                    _logger.Information("User [{Nickname}({UserID})] edited post {PostID}.",
-                        editor.Nickname,
-                        request.UserID,
-                        request.PostID);
+                return Result.Success(postToEdit.ID);
+            }
+            catch (ADOException ex)
+            {
+                await tx.RollbackAsync(cancellationToken);
 
-                    return Result.Success(postToEdit.ID);
-                }
-                catch (ADOException ex)
-                {
-                    await tx.RollbackAsync(cancellationToken);
+                _logger.Error("Failed to edit post {PostID} for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
+                    request.PostID,
+                    editor.Nickname,
+                    request.UserID,
+                    ex.Message);
 
-                    _logger.Error("Failed to edit post {PostID} for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
-                        request.PostID,
-                        editor.Nickname,
-                        request.UserID,
-                        ex.Message);
-
-                    return Result.Failure<int>(ex.Message);
-                }
+                return Result.Failure<int>(ex.Message);
             }
         }
     }

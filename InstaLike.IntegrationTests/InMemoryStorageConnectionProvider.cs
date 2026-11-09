@@ -5,31 +5,30 @@ using InstaLike.Core.Domain;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Services;
 
-namespace InstaLike.IntegrationTests
+namespace InstaLike.IntegrationTests;
+
+internal class InMemoryStorageConnectionProvider : IHybridStorageConnectionProvider
 {
-    internal class InMemoryStorageConnectionProvider : IHybridStorageConnectionProvider
+    private readonly InMemoryPictureStorage _storage = new();
+
+    public void Configure(IDictionary<string, string> settings) { }
+
+    public IExternalStorageProvider GetProvider() => _storage;
+
+    private sealed class InMemoryPictureStorage : IExternalStorageProvider
     {
-        private readonly InMemoryPictureStorage _storage = new();
+        private readonly ConcurrentDictionary<(string Container, Guid Identifier), Picture> _pictures = new();
 
-        public void Configure(IDictionary<string, string> settings) { }
-
-        public IExternalStorageProvider GetProvider() => _storage;
-
-        private sealed class InMemoryPictureStorage : IExternalStorageProvider
+        public Picture LoadPicture(Guid identifier, string containerName)
         {
-            private readonly ConcurrentDictionary<(string Container, Guid Identifier), Picture> _pictures = new();
+            return _pictures.TryGetValue((containerName, identifier), out var picture)
+                ? picture
+                : Picture.MissingPicture;
+        }
 
-            public Picture LoadPicture(Guid identifier, string containerName)
-            {
-                return _pictures.TryGetValue((containerName, identifier), out var picture)
-                    ? picture
-                    : Picture.MissingPicture;
-            }
-
-            public void SavePicture(Picture picture, string containerName)
-            {
-                _pictures[(containerName, picture.Identifier)] = picture;
-            }
+        public void SavePicture(Picture picture, string containerName)
+        {
+            _pictures[(containerName, picture.Identifier)] = picture;
         }
     }
 }

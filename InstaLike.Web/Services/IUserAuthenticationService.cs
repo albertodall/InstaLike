@@ -2,10 +2,9 @@
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Domain;
 
-namespace InstaLike.Web.Services
+namespace InstaLike.Web.Services;
+
+public interface IUserAuthenticationService
 {
-    public interface IUserAuthenticationService
-    {
-        Task<Result<User>> AuthenticateUser(string userName, string password);
-    }
+    Task<Result<User>> AuthenticateUser(string userName, string password);
 }

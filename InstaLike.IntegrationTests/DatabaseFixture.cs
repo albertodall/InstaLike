@@ -10,76 +10,75 @@ using NHibernate;
 using NHibernate.Tool.hbm2ddl;
 using Xunit.Abstractions;
 
-namespace InstaLike.IntegrationTests
+namespace InstaLike.IntegrationTests;
+
+public class DatabaseFixture : IDisposable
 {
-    public class DatabaseFixture : IDisposable
+    public DatabaseFixture()
     {
-        public DatabaseFixture()
-        {
-            var databaseFileName = $"InstaLikeTestDb-{Guid.NewGuid()}.sqlite";
+        var databaseFileName = $"InstaLikeTestDb-{Guid.NewGuid()}.sqlite";
 
-            SessionFactory = Fluently.Configure()
-                .Database(
-                    SQLiteConfiguration.Standard
-                        .Provider<HybridStorageDriverConnectionProvider>()
-                        .ConnectionString(BuildTestDatabaseConnectionString(databaseFileName))
-                        .AdoNetBatchSize(20)
-                        .ShowSql()
-                        .FormatSql()
-                        .UseReflectionOptimizer()
-                )
-                .Mappings(m =>
-                    m.FluentMappings
-                        .Conventions.Add(
-                            DefaultLazy.Always(),
-                            DynamicInsert.AlwaysTrue(),
-                            DynamicUpdate.AlwaysTrue(),
-                            new AssociationsMappingConvention(),
-                            new DateTimeOffsetTypeConvention()
-                        )
-                        .Add<UserMapping>()
-                        .Add<FollowMapping>()
-                        .Add<PostMapping>()
-                        .Add<CommentMapping>()
-                        .Add<LikeMapping>()
-                        .Add<NotificationMapping>()
-                )
-                .ExposeConfiguration(async cfg =>
-                {
-                    cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(InMemoryStorageConnectionProvider).AssemblyQualifiedName);
+        SessionFactory = Fluently.Configure()
+            .Database(
+                SQLiteConfiguration.Standard
+                    .Provider<HybridStorageDriverConnectionProvider>()
+                    .ConnectionString(BuildTestDatabaseConnectionString(databaseFileName))
+                    .AdoNetBatchSize(20)
+                    .ShowSql()
+                    .FormatSql()
+                    .UseReflectionOptimizer()
+            )
+            .Mappings(m =>
+                m.FluentMappings
+                    .Conventions.Add(
+                        DefaultLazy.Always(),
+                        DynamicInsert.AlwaysTrue(),
+                        DynamicUpdate.AlwaysTrue(),
+                        new AssociationsMappingConvention(),
+                        new DateTimeOffsetTypeConvention()
+                    )
+                    .Add<UserMapping>()
+                    .Add<FollowMapping>()
+                    .Add<PostMapping>()
+                    .Add<CommentMapping>()
+                    .Add<LikeMapping>()
+                    .Add<NotificationMapping>()
+            )
+            .ExposeConfiguration(async cfg =>
+            {
+                cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(InMemoryStorageConnectionProvider).AssemblyQualifiedName);
 
-                    var schemaExport = new SchemaExport(cfg);
-                    schemaExport.SetOutputFile($"{databaseFileName}_Schema.sql");
-                    await schemaExport.DropAsync(true, true);
-                    await schemaExport.CreateAsync(true, true);
-                })
-                .BuildSessionFactory();
-        }
+                var schemaExport = new SchemaExport(cfg);
+                schemaExport.SetOutputFile($"{databaseFileName}_Schema.sql");
+                await schemaExport.DropAsync(true, true);
+                await schemaExport.CreateAsync(true, true);
+            })
+            .BuildSessionFactory();
+    }
 
-        private ISessionFactory SessionFactory { get; }
+    private ISessionFactory SessionFactory { get; }
 
-        public ISession OpenSession(ITestOutputHelper output)
-        {
-            return SessionFactory
-                .WithOptions()
-                    .Interceptor(new XUnitSqlStatementOutputInterceptor(output))
-                .OpenSession();
-        }
+    public ISession OpenSession(ITestOutputHelper output)
+    {
+        return SessionFactory
+            .WithOptions()
+                .Interceptor(new XUnitSqlStatementOutputInterceptor(output))
+            .OpenSession();
+    }
 
-        public static string GetTestPictureBase64()
-        {
-            return Convert.ToBase64String(Resources.GrumpyCat);
-        }
+    public static string GetTestPictureBase64()
+    {
+        return Convert.ToBase64String(Resources.GrumpyCat);
+    }
 
-        private static string BuildTestDatabaseConnectionString(string testDatabaseFileName)
-        {
-            return $"Data Source={testDatabaseFileName}; Version=3; Pooling=True; Synchronous=Full; BinaryGuid=False;";
-        }
+    private static string BuildTestDatabaseConnectionString(string testDatabaseFileName)
+    {
+        return $"Data Source={testDatabaseFileName}; Version=3; Pooling=True; Synchronous=Full; BinaryGuid=False;";
+    }
 
-        public void Dispose()
-        {
-            SessionFactory?.Close();
-            SessionFactory?.Dispose();
-        }
+    public void Dispose()
+    {
+        SessionFactory?.Close();
+        SessionFactory?.Dispose();
     }
 }

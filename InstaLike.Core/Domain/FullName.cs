@@ -3,59 +3,58 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Domain
+namespace InstaLike.Core.Domain;
+
+public class FullName : ValueObject
 {
-    public class FullName : ValueObject
-    {
-        public string Name { get; }
-        public string Surname { get; }
+    public string Name { get; }
+    public string Surname { get; }
 
 #pragma warning disable CS8618
-        private FullName() { }
+    private FullName() { }
 #pragma warning restore CS8618
 
-        private FullName(string name, string surname) : this()
+    private FullName(string name, string surname) : this()
+    {
+        Name = name;
+        Surname = surname;
+    }
+
+    public static Result<FullName> Create(string name, string surname)
+    {
+        if (string.IsNullOrEmpty(name))
         {
-            Name = name;
-            Surname = surname;
+            return Result.Failure<FullName>("You have to specify a proper name. An empty string is not allowed.");
         }
 
-        public static Result<FullName> Create(string name, string surname)
+        if (string.IsNullOrEmpty(surname))
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                return Result.Failure<FullName>("You have to specify a proper name. An empty string is not allowed.");
-            }
-
-            if (string.IsNullOrEmpty(surname))
-            {
-                return Result.Failure<FullName>("You have to specify a proper surname. An empty string is not allowed.");
-            }
-
-            return Result.Success(new FullName(name, surname));
+            return Result.Failure<FullName>("You have to specify a proper surname. An empty string is not allowed.");
         }
 
-        public static explicit operator FullName(string fullname)
-        {
-            fullname = Regex.Replace(fullname, @"\s+", " ");
-            var splittedFullName = fullname.Split(new[] { ' ' }, 2);
-            return Create(splittedFullName[0], splittedFullName[1]).Value;
-        }
+        return Result.Success(new FullName(name, surname));
+    }
 
-        public static implicit operator string(FullName fullname)
-        {
-            return fullname.ToString();
-        }
+    public static explicit operator FullName(string fullname)
+    {
+        fullname = Regex.Replace(fullname, @"\s+", " ");
+        var splittedFullName = fullname.Split(new[] { ' ' }, 2);
+        return Create(splittedFullName[0], splittedFullName[1]).Value;
+    }
 
-        public override string ToString()
-        {
-            return $"{Name} {Surname}";
-        }
+    public static implicit operator string(FullName fullname)
+    {
+        return fullname.ToString();
+    }
 
-        protected override IEnumerable<IComparable> GetEqualityComponents()
-        {
-            yield return Name.ToUpperInvariant();
-            yield return Surname.ToUpperInvariant();
-        }
+    public override string ToString()
+    {
+        return $"{Name} {Surname}";
+    }
+
+    protected override IEnumerable<IComparable> GetEqualityComponents()
+    {
+        yield return Name.ToUpperInvariant();
+        yield return Surname.ToUpperInvariant();
     }
 }

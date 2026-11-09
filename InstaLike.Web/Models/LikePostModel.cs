@@ -1,8 +1,7 @@
-﻿namespace InstaLike.Web.Models
+﻿namespace InstaLike.Web.Models;
+
+public class LikePostModel
 {
-    public class LikePostModel
-    {
-        public int PostID { get; set; }
-        public int UserID { get; set; }
-    }
+    public int PostID { get; set; }
+    public int UserID { get; set; }
 }
