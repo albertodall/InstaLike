@@ -25,7 +25,7 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - Unit testing and integration testing. 
  - Unstructured data (images) storage.
  - Activity logging.
- - Cloud-based image recognition using [Azure Computer Vision](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/).
+ - Pictures auto-tagging with a vision-capable model (GPT-4.1 nano) on [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/overview).
  
 ## Features
  - User registration. 
@@ -69,9 +69,12 @@ In Visual Studio, set the `docker-compose` project as the startup project to deb
 ## Run the web application from your IDE
 1. Start the infrastructure only:
 ```shell
-docker compose up -d instalike.db.mssql instalike.storage.azureblob instalike.db.migrator instalike.dashboard
+docker compose up -d instalike.db.mssql instalike.storage.azureblob instalike.db.migrator instalike.dashboard instalike.ai.ollama
 ```
 2. Run the `InstaLike.Web` project with the `Development` environment: `appsettings.Development.json` points to the containerized SQL Server and to Azurite (`UseDevelopmentStorage=true`).
+
+### Pictures auto-tagging
+In Azure, pictures are tagged by GPT-4.1 nano on Azure OpenAI. Locally, a small open vision model ([Qwen2.5-VL 3B](https://ollama.com/library/qwen2.5vl)) runs for free in [Ollama](https://ollama.com), through the same OpenAI-compatible API. It starts with the rest of the stack. The first start downloads the ~3 GB model into `.containers/ollama`, and the model runs on the CPU unless Docker has GPU access.
 
 To apply new database scripts without containers:
 ```shell

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ClientModel;
 using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
@@ -10,10 +11,13 @@ using InstaLike.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
 using NHibernate.Driver;
+using OpenAI;
+using OpenAI.Chat;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -108,12 +112,26 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection ConfigureAzureComputerVision(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureImageTagging(this IServiceCollection services, IConfiguration configuration)
     {
-        // Auto-tagging is optional: when not configured, tagging requests just fail.
-        var apiKey = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiKey") ?? string.Empty;
-        var apiUrl = configuration.GetValue<string>("ImageAnalysis:AzureComputerVision:ApiUrl") ?? string.Empty;
-        services.AddSingleton<IImageRecognitionService>(new AzureComputerVisionRecognition(apiKey, apiUrl));
+        var endpoint = configuration.GetValue<string>("ImageAnalysis:Endpoint");
+        var apiKey = configuration.GetValue<string>("ImageAnalysis:ApiKey");
+        var model = configuration.GetValue<string>("ImageAnalysis:Model");
+
+        if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(model))
+        {
+            services.AddSingleton<IImageRecognitionService, DisabledImageRecognition>();
+            return services;
+        }
+
+        // Any OpenAI-compatible API: the Azure OpenAI v1 endpoint (where the model is the deployment name) or a local Ollama server.
+        var chatClient = new ChatClient(
+            model,
+            new ApiKeyCredential(apiKey),
+            new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
+
+        services.AddChatClient(chatClient.AsIChatClient());
+        services.AddSingleton<IImageRecognitionService, ChatClientImageTagging>();
 
         return services;
     }

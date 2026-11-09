@@ -73,16 +73,32 @@ resource "azurerm_service_plan" "instalike_appservice_plan" {
 }
 
 resource "azurerm_cognitive_account" "instalike_autotag_service" {
-  name                = "InstaLike-Images-AutoTag"
-  location            = azurerm_resource_group.instalike_resource_group.location
-  resource_group_name = azurerm_resource_group.instalike_resource_group.name
-  kind                = "ComputerVision"
+  name                  = "InstaLike-Images-AutoTag"
+  location              = azurerm_resource_group.instalike_resource_group.location
+  resource_group_name   = azurerm_resource_group.instalike_resource_group.name
+  kind                  = "OpenAI"
+  custom_subdomain_name = "instalike-images-autotag"
 
-  sku_name = "F0"
+  sku_name = "S0"
 
   tags = local.common_tags
 
   depends_on = [
     azurerm_resource_group.instalike_resource_group # See global.tf
   ]
+}
+
+resource "azurerm_cognitive_deployment" "instalike_autotag_model" {
+  name                 = "gpt-4.1-nano"
+  cognitive_account_id = azurerm_cognitive_account.instalike_autotag_service.id
+
+  model {
+    format = "OpenAI"
+    name   = "gpt-4.1-nano"
+  }
+
+  sku {
+    name     = "DataZoneStandard" # Pay per token, processed within the EU data zone
+    capacity = 10                 # Thousands of tokens per minute
+  }
 }
