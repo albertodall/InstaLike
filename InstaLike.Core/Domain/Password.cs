@@ -12,6 +12,7 @@ namespace InstaLike.Core.Domain
         private const byte MinimumPasswordLength = 6;
         private const byte SaltSize = 16;
         private const byte HashSize = 20;
+        private const int HashIterations = 10000;
 
         private string HashedValue { get; }
 
@@ -50,15 +51,10 @@ namespace InstaLike.Core.Domain
 
         public bool HashMatches(string password)
         {
-            byte[] hashedPassword;
             var storedHashedPassword = Convert.FromBase64String(HashedValue);
-            var saltPart = new byte[SaltSize];
-            Array.Copy(storedHashedPassword, 0, saltPart, 0, SaltSize);
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltPart, 10000))
-            {
-                hashedPassword = saltPart.Concat(pbkdf2.GetBytes(HashSize)).ToArray();
-            }
-            return hashedPassword.SequenceEqual(storedHashedPassword);
+            var saltPart = storedHashedPassword.AsSpan(0, SaltSize).ToArray();
+            var hashedPassword = saltPart.Concat(DeriveHash(password, saltPart)).ToArray();
+            return CryptographicOperations.FixedTimeEquals(hashedPassword, storedHashedPassword);
         }
 
         public static implicit operator string(Password password)
@@ -93,18 +89,20 @@ namespace InstaLike.Core.Domain
 
         private static string HashPassword(string password)
         {
-            byte[] salt = new byte[SaltSize];
-            RandomNumberGenerator.Create().GetBytes(salt);
-
-            byte[] hash;
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000))
-            {
-                hash = pbkdf2.GetBytes(HashSize);
-            }
+            byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+            byte[] hash = DeriveHash(password, salt);
             byte[] hashBytes = new byte[SaltSize + HashSize];
             Array.Copy(salt, 0, hashBytes, 0, SaltSize);
             Array.Copy(hash, 0, hashBytes, SaltSize, HashSize);
             return Convert.ToBase64String(hashBytes);
+        }
+
+        /// <remarks>
+        /// SHA1 and the iteration count must not change: they are needed to verify the already stored passwords.
+        /// </remarks>
+        private static byte[] DeriveHash(string password, byte[] salt)
+        {
+            return Rfc2898DeriveBytes.Pbkdf2(password, salt, HashIterations, HashAlgorithmName.SHA1, HashSize);
         }
 
         private static bool IsBase64String(string s)
