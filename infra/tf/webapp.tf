@@ -40,6 +40,7 @@ resource "azurerm_linux_web_app" "instalike_app" {
     azurerm_storage_container.instalike_profiles_container,
     azurerm_role_assignment.instalike_app_blob_access,
     azurerm_role_assignment.instalike_app_openai_access,
+    azurerm_role_assignment.instalike_app_telemetry_access,
     azurerm_cognitive_deployment.instalike_autotag_model,
     azurerm_application_insights.instalike_appinsights
   ]

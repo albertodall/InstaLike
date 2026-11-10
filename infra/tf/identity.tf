@@ -19,3 +19,10 @@ resource "azurerm_role_assignment" "instalike_app_openai_access" {
   principal_id         = azurerm_user_assigned_identity.instalike_app_identity.principal_id
   principal_type       = "ServicePrincipal"
 }
+
+resource "azurerm_role_assignment" "instalike_app_telemetry_access" {
+  scope                = azurerm_application_insights.instalike_appinsights.id
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = azurerm_user_assigned_identity.instalike_app_identity.principal_id
+  principal_type       = "ServicePrincipal"
+}

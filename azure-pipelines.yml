@@ -142,9 +142,6 @@ stages:
         displayName: 'Deploy Web Application'
         environment: 'InstaLike-Azure'
         pool: ubuntu-latest
-        
-        variables:
-          ApplicationInsights.ConnectionString: $(Azure-AppInsights-ConnectionString)
 
         strategy:
           runOnce:

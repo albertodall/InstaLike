@@ -85,7 +85,7 @@ internal static class ServiceCollectionExtensions
     {
         if (!string.IsNullOrEmpty(configuration.GetValue<string>("ApplicationInsights:ConnectionString")))
         {
-            services.AddApplicationInsightsTelemetry();
+            services.AddApplicationInsightsTelemetry(options => options.Credential = AzureIdentity.Credential);
         }
 
         return services;
