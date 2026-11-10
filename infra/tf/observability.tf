@@ -1,5 +1,5 @@
 resource "azurerm_log_analytics_workspace" "instalike_loganalytics_ws" {
-  name                = "InstaLike-Log-Workspace"
+  name                = "log-${local.name_suffix}"
   location            = azurerm_resource_group.instalike_resource_group.location
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
   sku                 = "PerGB2018"
@@ -13,7 +13,7 @@ resource "azurerm_log_analytics_workspace" "instalike_loganalytics_ws" {
 }
 
 resource "azurerm_application_insights" "instalike_appinsights" {
-  name                = "InstaLike-AppInsights"
+  name                = "appi-${local.name_suffix}"
   location            = azurerm_resource_group.instalike_resource_group.location
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
   workspace_id        = azurerm_log_analytics_workspace.instalike_loganalytics_ws.id

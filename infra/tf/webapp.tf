@@ -1,5 +1,5 @@
 resource "azurerm_linux_web_app" "instalike_app" {
-  name                = "InstaLike-WebApp"
+  name                = "app-${local.name_suffix}"
   resource_group_name = azurerm_resource_group.instalike_resource_group.name
   location            = azurerm_service_plan.instalike_appservice_plan.location
   service_plan_id     = azurerm_service_plan.instalike_appservice_plan.id
