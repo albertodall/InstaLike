@@ -1,5 +1,5 @@
 resource "azurerm_key_vault" "instalike_key_vault" {
-  name                        = "InstaLike-secrets-vault"
+  name                        = "kv-${local.name_suffix}"
   location                    = azurerm_resource_group.instalike_resource_group.location
   resource_group_name         = azurerm_resource_group.instalike_resource_group.name
   enabled_for_disk_encryption = false
@@ -17,7 +17,7 @@ resource "azurerm_key_vault" "instalike_key_vault" {
 }
 
 resource "azurerm_storage_account" "instalike_storage_account" {
-  name                      = "instalikepicturesstorage"
+  name                      = "st${replace(local.name_suffix, "-", "")}"
   resource_group_name       = azurerm_resource_group.instalike_resource_group.name
   location                  = azurerm_resource_group.instalike_resource_group.location
   account_kind              = "StorageV2"
@@ -58,7 +58,7 @@ resource "azurerm_storage_container" "instalike_profiles_container" {
 }
 
 resource "azurerm_service_plan" "instalike_appservice_plan" {
-  name                   = "InstaLike-Plan"
+  name                   = "asp-${local.name_suffix}"
   location               = azurerm_resource_group.instalike_resource_group.location
   resource_group_name    = azurerm_resource_group.instalike_resource_group.name
   os_type                = "Linux"
@@ -73,11 +73,11 @@ resource "azurerm_service_plan" "instalike_appservice_plan" {
 }
 
 resource "azurerm_cognitive_account" "instalike_autotag_service" {
-  name                  = "InstaLike-Images-AutoTag"
+  name                  = "oai-${local.name_suffix}"
   location              = azurerm_resource_group.instalike_resource_group.location
   resource_group_name   = azurerm_resource_group.instalike_resource_group.name
   kind                  = "OpenAI"
-  custom_subdomain_name = "instalike-images-autotag"
+  custom_subdomain_name = "oai-${local.name_suffix}"
 
   sku_name = "S0"
 

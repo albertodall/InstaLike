@@ -1,5 +1,5 @@
 resource "azurerm_mssql_server" "instalike_sql_server" {
-  name                         = "instalike-dbsrv"
+  name                         = "sql-${local.name_suffix}"
   resource_group_name          = azurerm_resource_group.instalike_resource_group.name
   location                     = azurerm_resource_group.instalike_resource_group.location
   version                      = "12.0"
@@ -15,7 +15,7 @@ resource "azurerm_mssql_server" "instalike_sql_server" {
 }
 
 resource "azurerm_mssql_database" "instalike_database" {
-  name                 = "InstaLike"
+  name                 = "sqldb-${local.name_suffix}"
   server_id            = azurerm_mssql_server.instalike_sql_server.id
   collation            = "SQL_Latin1_General_CP1_CI_AS"
   max_size_gb          = 2

@@ -14,6 +14,7 @@ variables:
   webApplicationProject: '**/InstaLike.Web.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  webAppName: 'app-instalike-prd-weu'
 
 stages:
   - stage: Create_Artifacts
@@ -155,6 +156,6 @@ stages:
                 inputs:
                   azureSubscription: $(AzureServiceConnectionName)
                   appType: 'webAppLinux'
-                  appName: 'InstaLike-WebApp'
+                  appName: '$(webAppName)'
                   package: '$(Pipeline.Workspace)/InstaLikeWebApplication/*.zip'
                   runtimeStack: 'DOTNETCORE|10.0'
