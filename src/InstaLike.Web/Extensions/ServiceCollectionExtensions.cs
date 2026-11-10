@@ -32,14 +32,14 @@ internal static class ServiceCollectionExtensions
     {
         var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
             ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
-        var externalStorageConnectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString")
-            ?? throw new InvalidOperationException("Setting 'ExternalStorage:AzureBlobStorage:ConnectionString' has not been configured.");
+        var storageSettings = AzureBlobStorageSettings.FromConfiguration(configuration);
 
         var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
             .ExposeConfiguration(cfg =>
             {
                 cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
-                cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, externalStorageConnectionString);
+                cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, storageSettings.ConnectionString ?? string.Empty);
+                cfg.SetProperty(ExternalStorageParameters.ServiceUriProperty, storageSettings.ServiceUri ?? string.Empty);
             });
 
         services.AddSingleton(nhConfig.BuildSessionFactory());

@@ -25,7 +25,7 @@ resource "azurerm_storage_account" "instalike_storage_account" {
   account_replication_type  = "LRS"
   access_tier               = "Hot"
   min_tls_version           = "TLS1_2"
-  shared_access_key_enabled = true
+  shared_access_key_enabled = false
 
   # The picture containers allow anonymous read access to blobs (container_access_type = "blob").
   allow_nested_items_to_be_public = true

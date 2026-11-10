@@ -23,6 +23,8 @@ terraform {
 }
 
 provider "azurerm" {
+  storage_use_azuread = true # Shared keys are disabled on the storage account
+
   features {
     key_vault {
       purge_soft_delete_on_destroy    = true
