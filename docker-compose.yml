@@ -15,7 +15,7 @@ services:
     image: ${DOCKER_REGISTRY-}instalikeweb
     build:
       context: .
-      dockerfile: InstaLike.Web/Dockerfile
+      dockerfile: src/InstaLike.Web/Dockerfile
     environment:
       ConnectionStrings__InstalikeDatabase: *database-connection-string
       # Well-known Azurite development account key (not a secret).
@@ -39,7 +39,7 @@ services:
     image: ${DOCKER_REGISTRY-}instalikedbmigrator
     build:
       context: .
-      dockerfile: InstaLike.Database.Migrator/Dockerfile
+      dockerfile: src/InstaLike.Database.Migrator/Dockerfile
     environment:
       ConnectionStrings__InstalikeDatabase: *database-connection-string
     depends_on:

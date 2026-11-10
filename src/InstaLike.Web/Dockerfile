@@ -8,13 +8,13 @@ EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
+WORKDIR /source
 COPY ["Directory.Build.props", "."]
-COPY ["InstaLike.Web/InstaLike.Web.csproj", "InstaLike.Web/"]
-COPY ["InstaLike.Core/InstaLike.Core.csproj", "InstaLike.Core/"]
-RUN dotnet restore "InstaLike.Web/InstaLike.Web.csproj"
+COPY ["src/InstaLike.Web/InstaLike.Web.csproj", "src/InstaLike.Web/"]
+COPY ["src/InstaLike.Core/InstaLike.Core.csproj", "src/InstaLike.Core/"]
+RUN dotnet restore "src/InstaLike.Web/InstaLike.Web.csproj"
 COPY . .
-WORKDIR "/src/InstaLike.Web"
+WORKDIR "/source/src/InstaLike.Web"
 RUN dotnet build "InstaLike.Web.csproj" -c $BUILD_CONFIGURATION --no-restore -o /app/build
 
 FROM build AS publish
