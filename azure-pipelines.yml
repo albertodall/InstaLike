@@ -141,7 +141,8 @@ stages:
       - deployment: DeployWebApp
         displayName: 'Deploy Web Application'
         environment: 'InstaLike-Azure'
-        pool: ubuntu-latest
+        pool:
+          vmImage: ubuntu-latest
 
         strategy:
           runOnce:
