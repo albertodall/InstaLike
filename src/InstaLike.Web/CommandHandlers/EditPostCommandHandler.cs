@@ -29,10 +29,15 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
         using (var tx = _session.BeginTransaction())
         {
             var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-            var postToEdit = await _session.QueryOver<Post>()
+            Post? postToEdit = await _session.QueryOver<Post>()
                 .Fetch(SelectMode.ChildFetch, p => p.Author)
                 .Where(p => p.ID == request.PostID)
                 .SingleOrDefaultAsync(cancellationToken);
+
+            if (postToEdit is null)
+            {
+                return Result.Failure<int>($"Post {request.PostID} does not exist.");
+            }
 
             if (!postToEdit.CanBeEditedBy(editor))
             {

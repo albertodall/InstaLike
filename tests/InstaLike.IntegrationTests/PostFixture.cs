@@ -368,4 +368,25 @@ public class PostFixture : IClassFixture<DatabaseFixture>
 
         editResult.IsSuccess.Should().BeFalse($"You're not allowed to edit post {post.ID}.");
     }
+
+    [Fact]
+    public async Task Cannot_Edit_A_Post_That_Does_Not_Exist()
+    {
+        const int missingPostID = int.MaxValue;
+        var author = new User((Nickname)"authoruser2", (FullName)"author2 user2", Password.Create("password").Value, (Email)"author2user2@acme.com", "my bio");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author);
+        }
+
+        var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = new EditPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var editResult = await sut.Handle(command, default);
+
+            editResult.IsFailure.Should().BeTrue();
+            editResult.Error.Should().Be($"Post {missingPostID} does not exist.");
+        }
+    }
 }
