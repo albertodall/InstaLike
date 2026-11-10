@@ -1,10 +1,5 @@
-variable "azure_sql_database_admin_username" {
-  description = "Azure SQL Database Administrator Username"
-  type        = string
-}
-
-variable "azure_sql_database_admin_password" {
-  description = "Azure SQL Database Administrator Password"
+variable "sql_administrators_group" {
+  description = "Entra ID group of the Azure SQL administrators (include the pipeline service principal)"
   type        = string
 }
 

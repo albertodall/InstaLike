@@ -14,7 +14,11 @@ variables:
   webApplicationProject: '**/InstaLike.Web.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  resourceGroupName: 'rg-instalike-prd-weu'
   webAppName: 'app-instalike-prd-weu'
+  webAppIdentityName: 'id-instalike-prd-weu'
+  sqlServerName: 'sql-instalike-prd-weu'
+  sqlDatabaseName: 'sqldb-instalike-prd-weu'
 
 stages:
   - stage: Create_Artifacts
@@ -119,11 +123,20 @@ stages:
                    itemPattern: '**/*'
                    targetPath: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
               
-               - script: dotnet InstaLike.Database.Migrator.dll
+               # Runs as the service connection's principal, a member of the SQL administrators group.
+               - task: AzureCLI@2
                  displayName: 'Apply Database Migrations'
-                 workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+                 inputs:
+                   azureSubscription: $(AzureServiceConnectionName)
+                   scriptType: 'bash'
+                   scriptLocation: 'inlineScript'
+                   workingDirectory: '$(Pipeline.Workspace)/InstaLikeDbMigrations'
+                   inlineScript: |
+                     export ApplicationUser__ClientId=`az identity show --name "$ApplicationUser__Name" --resource-group "$(resourceGroupName)" --query clientId --output tsv`
+                     dotnet InstaLike.Database.Migrator.dll
                  env:
-                   ConnectionStrings__InstalikeDatabase: $(Azure-Database-ConnectionString)
+                   ConnectionStrings__InstalikeDatabase: 'Server=tcp:$(sqlServerName).database.windows.net,1433;Initial Catalog=$(sqlDatabaseName);Authentication=Active Directory Default;Encrypt=True;'
+                   ApplicationUser__Name: $(webAppIdentityName)
 
       - deployment: DeployWebApp
         displayName: 'Deploy Web Application'
@@ -131,7 +144,6 @@ stages:
         pool: ubuntu-latest
         
         variables:
-          ConnectionStrings.InstalikeDatabase: $(Azure-Database-ConnectionString)
           ApplicationInsights.ConnectionString: $(Azure-AppInsights-ConnectionString)
 
         strategy:

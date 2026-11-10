@@ -1,7 +1,12 @@
 ﻿using System.Reflection;
 using DbUp;
+using DbUp.Engine;
+using DbUp.Support;
 
 const string ConnectionStringVariable = "ConnectionStrings__InstalikeDatabase";
+const string ApplicationUserNameVariable = "ApplicationUser__Name";
+const string ApplicationUserClientIdVariable = "ApplicationUser__ClientId";
+const string GrantsFolder = ".mssql.grants.";
 
 var connectionString = args.FirstOrDefault() ?? Environment.GetEnvironmentVariable(ConnectionStringVariable);
 if (string.IsNullOrWhiteSpace(connectionString))
@@ -13,14 +18,28 @@ if (string.IsNullOrWhiteSpace(connectionString))
 // Creates the database when missing (local and containerized environments); Azure SQL databases are provisioned by Terraform.
 EnsureDatabase.For.SqlDatabase(connectionString);
 
-var upgrader = DeployChanges.To
+var assembly = Assembly.GetExecutingAssembly();
+var builder = DeployChanges.To
     .SqlDatabase(connectionString)
-    .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+    .WithScriptsEmbeddedInAssembly(assembly, script => !script.Contains(GrantsFolder))
     .WithTransactionPerScript()
-    .LogToConsole()
-    .Build();
+    .LogToConsole();
 
-var result = upgrader.PerformUpgrade();
+// In Azure, grants database access to the web app's managed identity.
+var applicationUserName = Environment.GetEnvironmentVariable(ApplicationUserNameVariable);
+var applicationUserClientId = Environment.GetEnvironmentVariable(ApplicationUserClientIdVariable);
+if (!string.IsNullOrWhiteSpace(applicationUserName) && Guid.TryParse(applicationUserClientId, out var clientId))
+{
+    builder
+        .WithScriptsEmbeddedInAssembly(
+            assembly,
+            script => script.Contains(GrantsFolder),
+            new SqlScriptOptions { ScriptType = ScriptType.RunAlways, RunGroupOrder = DbUpDefaults.DefaultRunGroupOrder + 1 })
+        .WithVariable("ApplicationUserName", applicationUserName)
+        .WithVariable("ApplicationUserClientId", clientId.ToString());
+}
+
+var result = builder.Build().PerformUpgrade();
 if (!result.Successful)
 {
     Console.Error.WriteLine(result.Error);
