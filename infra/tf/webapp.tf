@@ -4,6 +4,11 @@ resource "azurerm_linux_web_app" "instalike_app" {
   location            = azurerm_service_plan.instalike_appservice_plan.location
   service_plan_id     = azurerm_service_plan.instalike_appservice_plan.id
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.instalike_app_identity.id]
+  }
+
   site_config {
     always_on           = true
     ftps_state          = "Disabled"
@@ -16,12 +21,13 @@ resource "azurerm_linux_web_app" "instalike_app" {
   }
 
   app_settings = {
-    ConnectionStrings__InstalikeDatabase                = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Persist Security Info=False;User ID=${var.azure_sql_database_admin_username};Password=${var.azure_sql_database_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-    ExternalStorage__AzureBlobStorage__ConnectionString = azurerm_storage_account.instalike_storage_account.primary_connection_string
-    ImageAnalysis__Endpoint                             = "${azurerm_cognitive_account.instalike_autotag_service.endpoint}openai/v1/"
-    ImageAnalysis__ApiKey                               = azurerm_cognitive_account.instalike_autotag_service.primary_access_key
-    ImageAnalysis__Model                                = azurerm_cognitive_deployment.instalike_autotag_model.name
-    ApplicationInsights__ConnectionString               = azurerm_application_insights.instalike_appinsights.connection_string
+    AZURE_CLIENT_ID                               = azurerm_user_assigned_identity.instalike_app_identity.client_id
+    AZURE_TOKEN_CREDENTIALS                       = "ManagedIdentityCredential"
+    ConnectionStrings__InstalikeDatabase          = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Authentication=Active Directory Default;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    ExternalStorage__AzureBlobStorage__ServiceUri = azurerm_storage_account.instalike_storage_account.primary_blob_endpoint
+    ImageAnalysis__Endpoint                       = "${azurerm_cognitive_account.instalike_autotag_service.endpoint}openai/v1/"
+    ImageAnalysis__Model                          = azurerm_cognitive_deployment.instalike_autotag_model.name
+    ApplicationInsights__ConnectionString         = azurerm_application_insights.instalike_appinsights.connection_string
   }
 
   tags = local.common_tags
@@ -29,27 +35,25 @@ resource "azurerm_linux_web_app" "instalike_app" {
   depends_on = [
     azurerm_service_plan.instalike_appservice_plan,
     azurerm_mssql_database.instalike_database,
+    azurerm_mssql_firewall_rule.instalike_sql_allow_azure_services,
     azurerm_storage_container.instalike_posts_container,
     azurerm_storage_container.instalike_profiles_container,
+    azurerm_role_assignment.instalike_app_blob_access,
+    azurerm_role_assignment.instalike_app_openai_access,
+    azurerm_role_assignment.instalike_app_telemetry_access,
     azurerm_cognitive_deployment.instalike_autotag_model,
     azurerm_application_insights.instalike_appinsights
   ]
 }
 
-resource "azurerm_key_vault_access_policy" "instalike_app_keyvault_access_policy" {
-  key_vault_id = azurerm_key_vault.instalike_key_vault.id
+# App Service imports the origin certificate (and its private key, stored as a secret) from the key vault.
+resource "azurerm_role_assignment" "web_app_resource_provider_certificate_access" {
+  for_each = toset(["Key Vault Certificate User", "Key Vault Secrets User"])
 
-  tenant_id = azurerm_key_vault.instalike_key_vault.tenant_id
-  object_id = data.azuread_service_principal.web_app_resource_provider.id
-
-  secret_permissions = ["Get"]
-
-  certificate_permissions = ["Get"]
-
-  depends_on = [
-    azurerm_key_vault.instalike_key_vault,
-    azurerm_linux_web_app.instalike_app
-  ]
+  scope                = azurerm_key_vault.instalike_key_vault.id
+  role_definition_name = each.value
+  principal_id         = data.azuread_service_principal.web_app_resource_provider.object_id
+  principal_type       = "ServicePrincipal"
 }
 
 resource "azurerm_app_service_certificate" "cloudflare_origin_server_cert" {
@@ -59,7 +63,7 @@ resource "azurerm_app_service_certificate" "cloudflare_origin_server_cert" {
   key_vault_secret_id = data.azurerm_key_vault_certificate.cloudflare_origin_server_certificate.secret_id
 
   depends_on = [
-    azurerm_key_vault_access_policy.instalike_app_keyvault_access_policy,
+    azurerm_role_assignment.web_app_resource_provider_certificate_access,
     azurerm_linux_web_app.instalike_app
   ]
 }

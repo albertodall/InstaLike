@@ -7,7 +7,7 @@ resource "azurerm_key_vault" "instalike_key_vault" {
   sku_name                    = "standard"
   soft_delete_retention_days  = 90
   purge_protection_enabled    = false
-  rbac_authorization_enabled  = false # Access is granted through access policies
+  rbac_authorization_enabled  = true
 
   tags = local.common_tags
 
@@ -25,7 +25,7 @@ resource "azurerm_storage_account" "instalike_storage_account" {
   account_replication_type  = "LRS"
   access_tier               = "Hot"
   min_tls_version           = "TLS1_2"
-  shared_access_key_enabled = true
+  shared_access_key_enabled = false
 
   # The picture containers allow anonymous read access to blobs (container_access_type = "blob").
   allow_nested_items_to_be_public = true
@@ -78,6 +78,7 @@ resource "azurerm_cognitive_account" "instalike_autotag_service" {
   resource_group_name   = azurerm_resource_group.instalike_resource_group.name
   kind                  = "OpenAI"
   custom_subdomain_name = "oai-${local.name_suffix}"
+  local_auth_enabled    = false # Entra ID only: the web app calls it with its managed identity
 
   sku_name = "S0"
 
@@ -101,4 +102,10 @@ resource "azurerm_cognitive_deployment" "instalike_autotag_model" {
     name     = "DataZoneStandard" # Pay per token, processed within the EU data zone
     capacity = 10                 # Thousands of tokens per minute
   }
+}
+# Lets Terraform read the origin certificate (see data.tf).
+resource "azurerm_role_assignment" "terraform_certificate_access" {
+  scope                = azurerm_key_vault.instalike_key_vault.id
+  role_definition_name = "Key Vault Certificate User"
+  principal_id         = data.azurerm_client_config.current.object_id
 }

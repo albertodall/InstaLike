@@ -10,11 +10,12 @@ internal class AzureBlobStorageConnectionProvider : IHybridStorageConnectionProv
 
     public void Configure(IDictionary<string, string> settings)
     {
-        if (settings.TryGetValue(ExternalStorageParameters.ConnectionStringProperty, out string? externalStorageConnectionString))
-        {
-            _provider = new Lazy<IExternalStorageProvider>(
-                () => new AzureBlobStorageProvider(externalStorageConnectionString));
-        }
+        settings.TryGetValue(ExternalStorageParameters.ConnectionStringProperty, out string? connectionString);
+        settings.TryGetValue(ExternalStorageParameters.ServiceUriProperty, out string? serviceUri);
+
+        var storageSettings = new AzureBlobStorageSettings(connectionString, serviceUri);
+        _provider = new Lazy<IExternalStorageProvider>(
+            () => new AzureBlobStorageProvider(storageSettings.CreateClient()));
     }
 
     public IExternalStorageProvider GetProvider()

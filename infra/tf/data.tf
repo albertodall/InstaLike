@@ -1,5 +1,10 @@
 data "azurerm_client_config" "current" {}
 
+data "azuread_group" "sql_administrators" {
+  display_name     = var.sql_administrators_group
+  security_enabled = true
+}
+
 data "azuread_service_principal" "web_app_resource_provider" {
   client_id = "abfa0a7c-a6b6-4736-8310-5855508787cd"
 }

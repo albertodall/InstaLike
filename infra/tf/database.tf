@@ -1,11 +1,15 @@
 resource "azurerm_mssql_server" "instalike_sql_server" {
-  name                         = "sql-${local.name_suffix}"
-  resource_group_name          = azurerm_resource_group.instalike_resource_group.name
-  location                     = azurerm_resource_group.instalike_resource_group.location
-  version                      = "12.0"
-  minimum_tls_version          = "1.2"
-  administrator_login          = var.azure_sql_database_admin_username
-  administrator_login_password = var.azure_sql_database_admin_password
+  name                = "sql-${local.name_suffix}"
+  resource_group_name = azurerm_resource_group.instalike_resource_group.name
+  location            = azurerm_resource_group.instalike_resource_group.location
+  version             = "12.0"
+  minimum_tls_version = "1.2"
+
+  azuread_administrator {
+    login_username              = data.azuread_group.sql_administrators.display_name
+    object_id                   = data.azuread_group.sql_administrators.object_id
+    azuread_authentication_only = true
+  }
 
   tags = local.common_tags
 
@@ -29,4 +33,11 @@ resource "azurerm_mssql_database" "instalike_database" {
   depends_on = [
     azurerm_mssql_server.instalike_sql_server
   ]
+}
+
+resource "azurerm_mssql_firewall_rule" "instalike_sql_allow_azure_services" {
+  name             = "AllowAllWindowsAzureIps" # The web app and the Microsoft-hosted pipeline agents
+  server_id        = azurerm_mssql_server.instalike_sql_server.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
 }

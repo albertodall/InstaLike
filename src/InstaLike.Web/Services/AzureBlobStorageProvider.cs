@@ -15,14 +15,9 @@ internal class AzureBlobStorageProvider : IExternalStorageProvider
 {
     private readonly BlobServiceClient _blobServiceClient;
 
-    public AzureBlobStorageProvider(string storageConnectionString)
+    public AzureBlobStorageProvider(BlobServiceClient blobServiceClient)
     {
-        if (string.IsNullOrEmpty(storageConnectionString))
-        {
-            throw new ArgumentNullException(nameof(storageConnectionString));
-        }
-
-        _blobServiceClient = new BlobServiceClient(storageConnectionString);
+        _blobServiceClient = blobServiceClient;
     }
 
     public Picture LoadPicture(Guid identifier, string containerName)
@@ -53,9 +48,8 @@ internal class AzureBlobStorageProvider : IExternalStorageProvider
             new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" } });
     }
 
-    public static async Task EnsureContainersExistAsync(string storageConnectionString, CancellationToken cancellationToken = default)
+    public static async Task EnsureContainersExistAsync(BlobServiceClient blobServiceClient, CancellationToken cancellationToken = default)
     {
-        var blobServiceClient = new BlobServiceClient(storageConnectionString);
         foreach (var containerName in PictureContainers.All)
         {
             await blobServiceClient

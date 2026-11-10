@@ -19,6 +19,8 @@ resource "azurerm_application_insights" "instalike_appinsights" {
   workspace_id        = azurerm_log_analytics_workspace.instalike_loganalytics_ws.id
   application_type    = "web"
 
+  local_authentication_enabled = false # Telemetry is sent with the web app's managed identity
+
   tags = local.common_tags
 
   depends_on = [
