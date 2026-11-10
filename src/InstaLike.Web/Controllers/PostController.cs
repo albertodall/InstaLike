@@ -125,7 +125,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Like(LikePostModel like)
     {
-        var command = new LikePostCommand(like.PostID, like.UserID);
+        var command = new LikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
 
         if (commandResult.IsSuccess && User.Identity != null && User.Identity.Name != null)
@@ -146,7 +146,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Dislike(LikePostModel like)
     {
-        var command = new DislikePostCommand(like.PostID, like.UserID);
+        var command = new DislikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
 
         return commandResult.IsSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
