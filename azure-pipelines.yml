@@ -132,8 +132,6 @@ stages:
         
         variables:
           ConnectionStrings.InstalikeDatabase: $(Azure-Database-ConnectionString)
-          ImageAnalysis.Endpoint: $(Azure-OpenAI-Endpoint)
-          ImageAnalysis.ApiKey: $(Azure-OpenAI-ApiKey)
           ApplicationInsights.ConnectionString: $(Azure-AppInsights-ConnectionString)
 
         strategy:

@@ -78,6 +78,7 @@ resource "azurerm_cognitive_account" "instalike_autotag_service" {
   resource_group_name   = azurerm_resource_group.instalike_resource_group.name
   kind                  = "OpenAI"
   custom_subdomain_name = "oai-${local.name_suffix}"
+  local_auth_enabled    = false # Entra ID only: the web app calls it with its managed identity
 
   sku_name = "S0"
 

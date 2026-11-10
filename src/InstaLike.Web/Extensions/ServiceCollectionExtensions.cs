@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
@@ -28,6 +29,8 @@ namespace InstaLike.Web.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
+    private const string AzureOpenAIScope = "https://cognitiveservices.azure.com/.default";
+
     public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, IConfiguration configuration)
     {
         var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
@@ -118,23 +121,29 @@ internal static class ServiceCollectionExtensions
         var apiKey = configuration.GetValue<string>("ImageAnalysis:ApiKey");
         var model = configuration.GetValue<string>("ImageAnalysis:Model");
 
-        if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(model))
+        if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(model))
         {
             services.AddSingleton<IImageRecognitionService, DisabledImageRecognition>();
             return services;
         }
 
         // Any OpenAI-compatible API: the Azure OpenAI v1 endpoint (where the model is the deployment name) or a local Ollama server.
-        var chatClient = new ChatClient(
-            model,
-            new ApiKeyCredential(apiKey),
-            new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
+        // Without an API key, Azure OpenAI is called with the application's Azure identity.
+        var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
+        var chatClient = string.IsNullOrEmpty(apiKey)
+            ? CreateEntraIdChatClient(model, options)
+            : new ChatClient(model, new ApiKeyCredential(apiKey), options);
 
         services.AddChatClient(chatClient.AsIChatClient());
         services.AddSingleton<IImageRecognitionService, ChatClientImageTagging>();
 
         return services;
     }
+
+#pragma warning disable OPENAI001 // Token authentication is the documented way to call the Azure OpenAI v1 endpoint with Entra ID.
+    private static ChatClient CreateEntraIdChatClient(string model, OpenAIClientOptions options) =>
+        new(model, new BearerTokenPolicy(AzureIdentity.Credential, AzureOpenAIScope), options);
+#pragma warning restore OPENAI001
 
     private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
     {
