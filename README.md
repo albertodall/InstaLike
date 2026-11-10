@@ -94,6 +94,15 @@ dotnet test
 ```
 Integration tests run on SQLite with an in-memory picture store, so they do not need any container.
 
+## Deploy to Azure
+Terraform (`infra/tf`) provisions the Azure resources, named after the [Azure naming conventions](https://azurenamingconventions.com/blog/azure-naming-conventions-complete-guide/) (`{type}-instalike-prd-weu`). The Azure DevOps pipeline (`azure-pipelines.yml`) builds, migrates the database and deploys the web application.
+
+There are no passwords or keys: the web application authenticates with its managed identity (`id-instalike-prd-weu`) to Azure SQL, Blob Storage, Azure OpenAI and Application Insights.
+
+Before the first deployment:
+1. Create an Entra ID security group for the Azure SQL administrators, add yourself and the pipeline service connection's principal, and set the `sql_administrators_group` Terraform variable to its name.
+2. Set the `AzureServiceConnectionName` pipeline variable. The migrator runs as the service connection's principal and grants database access to the managed identity.
+
 ## Acknowledgements
 This project has been built using these awesome Open Source projects:
 
