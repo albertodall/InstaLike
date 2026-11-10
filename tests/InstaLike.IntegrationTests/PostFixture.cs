@@ -328,7 +328,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", picture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger);
+            var sut = new EditPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
             editResult = await sut.Handle(command, default);
         }
 
@@ -336,7 +336,9 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         {
             using (new AssertionScope())
             {
-                session.Load<Post>(post.ID).Text.Value.Should().Be("edited text on post 1");
+                var editedPost = session.Load<Post>(post.ID);
+                editedPost.Text.Value.Should().Be("edited text on post 1");
+                editedPost.Picture.Identifier.Should().NotBe(post.Picture.Identifier, "stored pictures are never overwritten");
                 editResult.IsSuccess.Should().BeTrue();
             }
         }
@@ -360,7 +362,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", picture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger);
+            var sut = new EditPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
             editResult = await sut.Handle(command, default);
         }
 
