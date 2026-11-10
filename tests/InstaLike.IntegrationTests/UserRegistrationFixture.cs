@@ -79,7 +79,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
             editCommandResult = await sut.Handle(command, default);
         }
 
@@ -93,8 +93,59 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
                 modifiedUser.FullName.Should().Be((FullName)$"{testUser.FullName.Name}_mod {testUser.FullName.Surname}_mod");
                 modifiedUser.Email.Should().Be((Email)"new@email.com");
                 modifiedUser.Biography.Should().Be("new bio");
-                modifiedUser.ProfilePicture.Should().Be((Picture)DatabaseFixture.GetTestPictureBase64());
+                modifiedUser.ProfilePicture.RawBytes.Should().Equal(Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+                modifiedUser.ProfilePicture.Identifier.Should().NotBe(Guid.Empty);
             }
+        }
+    }
+
+    [Fact]
+    public async Task Should_Give_Each_New_Profile_Picture_Its_Own_Identifier()
+    {
+        var firstUser = new User((Nickname)"testuser5", (FullName)"test5 user5", Password.Create("password").Value, (Email)"testuser5@acme.com", "bio5");
+        var secondUser = new User((Nickname)"testuser6", (FullName)"test6 user6", Password.Create("password").Value, (Email)"testuser6@acme.com", "bio6");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(firstUser);
+            await session.SaveAsync(secondUser);
+        }
+
+        var picture = Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
+        foreach (var user in new[] { firstUser, secondUser })
+        {
+            var command = new EditUserDetailsCommand(user.ID, user.Nickname, user.FullName.Name, user.FullName.Surname, user.Email, user.Biography, picture);
+            using var session = _testFixture.OpenSession(_output);
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var firstPicture = (await session.GetAsync<User>(firstUser.ID)).ProfilePicture.Identifier;
+            var secondPicture = (await session.GetAsync<User>(secondUser.ID)).ProfilePicture.Identifier;
+            firstPicture.Should().NotBe(secondPicture);
+        }
+    }
+
+    [Fact]
+    public async Task Should_Keep_The_Profile_Picture_When_No_New_Picture_Is_Uploaded()
+    {
+        var testUser = new User((Nickname)"testuser7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio7");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(testUser);
+        }
+
+        var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, "new bio", null);
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await session.GetAsync<User>(testUser.ID)).ProfilePicture.Identifier.Should().Be(testUser.ProfilePicture.Identifier);
         }
     }
 
@@ -121,7 +172,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             testUser.ProfilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
             editCommandResult = await sut.Handle(command, default);
         }
 
@@ -151,7 +202,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             testUser.ProfilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
             editCommandResult = await sut.Handle(command, default);
         }
 
@@ -181,7 +232,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             testUser.ProfilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
             editCommandResult = await sut.Handle(command, default);
         }
 

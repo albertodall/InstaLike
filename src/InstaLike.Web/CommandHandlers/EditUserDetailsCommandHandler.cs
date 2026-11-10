@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Commands;
 using InstaLike.Core.Domain;
+using InstaLike.Core.Services;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -14,11 +15,13 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
+    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
 
-    public EditUserDetailsCommandHandler(ISession session, ILogger logger)
+    public EditUserDetailsCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
     }
 
     public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -46,7 +49,10 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
                 userToUpdate.ChangeEmailAddress(eMailValidationResult.Value);
                 userToUpdate.ChangeFullName(fullNameValidationResult.Value);
                 userToUpdate.UpdateBiography(request.Bio);
-                userToUpdate.SetProfilePicture((Picture)request.ProfilePicture);
+                if (request.ProfilePicture is { Length: > 0 })
+                {
+                    userToUpdate.SetProfilePicture(Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value);
+                }
 
                 await tx.CommitAsync(cancellationToken);
 
