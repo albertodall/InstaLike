@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Commands;
-using InstaLike.Core.Domain;
-using InstaLike.Core.Events;
-using InstaLike.Web.Data.Query;
+using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Media;
 using InstaLike.Web.Models;
-using InstaLike.Web.Services;
+using InstaLike.Web.Posts.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

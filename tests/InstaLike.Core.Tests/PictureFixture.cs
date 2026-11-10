@@ -1,6 +1,6 @@
 ﻿using System;
 using FluentAssertions;
-using InstaLike.Core.Domain;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Tests.Properties;
 using Xunit;
 

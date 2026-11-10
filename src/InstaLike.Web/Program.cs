@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
-using InstaLike.Core.Domain;
-using InstaLike.Core.Services;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

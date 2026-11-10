@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using InstaLike.Core.Services;
+using InstaLike.Core.SharedKernel;
 using Xunit;
 
 namespace InstaLike.Core.Tests;

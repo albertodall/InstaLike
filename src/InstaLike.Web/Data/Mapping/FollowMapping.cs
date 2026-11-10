@@ -1,5 +1,5 @@
 ﻿using FluentNHibernate.Mapping;
-using InstaLike.Core.Domain;
+using InstaLike.Core.Social;
 
 namespace InstaLike.Web.Data.Mapping;
 

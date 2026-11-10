@@ -2,11 +2,11 @@
 using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Commands;
-using InstaLike.Core.Domain;
-using InstaLike.Web.CommandHandlers;
-using InstaLike.Web.Data.Query;
+using InstaLike.Core.Accounts;
+using InstaLike.Core.Social;
 using InstaLike.Web.Models;
+using InstaLike.Web.Social.CommandHandlers;
+using InstaLike.Web.Social.Queries;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;

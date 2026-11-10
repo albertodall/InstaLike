@@ -2,8 +2,8 @@
 using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Domain;
-using InstaLike.Web.Services;
+using InstaLike.Core.Accounts;
+using InstaLike.Web.Accounts.Services;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;

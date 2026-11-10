@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Data.Common;
-using InstaLike.Core.Domain;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Infrastructure;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.SqlTypes;

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 
 namespace InstaLike.Web.Infrastructure;
 

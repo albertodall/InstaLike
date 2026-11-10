@@ -1,0 +1,44 @@
+﻿using CSharpFunctionalExtensions;
+
+namespace InstaLike.Core.Posts;
+
+public class CommentText : SimpleValueObject<string>
+{
+    private const int CommentTextMaxLength = 200;
+
+    private CommentText() : base(string.Empty) { }
+
+    private CommentText(string text) : base(text) { }
+
+    public static Result<CommentText> Create(string text)
+    {
+        var trimmedText = (text ?? string.Empty).Trim();
+
+        if (trimmedText.Length == 0)
+        {
+            return Result.Failure<CommentText>("Text for a comment should not be empty.");
+        }
+
+        if (trimmedText.Length > CommentTextMaxLength)
+        {
+            return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
+        }
+
+        return Result.Success(new CommentText(trimmedText));
+    }
+
+    public static implicit operator string(CommentText text)
+    {
+        return text.Value;
+    }
+
+    public static explicit operator CommentText(string text)
+    {
+        return Create(text).Value;
+    }
+
+    public override string ToString()
+    {
+        return Value;
+    }
+}

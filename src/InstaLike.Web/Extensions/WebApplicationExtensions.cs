@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using InstaLike.Web.Infrastructure;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Builder;
 
 namespace InstaLike.Web.Extensions;
