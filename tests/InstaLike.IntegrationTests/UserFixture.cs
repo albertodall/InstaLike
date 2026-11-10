@@ -2,8 +2,10 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Domain;
-using InstaLike.Web.Data.Query;
+using InstaLike.Core.Accounts;
+using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Accounts.Queries;
 using InstaLike.Web.Models;
 using Serilog;
 using Xunit;

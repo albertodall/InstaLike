@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 using Microsoft.Extensions.AI;
 using Xunit;
 

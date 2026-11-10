@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Domain;
+using InstaLike.Core.Posts;
 using Xunit;
 
 namespace InstaLike.Core.Tests;

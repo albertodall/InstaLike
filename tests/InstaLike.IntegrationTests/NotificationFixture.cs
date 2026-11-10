@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
-using InstaLike.Core.Commands;
-using InstaLike.Core.Domain;
-using InstaLike.Web.CommandHandlers;
-using InstaLike.Web.Data.Query;
+using InstaLike.Core.Accounts;
+using InstaLike.Core.Notifications;
 using InstaLike.Web.Models;
+using InstaLike.Web.Notifications.CommandHandlers;
+using InstaLike.Web.Notifications.Queries;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 using NHibernate.Connection;
 using NHibernate.Driver;
 

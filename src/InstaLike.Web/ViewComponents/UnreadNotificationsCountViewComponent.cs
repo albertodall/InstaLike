@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using InstaLike.Web.Data.Query;
+using InstaLike.Web.Notifications.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

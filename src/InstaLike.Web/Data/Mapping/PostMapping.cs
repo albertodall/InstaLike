@@ -1,5 +1,5 @@
 ﻿using FluentNHibernate.Mapping;
-using InstaLike.Core.Domain;
+using InstaLike.Core.Posts;
 using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;

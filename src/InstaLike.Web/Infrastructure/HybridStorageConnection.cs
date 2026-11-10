@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 
 namespace InstaLike.Web.Infrastructure;
 

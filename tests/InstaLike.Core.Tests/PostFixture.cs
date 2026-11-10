@@ -2,7 +2,9 @@
 using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Domain;
+using InstaLike.Core.Accounts;
+using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Tests.Properties;
 using Xunit;
 

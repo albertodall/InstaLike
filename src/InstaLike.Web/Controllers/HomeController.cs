@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using InstaLike.Web.Data.Query;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Models;
+using InstaLike.Web.Posts.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

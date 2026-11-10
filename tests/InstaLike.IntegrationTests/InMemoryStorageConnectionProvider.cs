@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using InstaLike.Core.Domain;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Infrastructure;
-using InstaLike.Web.Services;
+using InstaLike.Web.Media;
 
 namespace InstaLike.IntegrationTests;
 
