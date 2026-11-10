@@ -102,12 +102,11 @@ $('.like-button').click(function (e) {
     var likeButton = $(this),
         likesMarkup = likeButton.next('strong').find('.likes-count'),
         likes = parseInt(likesMarkup.html()),
-        postId = likeButton.attr('data-post-id'),
-        userId = likeButton.attr('data-user-id');
+        postId = likeButton.attr('data-post-id');
 
     var endpoint = likeButton.hasClass('post-liked') ? '/Post/Dislike' : '/Post/Like';
 
-    $.post(endpoint, { PostID: postId, UserID: userId }, function () {
+    $.post(endpoint, { PostID: postId }, function () {
         likeButton.toggleClass('post-liked');
 
         // Increments o decrements the number of likes.
