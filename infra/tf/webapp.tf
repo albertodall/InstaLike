@@ -46,20 +46,14 @@ resource "azurerm_linux_web_app" "instalike_app" {
   ]
 }
 
-resource "azurerm_key_vault_access_policy" "instalike_app_keyvault_access_policy" {
-  key_vault_id = azurerm_key_vault.instalike_key_vault.id
+# App Service imports the origin certificate (and its private key, stored as a secret) from the key vault.
+resource "azurerm_role_assignment" "web_app_resource_provider_certificate_access" {
+  for_each = toset(["Key Vault Certificate User", "Key Vault Secrets User"])
 
-  tenant_id = azurerm_key_vault.instalike_key_vault.tenant_id
-  object_id = data.azuread_service_principal.web_app_resource_provider.id
-
-  secret_permissions = ["Get"]
-
-  certificate_permissions = ["Get"]
-
-  depends_on = [
-    azurerm_key_vault.instalike_key_vault,
-    azurerm_linux_web_app.instalike_app
-  ]
+  scope                = azurerm_key_vault.instalike_key_vault.id
+  role_definition_name = each.value
+  principal_id         = data.azuread_service_principal.web_app_resource_provider.object_id
+  principal_type       = "ServicePrincipal"
 }
 
 resource "azurerm_app_service_certificate" "cloudflare_origin_server_cert" {
@@ -69,7 +63,7 @@ resource "azurerm_app_service_certificate" "cloudflare_origin_server_cert" {
   key_vault_secret_id = data.azurerm_key_vault_certificate.cloudflare_origin_server_certificate.secret_id
 
   depends_on = [
-    azurerm_key_vault_access_policy.instalike_app_keyvault_access_policy,
+    azurerm_role_assignment.web_app_resource_provider_certificate_access,
     azurerm_linux_web_app.instalike_app
   ]
 }

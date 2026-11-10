@@ -7,7 +7,7 @@ resource "azurerm_key_vault" "instalike_key_vault" {
   sku_name                    = "standard"
   soft_delete_retention_days  = 90
   purge_protection_enabled    = false
-  rbac_authorization_enabled  = false # Access is granted through access policies
+  rbac_authorization_enabled  = true
 
   tags = local.common_tags
 
@@ -102,4 +102,10 @@ resource "azurerm_cognitive_deployment" "instalike_autotag_model" {
     name     = "DataZoneStandard" # Pay per token, processed within the EU data zone
     capacity = 10                 # Thousands of tokens per minute
   }
+}
+# Lets Terraform read the origin certificate (see data.tf).
+resource "azurerm_role_assignment" "terraform_certificate_access" {
+  scope                = azurerm_key_vault.instalike_key_vault.id
+  role_definition_name = "Key Vault Certificate User"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
