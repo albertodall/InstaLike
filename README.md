@@ -59,14 +59,14 @@ Locally, SQL Server and [Azurite](https://github.com/Azure/Azurite) (the Azure S
 ```shell
 docker compose up --build
 ```
-The database migrator ([DbUp](https://dbup.readthedocs.io)) creates the database and applies the scripts in `InstaLike.Database.Migrator/mssql` once SQL Server is healthy, then the web application starts and creates the blob containers if they are missing.
+The database migrator ([DbUp](https://dbup.readthedocs.io)) creates the database and applies the scripts in `src/InstaLike.Database.Migrator/mssql` once SQL Server is healthy, then the web application starts and creates the blob containers if they are missing.
 Data is persisted under `.containers/`. Delete that folder to start from scratch.
 
 HTTPS uses the ASP.NET Core development certificate. Visual Studio exports it for you; from the command line, export it once and store its password in the web application's user secrets:
 ```shell
 dotnet dev-certs https --trust
 dotnet dev-certs https -ep "%APPDATA%\ASP.NET\Https\InstaLike.Web.pfx" -p <password>
-dotnet user-secrets --project InstaLike.Web set "Kestrel:Certificates:Development:Password" "<password>"
+dotnet user-secrets --project src/InstaLike.Web set "Kestrel:Certificates:Development:Password" "<password>"
 ```
 
 The web application sends its logs, traces and metrics through OpenTelemetry to the [Aspire Dashboard](https://aspire.dev/dashboard/standalone/), where they can be searched and correlated by trace. In Azure, the same data goes to Application Insights.
@@ -85,7 +85,7 @@ In Azure, pictures are tagged by GPT-4.1 nano on Azure OpenAI. Locally, a small 
 
 To apply new database scripts without containers:
 ```shell
-dotnet run --project InstaLike.Database.Migrator -- "Data Source=localhost,1433; Initial Catalog=InstaLike; User ID=sa; Password=Pa55w0rd; TrustServerCertificate=True"
+dotnet run --project src/InstaLike.Database.Migrator -- "Data Source=localhost,1433; Initial Catalog=InstaLike; User ID=sa; Password=Pa55w0rd; TrustServerCertificate=True"
 ```
 
 ## Tests
