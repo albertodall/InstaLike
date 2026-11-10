@@ -111,7 +111,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(UserDetailsModel userDetails, IFormFile profilePictureFile)
+    public async Task<IActionResult> Edit(UserDetailsModel userDetails, IFormFile? profilePictureFile)
     {
         if (ModelState.IsValid)
         {
@@ -122,7 +122,7 @@ public class AccountController : Controller
                 userDetails.Surname,
                 userDetails.Email,
                 userDetails.Bio,
-                await profilePictureFile.ToByteArrayAsync());
+                profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
 
             var processCommandResult = await _dispatcher.Send(command);
             if (processCommandResult.IsSuccess)

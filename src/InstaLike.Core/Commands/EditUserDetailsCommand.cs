@@ -11,9 +11,10 @@ public sealed class EditUserDetailsCommand : IRequest<Result>
     public string Surname { get; }
     public string Email { get; }
     public string Bio { get; }
-    public byte[] ProfilePicture { get; }
+    /// <summary>The new profile picture, or <see langword="null"/> to keep the current one.</summary>
+    public byte[]? ProfilePicture { get; }
 
-    public EditUserDetailsCommand(int userID, string nickname, string name, string surname, string email, string bio, byte[] profilePicture)
+    public EditUserDetailsCommand(int userID, string nickname, string name, string surname, string email, string bio, byte[]? profilePicture)
     {
         UserID = userID;
         Nickname = nickname;
