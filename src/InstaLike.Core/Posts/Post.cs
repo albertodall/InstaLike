@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
@@ -27,6 +29,9 @@ public class Post : AggregateRoot<int>
     private string _text;
     public virtual PostText Text => (PostText)_text;
 
+    private readonly IList<Like> _likes = [];
+    public virtual IReadOnlyCollection<Like> Likes => _likes.AsReadOnly();
+
     public virtual DateTimeOffset PostDate { get; protected set; }
 
     public virtual void UpdatePicture(PictureId picture)
@@ -39,14 +44,38 @@ public class Post : AggregateRoot<int>
         _text = text.Value;
     }
 
-    /// <remarks>
-    /// Duplicate likes are rejected by the caller: they depend on the other likes, not on the post.
-    /// </remarks>
-    public virtual Result<Like> LikeBy(int userID)
+    public virtual Result LikeBy(int userID)
     {
-        return AuthorID == userID
-            ? Result.Failure<Like>("You cannot put a 'Like' on your own posts.")
-            : Result.Success(Like.Create(ID, userID, AuthorID));
+        if (AuthorID == userID)
+        {
+            return Result.Failure("You cannot put a 'Like' on your own posts.");
+        }
+
+        if (IsLikedBy(userID))
+        {
+            return Result.Failure($"User {userID} already 'Liked' post {ID}.");
+        }
+
+        _likes.Add(new Like(this, userID));
+        RaiseDomainEvent(new PostLikedEvent(ID, userID, AuthorID));
+        return Result.Success();
+    }
+
+    public virtual Result DislikeBy(int userID)
+    {
+        var like = _likes.SingleOrDefault(l => l.UserID == userID);
+        if (like is null)
+        {
+            return Result.Failure($"User {userID} did not put any 'Like' on post {ID}.");
+        }
+
+        _likes.Remove(like);
+        return Result.Success();
+    }
+
+    public virtual bool IsLikedBy(int userID)
+    {
+        return _likes.Any(l => l.UserID == userID);
     }
 
     public virtual Comment CommentBy(int authorID, CommentText text)
