@@ -43,7 +43,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new PublishPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new PublishPostCommandHandler(session, Log.Logger);
             publishCommandResult = await sut.Handle(command, default);
         }
 
@@ -328,7 +328,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", picture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditPostCommandHandler(session, Log.Logger);
             editResult = await sut.Handle(command, default);
         }
 
@@ -362,7 +362,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", picture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditPostCommandHandler(session, Log.Logger);
             editResult = await sut.Handle(command, default);
         }
 
@@ -382,7 +382,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditPostCommandHandler(session, Log.Logger);
             var editResult = await sut.Handle(command, default);
 
             editResult.IsFailure.Should().BeTrue();

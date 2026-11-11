@@ -13,13 +13,11 @@ namespace InstaLike.Web.Accounts.CommandHandlers;
 internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
 {
     private readonly ISession _session;
-    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
     private readonly ILogger _logger;
 
-    public RegisterUserCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+    public RegisterUserCommandHandler(ISession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
-        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
         _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -48,7 +46,7 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
 
         if (request.ProfilePicture != null)
         {
-            var profilePicture = Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value;
+            var profilePicture = Picture.Create(request.ProfilePicture, Guid.NewGuid()).Value;
             userToRegister.SetProfilePicture(profilePicture);
         }
 

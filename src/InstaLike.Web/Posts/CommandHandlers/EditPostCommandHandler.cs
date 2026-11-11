@@ -15,13 +15,11 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
-    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
 
-    public EditPostCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+    public EditPostCommandHandler(ISession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
     }
 
     public async Task<Result<int>> Handle(EditPostCommand request, CancellationToken cancellationToken)
@@ -50,7 +48,7 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
 
             postToEdit.UpdateText(PostText.Create(request.Text).Value);
             // Pictures are write-once: a new picture gets a new identifier instead of overwriting the stored one.
-            postToEdit.UpdatePicture(Picture.Create(request.PictureRawBytes, _idGenerator.GetNextId()).Value);
+            postToEdit.UpdatePicture(Picture.Create(request.PictureRawBytes, Guid.NewGuid()).Value);
             try
             {
                 await _session.SaveAsync(postToEdit, cancellationToken);
