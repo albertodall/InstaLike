@@ -76,6 +76,46 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task Should_Not_Register_A_User_With_An_Email_Already_In_Use()
+    {
+        var existingUser = new User((Nickname)"emailowner", (FullName)"email owner", Password.Create("password").Value, (Email)"taken@acme.com", "bio");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(existingUser);
+        }
+
+        var command = new RegisterUserCommand("emailthief", "email", "thief", "password", "Taken@Acme.com", "bio", null);
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var result = await DatabaseFixture.CreateMediator(session, _pictureStore).Send(command);
+            result.Error.Should().Be("This email is already used by another account.");
+        }
+    }
+
+    [Fact]
+    public async Task Should_Not_Change_The_Email_To_One_Used_By_Another_Account()
+    {
+        var firstUser = new User((Nickname)"firstowner", (FullName)"first owner", Password.Create("password").Value, (Email)"first@acme.com", "bio");
+        var secondUser = new User((Nickname)"secondowner", (FullName)"second owner", Password.Create("password").Value, (Email)"second@acme.com", "bio");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(firstUser);
+            await session.SaveAsync(secondUser);
+        }
+
+        var command = new EditUserDetailsCommand(secondUser.ID, secondUser.Nickname, secondUser.FullName.Name, secondUser.FullName.Surname, "FIRST@acme.com", secondUser.Biography, null);
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await DatabaseFixture.CreateMediator(session, _pictureStore).Send(command)).IsSuccess.Should().BeFalse();
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await session.GetAsync<User>(secondUser.ID)).Email.Should().Be((Email)"second@acme.com");
+        }
+    }
+
+    [Fact]
     public async Task Should_Edit_Registered_User_Information()
     {
         const string testUserName = "testuser1";

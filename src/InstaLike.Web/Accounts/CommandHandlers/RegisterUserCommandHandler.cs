@@ -7,12 +7,15 @@ using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
+using NHibernate.Criterion;
 using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
 internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
 {
+    private const string EmailInUse = "This email is already used by another account.";
+
     private readonly ISession _session;
     private readonly ILogger _logger;
     private readonly IPictureStore _pictureStore;
@@ -40,6 +43,15 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
                 request.Nickname,
                 validationResult.Error);
             return Result.Failure<int>(validationResult.Error);
+        }
+
+        var availabilityResult = await CheckAvailabilityAsync(eMailValidationResult.Value, cancellationToken);
+        if (availabilityResult.IsFailure)
+        {
+            _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
+                request.Nickname,
+                availabilityResult.Error);
+            return Result.Failure<int>(availabilityResult.Error);
         }
 
         var userToRegister = new User(
@@ -75,5 +87,14 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
             userToRegister.ID);
 
         return Result.Success(userToRegister.ID);
+    }
+
+    private async Task<Result> CheckAvailabilityAsync(Email email, CancellationToken cancellationToken)
+    {
+        var usersWithEmail = await _session.QueryOver<User>()
+            .Where(Restrictions.Eq("Email", email.Value))
+            .RowCountAsync(cancellationToken);
+
+        return Result.FailureIf(usersWithEmail > 0, EmailInUse);
     }
 }

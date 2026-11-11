@@ -7,12 +7,15 @@ using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
+using NHibernate.Criterion;
 using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
 public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDetailsCommand, Result>
 {
+    private const string EmailInUse = "This email is already used by another account.";
+
     private readonly ISession _session;
     private readonly ILogger _logger;
     private readonly IPictureStore _pictureStore;
@@ -40,6 +43,16 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
                 request.UserID,
                 validationResult.Error);
             return Result.Failure(validationResult.Error);
+        }
+
+        var availabilityResult = await CheckAvailabilityAsync(request.UserID, eMailValidationResult.Value, cancellationToken);
+        if (availabilityResult.IsFailure)
+        {
+            _logger.Warning("Tried to update user profile for user [{Nickname}({UserID})] but some data were already in use: {WarningMessage}",
+                request.Nickname,
+                request.UserID,
+                availabilityResult.Error);
+            return availabilityResult;
         }
 
         var userToUpdate = await _session.GetAsync<User>(request.UserID, cancellationToken);
@@ -79,5 +92,15 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
             request.UserID);
 
         return Result.Success();
+    }
+
+    private async Task<Result> CheckAvailabilityAsync(int userID, Email email, CancellationToken cancellationToken)
+    {
+        var otherUsersWithEmail = await _session.QueryOver<User>()
+            .Where(Restrictions.Eq("Email", email.Value))
+            .And(u => u.ID != userID)
+            .RowCountAsync(cancellationToken);
+
+        return Result.FailureIf(otherUsersWithEmail > 0, EmailInUse);
     }
 }
