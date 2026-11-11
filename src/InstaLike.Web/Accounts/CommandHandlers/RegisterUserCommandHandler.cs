@@ -14,6 +14,7 @@ namespace InstaLike.Web.Accounts.CommandHandlers;
 
 internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
 {
+    private const string NicknameTaken = "This nickname is already taken.";
     private const string EmailInUse = "This email is already used by another account.";
 
     private readonly ISession _session;
@@ -36,7 +37,7 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
         var passwordValidationResult = Password.Create(request.Password);
         var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-        var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
+        var validationResult = Result.Combine(Environment.NewLine, nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
         if (validationResult.IsFailure)
         {
             _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
@@ -45,7 +46,7 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
             return Result.Failure<int>(validationResult.Error);
         }
 
-        var availabilityResult = await CheckAvailabilityAsync(eMailValidationResult.Value, cancellationToken);
+        var availabilityResult = await CheckAvailabilityAsync(nicknameValidationResult.Value, eMailValidationResult.Value, cancellationToken);
         if (availabilityResult.IsFailure)
         {
             _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
@@ -89,12 +90,20 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
         return Result.Success(userToRegister.ID);
     }
 
-    private async Task<Result> CheckAvailabilityAsync(Email email, CancellationToken cancellationToken)
+    private async Task<Result> CheckAvailabilityAsync(Nickname nickname, Email email, CancellationToken cancellationToken)
     {
-        var usersWithEmail = await _session.QueryOver<User>()
+        var usersWithNickname = _session.QueryOver<User>()
+            .Where(Restrictions.Eq("Nickname", nickname.Value))
+            .ToRowCountQuery()
+            .FutureValue<int>();
+        var usersWithEmail = _session.QueryOver<User>()
             .Where(Restrictions.Eq("Email", email.Value))
-            .RowCountAsync(cancellationToken);
+            .ToRowCountQuery()
+            .FutureValue<int>();
 
-        return Result.FailureIf(usersWithEmail > 0, EmailInUse);
+        return Result.Combine(
+            Environment.NewLine,
+            Result.FailureIf(await usersWithNickname.GetValueAsync(cancellationToken) > 0, NicknameTaken),
+            Result.FailureIf(await usersWithEmail.GetValueAsync(cancellationToken) > 0, EmailInUse));
     }
 }

@@ -14,6 +14,7 @@ namespace InstaLike.Web.Accounts.CommandHandlers;
 
 public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDetailsCommand, Result>
 {
+    private const string NicknameTaken = "This nickname is already taken.";
     private const string EmailInUse = "This email is already used by another account.";
 
     private readonly ISession _session;
@@ -35,7 +36,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
         var eMailValidationResult = Email.Create(request.Email);
         var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-        var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, fullNameValidationResult);
+        var validationResult = Result.Combine(Environment.NewLine, nicknameValidationResult, eMailValidationResult, fullNameValidationResult);
         if (validationResult.IsFailure)
         {
             _logger.Warning("Tried to update user profile for user [{Nickname}({UserID})] but some data were not valid: {WarningMessage}",
@@ -45,7 +46,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
             return Result.Failure(validationResult.Error);
         }
 
-        var availabilityResult = await CheckAvailabilityAsync(request.UserID, eMailValidationResult.Value, cancellationToken);
+        var availabilityResult = await CheckAvailabilityAsync(request.UserID, nicknameValidationResult.Value, eMailValidationResult.Value, cancellationToken);
         if (availabilityResult.IsFailure)
         {
             _logger.Warning("Tried to update user profile for user [{Nickname}({UserID})] but some data were already in use: {WarningMessage}",
@@ -94,13 +95,22 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
         return Result.Success();
     }
 
-    private async Task<Result> CheckAvailabilityAsync(int userID, Email email, CancellationToken cancellationToken)
+    private async Task<Result> CheckAvailabilityAsync(int userID, Nickname nickname, Email email, CancellationToken cancellationToken)
     {
-        var otherUsersWithEmail = await _session.QueryOver<User>()
+        var otherUsersWithNickname = _session.QueryOver<User>()
+            .Where(Restrictions.Eq("Nickname", nickname.Value))
+            .And(u => u.ID != userID)
+            .ToRowCountQuery()
+            .FutureValue<int>();
+        var otherUsersWithEmail = _session.QueryOver<User>()
             .Where(Restrictions.Eq("Email", email.Value))
             .And(u => u.ID != userID)
-            .RowCountAsync(cancellationToken);
+            .ToRowCountQuery()
+            .FutureValue<int>();
 
-        return Result.FailureIf(otherUsersWithEmail > 0, EmailInUse);
+        return Result.Combine(
+            Environment.NewLine,
+            Result.FailureIf(await otherUsersWithNickname.GetValueAsync(cancellationToken) > 0, NicknameTaken),
+            Result.FailureIf(await otherUsersWithEmail.GetValueAsync(cancellationToken) > 0, EmailInUse));
     }
 }

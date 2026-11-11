@@ -121,7 +121,7 @@ public class AccountController : Controller
             }
             else
             {
-                ModelState.AddModelError("", processCommandResult.Error);
+                ModelState.AddModelErrors(processCommandResult.Error);
             }
         }
 
@@ -155,7 +155,7 @@ public class AccountController : Controller
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError("", processCommandResult.Error);
+            ModelState.AddModelErrors(processCommandResult.Error);
         }
 
         return View(newUser);
