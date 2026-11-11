@@ -53,15 +53,16 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
                 .FutureValue<int>();
 
             // Comments for this post
+            Comment commentEntity = null!;
             User commentAuthor = null!;
             CommentModel comment = null!;
-            var postCommentsQuery = _session.QueryOver<Comment>()
-                .Where(c => c.Post.ID == request.PostID)
-                .OrderBy(c => c.CommentDate).Asc
-                .Inner.JoinQueryOver(c => c.Author, () => commentAuthor)
+            var postCommentsQuery = _session.QueryOver(() => commentEntity)
+                .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
+                .Where(() => commentEntity.PostID == request.PostID)
+                .OrderBy(() => commentEntity.CommentDate).Asc
                 .SelectList(list => list
-                    .Select(c => c.Text).WithAlias(() => comment.Text)
-                    .Select(c => c.CommentDate).WithAlias(() => comment.CommentDate)
+                    .Select(() => commentEntity.Text).WithAlias(() => comment.Text)
+                    .Select(() => commentEntity.CommentDate).WithAlias(() => comment.CommentDate)
                     .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
                 )
                 .TransformUsing(Transformers.AliasToBean<CommentModel>())

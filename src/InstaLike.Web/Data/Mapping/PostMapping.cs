@@ -27,10 +27,6 @@ internal class PostMapping : ClassMap<Post>
         References(p => p.Author)
             .Column("UserID");
 
-        HasMany(p => p.Comments)
-            .KeyColumn("PostID")
-            .Access.CamelCaseField(Prefix.Underscore);
-
         DynamicInsert();
     }
 }

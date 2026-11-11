@@ -18,11 +18,12 @@ internal class CommentMapping : ClassMap<Comment>
         Map(p => p.CommentDate)
             .Not.Nullable();
 
-        References(p => p.Post)
-            .Column("PostID");
+        Map(p => p.PostID)
+            .Not.Nullable();
 
-        References(p => p.Author)
-            .Column("UserID");
+        Map(p => p.AuthorID)
+            .Column("UserID")
+            .Not.Nullable();
 
         DynamicInsert();
     }

@@ -9,6 +9,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Posts.Queries;
@@ -46,7 +47,6 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
         using (var tx = _session.BeginTransaction())
         {
             Post post = null!;
-            Comment comment = null!;
 
             var followedUserIdsQuery = QueryOver.Of<Follow>()
                 .Where(f => f.FollowerID == request.UserID)
@@ -64,12 +64,21 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                 .Take(request.NumberOfPosts);
 
             // Comments for all posts included in the timeline.
-            _session.QueryOver<Post>()
-                .Left.JoinAlias(p => p.Comments, () => comment)
-                .Fetch(SelectMode.Fetch, () => comment.Author)
+            Comment commentEntity = null!;
+            User commentAuthor = null!;
+            CommentModel comment = null!;
+            var commentsQuery = _session.QueryOver(() => commentEntity)
+                .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
                 .WithSubquery
-                    .WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
-                .Future<Post>();
+                    .WhereProperty(() => commentEntity.PostID).In(postIdsToShowInTimelineQuery)
+                .SelectList(list => list
+                    .Select(() => commentEntity.PostID).WithAlias(() => comment.PostID)
+                    .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
+                    .Select(() => commentEntity.Text).WithAlias(() => comment.Text)
+                    .Select(() => commentEntity.CommentDate).WithAlias(() => comment.CommentDate)
+                )
+                .TransformUsing(Transformers.AliasToBean<CommentModel>())
+                .Future<CommentModel>();
 
             // Number of likes for each post that has likes.
             var postLikesCountQuery = _session.QueryOver<Like>()
@@ -97,6 +106,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
 
             var timelineQueryResult = await timelineQuery.GetEnumerableAsync(cancellationToken);
             var postLikesCount = postLikesCountQuery.ToDictionary(o => (int)o[0], o => (int)o[1]);
+            var commentsByPost = commentsQuery.ToLookup(c => c.PostID);
 
             // Mapping
             var timelineList = timelineQueryResult.Select(p => new PostModel
@@ -107,15 +117,9 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                 Picture = p.Picture,
                 PostDate = p.PostDate,
                 Text = p.Text,
-                Comments = p.Comments
+                Comments = commentsByPost[p.ID]
                         .OrderByDescending(c => c.CommentDate)
-                        .Select(c => new CommentModel
-                        {
-                            PostID = p.ID,
-                            AuthorNickName = c.Author.Nickname,
-                            CommentDate = c.CommentDate,
-                            Text = c.Text
-                        }).ToArray(),
+                        .ToArray(),
                 LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
                 IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
                 CanBeEditedByCurrentUser = p.CanBeEditedBy(currentUser)

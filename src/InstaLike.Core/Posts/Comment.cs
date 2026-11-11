@@ -1,5 +1,4 @@
 ﻿using System;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
@@ -10,19 +9,21 @@ public class Comment : EntityBase<int>
     protected Comment() { }
 #pragma warning restore CS8618
 
-    public Comment(Post post, User author, CommentText text) : this()
+    internal Comment(int postID, int authorID, CommentText text)
+        : this()
     {
-        Post = post;
-        Author = author;
+        PostID = postID;
+        AuthorID = authorID;
         _text = text ?? throw new ArgumentNullException(nameof(text));
         CommentDate = DateTimeOffset.Now;
     }
 
-    public virtual Post Post { get; }
-    public virtual User Author { get; }
+    public virtual int PostID { get; protected set; }
+
+    public virtual int AuthorID { get; protected set; }
 
     private readonly string _text;
     public virtual CommentText Text => (CommentText)_text;
 
-    public virtual DateTimeOffset CommentDate { get; }
+    public virtual DateTimeOffset CommentDate { get; protected set; }
 }
