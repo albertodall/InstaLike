@@ -1,6 +1,5 @@
 ﻿using System;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
@@ -11,17 +10,17 @@ public class Post : AggregateRoot<int>
     protected Post() { }
 #pragma warning restore CS8618
 
-    public Post(User author, PictureId picture, PostText text)
+    public Post(int authorID, PictureId picture, PostText text)
         : this()
     {
-        Author = author;
+        AuthorID = authorID;
         Picture = picture;
         _text = text;
 
         PostDate = DateTimeOffset.Now;
     }
 
-    public virtual User Author { get; protected set; }
+    public virtual int AuthorID { get; protected set; }
 
     public virtual PictureId Picture { get; protected set; }
 
@@ -43,18 +42,18 @@ public class Post : AggregateRoot<int>
     /// <remarks>Duplicate likes are rejected by the caller: they depend on the other likes, not on the post.</remarks>
     public virtual Result<Like> LikeBy(int userID)
     {
-        return Author.ID == userID
+        return AuthorID == userID
             ? Result.Failure<Like>("You cannot put a 'Like' on your own posts.")
-            : Result.Success(Like.Create(ID, userID, Author.ID));
+            : Result.Success(Like.Create(ID, userID, AuthorID));
     }
 
     public virtual Comment CommentBy(int authorID, CommentText text)
     {
-        return Comment.Create(ID, authorID, Author.ID, text);
+        return Comment.Create(ID, authorID, AuthorID, text);
     }
 
-    public virtual bool CanBeEditedBy(User user)
+    public virtual bool CanBeEditedBy(int userID)
     {
-        return Author == user;
+        return AuthorID == userID;
     }
 }

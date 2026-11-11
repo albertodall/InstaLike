@@ -128,11 +128,12 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
     {
         var author = new User((Nickname)authorNickname, (FullName)"event author", Password.Create("password").Value, (Email)$"{authorNickname}@acme.com", "bio");
         var reader = new User((Nickname)readerNickname, (FullName)"event reader", Password.Create("password").Value, (Email)$"{readerNickname}@acme.com", "bio");
-        var post = new Post(author, PictureId.New(), (PostText)"event post");
+        Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
             await session.SaveAsync(reader);
+            post = new Post(author.ID, PictureId.New(), (PostText)"event post");
             await session.SaveAsync(post);
             await session.FlushAsync();
         }

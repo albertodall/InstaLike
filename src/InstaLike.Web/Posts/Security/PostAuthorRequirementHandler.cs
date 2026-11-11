@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using NHibernate;
 
 namespace InstaLike.Web.Posts.Security;
 
@@ -31,14 +29,9 @@ internal class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorReq
                 return;
             }
 
-            var post = await _session.QueryOver<Post>()
-                .Fetch(SelectMode.ChildFetch, p => p.Author)
-                .Where(p => p.ID == postId)
-                .SingleOrDefaultAsync();
+            var post = await _session.GetAsync<Post>(postId);
 
-            var user = await _session.LoadAsync<User>(context.User.GetIdentifier());
-
-            if (post.CanBeEditedBy(user))
+            if (post is not null && post.CanBeEditedBy(context.User.GetIdentifier()))
             {
                 context.Succeed(requirement);
             }

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Models;
 using MediatR;
@@ -41,7 +42,6 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
     {
         _logger.Debug("Fetching timeline for user {UserID} with parameters {@Request}.", request.UserID, request);
 
-        var currentUser = await _session.LoadAsync<User>(request.UserID, cancellationToken);
         PostModel[] timeline;
 
         using (var tx = _session.BeginTransaction())
@@ -56,8 +56,8 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             var postIdsToShowInTimelineQuery = QueryOver.Of<Post>()
                 .Where(
                     Restrictions.Disjunction()
-                        .Add(Restrictions.Where<Post>(p => p.Author.ID == request.UserID))
-                        .Add(Subqueries.WhereProperty<Post>(p => p.Author.ID).In(followedUserIdsQuery))
+                        .Add(Restrictions.Where<Post>(p => p.AuthorID == request.UserID))
+                        .Add(Subqueries.WhereProperty<Post>(p => p.AuthorID).In(followedUserIdsQuery))
                 )
                 .Select(p => p.ID)
                 .OrderBy(p => p.PostDate).Desc
@@ -98,8 +98,19 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                 .Select(l => l.PostID)
                 .Future<int>();
 
+            var authorsQuery = _session.QueryOver<User>()
+                .WithSubquery
+                    .WhereProperty(u => u.ID).In(QueryOver.Of<Post>()
+                        .WithSubquery.WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
+                        .Select(p => p.AuthorID))
+                .SelectList(fields => fields
+                    .Select(u => u.ID)
+                    .Select(u => u.Nickname)
+                    .Select(u => u.ProfilePicture)
+                )
+                .Future<object[]>();
+
             var timelineQuery = _session.QueryOver(() => post)
-                .Fetch(SelectMode.FetchLazyProperties, () => post.Author)
                 .WithSubquery
                     .WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
                 .Future<Post>();
@@ -107,13 +118,16 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             var timelineQueryResult = await timelineQuery.GetEnumerableAsync(cancellationToken);
             var postLikesCount = postLikesCountQuery.ToDictionary(o => (int)o[0], o => (int)o[1]);
             var commentsByPost = commentsQuery.ToLookup(c => c.PostID);
+            var authors = authorsQuery.ToDictionary(
+                a => (int)a[0],
+                a => (Nickname: (string)a[1], ProfilePicture: (PictureId?)a[2]));
 
             // Mapping
             var timelineList = timelineQueryResult.Select(p => new PostModel
             {
                 PostID = p.ID,
-                AuthorNickName = p.Author.Nickname,
-                AuthorProfilePicture = p.Author.ProfilePicture,
+                AuthorNickName = authors[p.AuthorID].Nickname,
+                AuthorProfilePicture = authors[p.AuthorID].ProfilePicture,
                 Picture = p.Picture,
                 PostDate = p.PostDate,
                 Text = p.Text,
@@ -122,7 +136,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                         .ToArray(),
                 LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
                 IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
-                CanBeEditedByCurrentUser = p.CanBeEditedBy(currentUser)
+                CanBeEditedByCurrentUser = p.CanBeEditedBy(request.UserID)
             });
 
             timeline = timelineList.OrderByDescending(p => p.PostDate).ToArray();

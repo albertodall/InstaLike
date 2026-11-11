@@ -42,8 +42,6 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
 
         _logger.Debug("Reading details for post {PostID} with parameters {@Request}", request.PostID, request);
 
-        var currentUser = await _session.LoadAsync<User>(request.CurrentUserID, cancellationToken);
-
         using (var tx = _session.BeginTransaction())
         {
             // Total likes for this post
@@ -76,15 +74,16 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
                 .FutureValue<int>();
 
             // Post to show
+            Post postEntity = null!;
             User postAuthor = null!;
-            var postQuery = _session.QueryOver<Post>()
-                .Where(p => p.ID == request.PostID)
-                .Inner.JoinQueryOver(p => p.Author, () => postAuthor)
+            var postQuery = _session.QueryOver(() => postEntity)
+                .JoinEntityAlias(() => postAuthor, () => postAuthor.ID == postEntity.AuthorID)
+                .Where(() => postEntity.ID == request.PostID)
                 .SelectList(list => list
-                    .Select(p => p.ID).WithAlias(() => post.PostID)
-                    .Select(p => p.Text).WithAlias(() => post.Text)
-                    .Select(p => p.Picture).WithAlias(() => post.Picture)
-                    .Select(p => p.PostDate).WithAlias(() => post.PostDate)
+                    .Select(() => postEntity.ID).WithAlias(() => post.PostID)
+                    .Select(() => postEntity.Text).WithAlias(() => post.Text)
+                    .Select(() => postEntity.Picture).WithAlias(() => post.Picture)
+                    .Select(() => postEntity.PostDate).WithAlias(() => post.PostDate)
                     .Select(() => postAuthor.Nickname).WithAlias(() => post.AuthorNickName)
                     .Select(() => postAuthor.ProfilePicture).WithAlias(() => post.AuthorProfilePicture)
                 )
@@ -97,7 +96,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
             post.Comments = postCommentsQuery.ToArray();
             post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0;
             post.CanBeEditedByCurrentUser =
-                (await _session.LoadAsync<Post>(request.PostID, cancellationToken)).CanBeEditedBy(currentUser);
+                (await _session.LoadAsync<Post>(request.PostID, cancellationToken)).CanBeEditedBy(request.CurrentUserID);
         }
 
         return post;
