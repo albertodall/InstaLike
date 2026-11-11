@@ -320,7 +320,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post1);
             await session.SaveAsync(post2);
             await session.SaveAsync(post3);
-            await session.SaveAsync(new Follow(reader.ID, author1.ID));
+            await session.SaveAsync(Follow.Create(reader.ID, author1.ID).Value);
             await session.FlushAsync();
         }
 

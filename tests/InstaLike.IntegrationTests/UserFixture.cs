@@ -39,8 +39,8 @@ public class UserFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(follower);
             await session.SaveAsync(author);
             await session.SaveAsync(post);
-            await session.SaveAsync(new Follow(author.ID, followed.ID));
-            await session.SaveAsync(new Follow(follower.ID, author.ID));
+            await session.SaveAsync(Follow.Create(author.ID, followed.ID).Value);
+            await session.SaveAsync(Follow.Create(follower.ID, author.ID).Value);
             await session.FlushAsync();
         }
 

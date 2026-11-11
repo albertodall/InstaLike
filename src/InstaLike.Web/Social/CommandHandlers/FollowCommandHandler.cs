@@ -35,6 +35,12 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
                 return Result.Failure($"User [{request.FollowedNickname}] does not exist.");
             }
 
+            var follow = Follow.Create(request.FollowerID, followedUserID);
+            if (follow.IsFailure)
+            {
+                return follow;
+            }
+
             var alreadyFollowing = await _session.QueryOver<Follow>()
                 .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == followedUserID)
                 .RowCountAsync(cancellationToken) > 0;
@@ -45,7 +51,7 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
 
             try
             {
-                await _session.SaveAsync(new Follow(request.FollowerID, followedUserID), cancellationToken);
+                await _session.SaveAsync(follow.Value, cancellationToken);
                 await tx.CommitAsync(cancellationToken);
 
                 _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})]",

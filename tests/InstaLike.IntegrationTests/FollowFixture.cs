@@ -66,7 +66,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followerUser);
             await session.SaveAsync(followedUser);
-            await session.SaveAsync(new Follow(followerUser.ID, followedUser.ID));
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
         }
 
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
@@ -164,6 +164,23 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task User_Should_Not_Follow_Themselves()
+    {
+        var user = new User((Nickname)"user14", (FullName)"test14 user14", Password.Create("password").Value, (Email)"testuser14@acme.com", "bio14");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(user);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var handler = new FollowCommandHandler(session, Log.Logger);
+            (await handler.Handle(new FollowCommand(user.ID, user.Nickname), default)).IsSuccess.Should().BeFalse();
+            (await CountFollowsAsync(session, user.ID, user.ID)).Should().Be(0);
+        }
+    }
+
+    [Fact]
     public async Task User_Should_Have_One_Follower()
     {
         var followerUser = new User((Nickname)"user9", (FullName)"test9 user9", Password.Create("password").Value, (Email)"testuser9@acme.com", "bio9");
@@ -174,7 +191,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followedUser);
             await session.SaveAsync(followerUser);
-            await session.SaveAsync(new Follow(followerUser.ID, followedUser.ID));
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
         }
 
         var followersQuery = new FollowersQuery(followedUser.Nickname);
@@ -198,7 +215,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followedUser);
             await session.SaveAsync(followerUser);
-            await session.SaveAsync(new Follow(followerUser.ID, followedUser.ID));
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
         }
 
         var followingQuery = new FollowingQuery(followerUser.Nickname);
