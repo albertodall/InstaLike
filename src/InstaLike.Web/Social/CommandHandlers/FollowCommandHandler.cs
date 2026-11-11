@@ -24,55 +24,50 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
 
     public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)
     {
-        using (var tx = _session.BeginTransaction())
+        var followedID = await _session.QueryOver<User>()
+            .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
+            .Select(u => u.ID)
+            .SingleOrDefaultAsync<int?>(cancellationToken);
+        if (followedID is not int followedUserID)
         {
-            var followedID = await _session.QueryOver<User>()
-                .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
-                .Select(u => u.ID)
-                .SingleOrDefaultAsync<int?>(cancellationToken);
-            if (followedID is not int followedUserID)
-            {
-                return Result.Failure($"User [{request.FollowedNickname}] does not exist.");
-            }
-
-            var follow = Follow.Create(request.FollowerID, followedUserID);
-            if (follow.IsFailure)
-            {
-                return follow;
-            }
-
-            var alreadyFollowing = await _session.QueryOver<Follow>()
-                .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == followedUserID)
-                .RowCountAsync(cancellationToken) > 0;
-            if (alreadyFollowing)
-            {
-                return Result.Failure($"User {request.FollowerID} is already following user [{request.FollowedNickname}].");
-            }
-
-            try
-            {
-                await _session.SaveAsync(follow.Value, cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-
-                _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})]",
-                    request.FollowerID,
-                    request.FollowedNickname,
-                    followedUserID);
-
-                return Result.Success();
-            }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-
-                _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                    request.FollowedNickname,
-                    followedUserID,
-                    request.FollowerID,
-                    ex.Message);
-
-                return Result.Failure(ex.Message);
-            }
+            return Result.Failure($"User [{request.FollowedNickname}] does not exist.");
         }
+
+        var follow = Follow.Create(request.FollowerID, followedUserID);
+        if (follow.IsFailure)
+        {
+            return follow;
+        }
+
+        var alreadyFollowing = await _session.QueryOver<Follow>()
+            .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == followedUserID)
+            .RowCountAsync(cancellationToken) > 0;
+        if (alreadyFollowing)
+        {
+            return Result.Failure($"User {request.FollowerID} is already following user [{request.FollowedNickname}].");
+        }
+
+        try
+        {
+            await _session.SaveAsync(follow.Value, cancellationToken);
+            await _session.FlushAsync(cancellationToken);
+        }
+        catch (ADOException ex)
+        {
+            _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
+                request.FollowedNickname,
+                followedUserID,
+                request.FollowerID,
+                ex.Message);
+
+            return Result.Failure(ex.Message);
+        }
+
+        _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})]",
+            request.FollowerID,
+            request.FollowedNickname,
+            followedUserID);
+
+        return Result.Success();
     }
 }

@@ -4,6 +4,14 @@ using NHibernate.Proxy;
 
 namespace InstaLike.Core.SharedKernel;
 
+/// <summary>
+/// Provides a base class for entities identified by an ID.
+/// </summary>
+/// <remarks>
+/// Entities of the same unproxied type are equal when their IDs are equal. Entities with transient IDs
+/// are equal only when they are the same instance.
+/// </remarks>
+/// <typeparam name="TId">The non-nullable type of the entity identifier.</typeparam>
 public abstract class EntityBase<TId> : IEquatable<EntityBase<TId>>
     where TId : notnull
 {

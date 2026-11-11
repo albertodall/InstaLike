@@ -53,13 +53,8 @@ internal sealed class AzureBlobPictureStore : IPictureStore
         }
     }
 
-    public async Task TryDeleteAsync(string container, PictureId? picture)
+    public async Task TryDeleteAsync(string container, PictureId picture)
     {
-        if (picture is null)
-        {
-            return;
-        }
-
         try
         {
             await GetBlob(container, picture).DeleteIfExistsAsync();

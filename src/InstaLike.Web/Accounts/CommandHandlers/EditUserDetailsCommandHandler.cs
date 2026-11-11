@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
@@ -16,12 +16,14 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
     private readonly ISession _session;
     private readonly ILogger _logger;
     private readonly IPictureStore _pictureStore;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public EditUserDetailsCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
+    public EditUserDetailsCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore, IUnitOfWork unitOfWork)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
         _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -40,46 +42,42 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
             return Result.Failure(validationResult.Error);
         }
 
-        PictureId? uploadedPicture = null;
-        PictureId? replacedPicture = null;
-
-        using (var tx = _session.BeginTransaction())
+        var userToUpdate = await _session.GetAsync<User>(request.UserID, cancellationToken);
+        userToUpdate.ChangeNickname(nicknameValidationResult.Value);
+        userToUpdate.ChangeEmailAddress(eMailValidationResult.Value);
+        userToUpdate.ChangeFullName(fullNameValidationResult.Value);
+        userToUpdate.UpdateBiography(request.Bio);
+        if (request.ProfilePicture is { Length: > 0 })
         {
-            try
+            var replacedPicture = userToUpdate.ProfilePicture;
+            var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken);
+            if (replacedPicture is not null)
             {
-                var userToUpdate = await _session.GetAsync<User>(request.UserID, cancellationToken);
-                userToUpdate.ChangeNickname(nicknameValidationResult.Value);
-                userToUpdate.ChangeEmailAddress(eMailValidationResult.Value);
-                userToUpdate.ChangeFullName(fullNameValidationResult.Value);
-                userToUpdate.UpdateBiography(request.Bio);
-                if (request.ProfilePicture is { Length: > 0 })
-                {
-                    replacedPicture = userToUpdate.ProfilePicture;
-                    uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken);
-                    userToUpdate.SetProfilePicture(uploadedPicture);
-                }
-
-                await tx.CommitAsync(cancellationToken);
-                await _pictureStore.TryDeleteAsync(PictureContainers.Profiles, replacedPicture);
-
-                _logger.Information("Successfully updated user profile for user [{Nickname}({UserID})]",
-                    request.Nickname,
-                    request.UserID);
-
-                return Result.Success(userToUpdate.ID);
+                _unitOfWork.OnCommitted(() => _pictureStore.TryDeleteAsync(PictureContainers.Profiles, replacedPicture));
             }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-                await _pictureStore.TryDeleteAsync(PictureContainers.Profiles, uploadedPicture);
 
-                _logger.Error("Error updating user profile for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
-                    request.Nickname,
-                    request.UserID,
-                    ex.Message);
-
-                return Result.Failure(ex.Message);
-            }
+            _unitOfWork.OnRolledBack(() => _pictureStore.TryDeleteAsync(PictureContainers.Profiles, uploadedPicture));
+            userToUpdate.SetProfilePicture(uploadedPicture);
         }
+
+        try
+        {
+            await _session.FlushAsync(cancellationToken);
+        }
+        catch (ADOException ex)
+        {
+            _logger.Error("Error updating user profile for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
+                request.Nickname,
+                request.UserID,
+                ex.Message);
+
+            return Result.Failure(ex.Message);
+        }
+
+        _logger.Information("Successfully updated user profile for user [{Nickname}({UserID})]",
+            request.Nickname,
+            request.UserID);
+
+        return Result.Success();
     }
 }

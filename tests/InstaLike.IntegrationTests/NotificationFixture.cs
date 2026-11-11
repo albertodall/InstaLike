@@ -4,7 +4,6 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Notifications;
 using InstaLike.Web.Models;
-using InstaLike.Web.Notifications.CommandHandlers;
 using InstaLike.Web.Notifications.Queries;
 using Serilog;
 using Xunit;
@@ -45,8 +44,8 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         var command = new MarkAllUserNotificationsReadCommand(recipient.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new MarkAllUserNotificationsReadCommandHandler(session, Log.Logger);
-            result = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            result = await sut.Send(command, default);
         }
 
         result.Should().Be(3);

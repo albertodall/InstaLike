@@ -44,6 +44,8 @@ internal static class ServiceCollectionExtensions
             var sessionFactory = sp.GetRequiredService<ISessionFactory>();
             return sessionFactory.OpenSession();
         });
+        services.AddScoped<UnitOfWork>();
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
 
         return services;
     }

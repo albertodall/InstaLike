@@ -1,19 +1,11 @@
-﻿using MediatR;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public class PostLikedEvent : INotification
-{
-    public string SenderNickname { get; }
-    public int PostID { get; }
-    public string SenderProfileUrl { get; }
-    public string PostUrl { get; }
-
-    public PostLikedEvent(string senderNickname, string senderProfileUrl, int postID, string postUrl)
-    {
-        SenderNickname = senderNickname;
-        PostID = postID;
-        SenderProfileUrl = senderProfileUrl;
-        PostUrl = postUrl;
-    }
-}
+/// <summary>
+/// Represents an event raised when a post is liked.
+/// </summary>
+/// <param name="PostID">The identifier of the liked post.</param>
+/// <param name="LikerID">The identifier of the user who liked the post.</param>
+/// <param name="PostAuthorID">The identifier of the post's author.</param>
+public sealed record PostLikedEvent(int PostID, int LikerID, int PostAuthorID) : IDomainEvent;

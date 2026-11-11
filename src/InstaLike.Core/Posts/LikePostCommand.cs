@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using MediatR;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public sealed class LikePostCommand : IRequest<Result>
+public sealed class LikePostCommand : ICommand<Result>
 {
     public int PostID { get; }
     public int UserID { get; }

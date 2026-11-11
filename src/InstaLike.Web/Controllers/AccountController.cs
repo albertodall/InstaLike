@@ -194,15 +194,8 @@ public class AccountController : Controller
         var command = new FollowCommand(User.GetIdentifier(), id);
         var processCommandResult = await _dispatcher.Send(command);
 
-        if (processCommandResult.IsSuccess && User.Identity != null && User.Identity.Name != null)
+        if (processCommandResult.IsSuccess)
         {
-            var newFollowerNotification = new FollowedUserEvent(
-                User.Identity.Name,
-                Url.Action("Profile", "Account", new { id = User.Identity.Name })!,
-                id);
-
-            await _dispatcher.Publish(newFollowerNotification);
-
             return RedirectToAction(nameof(Profile), new { id });
         }
 

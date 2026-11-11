@@ -4,12 +4,11 @@ using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
 using MediatR;
 using NHibernate;
-using NHibernate.Criterion;
 using Serilog;
 
 namespace InstaLike.Web.Notifications.CommandHandlers;
 
-public class MarkAllUserNotificationsReadCommandHandler : IRequestHandler<MarkAllUserNotificationsReadCommand, int>
+internal sealed class MarkAllUserNotificationsReadCommandHandler : IRequestHandler<MarkAllUserNotificationsReadCommand, int>
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
@@ -22,45 +21,25 @@ public class MarkAllUserNotificationsReadCommandHandler : IRequestHandler<MarkAl
 
     public async Task<int> Handle(MarkAllUserNotificationsReadCommand request, CancellationToken cancellationToken)
     {
-        using (var tx = _session.BeginTransaction())
+        var unreadNotifications = await _session.QueryOver<Notification>()
+            .Where(n => n.RecipientID == request.UserID)
+            .AndNot(n => n.HasBeenReadByRecipient)
+            .ListAsync(cancellationToken);
+
+        foreach (var notification in unreadNotifications)
         {
-            int unreadNotificationsCount = 0;
-            try
-            {
-                var notificationsQuery = QueryOver.Of<Notification>()
-                    .Where(n => n.RecipientID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
-
-                var unreadNotificationsCountQuery = notificationsQuery.GetExecutableQueryOver(_session).ToRowCountQuery().FutureValue<int>();
-                var unreadNotificationsQuery = notificationsQuery.GetExecutableQueryOver(_session).Future<Notification>();
-
-                foreach (var n in (await unreadNotificationsQuery.GetEnumerableAsync(cancellationToken)))
-                {
-                    n.MarkAsRead();
-                }
-
-                await tx.CommitAsync(cancellationToken);
-                unreadNotificationsCount = await unreadNotificationsCountQuery.GetValueAsync(cancellationToken);
-
-                if (unreadNotificationsCount > 0)
-                {
-                    _logger.Information("User {UserID} marked {ReadNotifications} notification as read.",
-                        request.UserID,
-                        unreadNotificationsCount);
-                }
-
-                return unreadNotificationsCount;
-            }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-
-                _logger.Error("Failed to mark {UnreadNotifications} notifications as read for user {UserID}. Error message: {ErrorMessage}",
-                    unreadNotificationsCount,
-                    request.UserID,
-                    ex.Message);
-
-                throw;
-            }
+            notification.MarkAsRead();
         }
+
+        await _session.FlushAsync(cancellationToken);
+
+        if (unreadNotifications.Count > 0)
+        {
+            _logger.Information("User {UserID} marked {ReadNotifications} notifications as read.",
+                request.UserID,
+                unreadNotifications.Count);
+        }
+
+        return unreadNotifications.Count;
     }
 }

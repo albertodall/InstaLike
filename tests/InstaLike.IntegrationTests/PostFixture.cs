@@ -10,7 +10,6 @@ using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Media;
 using InstaLike.Web.Models;
-using InstaLike.Web.Posts.CommandHandlers;
 using InstaLike.Web.Posts.Queries;
 using Serilog;
 using Xunit;
@@ -46,8 +45,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new PublishPostCommandHandler(session, Log.Logger, _pictureStore);
-            publishCommandResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            publishCommandResult = await sut.Send(command, default);
         }
 
         using (new AssertionScope())
@@ -74,8 +73,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishPostCommand(author.ID, "post without a picture", []);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new PublishPostCommandHandler(session, Log.Logger, _pictureStore);
-            (await sut.Handle(command, default)).IsSuccess.Should().BeFalse();
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            (await sut.Send(command, default)).IsSuccess.Should().BeFalse();
         }
     }
 
@@ -96,8 +95,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishCommentCommand(post.ID, "test comment", commenter.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new PublishCommentCommandHandler(session, Log.Logger);
-            commentPostResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            commentPostResult = await sut.Send(command, default);
         }
 
         using (new AssertionScope())
@@ -128,8 +127,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new LikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
-            likeResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            likeResult = await sut.Send(command, default);
         }
 
         using (new AssertionScope())
@@ -160,8 +159,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new DislikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
-            likeResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            likeResult = await sut.Send(command, default);
         }
 
         using (new AssertionScope())
@@ -191,8 +190,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new DislikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
-            likeResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            likeResult = await sut.Send(command, default);
         }
 
         likeResult.IsSuccess.Should().BeFalse($"User [{reader.Nickname}] did not put any 'Like' on this post.");
@@ -215,9 +214,9 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new LikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
-            await sut.Handle(command, default);
-            likeResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            await sut.Send(command, default);
+            likeResult = await sut.Send(command, default);
         }
 
         likeResult.IsSuccess.Should().BeFalse($"User [{reader.Nickname}] already 'Liked' this post.");
@@ -238,8 +237,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new LikePostCommand(post.ID, author.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new LikeOrDislikePostCommandHandler(session, Log.Logger);
-            likeResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session);
+            likeResult = await sut.Send(command, default);
         }
 
         likeResult.IsSuccess.Should().BeFalse("You cannot put a 'Like' on your own posts.");
@@ -357,8 +356,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger, _pictureStore);
-            editResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            editResult = await sut.Send(command, default);
         }
 
         using (var session = _testFixture.OpenSession(_output))
@@ -392,8 +391,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger, _pictureStore);
-            editResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            editResult = await sut.Send(command, default);
         }
 
         editResult.IsSuccess.Should().BeFalse($"You're not allowed to edit post {post.ID}.");
@@ -412,8 +411,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger, _pictureStore);
-            var editResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            var editResult = await sut.Send(command, default);
 
             editResult.IsFailure.Should().BeTrue();
             editResult.Error.Should().Be($"Post {missingPostID} does not exist.");

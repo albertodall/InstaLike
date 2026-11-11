@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using MediatR;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Social;
 
-public sealed class UnfollowCommand : IRequest<Result>
+public sealed class UnfollowCommand : ICommand<Result>
 {
     public int FollowerID { get; }
     public string UnfollowedNickname { get; }

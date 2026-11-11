@@ -5,9 +5,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
-using InstaLike.Web.Accounts.CommandHandlers;
 using InstaLike.Web.Media;
-using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -41,8 +39,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new RegisterUserCommandHandler(session, Log.Logger, _pictureStore);
-            userRegistrationResult = await sut.Handle(userRegistrationCommand, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            userRegistrationResult = await sut.Send(userRegistrationCommand, default);
         }
 
         using (new AssertionScope())
@@ -66,8 +64,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         Result<int> registrationResult;
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new RegisterUserCommandHandler(session, Log.Logger, _pictureStore);
-            registrationResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            registrationResult = await sut.Send(command, default);
         }
 
         registrationResult.IsSuccess.Should().BeTrue();
@@ -101,8 +99,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            editCommandResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            editCommandResult = await sut.Send(command, default);
         }
 
         using (new AssertionScope())
@@ -136,8 +134,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         {
             var command = new EditUserDetailsCommand(user.ID, user.Nickname, user.FullName.Name, user.FullName.Surname, user.Email, user.Biography, picture);
             using var session = _testFixture.OpenSession(_output);
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            (await sut.Send(command, default)).IsSuccess.Should().BeTrue();
         }
 
         using (var session = _testFixture.OpenSession(_output))
@@ -161,8 +159,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, "new bio", null);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            (await sut.Send(command, default)).IsSuccess.Should().BeTrue();
         }
 
         using (var session = _testFixture.OpenSession(_output))
@@ -186,8 +184,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, testUser.Biography, picture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            (await sut.Send(command, default)).IsSuccess.Should().BeTrue();
         }
 
         _pictureStore.GetContent(PictureContainers.Profiles, oldPicture).Should().BeNull();
@@ -216,8 +214,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             null);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            editCommandResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            editCommandResult = await sut.Send(command, default);
         }
 
         editCommandResult.IsSuccess.Should().BeFalse();
@@ -246,8 +244,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             null);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            editCommandResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            editCommandResult = await sut.Send(command, default);
         }
 
         editCommandResult.IsSuccess.Should().BeFalse();
@@ -276,8 +274,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             null);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, _pictureStore);
-            editCommandResult = await sut.Handle(command, default);
+            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            editCommandResult = await sut.Send(command, default);
         }
 
         editCommandResult.IsSuccess.Should().BeFalse();

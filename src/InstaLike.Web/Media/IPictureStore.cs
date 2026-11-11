@@ -14,5 +14,5 @@ public interface IPictureStore
     /// <summary>
     /// Never throws: it runs outside the transaction, so a failure is logged and leaves the picture orphaned.
     /// </summary>
-    Task TryDeleteAsync(string container, PictureId? picture);
+    Task TryDeleteAsync(string container, PictureId picture);
 }

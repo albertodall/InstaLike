@@ -26,13 +26,9 @@ internal sealed class InMemoryPictureStore : IPictureStore
         return Task.FromResult(stored);
     }
 
-    public Task TryDeleteAsync(string container, PictureId? picture)
+    public Task TryDeleteAsync(string container, PictureId picture)
     {
-        if (picture is not null)
-        {
-            _pictures.TryRemove((container, picture), out _);
-        }
-
+        _pictures.TryRemove((container, picture), out _);
         return Task.CompletedTask;
     }
 

@@ -21,6 +21,15 @@ public class FollowFixture
     }
 
     [Fact]
+    public void Following_Should_Raise_An_Event()
+    {
+        var follow = Follow.Create(1, 2).Value;
+
+        follow.DomainEvents.Should().ContainSingle()
+            .Which.Should().Be(new FollowedUserEvent(1, 2));
+    }
+
+    [Fact]
     public void User_Cannot_Follow_Themselves()
     {
         Follow.Create(1, 1).IsSuccess.Should().BeFalse();

@@ -3,7 +3,7 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts;
 
-public class User : EntityBase<int>
+public class User : AggregateRoot<int>
 {
 #pragma warning disable CS8618
     protected User() { }
