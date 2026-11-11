@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -15,15 +15,22 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
+    private readonly IPictureStore _pictureStore;
 
-    public EditPostCommandHandler(ISession session, ILogger logger)
+    public EditPostCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
     }
 
     public async Task<Result<int>> Handle(EditPostCommand request, CancellationToken cancellationToken)
     {
+        if (request.PictureRawBytes is not { Length: > 0 })
+        {
+            return Result.Failure<int>("Please select a picture to share together with your post.");
+        }
+
         using (var tx = _session.BeginTransaction())
         {
             var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
@@ -47,8 +54,7 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             }
 
             postToEdit.UpdateText(PostText.Create(request.Text).Value);
-            // Pictures are write-once: a new picture gets a new identifier instead of overwriting the stored one.
-            postToEdit.UpdatePicture(Picture.Create(request.PictureRawBytes, Guid.NewGuid()).Value);
+            postToEdit.UpdatePicture(await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken));
             try
             {
                 await _session.SaveAsync(postToEdit, cancellationToken);

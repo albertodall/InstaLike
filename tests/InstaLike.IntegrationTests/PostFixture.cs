@@ -7,6 +7,7 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Media;
 using InstaLike.Web.Models;
 using InstaLike.Web.Posts.CommandHandlers;
 using InstaLike.Web.Posts.Queries;
@@ -20,6 +21,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;
+    private readonly InMemoryPictureStore _pictureStore = new();
 
     public PostFixture(DatabaseFixture fixture, ITestOutputHelper output)
     {
@@ -43,7 +45,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new PublishPostCommandHandler(session, Log.Logger);
+            var sut = new PublishPostCommandHandler(session, Log.Logger, _pictureStore);
             publishCommandResult = await sut.Handle(command, default);
         }
 
@@ -52,8 +54,27 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             publishCommandResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<Post>(publishCommandResult.Value)).Should().NotBeNull();
+                var publishedPost = await session.GetAsync<Post>(publishCommandResult.Value);
+                publishedPost.Should().NotBeNull();
+                _pictureStore.GetContent(PictureContainers.Posts, publishedPost.Picture).Should().Equal(command.PictureRawBytes);
             }
+        }
+    }
+
+    [Fact]
+    public async Task Should_Not_Publish_A_Post_Without_A_Picture()
+    {
+        var author = new User((Nickname)"nopictureauthor", (FullName)"nopicture author", Password.Create("password").Value, (Email)"nopictureauthor@acme.com", "bio");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author);
+        }
+
+        var command = new PublishPostCommand(author.ID, "post without a picture", []);
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = new PublishPostCommandHandler(session, Log.Logger, _pictureStore);
+            (await sut.Handle(command, default)).IsSuccess.Should().BeFalse();
         }
     }
 
@@ -63,7 +84,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         Result<int> commentPostResult;
         var author = new User((Nickname)"author1", (FullName)"author one", Password.Create("password").Value, (Email)"author1@acme.com", "my bio");
         var commenter = new User((Nickname)"commenter1", (FullName)"commenter one", Password.Create("password").Value, (Email)"commenter1@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
@@ -95,7 +116,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         Result likeResult;
         var author = new User((Nickname)"author2", (FullName)"author two", Password.Create("password").Value, (Email)"author2@acme.com", "my bio");
         var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
@@ -126,7 +147,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         Result likeResult;
         var author = new User((Nickname)"author3", (FullName)"author three", Password.Create("password").Value, (Email)"author3@acme.com", "my bio");
         var reader = new User((Nickname)"reader2", (FullName)"reader two", Password.Create("password").Value, (Email)"reader2@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         post.PutLikeBy(reader);
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -158,7 +179,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         Result likeResult;
         var author = new User((Nickname)"author4", (FullName)"author four", Password.Create("password").Value, (Email)"author4@acme.com", "my bio");
         var reader = new User((Nickname)"reader3", (FullName)"reader three", Password.Create("password").Value, (Email)"reader3@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
@@ -182,7 +203,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         Result likeResult;
         var author = new User((Nickname)"author5", (FullName)"author five", Password.Create("password").Value, (Email)"author5@acme.com", "my bio");
         var reader = new User((Nickname)"reader4", (FullName)"reader four", Password.Create("password").Value, (Email)"reader4@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
@@ -206,7 +227,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     {
         Result likeResult;
         var author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
@@ -228,7 +249,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     {
         CommentModel[] comments;
         var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         var comment = new Comment(post, author, CommentText.Create("First comment").Value);
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -253,7 +274,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         PostModel result;
         var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
         var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         var comment = new Comment(post, reader, CommentText.Create("My comment").Value);
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -287,9 +308,9 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var author1 = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
         var author2 = new User((Nickname)"authoruser2", (FullName)"author2 user2", Password.Create("password").Value, (Email)"author2user2@acme.com", "my bio");
         var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
-        var post1 = new Post(author1, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post 1");
-        var post2 = new Post(author1, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post 2");
-        var post3 = new Post(author2, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post 3");
+        var post1 = new Post(author1, PictureId.New(), (PostText)"test post 1");
+        var post2 = new Post(author1, PictureId.New(), (PostText)"test post 2");
+        var post3 = new Post(author2, PictureId.New(), (PostText)"test post 3");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author1);
@@ -316,7 +337,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task User_Can_Edit_His_Own_Posts()
     {
         Result editResult;
-        var picture = (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
+        var picture = PictureId.New();
         var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
         var post = new Post(author, picture, (PostText)"test post 1");
         using (var session = _testFixture.OpenSession(_output))
@@ -325,10 +346,10 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post);
         }
 
-        var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", picture);
+        var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger);
+            var sut = new EditPostCommandHandler(session, Log.Logger, _pictureStore);
             editResult = await sut.Handle(command, default);
         }
 
@@ -338,7 +359,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             {
                 var editedPost = session.Load<Post>(post.ID);
                 editedPost.Text.Value.Should().Be("edited text on post 1");
-                editedPost.Picture.Identifier.Should().NotBe(post.Picture.Identifier, "stored pictures are never overwritten");
+                editedPost.Picture.Should().NotBe(post.Picture, "stored pictures are never overwritten");
                 editResult.IsSuccess.Should().BeTrue();
             }
         }
@@ -348,7 +369,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task User_Cannot_Edit_Post_Published_By_Another_User()
     {
         Result editResult;
-        var picture = (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
+        var picture = PictureId.New();
         var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
         var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
         var post = new Post(author, picture, (PostText)"test post 1");
@@ -359,10 +380,10 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post);
         }
 
-        var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", picture);
+        var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger);
+            var sut = new EditPostCommandHandler(session, Log.Logger, _pictureStore);
             editResult = await sut.Handle(command, default);
         }
 
@@ -382,7 +403,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditPostCommandHandler(session, Log.Logger);
+            var sut = new EditPostCommandHandler(session, Log.Logger, _pictureStore);
             var editResult = await sut.Handle(command, default);
 
             editResult.IsFailure.Should().BeTrue();

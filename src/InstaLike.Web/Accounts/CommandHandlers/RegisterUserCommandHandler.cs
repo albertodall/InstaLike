@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -14,11 +14,13 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
+    private readonly IPictureStore _pictureStore;
 
-    public RegisterUserCommandHandler(ISession session, ILogger logger)
+    public RegisterUserCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
     }
 
     public async Task<Result<int>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -44,10 +46,9 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
             eMailValidationResult.Value,
             request.Biography);
 
-        if (request.ProfilePicture != null)
+        if (request.ProfilePicture is { Length: > 0 })
         {
-            var profilePicture = Picture.Create(request.ProfilePicture, Guid.NewGuid()).Value;
-            userToRegister.SetProfilePicture(profilePicture);
+            userToRegister.SetProfilePicture(await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken));
         }
 
         using (var tx = _session.BeginTransaction())

@@ -1,5 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using InstaLike.Core.SharedKernel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Models;
@@ -14,5 +14,5 @@ public class EditPostModel
     [Required(ErrorMessage = "Please, write a text for the picture you're publishing.")]
     public string Text { get; set; } = string.Empty;
 
-    public byte[] Picture { get; set; } = Array.Empty<byte>();
+    public PictureId? Picture { get; set; }
 }

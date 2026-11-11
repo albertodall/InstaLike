@@ -47,7 +47,7 @@ internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery
                 Surname = user.FullName.Surname,
                 Email = user.Email,
                 Bio = user.Biography,
-                ProfilePicture = user.ProfilePicture.RawBytes
+                ProfilePicture = user.ProfilePicture
             };
 
             await tx.CommitAsync(cancellationToken);

@@ -29,8 +29,6 @@ public class User : EntityBase<int>
         _password = password;
         _fullName = fullName;
         Biography = biography;
-
-        ProfilePicture = Picture.DefaultProfilePicture;
         RegistrationDate = DateTimeOffset.Now;
     }
 
@@ -62,7 +60,7 @@ public class User : EntityBase<int>
         set => _email = value;
     }
 
-    public virtual Picture ProfilePicture { get; protected set; }
+    public virtual PictureId? ProfilePicture { get; protected set; }
     public virtual string Biography { get; protected set; }
     public virtual DateTimeOffset RegistrationDate { get; protected set; }
     public virtual IReadOnlyList<Follow> Followers => _followers.ToList();
@@ -73,14 +71,14 @@ public class User : EntityBase<int>
         Password = password;
     }
 
-    public virtual void SetProfilePicture(Picture picture)
+    public virtual void SetProfilePicture(PictureId picture)
     {
         ProfilePicture = picture;
     }
 
-    public virtual void SetDefaultProfilePicture()
+    public virtual void RemoveProfilePicture()
     {
-        ProfilePicture = Picture.DefaultProfilePicture;
+        ProfilePicture = null;
     }
 
     public virtual void ChangeNickname(Nickname nickname)

@@ -55,7 +55,7 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
                     .Select(u => u.FullName.Name).WithAlias(() => profile.Name)
                     .Select(u => u.FullName.Surname).WithAlias(() => profile.Surname)
                     .Select(u => u.Biography).WithAlias(() => profile.Bio)
-                    .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePictureBytes)
+                    .Select(u => u.ProfilePicture).WithAlias(() => profile.ProfilePicture)
                 )
                 .TransformUsing(new EntityToModelResultTransformer<UserProfileModel>());
 
@@ -77,7 +77,7 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
                     .Add(Projections.Property<Post>(p => p.ID)
                         .WithAlias(() => thumbnailModel.PostID))
                     .Add(Projections.Property<Post>(p => p.Picture)
-                        .WithAlias(() => thumbnailModel.ThumbnailPictureBytes))
+                        .WithAlias(() => thumbnailModel.Picture))
                 )
                 .TransformUsing(new EntityToModelResultTransformer<PostThumbnailModel>())
                 .Take(request.NumberOfThumbnails)

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -14,11 +14,13 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
+    private readonly IPictureStore _pictureStore;
 
-    public EditUserDetailsCommandHandler(ISession session, ILogger logger)
+    public EditUserDetailsCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
     }
 
     public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -48,7 +50,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
                 userToUpdate.UpdateBiography(request.Bio);
                 if (request.ProfilePicture is { Length: > 0 })
                 {
-                    userToUpdate.SetProfilePicture(Picture.Create(request.ProfilePicture, Guid.NewGuid()).Value);
+                    userToUpdate.SetProfilePicture(await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken));
                 }
 
                 await tx.CommitAsync(cancellationToken);

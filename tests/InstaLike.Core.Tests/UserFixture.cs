@@ -1,24 +1,20 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
-using InstaLike.Core.Tests.Properties;
 using Xunit;
 
 namespace InstaLike.Core.Tests;
 
 public class UserFixture
 {
-    private readonly string _testPictureBase64 = Convert.ToBase64String(Resources.GrumpyCat);
-
     [Fact]
-    public void New_User_Should_Have_Default_Profile_Picture()
+    public void New_User_Should_Have_No_Profile_Picture()
     {
         var sut = CreateTestUser();
 
-        sut.ProfilePicture.Should().Be(Picture.DefaultProfilePicture);
+        sut.ProfilePicture.Should().BeNull();
     }
 
     [Fact]
@@ -85,7 +81,7 @@ public class UserFixture
     [Fact]
     public void Should_Set_New_Profile_Picture()
     {
-        var newProfilePicture = (Picture)_testPictureBase64;
+        var newProfilePicture = PictureId.New();
         var sut = CreateTestUser();
 
         sut.SetProfilePicture(newProfilePicture);
@@ -94,15 +90,15 @@ public class UserFixture
     }
 
     [Fact]
-    public void Should_Set_Default_Profile_Picture()
+    public void Should_Remove_Profile_Picture()
     {
-        var newProfilePicture = (Picture)_testPictureBase64;
+        var newProfilePicture = PictureId.New();
         var sut = CreateTestUser();
 
         sut.SetProfilePicture(newProfilePicture);
-        sut.SetDefaultProfilePicture();
+        sut.RemoveProfilePicture();
 
-        sut.ProfilePicture.Should().Be(Picture.DefaultProfilePicture);
+        sut.ProfilePicture.Should().BeNull();
     }
 
     [Fact]
@@ -192,7 +188,7 @@ public class UserFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var post = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         using (new AssertionScope())
         {
@@ -211,7 +207,7 @@ public class UserFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var post = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         using (new AssertionScope())
         {
@@ -224,7 +220,7 @@ public class UserFixture
     public void Should_Not_Put_A_Like_On_Own_Post()
     {
         var sut = CreateTestUser();
-        var post = new Post(sut, (Picture)_testPictureBase64, (PostText)"test post");
+        var post = new Post(sut, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeTo(post).IsSuccess.Should().BeFalse();
     }
@@ -239,7 +235,7 @@ public class UserFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var post = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeTo(post);
 
@@ -256,7 +252,7 @@ public class UserFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var post = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeTo(post);
 

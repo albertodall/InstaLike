@@ -1,9 +1,9 @@
-﻿using System;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Models;
 
 public class FollowModel
 {
     public string Nickname { get; set; } = string.Empty;
-    public byte[] ProfilePicture { get; set; } = Array.Empty<byte>();
+    public PictureId? ProfilePicture { get; set; }
 }

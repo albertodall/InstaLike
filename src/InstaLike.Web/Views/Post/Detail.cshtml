@@ -9,8 +9,7 @@
 <div class="post-detail">
     <div class="author">
         @{
-            var profilePictureBase64 = Convert.ToBase64String(Model.AuthorProfilePicture);
-            var profilePicture = $"data:image/jpeg;base64,{profilePictureBase64}";
+            var profilePicture = Url.ProfilePicture(Model.AuthorProfilePicture);
         }
         <img src="@profilePicture" alt="User's profile picture" />
 
@@ -23,8 +22,7 @@
 
     <div>
         @{
-            var postPictureBase64 = Convert.ToBase64String(Model.Picture);
-            var postPicture = $"data:image/jpeg;base64,{postPictureBase64}";
+            var postPicture = Url.PostPicture(Model.Picture);
         }
         <img class="post-picture" src="@postPicture" alt="Post picture" />
     </div>

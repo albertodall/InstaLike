@@ -1,9 +1,9 @@
-﻿using System;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Models;
 
 public class PostThumbnailModel
 {
     public int PostID { get; set; }
-    public byte[] ThumbnailPictureBytes { get; set; } = Array.Empty<byte>();
+    public PictureId? Picture { get; set; }
 }

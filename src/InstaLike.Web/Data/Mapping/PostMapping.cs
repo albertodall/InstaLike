@@ -20,7 +20,7 @@ internal class PostMapping : ClassMap<Post>
             .Not.Nullable();
 
         Map(p => p.Picture)
-            .CustomType<PostPictureType>()
+            .CustomType<PictureIdType>()
             .Column("PostGuid")
             .Not.Nullable();
 

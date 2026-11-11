@@ -9,8 +9,7 @@
 <div>
     <div class="user-profile-info">
         @{
-            var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePictureBytes);
-            var profilePicture = $"data:image/jpeg;base64,{profilePictureBase64}";
+            var profilePicture = Url.ProfilePicture(Model.ProfilePicture);
         }
         <img src="@profilePicture" alt="User's profile picture" />
 
@@ -76,8 +75,7 @@
             <p>Latest @(Model.RecentPosts.Length) post by @(Model.Nickname)</p>
             foreach (var thumbnail in Model.RecentPosts)
             {
-                var postPictureBase64 = Convert.ToBase64String(thumbnail.ThumbnailPictureBytes);
-                var postPicture = $"data:image/jpeg;base64,{postPictureBase64}";
+                var postPicture = Url.PostPicture(thumbnail.Picture);
                 <a asp-action="Detail" asp-controller="Post" asp-route-id="@thumbnail.PostID">
                     <img src="@postPicture" alt="Post picture thumbnail" />
                 </a>

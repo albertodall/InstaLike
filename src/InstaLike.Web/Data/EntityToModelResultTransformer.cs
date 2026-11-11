@@ -37,7 +37,7 @@ internal class EntityToModelResultTransformer<TTarget> : IResultTransformer
         for (var i = 0; i < aliasesList.Count; i++)
         {
             var currentAlias = aliasesList[i];
-            if (tuple[i].GetType() != targetType.GetProperty(currentAlias)?.PropertyType)
+            if (tuple[i] is not null && tuple[i].GetType() != targetType.GetProperty(currentAlias)?.PropertyType)
             {
                 differentTypeProperties.Add(aliases[i]);
                 // Aliases cannot change their position inside the "aliases" array, we don't want to fool NHibernate
