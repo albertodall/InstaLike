@@ -6,6 +6,7 @@ using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using InstaLike.Core.SharedKernel;
+using Serilog;
 
 namespace InstaLike.Web.Media;
 
@@ -15,10 +16,12 @@ namespace InstaLike.Web.Media;
 internal sealed class AzureBlobPictureStore : IPictureStore
 {
     private readonly BlobServiceClient _blobServiceClient;
+    private readonly ILogger _logger;
 
-    public AzureBlobPictureStore(BlobServiceClient blobServiceClient)
+    public AzureBlobPictureStore(BlobServiceClient blobServiceClient, ILogger logger)
     {
         _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
+        _logger = logger?.ForContext<AzureBlobPictureStore>() ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<PictureId> SaveAsync(string container, byte[] content, CancellationToken cancellationToken)
@@ -47,6 +50,23 @@ internal sealed class AzureBlobPictureStore : IPictureStore
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
             return null;
+        }
+    }
+
+    public async Task TryDeleteAsync(string container, PictureId? picture)
+    {
+        if (picture is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await GetBlob(container, picture).DeleteIfExistsAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Could not delete picture {PictureId} from container {Container}; it is left orphaned.", picture.Value, container);
         }
     }
 

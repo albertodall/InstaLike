@@ -337,7 +337,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task User_Can_Edit_His_Own_Posts()
     {
         Result editResult;
-        var picture = PictureId.New();
+        var picture = await _pictureStore.SaveAsync(PictureContainers.Posts, Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), default);
         var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
         var post = new Post(author, picture, (PostText)"test post 1");
         using (var session = _testFixture.OpenSession(_output))
@@ -360,6 +360,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
                 var editedPost = session.Load<Post>(post.ID);
                 editedPost.Text.Value.Should().Be("edited text on post 1");
                 editedPost.Picture.Should().NotBe(post.Picture, "stored pictures are never overwritten");
+                _pictureStore.GetContent(PictureContainers.Posts, picture).Should().BeNull("the replaced picture is deleted after the commit");
                 editResult.IsSuccess.Should().BeTrue();
             }
         }

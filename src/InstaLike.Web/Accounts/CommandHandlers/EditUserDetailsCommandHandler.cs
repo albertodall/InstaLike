@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
@@ -39,6 +40,9 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
             return Result.Failure(validationResult.Error);
         }
 
+        PictureId? uploadedPicture = null;
+        PictureId? replacedPicture = null;
+
         using (var tx = _session.BeginTransaction())
         {
             try
@@ -50,10 +54,13 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
                 userToUpdate.UpdateBiography(request.Bio);
                 if (request.ProfilePicture is { Length: > 0 })
                 {
-                    userToUpdate.SetProfilePicture(await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken));
+                    replacedPicture = userToUpdate.ProfilePicture;
+                    uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken);
+                    userToUpdate.SetProfilePicture(uploadedPicture);
                 }
 
                 await tx.CommitAsync(cancellationToken);
+                await _pictureStore.TryDeleteAsync(PictureContainers.Profiles, replacedPicture);
 
                 _logger.Information("Successfully updated user profile for user [{Nickname}({UserID})]",
                     request.Nickname,
@@ -64,6 +71,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
             catch (ADOException ex)
             {
                 await tx.RollbackAsync(cancellationToken);
+                await _pictureStore.TryDeleteAsync(PictureContainers.Profiles, uploadedPicture);
 
                 _logger.Error("Error updating user profile for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                     request.Nickname,

@@ -67,6 +67,7 @@ internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand,
             catch (ADOException ex)
             {
                 await tx.RollbackAsync(cancellationToken);
+                await _pictureStore.TryDeleteAsync(PictureContainers.Profiles, userToRegister.ProfilePicture);
 
                 _logger.Error("Error during registration of user {Nickname}. Error message: {ErrorMessage}",
                     request.Nickname,

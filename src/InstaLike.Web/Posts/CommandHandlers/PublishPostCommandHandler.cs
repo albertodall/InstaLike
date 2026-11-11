@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
@@ -34,10 +35,11 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
         using (var tx = _session.BeginTransaction())
         {
             User? author = null;
+            PictureId? postPicture = null;
             try
             {
                 author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-                var postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
+                postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
 
                 var post = new Post(author, postPicture, (PostText)request.Text);
 
@@ -53,6 +55,7 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
             catch (ADOException ex)
             {
                 await tx.RollbackAsync(cancellationToken);
+                await _pictureStore.TryDeleteAsync(PictureContainers.Posts, postPicture);
 
                 _logger.Error("Failed to publish a post for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                     author?.Nickname,

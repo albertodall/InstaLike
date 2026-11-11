@@ -54,11 +54,14 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             }
 
             postToEdit.UpdateText(PostText.Create(request.Text).Value);
-            postToEdit.UpdatePicture(await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken));
+            var replacedPicture = postToEdit.Picture;
+            var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
+            postToEdit.UpdatePicture(uploadedPicture);
             try
             {
                 await _session.SaveAsync(postToEdit, cancellationToken);
                 await tx.CommitAsync(cancellationToken);
+                await _pictureStore.TryDeleteAsync(PictureContainers.Posts, replacedPicture);
 
                 _logger.Information("User [{Nickname}({UserID})] edited post {PostID}.",
                     editor.Nickname,
@@ -70,6 +73,7 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             catch (ADOException ex)
             {
                 await tx.RollbackAsync(cancellationToken);
+                await _pictureStore.TryDeleteAsync(PictureContainers.Posts, uploadedPicture);
 
                 _logger.Error("Failed to edit post {PostID} for user [{Nickname}({UserID})]. Error message: {ErrorMessage}",
                     request.PostID,
