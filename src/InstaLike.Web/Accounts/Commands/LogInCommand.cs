@@ -1,7 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Core.Accounts;
+using InstaLike.Web.Data;
 
-namespace InstaLike.Core.Accounts;
+namespace InstaLike.Web.Accounts.Commands;
 
 public sealed class LogInCommand : ICommand<Result<User>>
 {

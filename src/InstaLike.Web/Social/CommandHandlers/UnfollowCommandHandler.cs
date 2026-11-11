@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Social;
+using InstaLike.Web.Social.Commands;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;

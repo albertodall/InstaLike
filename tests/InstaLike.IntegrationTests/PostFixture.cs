@@ -10,6 +10,7 @@ using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Media;
 using InstaLike.Web.Models;
+using InstaLike.Web.Posts.Commands;
 using InstaLike.Web.Posts.Queries;
 using Serilog;
 using Xunit;

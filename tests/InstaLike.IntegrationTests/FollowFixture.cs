@@ -5,6 +5,7 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Social;
 using InstaLike.Web.Models;
+using InstaLike.Web.Social.Commands;
 using InstaLike.Web.Social.Queries;
 using NHibernate;
 using Serilog;

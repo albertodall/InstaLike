@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 
-namespace InstaLike.Core.Accounts;
+namespace InstaLike.Web.Accounts.Commands;
 
 public sealed class EditUserDetailsCommand : ICommand<Result>
 {

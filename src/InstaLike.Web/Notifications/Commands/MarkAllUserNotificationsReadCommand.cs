@@ -1,6 +1,6 @@
-﻿using InstaLike.Core.SharedKernel;
+﻿using InstaLike.Web.Data;
 
-namespace InstaLike.Core.Notifications;
+namespace InstaLike.Web.Notifications.Commands;
 
 public sealed class MarkAllUserNotificationsReadCommand : ICommand<int>
 {
@@ -10,5 +10,4 @@ public sealed class MarkAllUserNotificationsReadCommand : ICommand<int>
     {
         UserID = userID;
     }
-
 }

@@ -5,6 +5,7 @@ using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
+using InstaLike.Web.Posts.Commands;
 using MediatR;
 using NHibernate;
 using Serilog;

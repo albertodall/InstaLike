@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 
-namespace InstaLike.Core.Posts;
+namespace InstaLike.Web.Posts.Commands;
 
 public sealed class PublishCommentCommand : ICommand<Result<int>>
 {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace InstaLike.Core.SharedKernel;
+namespace InstaLike.Web.Data;
 
 /// <summary>
 /// Runs in its own transaction, committed together with the domain events it raises.
