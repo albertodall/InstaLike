@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Social;
 using InstaLike.Web.Accounts.Queries;
-using InstaLike.Web.Accounts.Services;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Models;
 using InstaLike.Web.Social.Queries;
@@ -23,12 +22,10 @@ public class AccountController : Controller
 {
     private const int MaxThumbnailsInUserProfile = 20;
 
-    private readonly IUserAuthenticationService _authenticationService;
     private readonly IMediator _dispatcher;
 
-    public AccountController(IUserAuthenticationService authenticationService, IMediator dispatcher)
+    public AccountController(IMediator dispatcher)
     {
-        _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
     }
 
@@ -49,7 +46,7 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var authenticationResult = await _authenticationService.AuthenticateUser(model.Username, model.Password);
+            var authenticationResult = await _dispatcher.Send(new LogInCommand(model.Username, model.Password));
             if (authenticationResult.IsFailure)
             {
                 ModelState.AddModelError("", authenticationResult.Error);
@@ -68,8 +65,6 @@ public class AccountController : Controller
                         IsPersistent = model.RememberMe
                     });
 
-                await _dispatcher.Publish(new UserLoggedInEvent(authenticationResult.Value.ID, authenticationResult.Value.Nickname));
-
                 return Url.IsLocalUrl(model.ReturnUrl)
                     ? LocalRedirect(model.ReturnUrl)
                     : RedirectToAction("Index", "Home");
@@ -82,12 +77,7 @@ public class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-        var userIDClaim = User.GetIdentifier();
-        if (User.Identity != null && User.Identity.Name != null)
-        {
-            await _dispatcher.Publish(new UserLoggedOutEvent(userIDClaim, User.Identity.Name));
-        }
+        await _dispatcher.Send(new LogOutCommand(User.GetIdentifier()));
 
         return RedirectToAction("Index", "Home");
     }

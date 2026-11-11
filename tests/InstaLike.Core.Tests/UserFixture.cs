@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 using Xunit;
@@ -97,6 +98,45 @@ public class UserFixture
         sut.RemoveProfilePicture();
 
         sut.ProfilePicture.Should().BeNull();
+    }
+
+    [Fact]
+    public void Logging_In_With_The_Right_Password_Should_Raise_An_Event()
+    {
+        var sut = CreateUserWithPassword("password");
+
+        using (new AssertionScope())
+        {
+            sut.LogIn("password").IsSuccess.Should().BeTrue();
+            sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new UserLoggedInEvent(sut.ID));
+        }
+    }
+
+    [Fact]
+    public void Logging_In_With_A_Wrong_Password_Should_Fail_Without_Events()
+    {
+        var sut = CreateUserWithPassword("password");
+
+        using (new AssertionScope())
+        {
+            sut.LogIn("wrong").IsSuccess.Should().BeFalse();
+            sut.DomainEvents.Should().BeEmpty();
+        }
+    }
+
+    [Fact]
+    public void Logging_Out_Should_Raise_An_Event()
+    {
+        var sut = CreateUserWithPassword("password");
+
+        sut.LogOut();
+
+        sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new UserLoggedOutEvent(sut.ID));
+    }
+
+    private static User CreateUserWithPassword(string password)
+    {
+        return new User((Nickname)"user1", (FullName)"Test User", Password.Create(password).Value, (Email)"user1@acme.com", "My Bio");
     }
 
     private static User CreateTestUser()

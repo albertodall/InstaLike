@@ -1,8 +1,12 @@
 ﻿using System;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts;
 
+/// <summary>
+/// Represents a user account with profile information and authentication capabilities.
+/// </summary>
 public class User : AggregateRoot<int>
 {
 #pragma warning disable CS8618
@@ -51,6 +55,22 @@ public class User : AggregateRoot<int>
     public virtual PictureId? ProfilePicture { get; protected set; }
     public virtual string Biography { get; protected set; }
     public virtual DateTimeOffset RegistrationDate { get; protected set; }
+
+    public virtual Result LogIn(string password)
+    {
+        if (!Password.HashMatches(password))
+        {
+            return Result.Failure("Username or password are not valid.");
+        }
+
+        RaiseDomainEvent(new UserLoggedInEvent(ID));
+        return Result.Success();
+    }
+
+    public virtual void LogOut()
+    {
+        RaiseDomainEvent(new UserLoggedOutEvent(ID));
+    }
 
     public virtual void ChangePassword(Password password)
     {
