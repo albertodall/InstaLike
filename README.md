@@ -88,6 +88,15 @@ To apply new database scripts without containers:
 dotnet run --project src/InstaLike.Database.Migrator -- "Data Source=localhost,1433; Initial Catalog=InstaLike; User ID=sa; Password=Pa55w0rd; TrustServerCertificate=True"
 ```
 
+## Sample data
+`sampledata` holds the data used during the first development of *InstaLike*: a few Gotham City citizens with their posts, comments, likes and notifications.
+With the containers running, upload the pictures to Azurite first (the script needs the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)), then insert the data:
+```shell
+pwsh sampledata/upload-sample-pictures.ps1
+sqlcmd -S localhost,1433 -U sa -P Pa55w0rd -d InstaLike -i sampledata/insert-sample-data.sql
+```
+The script skips the rows that already exist, so it can run again.
+
 ## Tests
 ```shell
 dotnet test
