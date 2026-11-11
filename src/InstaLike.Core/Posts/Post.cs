@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
@@ -9,13 +7,8 @@ namespace InstaLike.Core.Posts;
 
 public class Post : EntityBase<int>
 {
-    private readonly IList<Comment> _comments;
-
 #pragma warning disable CS8618
-    protected Post()
-    {
-        _comments = new List<Comment>();
-    }
+    protected Post() { }
 #pragma warning restore CS8618
 
     public Post(User author, PictureId picture, PostText text)
@@ -37,8 +30,6 @@ public class Post : EntityBase<int>
 
     public virtual DateTimeOffset PostDate { get; protected set; }
 
-    public virtual IReadOnlyList<Comment> Comments => _comments.ToList();
-
     public virtual void UpdatePicture(PictureId picture)
     {
         Picture = picture;
@@ -57,9 +48,9 @@ public class Post : EntityBase<int>
             : Result.Success(new Like(ID, userID));
     }
 
-    public virtual void AddComment(Comment comment)
+    public virtual Comment CommentBy(int authorID, CommentText text)
     {
-        _comments.Add(comment);
+        return new Comment(ID, authorID, text);
     }
 
     public virtual bool CanBeEditedBy(User user)

@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using MediatR;
 using NHibernate;
@@ -23,33 +22,38 @@ internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishComm
 
     public async Task<Result<int>> Handle(PublishCommentCommand request, CancellationToken cancellationToken)
     {
+        var text = CommentText.Create(request.Text);
+        if (text.IsFailure)
+        {
+            return Result.Failure<int>(text.Error);
+        }
+
         using (var tx = _session.BeginTransaction())
         {
-            User? author = null;
+            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+            if (post is null)
+            {
+                return Result.Failure<int>($"Post {request.PostID} does not exist.");
+            }
+
+            var comment = post.CommentBy(request.UserID, text.Value);
             try
             {
-                author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-                var post = await _session.LoadAsync<Post>(request.PostID, cancellationToken);
-
-                var comment = new Comment(post, author, (CommentText)request.Text);
-                post.AddComment(comment);
-
+                await _session.SaveAsync(comment, cancellationToken);
                 await tx.CommitAsync(cancellationToken);
 
-                _logger.Information("User [{NickName}({UserID})] wrote a new comment to post {PostID}",
+                _logger.Information("User {UserID} wrote a new comment to post {PostID}",
                     request.UserID,
-                    author.Nickname,
                     request.PostID);
 
                 return Result.Success(comment.ID);
             }
-            catch (Exception ex)
+            catch (ADOException ex)
             {
                 await tx.RollbackAsync(cancellationToken);
 
-                _logger.Error("Failed to save comment to post {PostID} written by user [{NickName}({UserID})]. Error message: {ErrorMessage}",
+                _logger.Error("Failed to save comment to post {PostID} written by user {UserID}. Error message: {ErrorMessage}",
                     request.PostID,
-                    author?.Nickname,
                     request.UserID,
                     ex.Message);
 

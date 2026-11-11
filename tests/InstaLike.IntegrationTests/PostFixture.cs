@@ -106,7 +106,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             using (var session = _testFixture.OpenSession(_output))
             {
                 (await session.GetAsync<Comment>(commentPostResult.Value)).Should().NotBeNull();
-                (await session.GetAsync<Post>(post.ID)).Comments.Count().Should().Be(1);
+                (await session.QueryOver<Comment>().Where(c => c.PostID == post.ID).RowCountAsync()).Should().Be(1);
             }
         }
     }
@@ -251,12 +251,11 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         CommentModel[] comments;
         var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
         var post = new Post(author, PictureId.New(), (PostText)"test post");
-        var comment = new Comment(post, author, CommentText.Create("First comment").Value);
         using (var session = _testFixture.OpenSession(_output))
         {
-            post.AddComment(comment);
             await session.SaveAsync(author);
             await session.SaveAsync(post);
+            await session.SaveAsync(post.CommentBy(author.ID, CommentText.Create("First comment").Value));
         }
 
         var query = new PostCommentsQuery(post.ID);
@@ -276,13 +275,12 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
         var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
         var post = new Post(author, PictureId.New(), (PostText)"test post");
-        var comment = new Comment(post, reader, CommentText.Create("My comment").Value);
         using (var session = _testFixture.OpenSession(_output))
         {
-            post.AddComment(comment);
             await session.SaveAsync(reader);
             await session.SaveAsync(author);
             await session.SaveAsync(post);
+            await session.SaveAsync(post.CommentBy(reader.ID, CommentText.Create("My comment").Value));
             await session.SaveAsync(post.LikeBy(reader.ID).Value);
         }
 
@@ -321,6 +319,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post2);
             await session.SaveAsync(post3);
             await session.SaveAsync(Follow.Create(reader.ID, author1.ID).Value);
+            await session.SaveAsync(post1.CommentBy(reader.ID, (CommentText)"nice picture"));
             await session.FlushAsync();
         }
 
@@ -331,7 +330,15 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             timeline = await sut.Handle(query, default);
         }
 
-        timeline.Length.Should().Be(2);
+        using (new AssertionScope())
+        {
+            timeline.Length.Should().Be(2);
+            var commentedPost = timeline.Single(p => p.PostID == post1.ID);
+            commentedPost.Comments.Should().ContainSingle();
+            commentedPost.Comments[0].AuthorNickName.Should().Be(reader.Nickname);
+            commentedPost.Comments[0].Text.Should().Be("nice picture");
+            timeline.Single(p => p.PostID == post2.ID).Comments.Should().BeEmpty();
+        }
     }
 
     [Fact]

@@ -10,21 +10,19 @@ namespace InstaLike.Core.Tests;
 public class PostFixture
 {
     [Fact]
-    public void Should_Add_Comment_To_Post()
+    public void Should_Comment_A_Post()
     {
-        var postAuthor = CreateTestPostAuthor();
-        var commentAuthor = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-        var comment = new Comment(sut, commentAuthor, (CommentText)"test comment");
+        const int commentAuthorID = 42;
+        var sut = new Post(CreateTestPostAuthor(), PictureId.New(), (PostText)"test post");
 
-        sut.AddComment(comment);
+        var comment = sut.CommentBy(commentAuthorID, (CommentText)"test comment");
 
-        sut.Comments.Count.Should().Be(1);
+        using (new AssertionScope())
+        {
+            comment.PostID.Should().Be(sut.ID);
+            comment.AuthorID.Should().Be(commentAuthorID);
+            comment.Text.Should().Be((CommentText)"test comment");
+        }
     }
 
     [Fact]
