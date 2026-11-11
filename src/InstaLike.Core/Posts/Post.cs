@@ -39,7 +39,9 @@ public class Post : AggregateRoot<int>
         _text = text.Value;
     }
 
-    /// <remarks>Duplicate likes are rejected by the caller: they depend on the other likes, not on the post.</remarks>
+    /// <remarks>
+    /// Duplicate likes are rejected by the caller: they depend on the other likes, not on the post.
+    /// </remarks>
     public virtual Result<Like> LikeBy(int userID)
     {
         return AuthorID == userID
