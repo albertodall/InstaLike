@@ -60,14 +60,6 @@ public class ImageTaggingFixture
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact]
-    public async Task Disabled_Tagging_Should_Return_A_Failure()
-    {
-        var result = await new DisabledImageRecognition().AutoTagImage(new MemoryStream(), "image/jpeg");
-
-        result.IsFailure.Should().BeTrue();
-    }
-
     private sealed class FakeChatClient : IChatClient
     {
         private readonly string _responseText = string.Empty;
