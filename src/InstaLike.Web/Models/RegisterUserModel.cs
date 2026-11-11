@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace InstaLike.Web.Models;
 
@@ -37,6 +36,4 @@ public class RegisterUserModel
     [Display(Name = "Bio")]
     [DisplayFormat(ConvertEmptyStringToNull = false)]
     public string Biography { get; set; } = string.Empty;
-
-    public byte[] ProfilePicture { get; set; } = Array.Empty<byte>();
 }

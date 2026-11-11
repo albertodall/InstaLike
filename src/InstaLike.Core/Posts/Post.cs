@@ -20,7 +20,7 @@ public class Post : EntityBase<int>
     }
 #pragma warning restore CS8618
 
-    public Post(User author, Picture picture, PostText text)
+    public Post(User author, PictureId picture, PostText text)
         : this()
     {
         Author = author;
@@ -32,7 +32,7 @@ public class Post : EntityBase<int>
 
     public virtual User Author { get; protected set; }
 
-    public virtual Picture Picture { get; protected set; }
+    public virtual PictureId Picture { get; protected set; }
 
     private string _text;
     public virtual PostText Text => (PostText)_text;
@@ -43,7 +43,7 @@ public class Post : EntityBase<int>
 
     public virtual IReadOnlyList<Like> Likes => _likes.ToList();
 
-    public virtual void UpdatePicture(Picture picture)
+    public virtual void UpdatePicture(PictureId picture)
     {
         Picture = picture;
     }

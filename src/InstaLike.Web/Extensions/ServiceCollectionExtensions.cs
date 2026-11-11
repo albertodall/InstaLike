@@ -36,15 +36,7 @@ internal static class ServiceCollectionExtensions
     {
         var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
             ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
-        var storageSettings = AzureBlobStorageSettings.FromConfiguration(configuration);
-
-        var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString)
-            .ExposeConfiguration(cfg =>
-            {
-                cfg.SetProperty(ExternalStorageParameters.ConnectionProviderProperty, typeof(AzureBlobStorageConnectionProvider).AssemblyQualifiedName);
-                cfg.SetProperty(ExternalStorageParameters.ConnectionStringProperty, storageSettings.ConnectionString ?? string.Empty);
-                cfg.SetProperty(ExternalStorageParameters.ServiceUriProperty, storageSettings.ServiceUri ?? string.Empty);
-            });
+        var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
 
         services.AddSingleton(nhConfig.BuildSessionFactory());
         services.AddScoped(sp =>
@@ -52,6 +44,15 @@ internal static class ServiceCollectionExtensions
             var sessionFactory = sp.GetRequiredService<ISessionFactory>();
             return sessionFactory.OpenSession();
         });
+
+        return services;
+    }
+
+    public static IServiceCollection ConfigurePictureStorage(this IServiceCollection services, IConfiguration configuration)
+    {
+        var storageSettings = AzureBlobStorageSettings.FromConfiguration(configuration);
+        services.AddSingleton(storageSettings.CreateClient());
+        services.AddSingleton<IPictureStore, AzureBlobPictureStore>();
 
         return services;
     }
@@ -152,7 +153,6 @@ internal static class ServiceCollectionExtensions
             .Database(
                 MsSqlConfiguration.MsSql2012
                     .Driver<MicrosoftDataSqlClientDriver>()
-                    .Provider<HybridStorageDriverConnectionProvider>()
                     .ConnectionString(connectionString)
                     .DefaultSchema("dbo")
                     .AdoNetBatchSize(20)
@@ -166,7 +166,6 @@ internal static class ServiceCollectionExtensions
                         LazyLoad.Always(),
                         DynamicUpdate.AlwaysTrue())
                     .Conventions.Add<AssociationsMappingConvention>()
-                    .Conventions.Add<NotNullGuidTypeConvention>()
                     .AddFromAssembly(Assembly.GetExecutingAssembly()));
     }
 }

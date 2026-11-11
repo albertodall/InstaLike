@@ -8,8 +8,7 @@
 
 <div>
     @{
-        var pictureBase64 = Convert.ToBase64String(Model.Picture);
-        var picture = $"data:image/jpeg;base64,{pictureBase64}";
+        var picture = Url.PostPicture(Model.Picture);
     }
     <h2>Edit your post</h2>
     <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Post" asp-antiforgery="true">
@@ -19,10 +18,10 @@
             <input type="hidden" asp-for="PostID" value="@Model.PostID" />
             <div class="picture-placeholder">
                 <div class="posted-picture">
-                    <label asp-for="Picture">
+                    <label for="pictureFile">
                         <img src="@picture" alt="Image to be published" />
                     </label>
-                    <input type="file" asp-for="Picture" name="pictureFile" required />
+                    <input id="pictureFile" type="file" name="pictureFile" required />
                 </div>
             </div>
 

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using InstaLike.Web.Models;
@@ -28,12 +27,7 @@ public class PostController : Controller
 
     public IActionResult Publish()
     {
-        var model = new PublishPostModel()
-        {
-            Picture = Picture.EmptyPicture
-        };
-
-        return View(model);
+        return View(new PublishPostModel());
     }
 
     [HttpPost]

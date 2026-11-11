@@ -27,10 +27,9 @@ internal class UserMapping : ClassMap<User>
         Map(p => p.RegistrationDate)
             .Not.Nullable();
         Map(p => p.ProfilePicture)
-            .CustomType<ProfilePictureType>()
+            .CustomType<PictureIdType>()
             .Column("ProfilePictureGuid")
-            .Not.Nullable()
-            .LazyLoad();
+            .Nullable();
 
         Component(p => p.FullName, m =>
         {

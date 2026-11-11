@@ -27,8 +27,7 @@ resource "azurerm_storage_account" "instalike_storage_account" {
   min_tls_version           = "TLS1_2"
   shared_access_key_enabled = false
 
-  # The picture containers allow anonymous read access to blobs (container_access_type = "blob").
-  allow_nested_items_to_be_public = true
+  allow_nested_items_to_be_public = false
 
   tags = local.common_tags
 
@@ -40,7 +39,7 @@ resource "azurerm_storage_account" "instalike_storage_account" {
 resource "azurerm_storage_container" "instalike_posts_container" {
   name                  = "posts"
   storage_account_id    = azurerm_storage_account.instalike_storage_account.id
-  container_access_type = "blob"
+  container_access_type = "private"
 
   depends_on = [
     azurerm_storage_account.instalike_storage_account
@@ -50,7 +49,7 @@ resource "azurerm_storage_container" "instalike_posts_container" {
 resource "azurerm_storage_container" "instalike_profiles_container" {
   name                  = "profiles"
   storage_account_id    = azurerm_storage_account.instalike_storage_account.id
-  container_access_type = "blob"
+  container_access_type = "private"
 
   depends_on = [
     azurerm_storage_account.instalike_storage_account

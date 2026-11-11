@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
-using InstaLike.Web.Infrastructure;
+using Azure.Storage.Blobs;
 using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace InstaLike.Web.Extensions;
 
@@ -9,8 +10,8 @@ internal static class WebApplicationExtensions
 {
     public static async Task EnsurePictureContainersExistAsync(this WebApplication app)
     {
-        var blobServiceClient = AzureBlobStorageSettings.FromConfiguration(app.Configuration).CreateClient();
+        var blobServiceClient = app.Services.GetRequiredService<BlobServiceClient>();
 
-        await AzureBlobStorageProvider.EnsureContainersExistAsync(blobServiceClient, app.Lifetime.ApplicationStopping);
+        await AzureBlobPictureStore.EnsureContainersExistAsync(blobServiceClient, app.Lifetime.ApplicationStopping);
     }
 }

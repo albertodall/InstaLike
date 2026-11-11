@@ -5,15 +5,12 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
-using InstaLike.Core.Tests.Properties;
 using Xunit;
 
 namespace InstaLike.Core.Tests;
 
 public class PostFixture
 {
-    private readonly string _testPictureBase64 = Convert.ToBase64String(Resources.GrumpyCat);
-
     [Fact]
     public void Should_Add_Comment_To_Post()
     {
@@ -24,7 +21,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
         var comment = new Comment(sut, commentAuthor, (CommentText)"test comment");
 
         sut.AddComment(comment);
@@ -42,7 +39,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeBy(postReader);
 
@@ -57,7 +54,7 @@ public class PostFixture
     public void Post_Author_Should_Not_Put_Like_To_His_Posts()
     {
         var postAuthor = CreateTestPostAuthor();
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeBy(postAuthor).IsSuccess
             .Should()
@@ -74,7 +71,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         using (new AssertionScope())
         {
@@ -97,7 +94,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeBy(postReader);
 
@@ -119,7 +116,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.RemoveLikeBy(postReader).IsSuccess
             .Should()
@@ -136,7 +133,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.PutLikeBy(postReader);
 
@@ -153,7 +150,7 @@ public class PostFixture
             (Password)"password",
             (Email)"user2@acme.com",
             "My Bio");
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.LikesTo(postReader).Should().BeFalse();
     }
@@ -162,7 +159,7 @@ public class PostFixture
     public void Author_Can_Edit_His_Own_Post()
     {
         var postAuthor = CreateTestPostAuthor();
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         sut.CanBeEditedBy(postAuthor).Should().BeTrue();
     }
@@ -171,7 +168,7 @@ public class PostFixture
     public void User_Cannot_Edit_Post_Authored_By_Other_Users()
     {
         var postAuthor = CreateTestPostAuthor();
-        var sut = new Post(postAuthor, (Picture)_testPictureBase64, (PostText)"test post");
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
         var otherUser = new User(
             (Nickname)"user2",

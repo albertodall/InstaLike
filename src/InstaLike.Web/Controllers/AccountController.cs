@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Accounts.Queries;
 using InstaLike.Web.Accounts.Services;
@@ -142,26 +141,15 @@ public class AccountController : Controller
     [AllowAnonymous]
     public IActionResult Register()
     {
-        var model = new RegisterUserModel()
-        {
-            ProfilePicture = Picture.DefaultProfilePicture
-        };
-
-        return View(model);
+        return View(new RegisterUserModel());
     }
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterUserModel newUser, IFormFile profilePictureFile)
+    public async Task<IActionResult> Register(RegisterUserModel newUser, IFormFile? profilePictureFile)
     {
         if (ModelState.IsValid)
         {
-            var profilePicture = Picture.DefaultProfilePicture.RawBytes;
-            if (profilePictureFile != null)
-            {
-                profilePicture = await profilePictureFile.ToByteArrayAsync();
-            }
-
             var command = new RegisterUserCommand(
                 newUser.Nickname,
                 newUser.Name,
@@ -169,7 +157,7 @@ public class AccountController : Controller
                 newUser.Password,
                 newUser.Email,
                 newUser.Biography,
-                profilePicture);
+                profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
 
             var processCommandResult = await _dispatcher.Send(command);
             if (processCommandResult.IsSuccess)

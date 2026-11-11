@@ -45,7 +45,7 @@ internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, Edit
             {
                 PostID = post.ID,
                 AuthorID = post.Author.ID,
-                Picture = post.Picture.RawBytes,
+                Picture = post.Picture,
                 Text = post.Text
             };
         }

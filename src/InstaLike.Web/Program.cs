@@ -30,6 +30,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly));
 
 builder.Services.ConfigureDataAccess(builder.Configuration);
+builder.Services.ConfigurePictureStorage(builder.Configuration);
 builder.Services.ConfigureImageTagging(builder.Configuration);
 
 builder.Services.ConfigureAuthentication();

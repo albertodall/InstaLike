@@ -9,8 +9,7 @@
         {
             <div>
                 @{
-                    var profilePictureBase64 = Convert.ToBase64String(user.ProfilePicture);
-                    var profilePicture = String.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+                    var profilePicture = Url.ProfilePicture(user.ProfilePicture);
                 }
                 <img src="@profilePicture" alt="User's profile picture" />
                 <a asp-action="Profile" asp-controller="Account" asp-route-id="@user.Nickname">@user.Nickname</a>

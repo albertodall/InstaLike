@@ -7,8 +7,7 @@
 <h1>Register</h1>
 
 @{
-    var profilePictureBase64 = Convert.ToBase64String(Model.ProfilePicture);
-    var profilePicture = string.Format("data:image/jpeg;base64,{0}", profilePictureBase64);
+    var profilePicture = Url.ProfilePicture(null);
 }
 <form method="post" enctype="multipart/form-data" asp-action="Register" asp-controller="Account" asp-antiforgery="true">
     <div class="form_reg">
@@ -63,10 +62,10 @@
             </div>
         </div>
         <div class="user-details-profile-picture">
-            <label asp-for="ProfilePicture">
+            <label for="profilePictureFile">
                 <img src="@profilePicture" alt="Your profile picture" />
             </label>
-            <input asp-for="ProfilePicture" type="file" name="profilePictureFile" />
+            <input id="profilePictureFile" type="file" name="profilePictureFile" />
         </div>
         <div>
             <input type="submit" value="Register" />

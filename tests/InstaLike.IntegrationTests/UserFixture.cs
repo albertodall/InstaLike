@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
@@ -32,7 +31,7 @@ public class UserFixture : IClassFixture<DatabaseFixture>
         var author = new User((Nickname)"authoruser", (FullName)"author user", Password.Create("password").Value, (Email)"authoruser@acme.com", "my bio");
         var followed = new User((Nickname)"followeduser", (FullName)"followed user", Password.Create("password").Value, (Email)"followed@acme.com", "my bio");
         var follower = new User((Nickname)"followeruser", (FullName)"follower user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-        var post = new Post(author, (Picture)Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), (PostText)"test post");
+        var post = new Post(author, PictureId.New(), (PostText)"test post");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followed);
