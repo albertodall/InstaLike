@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using Xunit;
 
@@ -52,6 +53,18 @@ public class EmailFixture
 
         sut1.Should().Be(sut2);
         sut1.GetHashCode().Equals(sut2.GetHashCode()).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Emails_Differing_Only_In_Case_Should_Be_Equal()
+    {
+        var sut = Email.Create(" User1@Acme.COM ").Value;
+
+        using (new AssertionScope())
+        {
+            sut.Value.Should().Be("user1@acme.com");
+            sut.Should().Be(Email.Create("user1@acme.com").Value);
+        }
     }
 
     [Fact]
