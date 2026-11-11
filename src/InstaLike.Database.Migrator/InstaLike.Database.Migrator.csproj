@@ -1,20 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="dbup-sqlserver" Version="7.2.0" />
+    <PackageReference Include="dbup-sqlserver" />
     <!-- Pinned transitive dependency: the version requested by Microsoft.Data.SqlClient has known vulnerabilities. -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="mssql\*.sql" />
     <EmbeddedResource Include="mssql\grants\*.sql" />
   </ItemGroup>
-
 </Project>

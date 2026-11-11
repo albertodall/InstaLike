@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
-    <PackageReference Include="CSharpFunctionalExtensions" Version="3.7.0" />
-    <PackageReference Include="MediatR" Version="12.5.0" />
-    <PackageReference Include="NHibernate" Version="5.7.1" />
+    <PackageReference Include="CSharpFunctionalExtensions" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="NHibernate" />
   </ItemGroup>
-
 </Project>
