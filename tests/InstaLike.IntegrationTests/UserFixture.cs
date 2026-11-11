@@ -9,7 +9,6 @@ using InstaLike.Web.Accounts.Queries;
 using InstaLike.Web.Models;
 using Serilog;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests;
 
@@ -35,21 +34,21 @@ public class UserFixture : IClassFixture<DatabaseFixture>
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followed);
-            await session.SaveAsync(follower);
-            await session.SaveAsync(author);
+            await session.SaveAsync(followed, TestContext.Current.CancellationToken);
+            await session.SaveAsync(follower, TestContext.Current.CancellationToken);
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = new Post(author.ID, PictureId.New(), (PostText)"test post");
-            await session.SaveAsync(post);
-            await session.SaveAsync(Follow.Create(author.ID, followed.ID).Value);
-            await session.SaveAsync(Follow.Create(follower.ID, author.ID).Value);
-            await session.FlushAsync();
+            await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(author.ID, followed.ID).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(follower.ID, author.ID).Value, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new UserProfileQuery(follower.ID, author.Nickname, 3);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new UserProfileQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, default);
+            result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
@@ -70,14 +69,14 @@ public class UserFixture : IClassFixture<DatabaseFixture>
         var user = new User((Nickname)"testuser", (FullName)"test user", Password.Create("password").Value, (Email)"testuser@acme.com", "my bio");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(user);
+            await session.SaveAsync(user, TestContext.Current.CancellationToken);
         }
 
         var query = new UserDetailsQuery(user.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new UserDetailsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, default);
+            result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())

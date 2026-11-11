@@ -9,7 +9,6 @@ using InstaLike.Core.SharedKernel;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests;
 
@@ -34,13 +33,13 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(testUser);
+            await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = DatabaseFixture.CreateMediator(session);
-            authenticationResult = await sut.Send(new LogInCommand(testUserName, testPassword));
+            authenticationResult = await sut.Send(new LogInCommand(testUserName, testPassword), TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
@@ -61,13 +60,13 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(testUser);
+            await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = DatabaseFixture.CreateMediator(session);
-            authenticationResult = await sut.Send(new LogInCommand(testUserName, "xxx42"));
+            authenticationResult = await sut.Send(new LogInCommand(testUserName, "xxx42"), TestContext.Current.CancellationToken);
         }
 
         authenticationResult.IsSuccess.Should().BeFalse();
@@ -81,7 +80,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = DatabaseFixture.CreateMediator(session);
-            authenticationResult = await sut.Send(new LogInCommand("not_existing_user", "xxx42"));
+            authenticationResult = await sut.Send(new LogInCommand("not_existing_user", "xxx42"), TestContext.Current.CancellationToken);
         }
 
         authenticationResult.IsSuccess.Should().BeFalse();
@@ -93,7 +92,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         var testUser = new User((Nickname)"testuser4", (FullName)"test4 user4", Password.Create("password4").Value, (Email)"testuser4@acme.com", "bio4");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(testUser);
+            await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
         }
 
         var raised = new List<IDomainEvent>();
@@ -105,9 +104,9 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
                 services.AddSingleton<INotificationHandler<UserLoggedOutEvent>>(new RecordingHandler<UserLoggedOutEvent>(raised));
             });
 
-            (await sut.Send(new LogInCommand("testuser4", "wrong"))).IsSuccess.Should().BeFalse();
-            (await sut.Send(new LogInCommand("testuser4", "password4"))).IsSuccess.Should().BeTrue();
-            (await sut.Send(new LogOutCommand(testUser.ID))).IsSuccess.Should().BeTrue();
+            (await sut.Send(new LogInCommand("testuser4", "wrong"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
+            (await sut.Send(new LogInCommand("testuser4", "password4"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await sut.Send(new LogOutCommand(testUser.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         raised.Should().Equal(new UserLoggedInEvent(testUser.ID), new UserLoggedOutEvent(testUser.ID));

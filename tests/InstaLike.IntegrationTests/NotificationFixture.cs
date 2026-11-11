@@ -7,7 +7,6 @@ using InstaLike.Web.Models;
 using InstaLike.Web.Notifications.Queries;
 using Serilog;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests;
 
@@ -30,22 +29,22 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(sender);
-            await session.SaveAsync(recipient);
+            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
             var not1 = Notification.Followed(sender.ID, recipient.ID);
             var not2 = Notification.Followed(sender.ID, recipient.ID);
             var not3 = Notification.Followed(sender.ID, recipient.ID);
-            await session.SaveAsync(not1);
-            await session.SaveAsync(not2);
-            await session.SaveAsync(not3);
-            await session.FlushAsync();
+            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new MarkAllUserNotificationsReadCommand(recipient.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = DatabaseFixture.CreateMediator(session);
-            result = await sut.Send(command, default);
+            result = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
         result.Should().Be(3);
@@ -59,23 +58,23 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(sender);
-            await session.SaveAsync(recipient);
+            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
             var not1 = Notification.Followed(sender.ID, recipient.ID);
             var not2 = Notification.Followed(sender.ID, recipient.ID);
             var not3 = Notification.Followed(sender.ID, recipient.ID);
             not1.MarkAsRead();
-            await session.SaveAsync(not1);
-            await session.SaveAsync(not2);
-            await session.SaveAsync(not3);
-            await session.FlushAsync();
+            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new UnreadNotificationsQuery(recipient.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, default);
+            result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         result.Should().Be(2);
@@ -89,23 +88,23 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(sender);
-            await session.SaveAsync(recipient);
+            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
             var not1 = Notification.Followed(sender.ID, recipient.ID);
             var not2 = Notification.Followed(sender.ID, recipient.ID);
             var not3 = Notification.Followed(sender.ID, recipient.ID);
             not1.MarkAsRead();
-            await session.SaveAsync(not1);
-            await session.SaveAsync(not2);
-            await session.SaveAsync(not3);
-            await session.FlushAsync();
+            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new NotificationsQuery(recipient.ID, true);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new NotificationsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, default);
+            result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
@@ -123,23 +122,23 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(sender);
-            await session.SaveAsync(recipient);
+            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
             var not1 = Notification.Followed(sender.ID, recipient.ID);
             var not2 = Notification.Followed(sender.ID, recipient.ID);
             var not3 = Notification.Followed(sender.ID, recipient.ID);
             not1.MarkAsRead();
-            await session.SaveAsync(not1);
-            await session.SaveAsync(not2);
-            await session.SaveAsync(not3);
-            await session.FlushAsync();
+            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new NotificationsQuery(recipient.ID, false);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new NotificationsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, default);
+            result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         result.Length.Should().Be(2);
