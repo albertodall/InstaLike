@@ -37,14 +37,8 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
             return like;
         }
 
-        if (await FindLikeAsync(request.PostID, request.UserID, cancellationToken) is not null)
-        {
-            return Result.Failure($"User {request.UserID} already 'Liked' post {request.PostID}.");
-        }
-
         try
         {
-            await _session.SaveAsync(like.Value, cancellationToken);
             await _session.FlushAsync(cancellationToken);
         }
         catch (ADOException ex)
@@ -66,15 +60,20 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
     {
         var logger = _logger.ForContext<DislikePostCommand>();
 
-        var like = await FindLikeAsync(request.PostID, request.UserID, cancellationToken);
-        if (like is null)
+        var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+        if (post is null)
         {
-            return Result.Failure($"User {request.UserID} did not put any 'Like' on post {request.PostID}.");
+            return Result.Failure($"Post {request.PostID} does not exist.");
+        }
+
+        var dislike = post.DislikeBy(request.UserID);
+        if (dislike.IsFailure)
+        {
+            return dislike;
         }
 
         try
         {
-            await _session.DeleteAsync(like, cancellationToken);
             await _session.FlushAsync(cancellationToken);
         }
         catch (ADOException ex)
@@ -90,12 +89,5 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
         logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);
 
         return Result.Success();
-    }
-
-    private Task<Like?> FindLikeAsync(int postID, int userID, CancellationToken cancellationToken)
-    {
-        return _session.QueryOver<Like>()
-            .Where(l => l.PostID == postID && l.UserID == userID)
-            .SingleOrDefaultAsync<Like?>(cancellationToken);
     }
 }

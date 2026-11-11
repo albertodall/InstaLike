@@ -138,8 +138,31 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+                (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
             }
+        }
+    }
+
+    [Fact]
+    public async Task A_Like_Put_Before_The_Post_Is_Saved_Should_Be_Stored_With_Its_Post()
+    {
+        var author = new User((Nickname)"author8", (FullName)"author eight", Password.Create("password").Value, (Email)"author8@acme.com", "my bio");
+        var reader = new User((Nickname)"reader8", (FullName)"reader eight", Password.Create("password").Value, (Email)"reader8@acme.com", "my bio");
+        Post post;
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post.LikeBy(reader.ID);
+            await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var storedPost = await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken);
+            storedPost!.IsLikedBy(reader.ID).Should().BeTrue();
         }
     }
 
@@ -156,7 +179,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = new Post(author.ID, PictureId.New(), (PostText)"test post");
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            await session.SaveAsync(post.LikeBy(reader.ID).Value, TestContext.Current.CancellationToken);
+            post.LikeBy(reader.ID);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new DislikePostCommand(post.ID, reader.ID);
@@ -171,7 +195,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
+                (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
             }
         }
     }
@@ -288,7 +312,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             post = new Post(author.ID, PictureId.New(), (PostText)"test post");
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             await session.SaveAsync(post.CommentBy(reader.ID, CommentText.Create("My comment").Value), TestContext.Current.CancellationToken);
-            await session.SaveAsync(post.LikeBy(reader.ID).Value, TestContext.Current.CancellationToken);
+            post.LikeBy(reader.ID);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new PostDetailQuery(post.ID, reader.ID);

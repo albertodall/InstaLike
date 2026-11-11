@@ -118,7 +118,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
         {
             using (new AssertionScope())
             {
-                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
+                (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
                 (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
             }
         }

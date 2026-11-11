@@ -28,6 +28,13 @@ internal class PostMapping : ClassMap<Post>
             .Column("UserID")
             .Not.Nullable();
 
+        HasMany(p => p.Likes)
+            .Access.CamelCaseField(Prefix.Underscore)
+            .KeyColumn("PostID")
+            .Inverse()
+            .Cascade.AllDeleteOrphan()
+            .AsBag();
+
         DynamicInsert();
     }
 }

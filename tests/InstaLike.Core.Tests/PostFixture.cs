@@ -32,13 +32,15 @@ public class PostFixture
         const int readerID = 42;
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-        var like = sut.LikeBy(readerID);
+        var result = sut.LikeBy(readerID);
 
         using (new AssertionScope())
         {
-            like.IsSuccess.Should().BeTrue();
-            like.Value.PostID.Should().Be(sut.ID);
-            like.Value.UserID.Should().Be(readerID);
+            result.IsSuccess.Should().BeTrue();
+            sut.IsLikedBy(readerID).Should().BeTrue();
+            var like = sut.Likes.Should().ContainSingle().Subject;
+            like.Post.Should().BeSameAs(sut);
+            like.UserID.Should().Be(readerID);
         }
     }
 
@@ -48,10 +50,52 @@ public class PostFixture
         const int readerID = 42;
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-        var like = sut.LikeBy(readerID).Value;
+        sut.LikeBy(readerID);
 
-        like.DomainEvents.Should().ContainSingle()
+        sut.DomainEvents.Should().ContainSingle()
             .Which.Should().Be(new PostLikedEvent(sut.ID, readerID, PostAuthorID));
+    }
+
+    [Fact]
+    public void Reader_Should_Not_Like_A_Post_Twice()
+    {
+        const int readerID = 42;
+        var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+        sut.LikeBy(readerID);
+
+        var result = sut.LikeBy(readerID);
+
+        using (new AssertionScope())
+        {
+            result.IsFailure.Should().BeTrue();
+            sut.Likes.Should().ContainSingle();
+            sut.DomainEvents.Should().ContainSingle();
+        }
+    }
+
+    [Fact]
+    public void Reader_Should_Dislike_A_Liked_Post()
+    {
+        const int readerID = 42;
+        var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+        sut.LikeBy(readerID);
+
+        var result = sut.DislikeBy(readerID);
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            sut.IsLikedBy(readerID).Should().BeFalse();
+            sut.Likes.Should().BeEmpty();
+        }
+    }
+
+    [Fact]
+    public void Reader_Should_Not_Dislike_A_Post_Not_Liked()
+    {
+        var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+
+        sut.DislikeBy(42).IsFailure.Should().BeTrue();
     }
 
     [Fact]
@@ -71,9 +115,13 @@ public class PostFixture
     {
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-        sut.LikeBy(PostAuthorID).IsSuccess
-            .Should()
-            .BeFalse("users cannot put a 'Like' on their own posts");
+        using (new AssertionScope())
+        {
+            sut.LikeBy(PostAuthorID).IsSuccess
+                .Should()
+                .BeFalse("users cannot put a 'Like' on their own posts");
+            sut.DomainEvents.Should().BeEmpty();
+        }
     }
 
     [Fact]
