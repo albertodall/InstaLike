@@ -3,6 +3,13 @@ using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Accounts;
 
+/// <summary>
+/// Represents a normalized email address.
+/// </summary>
+/// <remarks>
+/// Email values are trimmed, converted to lowercase, and checked for a basic address format
+/// when created.
+/// </remarks>
 public class Email : SimpleValueObject<string>
 {
     private const string EMailValidationRegEx = @"^(.+)@(.+)$";
@@ -13,7 +20,7 @@ public class Email : SimpleValueObject<string>
 
     public static Result<Email> Create(string input)
     {
-        input = (input ?? string.Empty).Trim();
+        input = (input ?? string.Empty).Trim().ToLowerInvariant();
 
         if (input.Length == 0)
         {
