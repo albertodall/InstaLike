@@ -1,7 +1,5 @@
 ﻿using FluentAssertions;
-using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using Xunit;
 
@@ -99,91 +97,6 @@ public class UserFixture
         sut.RemoveProfilePicture();
 
         sut.ProfilePicture.Should().BeNull();
-    }
-
-    [Fact]
-    public void Should_Put_A_Like_On_A_Post()
-    {
-        var sut = CreateTestUser();
-        var postAuthor = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        using (new AssertionScope())
-        {
-            sut.PutLikeTo(post).IsSuccess.Should().BeTrue();
-            post.LikesTo(sut).Should().BeTrue();
-        }
-    }
-
-    [Fact]
-    public void Should_Not_Put_Like_Twice()
-    {
-        var sut = CreateTestUser();
-        var postAuthor = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        using (new AssertionScope())
-        {
-            sut.PutLikeTo(post).IsSuccess.Should().BeTrue();
-            sut.PutLikeTo(post).IsSuccess.Should().BeFalse();
-        }
-    }
-
-    [Fact]
-    public void Should_Not_Put_A_Like_On_Own_Post()
-    {
-        var sut = CreateTestUser();
-        var post = new Post(sut, PictureId.New(), (PostText)"test post");
-
-        sut.PutLikeTo(post).IsSuccess.Should().BeFalse();
-    }
-
-    [Fact]
-    public void Should_Remove_A_Like_To_A_Post()
-    {
-        var sut = CreateTestUser();
-        var postAuthor = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        sut.PutLikeTo(post);
-
-        sut.RemoveLikeFrom(post).IsSuccess.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Should_Not_Remove_Like_Twice()
-    {
-        var sut = CreateTestUser();
-        var postAuthor = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var post = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        sut.PutLikeTo(post);
-
-        using (new AssertionScope())
-        {
-            sut.RemoveLikeFrom(post).IsSuccess.Should().BeTrue();
-            sut.RemoveLikeFrom(post).IsSuccess.Should().BeFalse();
-        }
     }
 
     private static User CreateTestUser()

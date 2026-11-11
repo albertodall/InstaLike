@@ -1,25 +1,23 @@
 ﻿using System;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
 public class Like : EntityBase<int>
 {
-#pragma warning disable CS8618
     protected Like() { }
-#pragma warning restore CS8618
 
-    public Like(Post post, User user) : this()
+    internal Like(int postID, int userID)
+        : this()
     {
-        Post = post;
-        User = user;
+        PostID = postID;
+        UserID = userID;
         LikeDate = DateTimeOffset.Now;
     }
 
-    public virtual Post Post { get; }
+    public virtual int PostID { get; protected set; }
 
-    public virtual User User { get; }
+    public virtual int UserID { get; protected set; }
 
-    public virtual DateTimeOffset LikeDate { get; }
+    public virtual DateTimeOffset LikeDate { get; protected set; }
 }

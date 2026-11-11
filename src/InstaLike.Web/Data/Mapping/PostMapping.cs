@@ -31,10 +31,6 @@ internal class PostMapping : ClassMap<Post>
             .KeyColumn("PostID")
             .Access.CamelCaseField(Prefix.Underscore);
 
-        HasMany(p => p.Likes)
-            .KeyColumn("PostID")
-            .Access.CamelCaseField(Prefix.Underscore);
-
         DynamicInsert();
     }
 }
