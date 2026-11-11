@@ -14,10 +14,10 @@ internal class FollowMapping : ClassMap<Follow>
         Map(p => p.FollowDate)
             .Not.Nullable();
 
-        References(p => p.Follower)
-            .Column("FollowerID");
+        Map(p => p.FollowerID)
+            .Not.Nullable();
 
-        References(p => p.Followed)
-            .Column("FollowedID");
+        Map(p => p.FollowedID)
+            .Not.Nullable();
     }
 }

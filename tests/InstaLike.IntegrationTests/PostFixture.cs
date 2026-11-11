@@ -7,6 +7,7 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Core.Social;
 using InstaLike.Web.Media;
 using InstaLike.Web.Models;
 using InstaLike.Web.Posts.CommandHandlers;
@@ -319,7 +320,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post1);
             await session.SaveAsync(post2);
             await session.SaveAsync(post3);
-            reader.Follow(author1);
+            await session.SaveAsync(new Follow(reader.ID, author1.ID));
             await session.FlushAsync();
         }
 

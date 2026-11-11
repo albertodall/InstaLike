@@ -1,24 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
-using InstaLike.Core.Social;
 
 namespace InstaLike.Core.Accounts;
 
 public class User : EntityBase<int>
 {
-    private readonly IList<Follow> _followers;
-    private readonly IList<Follow> _followed;
-
 #pragma warning disable CS8618
-    protected User()
-    {
-        _followers = new List<Follow>();
-        _followed = new List<Follow>();
-    }
+    protected User() { }
 #pragma warning restore CS8618
 
     public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
@@ -63,8 +53,6 @@ public class User : EntityBase<int>
     public virtual PictureId? ProfilePicture { get; protected set; }
     public virtual string Biography { get; protected set; }
     public virtual DateTimeOffset RegistrationDate { get; protected set; }
-    public virtual IReadOnlyList<Follow> Followers => _followers.ToList();
-    public virtual IReadOnlyList<Follow> Followed => _followed.ToList();
 
     public virtual void ChangePassword(Password password)
     {
@@ -99,53 +87,6 @@ public class User : EntityBase<int>
     public virtual void UpdateBiography(string newBiography)
     {
         Biography = newBiography;
-    }
-
-    public virtual bool IsFollowing(User user)
-    {
-        return _followed.Any(f => f.Followed == user);
-    }
-
-    public virtual bool IsFollowedBy(User user)
-    {
-        return _followers.Any(f => f.Follower == user);
-    }
-
-    public virtual Result Follow(User user)
-    {
-        return Result.Success()
-            .Ensure(() => !IsFollowing(user), $"User [{user.Nickname}] is already followed by user [{Nickname}].")
-            .Tap(() =>
-            {
-                var follow = new Follow(this, user);
-                _followed.Add(follow);
-                user.AddFollow(follow);
-            });
-    }
-
-    protected virtual void AddFollow(Follow follow)
-    {
-        _followers.Add(follow);
-    }
-
-    public virtual Result Unfollow(User user)
-    {
-        Follow? followed = _followed.SingleOrDefault(f => f.Followed == user);
-
-        if (followed is null)
-        {
-            return Result.Failure($"User [{Nickname}] is not following user [{user.Nickname}].");
-        }
-
-        _followed.Remove(followed);
-        user.RemoveFollow(followed);
-
-        return Result.Success();
-    }
-
-    protected virtual void RemoveFollow(Follow follow)
-    {
-        _followers.Remove(follow);
     }
 
     public virtual Result PutLikeTo(Post post)

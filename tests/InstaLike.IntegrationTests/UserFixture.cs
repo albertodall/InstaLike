@@ -4,6 +4,7 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Core.Social;
 using InstaLike.Web.Accounts.Queries;
 using InstaLike.Web.Models;
 using Serilog;
@@ -38,8 +39,8 @@ public class UserFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(follower);
             await session.SaveAsync(author);
             await session.SaveAsync(post);
-            author.Follow(followed);
-            follower.Follow(author);
+            await session.SaveAsync(new Follow(author.ID, followed.ID));
+            await session.SaveAsync(new Follow(follower.ID, author.ID));
             await session.FlushAsync();
         }
 
