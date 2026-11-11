@@ -137,7 +137,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<Post>(post.ID)).Likes.Count().Should().Be(1);
+                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync()).Should().Be(1);
             }
         }
     }
@@ -149,12 +149,12 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var author = new User((Nickname)"author3", (FullName)"author three", Password.Create("password").Value, (Email)"author3@acme.com", "my bio");
         var reader = new User((Nickname)"reader2", (FullName)"reader two", Password.Create("password").Value, (Email)"reader2@acme.com", "my bio");
         var post = new Post(author, PictureId.New(), (PostText)"test post");
-        post.PutLikeBy(reader);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
             await session.SaveAsync(reader);
             await session.SaveAsync(post);
+            await session.SaveAsync(post.LikeBy(reader.ID).Value);
         }
 
         var command = new DislikePostCommand(post.ID, reader.ID);
@@ -169,7 +169,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<Post>(post.ID)).Likes.Count().Should().Be(0);
+                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync()).Should().Be(0);
             }
         }
     }
@@ -280,10 +280,10 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             post.AddComment(comment);
-            post.PutLikeBy(reader);
             await session.SaveAsync(reader);
             await session.SaveAsync(author);
             await session.SaveAsync(post);
+            await session.SaveAsync(post.LikeBy(reader.ID).Value);
         }
 
         var query = new PostDetailQuery(post.ID, reader.ID);

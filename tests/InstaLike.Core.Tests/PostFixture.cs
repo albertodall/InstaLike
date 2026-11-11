@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
@@ -30,23 +28,18 @@ public class PostFixture
     }
 
     [Fact]
-    public void Should_Add_Like_To_Post()
+    public void Reader_Should_Like_A_Post()
     {
-        var postAuthor = CreateTestPostAuthor();
-        var postReader = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
+        const int readerID = 42;
+        var sut = new Post(CreateTestPostAuthor(), PictureId.New(), (PostText)"test post");
 
-        sut.PutLikeBy(postReader);
+        var like = sut.LikeBy(readerID);
 
         using (new AssertionScope())
         {
-            sut.LikesTo(postReader).Should().BeTrue();
-            sut.Likes.Count.Should().Be(1);
+            like.IsSuccess.Should().BeTrue();
+            like.Value.PostID.Should().Be(sut.ID);
+            like.Value.UserID.Should().Be(readerID);
         }
     }
 
@@ -56,103 +49,9 @@ public class PostFixture
         var postAuthor = CreateTestPostAuthor();
         var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
 
-        sut.PutLikeBy(postAuthor).IsSuccess
+        sut.LikeBy(postAuthor.ID).IsSuccess
             .Should()
-            .BeFalse($"User [{postAuthor.Nickname}] cannot put a 'Like' on their own posts.");
-    }
-
-    [Fact]
-    public void Cannot_Put_Like_To_Post_Twice()
-    {
-        var postAuthor = CreateTestPostAuthor();
-        var postReader = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        using (new AssertionScope())
-        {
-            sut.PutLikeBy(postReader).IsSuccess
-                .Should()
-                .BeTrue();
-            sut.PutLikeBy(postReader).IsSuccess
-                .Should()
-                .BeFalse($"User [{postReader.Nickname}] has already put a 'Like' to this post.");
-        }
-    }
-
-    [Fact]
-    public void Should_Remove_Like_From_Post()
-    {
-        var postAuthor = CreateTestPostAuthor();
-        var postReader = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        sut.PutLikeBy(postReader);
-
-        using (new AssertionScope())
-        {
-            sut.RemoveLikeBy(postReader).IsSuccess.Should().BeTrue();
-            sut.LikesTo(postReader).Should().BeFalse();
-            sut.Likes.Count().Should().Be(0);
-        }
-    }
-
-    [Fact]
-    public void Should_Not_Remove_Like_From_Post_If_Not_Liked_Before()
-    {
-        var postAuthor = CreateTestPostAuthor();
-        var postReader = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        sut.RemoveLikeBy(postReader).IsSuccess
-            .Should()
-            .BeFalse($"User [{postReader.Nickname}] did not put any 'Like' on this post.");
-    }
-
-    [Fact]
-    public void Post_Should_Be_Liked_By_User()
-    {
-        var postAuthor = CreateTestPostAuthor();
-        var postReader = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        sut.PutLikeBy(postReader);
-
-        sut.LikesTo(postReader).Should().BeTrue();
-    }
-
-    [Fact]
-    public void Post_Should_Not_Be_Liked_By_User_Without_Putting_A_Like_First()
-    {
-        var postAuthor = CreateTestPostAuthor();
-        var postReader = new User(
-            (Nickname)"user2",
-            (FullName)"Test User 2",
-            (Password)"password",
-            (Email)"user2@acme.com",
-            "My Bio");
-        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
-
-        sut.LikesTo(postReader).Should().BeFalse();
+            .BeFalse("users cannot put a 'Like' on their own posts");
     }
 
     [Fact]

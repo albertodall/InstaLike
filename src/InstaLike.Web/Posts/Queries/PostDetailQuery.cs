@@ -48,7 +48,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
         {
             // Total likes for this post
             var postLikesCountQuery = _session.QueryOver<Like>()
-                .Where(l => l.Post.ID == request.PostID)
+                .Where(l => l.PostID == request.PostID)
                 .ToRowCountQuery()
                 .FutureValue<int>();
 
@@ -69,8 +69,8 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
 
             // Is this post liked by the current user?
             var isLikedByCurrentUserQuery = _session.QueryOver<Like>()
-                .Where(l => l.Post.ID == request.PostID)
-                    .And(l => l.User.ID == request.CurrentUserID)
+                .Where(l => l.PostID == request.PostID)
+                    .And(l => l.UserID == request.CurrentUserID)
                 .ToRowCountQuery()
                 .FutureValue<int>();
 

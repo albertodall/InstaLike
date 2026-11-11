@@ -10,13 +10,11 @@ namespace InstaLike.Core.Posts;
 public class Post : EntityBase<int>
 {
     private readonly IList<Comment> _comments;
-    private readonly IList<Like> _likes;
 
 #pragma warning disable CS8618
     protected Post()
     {
         _comments = new List<Comment>();
-        _likes = new List<Like>();
     }
 #pragma warning restore CS8618
 
@@ -41,8 +39,6 @@ public class Post : EntityBase<int>
 
     public virtual IReadOnlyList<Comment> Comments => _comments.ToList();
 
-    public virtual IReadOnlyList<Like> Likes => _likes.ToList();
-
     public virtual void UpdatePicture(PictureId picture)
     {
         Picture = picture;
@@ -53,31 +49,12 @@ public class Post : EntityBase<int>
         _text = text.Value;
     }
 
-    public virtual bool LikesTo(User user)
+    /// <remarks>Duplicate likes are rejected by the caller: they depend on the other likes, not on the post.</remarks>
+    public virtual Result<Like> LikeBy(int userID)
     {
-        return _likes.Any(like => like.User == user);
-    }
-
-    public virtual Result PutLikeBy(User user)
-    {
-        return Result.Success()
-            .Ensure(() => Author != user, $"User [{user.Nickname}] cannot put a 'Like' on their own posts.")
-            .Ensure(() => !LikesTo(user), $"User [{user.Nickname}] has already put a 'Like' to this post.")
-            .Tap(() => _likes.Add(new Like(this, user)));
-    }
-
-    public virtual Result RemoveLikeBy(User user)
-    {
-        Like? likeToRemove = _likes.SingleOrDefault(like => like.User == user);
-
-        if (likeToRemove is null)
-        {
-            return Result.Failure($"User [{user.Nickname}] did not put any 'Like' on this post.");
-        }
-
-        _likes.Remove(likeToRemove);
-
-        return Result.Success();
+        return Author.ID == userID
+            ? Result.Failure<Like>("You cannot put a 'Like' on your own posts.")
+            : Result.Success(new Like(ID, userID));
     }
 
     public virtual void AddComment(Comment comment)

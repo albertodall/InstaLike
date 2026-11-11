@@ -74,9 +74,9 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             // Number of likes for each post that has likes.
             var postLikesCountQuery = _session.QueryOver<Like>()
                 .WithSubquery
-                    .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
+                    .WhereProperty(l => l.PostID).In(postIdsToShowInTimelineQuery)
                 .SelectList(fields => fields
-                    .SelectGroup(l => l.Post.ID)
+                    .SelectGroup(l => l.PostID)
                     .SelectCount(l => l.ID)
                 )
                 .Future<object[]>();
@@ -84,9 +84,9 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             // Posts liked by current user
             var postsLikedByCurrentUserQuery = _session.QueryOver<Like>()
                 .WithSubquery
-                    .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
-                    .And(l => l.User.ID == request.UserID)
-                .Select(l => l.Post.ID)
+                    .WhereProperty(l => l.PostID).In(postIdsToShowInTimelineQuery)
+                    .And(l => l.UserID == request.UserID)
+                .Select(l => l.PostID)
                 .Future<int>();
 
             var timelineQuery = _session.QueryOver(() => post)

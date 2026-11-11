@@ -14,10 +14,10 @@ internal class LikeMapping : ClassMap<Like>
         Map(p => p.LikeDate)
             .Not.Nullable();
 
-        References(p => p.Post)
-            .Column("PostID");
+        Map(p => p.PostID)
+            .Not.Nullable();
 
-        References(p => p.User)
-            .Column("UserID");
+        Map(p => p.UserID)
+            .Not.Nullable();
     }
 }

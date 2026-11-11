@@ -1,6 +1,4 @@
 ﻿using System;
-using CSharpFunctionalExtensions;
-using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts;
@@ -87,20 +85,5 @@ public class User : EntityBase<int>
     public virtual void UpdateBiography(string newBiography)
     {
         Biography = newBiography;
-    }
-
-    public virtual Result PutLikeTo(Post post)
-    {
-        return Result.Success()
-            .Ensure(() => post.Author != this, "You cannot put a 'Like' on your own posts.")
-            .Ensure(() => !post.LikesTo(this), $"User [{Nickname}] already 'Liked' this post.")
-            .Tap(() => post.PutLikeBy(this));
-    }
-
-    public virtual Result RemoveLikeFrom(Post post)
-    {
-        return Result.Success()
-            .Ensure(() => post.LikesTo(this), $"User [{Nickname}] did not put any 'Like' on this post.")
-            .Tap(() => post.RemoveLikeBy(this));
     }
 }
