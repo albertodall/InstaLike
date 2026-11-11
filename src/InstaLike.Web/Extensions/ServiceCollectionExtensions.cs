@@ -125,8 +125,7 @@ internal static class ServiceCollectionExtensions
 
         if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(model))
         {
-            services.AddSingleton<IImageRecognitionService, DisabledImageRecognition>();
-            return services;
+            throw new InvalidOperationException("Image tagging has not been configured. Set 'ImageAnalysis:Endpoint' and 'ImageAnalysis:Model'.");
         }
 
         // Any OpenAI-compatible API: the Azure OpenAI v1 endpoint (where the model is the deployment name) or a local Ollama server.
