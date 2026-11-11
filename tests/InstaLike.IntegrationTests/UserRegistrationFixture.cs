@@ -5,6 +5,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Accounts.Commands;
 using InstaLike.Web.Media;
 using Xunit;
 

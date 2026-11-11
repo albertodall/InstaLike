@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Builder;
@@ -28,7 +27,7 @@ builder.Services.ConfigureTelemetry(builder.Configuration);
 builder.Services.ConfigureOpenTelemetry(builder.Configuration);
 
 builder.Services.AddMediatR(cfg => cfg
-    .RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(EntityBase<>).Assembly)
+    .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
     .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
 
 builder.Services.ConfigureDataAccess(builder.Configuration);

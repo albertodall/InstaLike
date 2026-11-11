@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
+using InstaLike.Web.Notifications.Commands;
 using MediatR;
 using NHibernate;
 using Serilog;

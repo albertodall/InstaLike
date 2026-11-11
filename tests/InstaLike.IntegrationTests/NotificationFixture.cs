@@ -4,6 +4,7 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Notifications;
 using InstaLike.Web.Models;
+using InstaLike.Web.Notifications.Commands;
 using InstaLike.Web.Notifications.Queries;
 using Serilog;
 using Xunit;

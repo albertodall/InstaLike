@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
-using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 
-namespace InstaLike.Core.Social;
+namespace InstaLike.Web.Social.Commands;
 
 public sealed class UnfollowCommand : ICommand<Result>
 {

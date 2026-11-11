@@ -6,6 +6,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Accounts.Commands;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

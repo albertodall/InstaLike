@@ -5,6 +5,7 @@ using InstaLike.Core.Posts;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using InstaLike.Web.Models;
+using InstaLike.Web.Posts.Commands;
 using InstaLike.Web.Posts.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

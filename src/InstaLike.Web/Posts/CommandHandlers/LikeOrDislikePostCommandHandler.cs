@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
+using InstaLike.Web.Posts.Commands;
 using MediatR;
 using NHibernate;
 using Serilog;
