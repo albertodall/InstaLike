@@ -14,13 +14,11 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
-    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
 
-    public EditUserDetailsCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+    public EditUserDetailsCommandHandler(ISession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
     }
 
     public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -50,7 +48,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
                 userToUpdate.UpdateBiography(request.Bio);
                 if (request.ProfilePicture is { Length: > 0 })
                 {
-                    userToUpdate.SetProfilePicture(Picture.Create(request.ProfilePicture, _idGenerator.GetNextId()).Value);
+                    userToUpdate.SetProfilePicture(Picture.Create(request.ProfilePicture, Guid.NewGuid()).Value);
                 }
 
                 await tx.CommitAsync(cancellationToken);

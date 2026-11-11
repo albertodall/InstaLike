@@ -15,13 +15,11 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
-    private readonly ISequentialIdGenerator<SequentialGuid> _idGenerator;
 
-    public PublishPostCommandHandler(ISession session, ILogger logger, ISequentialIdGenerator<SequentialGuid> idGenerator)
+    public PublishPostCommandHandler(ISession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<PublishPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
     }
 
     public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
@@ -32,7 +30,7 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
             try
             {
                 author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-                var postPicture = Picture.Create(request.PictureRawBytes, _idGenerator.GetNextId()).Value;
+                var postPicture = Picture.Create(request.PictureRawBytes, Guid.NewGuid()).Value;
 
                 var post = new Post(author, postPicture, (PostText)request.Text);
 

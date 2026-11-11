@@ -39,7 +39,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new RegisterUserCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new RegisterUserCommandHandler(session, Log.Logger);
             userRegistrationResult = await sut.Handle(userRegistrationCommand, default);
         }
 
@@ -78,7 +78,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
             editCommandResult = await sut.Handle(command, default);
         }
 
@@ -114,7 +114,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         {
             var command = new EditUserDetailsCommand(user.ID, user.Nickname, user.FullName.Name, user.FullName.Surname, user.Email, user.Biography, picture);
             using var session = _testFixture.OpenSession(_output);
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
             (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
         }
 
@@ -138,7 +138,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, "new bio", null);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
             (await sut.Handle(command, default)).IsSuccess.Should().BeTrue();
         }
 
@@ -171,7 +171,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             testUser.ProfilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
             editCommandResult = await sut.Handle(command, default);
         }
 
@@ -201,7 +201,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             testUser.ProfilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
             editCommandResult = await sut.Handle(command, default);
         }
 
@@ -231,7 +231,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             testUser.ProfilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new EditUserDetailsCommandHandler(session, Log.Logger, new SequentialGuidGenerator());
+            var sut = new EditUserDetailsCommandHandler(session, Log.Logger);
             editCommandResult = await sut.Handle(command, default);
         }
 
