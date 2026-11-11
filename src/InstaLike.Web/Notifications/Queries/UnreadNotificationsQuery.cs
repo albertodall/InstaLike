@@ -38,7 +38,7 @@ internal sealed class UnreadNotificationsQueryHandler : IRequestHandler<UnreadNo
         using (var tx = _session.BeginTransaction())
         {
             var countQuery = _session.QueryOver<Notification>()
-                .Where(n => n.Recipient.ID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
+                .Where(n => n.RecipientID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
 
             unreadNotifications = await countQuery.RowCountAsync(cancellationToken);
 

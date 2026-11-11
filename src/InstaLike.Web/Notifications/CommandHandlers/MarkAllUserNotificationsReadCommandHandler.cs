@@ -28,7 +28,7 @@ public class MarkAllUserNotificationsReadCommandHandler : IRequestHandler<MarkAl
             try
             {
                 var notificationsQuery = QueryOver.Of<Notification>()
-                    .Where(n => n.Recipient.ID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
+                    .Where(n => n.RecipientID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
 
                 var unreadNotificationsCountQuery = notificationsQuery.GetExecutableQueryOver(_session).ToRowCountQuery().FutureValue<int>();
                 var unreadNotificationsQuery = notificationsQuery.GetExecutableQueryOver(_session).Future<Notification>();

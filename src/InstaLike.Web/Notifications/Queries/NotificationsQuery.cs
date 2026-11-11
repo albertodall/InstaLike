@@ -44,24 +44,26 @@ internal class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, N
         using (var tx = _session.BeginTransaction())
         {
             NotificationModel notification = null!;
-            User recipient = null!;
+            Notification notificationEntity = null!;
+            User sender = null!;
 
-            var notificationsQuery = _session.QueryOver<Notification>()
-                .Inner.JoinAlias(n => n.Recipient, () => recipient)
-                .Where(n => n.Recipient.ID == request.UserID);
+            var notificationsQuery = _session.QueryOver(() => notificationEntity)
+                .JoinEntityAlias(() => sender, () => sender.ID == notificationEntity.SenderID)
+                .Where(() => notificationEntity.RecipientID == request.UserID);
 
             if (!request.IncludeReadNotifications)
             {
-                notificationsQuery.And(n => !n.HasBeenReadByRecipient);
+                notificationsQuery.And(() => !notificationEntity.HasBeenReadByRecipient);
             }
 
             notificationsQuery
-                .OrderBy(n => n.NotificationDate).Desc
+                .OrderBy(() => notificationEntity.NotificationDate).Desc
                 .SelectList(fields => fields
-                    .Select(() => recipient.Nickname).WithAlias(() => notification.SenderNickname)
-                    .Select(() => recipient.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
-                    .Select(n => n.Message).WithAlias(() => notification.Message)
-                    .Select(n => n.NotificationDate).WithAlias(() => notification.NotificationDate)
+                    .Select(() => sender.Nickname).WithAlias(() => notification.SenderNickname)
+                    .Select(() => sender.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
+                    .Select(() => notificationEntity.Kind).WithAlias(() => notification.Kind)
+                    .Select(() => notificationEntity.PostID).WithAlias(() => notification.PostID)
+                    .Select(() => notificationEntity.NotificationDate).WithAlias(() => notification.NotificationDate)
                 )
                 .TransformUsing(new EntityToModelResultTransformer<NotificationModel>());
 

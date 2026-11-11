@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Notifications;
 using InstaLike.Web.Models;
@@ -28,14 +29,13 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         int result;
         var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-        var not1 = new Notification(sender, recipient, "Notification 1");
-        var not2 = new Notification(sender, recipient, "Notification 2");
-        var not3 = new Notification(sender, recipient, "Notification 3");
-
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(sender);
             await session.SaveAsync(recipient);
+            var not1 = Notification.Followed(sender.ID, recipient.ID);
+            var not2 = Notification.Followed(sender.ID, recipient.ID);
+            var not3 = Notification.Followed(sender.ID, recipient.ID);
             await session.SaveAsync(not1);
             await session.SaveAsync(not2);
             await session.SaveAsync(not3);
@@ -58,15 +58,14 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         int result;
         var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-        var not1 = new Notification(sender, recipient, "Notification 1");
-        var not2 = new Notification(sender, recipient, "Notification 2");
-        var not3 = new Notification(sender, recipient, "Notification 3");
-
         using (var session = _testFixture.OpenSession(_output))
         {
-            not1.MarkAsRead();
             await session.SaveAsync(sender);
             await session.SaveAsync(recipient);
+            var not1 = Notification.Followed(sender.ID, recipient.ID);
+            var not2 = Notification.Followed(sender.ID, recipient.ID);
+            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            not1.MarkAsRead();
             await session.SaveAsync(not1);
             await session.SaveAsync(not2);
             await session.SaveAsync(not3);
@@ -89,15 +88,14 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         NotificationModel[] result;
         var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-        var not1 = new Notification(sender, recipient, "Notification 1");
-        var not2 = new Notification(sender, recipient, "Notification 2");
-        var not3 = new Notification(sender, recipient, "Notification 3");
-
         using (var session = _testFixture.OpenSession(_output))
         {
-            not1.MarkAsRead();
             await session.SaveAsync(sender);
             await session.SaveAsync(recipient);
+            var not1 = Notification.Followed(sender.ID, recipient.ID);
+            var not2 = Notification.Followed(sender.ID, recipient.ID);
+            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            not1.MarkAsRead();
             await session.SaveAsync(not1);
             await session.SaveAsync(not2);
             await session.SaveAsync(not3);
@@ -111,7 +109,11 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
             result = await sut.Handle(query, default);
         }
 
-        result.Length.Should().Be(3);
+        using (new AssertionScope())
+        {
+            result.Length.Should().Be(3);
+            result.Should().OnlyContain(n => n.SenderNickname == sender.Nickname && n.Kind == NotificationKind.Followed);
+        }
     }
 
     [Fact]
@@ -120,15 +122,14 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         NotificationModel[] result;
         var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
         var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-        var not1 = new Notification(sender, recipient, "Notification 1");
-        var not2 = new Notification(sender, recipient, "Notification 2");
-        var not3 = new Notification(sender, recipient, "Notification 3");
-
         using (var session = _testFixture.OpenSession(_output))
         {
-            not1.MarkAsRead();
             await session.SaveAsync(sender);
             await session.SaveAsync(recipient);
+            var not1 = Notification.Followed(sender.ID, recipient.ID);
+            var not2 = Notification.Followed(sender.ID, recipient.ID);
+            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            not1.MarkAsRead();
             await session.SaveAsync(not1);
             await session.SaveAsync(not2);
             await session.SaveAsync(not3);
