@@ -57,12 +57,17 @@ stages:
               projects: '$(solution)'
               arguments: '--no-restore --configuration $(buildConfiguration)'
             
-          - task: DotNetCoreCLI@2
+          - script: >-
+              dotnet test --solution InstaLike.slnx --no-build --configuration $(buildConfiguration)
+              --report-xunit-trx --results-directory $(Agent.TempDirectory)/TestResults
             displayName: 'Run all tests'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: succeededOrFailed()
             inputs:
-              command: 'test'
-              projects: '$(solution)'
-              arguments: '--no-restore --no-build --configuration $(buildConfiguration)'
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '$(Agent.TempDirectory)/TestResults/**/*.trx'
             
           - task: SonarCloudAnalyze@1
             displayName: 'Run SonarCloud Code Analysis'

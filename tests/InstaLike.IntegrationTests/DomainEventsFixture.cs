@@ -12,7 +12,6 @@ using InstaLike.Core.Social;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests;
 
@@ -34,7 +33,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new LikePostCommand(post.ID, reader.ID))).IsSuccess.Should().BeTrue();
+            (await DatabaseFixture.CreateMediator(session).Send(new LikePostCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         var notifications = await GetNotificationsAsync(author.ID);
@@ -54,7 +53,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new PublishCommentCommand(post.ID, "nice", reader.ID))).IsSuccess.Should().BeTrue();
+            (await DatabaseFixture.CreateMediator(session).Send(new PublishCommentCommand(post.ID, "nice", reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         var notifications = await GetNotificationsAsync(author.ID);
@@ -74,7 +73,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new PublishCommentCommand(post.ID, "my own post", author.ID))).IsSuccess.Should().BeTrue();
+            (await DatabaseFixture.CreateMediator(session).Send(new PublishCommentCommand(post.ID, "my own post", author.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
@@ -87,7 +86,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new FollowCommand(reader.ID, author.Nickname))).IsSuccess.Should().BeTrue();
+            (await DatabaseFixture.CreateMediator(session).Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         var notifications = await GetNotificationsAsync(author.ID);
@@ -118,7 +117,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
         {
             using (new AssertionScope())
             {
-                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync()).Should().Be(0);
+                (await session.QueryOver<Like>().Where(l => l.PostID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
                 (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
             }
         }

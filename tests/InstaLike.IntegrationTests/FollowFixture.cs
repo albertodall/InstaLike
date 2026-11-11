@@ -9,7 +9,6 @@ using InstaLike.Web.Social.Queries;
 using NHibernate;
 using Serilog;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace InstaLike.IntegrationTests;
 
@@ -33,15 +32,15 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followerUser);
-            await session.SaveAsync(followedUser);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
         }
 
         var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            followResult = await handler.Send(followCommand, default);
+            followResult = await handler.Send(followCommand, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
@@ -63,16 +62,16 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followerUser);
-            await session.SaveAsync(followedUser);
-            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value, TestContext.Current.CancellationToken);
         }
 
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            unfollowResult = await handler.Send(unfollowCommand, default);
+            unfollowResult = await handler.Send(unfollowCommand, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
@@ -94,21 +93,21 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followerUser);
-            await session.SaveAsync(followedUser);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
         }
 
         var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            await handler.Send(followCommand, default);
+            await handler.Send(followCommand, TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            followResult = await handler.Send(followCommand, default);
+            followResult = await handler.Send(followCommand, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
@@ -131,15 +130,15 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followerUser);
-            await session.SaveAsync(followedUser);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
         }
 
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            unfollowResult = await handler.Send(unfollowCommand, default);
+            unfollowResult = await handler.Send(unfollowCommand, TestContext.Current.CancellationToken);
         }
 
         unfollowResult.IsSuccess.Should()
@@ -152,13 +151,13 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var followerUser = new User((Nickname)"user13", (FullName)"test13 user13", Password.Create("password").Value, (Email)"testuser13@acme.com", "bio13");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followerUser);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            (await handler.Send(new FollowCommand(followerUser.ID, "nobody"), default)).IsSuccess.Should().BeFalse();
+            (await handler.Send(new FollowCommand(followerUser.ID, "nobody"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
         }
     }
 
@@ -168,13 +167,13 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var user = new User((Nickname)"user14", (FullName)"test14 user14", Password.Create("password").Value, (Email)"testuser14@acme.com", "bio14");
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(user);
+            await session.SaveAsync(user, TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
             var handler = DatabaseFixture.CreateMediator(session);
-            (await handler.Send(new FollowCommand(user.ID, user.Nickname), default)).IsSuccess.Should().BeFalse();
+            (await handler.Send(new FollowCommand(user.ID, user.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
             (await CountFollowsAsync(session, user.ID, user.ID)).Should().Be(0);
         }
     }
@@ -188,16 +187,16 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followedUser);
-            await session.SaveAsync(followerUser);
-            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
+            await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value, TestContext.Current.CancellationToken);
         }
 
         var followersQuery = new FollowersQuery(followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new FollowersQueryHandler(session, Log.Logger);
-            result = await sut.Handle(followersQuery, default);
+            result = await sut.Handle(followersQuery, TestContext.Current.CancellationToken);
         }
 
         result.Length.Should().Be(1);
@@ -212,16 +211,16 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            await session.SaveAsync(followedUser);
-            await session.SaveAsync(followerUser);
-            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
+            await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value, TestContext.Current.CancellationToken);
         }
 
         var followingQuery = new FollowingQuery(followerUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new FollowingQueryHandler(session, Log.Logger);
-            result = await sut.Handle(followingQuery, default);
+            result = await sut.Handle(followingQuery, TestContext.Current.CancellationToken);
         }
 
         result.Length.Should().Be(1);

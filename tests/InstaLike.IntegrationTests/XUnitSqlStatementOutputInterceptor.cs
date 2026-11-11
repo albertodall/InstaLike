@@ -1,6 +1,6 @@
 ﻿using NHibernate;
 using NHibernate.SqlCommand;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace InstaLike.IntegrationTests;
 

@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
 using Serilog;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
