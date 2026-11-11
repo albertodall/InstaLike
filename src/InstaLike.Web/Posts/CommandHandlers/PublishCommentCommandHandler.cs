@@ -28,37 +28,30 @@ internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishComm
             return Result.Failure<int>(text.Error);
         }
 
-        using (var tx = _session.BeginTransaction())
+        var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+        if (post is null)
         {
-            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
-            if (post is null)
-            {
-                return Result.Failure<int>($"Post {request.PostID} does not exist.");
-            }
-
-            var comment = post.CommentBy(request.UserID, text.Value);
-            try
-            {
-                await _session.SaveAsync(comment, cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-
-                _logger.Information("User {UserID} wrote a new comment to post {PostID}",
-                    request.UserID,
-                    request.PostID);
-
-                return Result.Success(comment.ID);
-            }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-
-                _logger.Error("Failed to save comment to post {PostID} written by user {UserID}. Error message: {ErrorMessage}",
-                    request.PostID,
-                    request.UserID,
-                    ex.Message);
-
-                return Result.Failure<int>(ex.Message);
-            }
+            return Result.Failure<int>($"Post {request.PostID} does not exist.");
         }
+
+        var comment = post.CommentBy(request.UserID, text.Value);
+        try
+        {
+            await _session.SaveAsync(comment, cancellationToken);
+            await _session.FlushAsync(cancellationToken);
+        }
+        catch (ADOException ex)
+        {
+            _logger.Error("Failed to save comment to post {PostID} written by user {UserID}. Error message: {ErrorMessage}",
+                request.PostID,
+                request.UserID,
+                ex.Message);
+
+            return Result.Failure<int>(ex.Message);
+        }
+
+        _logger.Information("User {UserID} wrote a new comment to post {PostID}", request.UserID, request.PostID);
+
+        return Result.Success(comment.ID);
     }
 }

@@ -5,7 +5,7 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public class Post : EntityBase<int>
+public class Post : AggregateRoot<int>
 {
 #pragma warning disable CS8618
     protected Post() { }
@@ -45,12 +45,12 @@ public class Post : EntityBase<int>
     {
         return Author.ID == userID
             ? Result.Failure<Like>("You cannot put a 'Like' on your own posts.")
-            : Result.Success(new Like(ID, userID));
+            : Result.Success(Like.Create(ID, userID, Author.ID));
     }
 
     public virtual Comment CommentBy(int authorID, CommentText text)
     {
-        return new Comment(ID, authorID, text);
+        return Comment.Create(ID, authorID, Author.ID, text);
     }
 
     public virtual bool CanBeEditedBy(User user)

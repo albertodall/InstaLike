@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using MediatR;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public sealed class EditPostCommand : IRequest<Result<int>>
+public sealed class EditPostCommand : ICommand<Result<int>>
 {
     public int UserID { get; }
     public int PostID { get; }

@@ -42,6 +42,32 @@ public class PostFixture
     }
 
     [Fact]
+    public void Liking_A_Post_Should_Raise_An_Event()
+    {
+        const int readerID = 42;
+        var postAuthor = CreateTestPostAuthor();
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
+
+        var like = sut.LikeBy(readerID).Value;
+
+        like.DomainEvents.Should().ContainSingle()
+            .Which.Should().Be(new PostLikedEvent(sut.ID, readerID, postAuthor.ID));
+    }
+
+    [Fact]
+    public void Commenting_A_Post_Should_Raise_An_Event()
+    {
+        const int commentAuthorID = 42;
+        var postAuthor = CreateTestPostAuthor();
+        var sut = new Post(postAuthor, PictureId.New(), (PostText)"test post");
+
+        var comment = sut.CommentBy(commentAuthorID, (CommentText)"test comment");
+
+        comment.DomainEvents.Should().ContainSingle()
+            .Which.Should().Be(new CommentPublishedEvent(sut.ID, commentAuthorID, postAuthor.ID));
+    }
+
+    [Fact]
     public void Post_Author_Should_Not_Put_Like_To_His_Posts()
     {
         var postAuthor = CreateTestPostAuthor();

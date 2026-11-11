@@ -1,19 +1,11 @@
-﻿using MediatR;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public class CommentPublishedEvent : INotification
-{
-    public string SenderNickname { get; }
-    public int PostID { get; }
-    public string SenderProfileUrl { get; }
-    public string PostUrl { get; }
-
-    public CommentPublishedEvent(string senderNickname, string senderProfileUrl, int postID, string postUrl)
-    {
-        SenderNickname = senderNickname;
-        SenderProfileUrl = senderProfileUrl;
-        PostID = postID;
-        PostUrl = postUrl;
-    }
-}
+/// <summary>
+/// Represents an event raised when a comment is published.
+/// </summary>
+/// <param name="PostID">The identifier of the post that received the comment.</param>
+/// <param name="CommentAuthorID">The identifier of the comment's author.</param>
+/// <param name="PostAuthorID">The identifier of the post's author.</param>
+public sealed record CommentPublishedEvent(int PostID, int CommentAuthorID, int PostAuthorID) : IDomainEvent;

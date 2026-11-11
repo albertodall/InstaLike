@@ -4,7 +4,7 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Social;
 
-public class Follow : EntityBase<int>
+public class Follow : AggregateRoot<int>
 {
     protected Follow() { }
 
@@ -24,8 +24,13 @@ public class Follow : EntityBase<int>
 
     public static Result<Follow> Create(int followerID, int followedID)
     {
-        return followerID == followedID
-            ? Result.Failure<Follow>("You cannot follow yourself.")
-            : Result.Success(new Follow(followerID, followedID));
+        if (followerID == followedID)
+        {
+            return Result.Failure<Follow>("You cannot follow yourself.");
+        }
+
+        var follow = new Follow(followerID, followedID);
+        follow.RaiseDomainEvent(new FollowedUserEvent(followerID, followedID));
+        return Result.Success(follow);
     }
 }

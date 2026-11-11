@@ -7,7 +7,7 @@ namespace InstaLike.Core.Notifications;
 /// Represents a notification sent to a recipient when another user follows them,
 /// likes their post, or comments on their post.
 /// </summary>
-public class Notification : EntityBase<int>
+public class Notification : AggregateRoot<int>
 {
     protected Notification() { }
 

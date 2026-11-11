@@ -24,49 +24,44 @@ internal sealed class UnfollowCommandHandler : IRequestHandler<UnfollowCommand, 
 
     public async Task<Result> Handle(UnfollowCommand request, CancellationToken cancellationToken)
     {
-        using (var tx = _session.BeginTransaction())
+        var unfollowedID = await _session.QueryOver<User>()
+            .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
+            .Select(u => u.ID)
+            .SingleOrDefaultAsync<int?>(cancellationToken);
+        if (unfollowedID is not int unfollowedUserID)
         {
-            var unfollowedID = await _session.QueryOver<User>()
-                .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
-                .Select(u => u.ID)
-                .SingleOrDefaultAsync<int?>(cancellationToken);
-            if (unfollowedID is not int unfollowedUserID)
-            {
-                return Result.Failure($"User [{request.UnfollowedNickname}] does not exist.");
-            }
-
-            var follow = await _session.QueryOver<Follow>()
-                .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == unfollowedUserID)
-                .SingleOrDefaultAsync(cancellationToken);
-            if (follow is null)
-            {
-                return Result.Failure($"User {request.FollowerID} is not following user [{request.UnfollowedNickname}].");
-            }
-
-            try
-            {
-                await _session.DeleteAsync(follow, cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-
-                _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
-                    request.FollowerID,
-                    request.UnfollowedNickname,
-                    unfollowedUserID);
-
-                return Result.Success();
-            }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-
-                _logger.Error("Error while unfollowing [{UnfollowedNickname}({UnfollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                    request.UnfollowedNickname,
-                    unfollowedUserID,
-                    request.FollowerID,
-                    ex.Message);
-
-                return Result.Failure(ex.Message);
-            }
+            return Result.Failure($"User [{request.UnfollowedNickname}] does not exist.");
         }
+
+        var follow = await _session.QueryOver<Follow>()
+            .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == unfollowedUserID)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (follow is null)
+        {
+            return Result.Failure($"User {request.FollowerID} is not following user [{request.UnfollowedNickname}].");
+        }
+
+        try
+        {
+            await _session.DeleteAsync(follow, cancellationToken);
+            await _session.FlushAsync(cancellationToken);
+        }
+        catch (ADOException ex)
+        {
+            _logger.Error("Error while unfollowing [{UnfollowedNickname}({UnfollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
+                request.UnfollowedNickname,
+                unfollowedUserID,
+                request.FollowerID,
+                ex.Message);
+
+            return Result.Failure(ex.Message);
+        }
+
+        _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
+            request.FollowerID,
+            request.UnfollowedNickname,
+            unfollowedUserID);
+
+        return Result.Success();
     }
 }

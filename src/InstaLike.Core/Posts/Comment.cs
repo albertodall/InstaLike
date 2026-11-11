@@ -3,13 +3,13 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public class Comment : EntityBase<int>
+public class Comment : AggregateRoot<int>
 {
 #pragma warning disable CS8618
     protected Comment() { }
 #pragma warning restore CS8618
 
-    internal Comment(int postID, int authorID, CommentText text)
+    private Comment(int postID, int authorID, CommentText text)
         : this()
     {
         PostID = postID;
@@ -26,4 +26,11 @@ public class Comment : EntityBase<int>
     public virtual CommentText Text => (CommentText)_text;
 
     public virtual DateTimeOffset CommentDate { get; protected set; }
+
+    internal static Comment Create(int postID, int authorID, int postAuthorID, CommentText text)
+    {
+        var comment = new Comment(postID, authorID, text);
+        comment.RaiseDomainEvent(new CommentPublishedEvent(postID, authorID, postAuthorID));
+        return comment;
+    }
 }

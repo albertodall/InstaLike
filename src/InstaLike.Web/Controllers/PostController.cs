@@ -96,19 +96,8 @@ public class PostController : Controller
     public async Task<IActionResult> PublishComment(PublishCommentModel newComment)
     {
         var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetIdentifier());
-        var commandResult = await _dispatcher.Send(command);
+        await _dispatcher.Send(command);
 
-        if (commandResult.IsSuccess && User.Identity != null && User.Identity.Name != null)
-        {
-            var newCommentNotification = new CommentPublishedEvent(
-                User.Identity.Name,
-                Url.Action("Profile", "Account", new { id = User?.Identity?.Name })!,
-                newComment.PostID,
-                Url.Action("Detail", "Post", new { id = newComment.PostID })!
-            );
-
-            await _dispatcher.Publish(newCommentNotification);
-        }
         var commentsQuery = new PostCommentsQuery(newComment.PostID);
         var comments = await _dispatcher.Send(commentsQuery);
 
@@ -120,18 +109,6 @@ public class PostController : Controller
     {
         var command = new LikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
-
-        if (commandResult.IsSuccess && User.Identity != null && User.Identity.Name != null)
-        {
-            var postLikedNotification = new PostLikedEvent(
-                User.Identity.Name,
-                Url.Action("Profile", "Account", new { id = User?.Identity?.Name })!,
-                like.PostID,
-                Url.Action("Detail", "Post", new { id = like.PostID })!
-            );
-
-            await _dispatcher.Publish(postLikedNotification);
-        }
 
         return commandResult.IsSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
     }

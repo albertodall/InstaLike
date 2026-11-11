@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
-using InstaLike.Web.Accounts.Services;
-using Serilog;
+using InstaLike.Core.SharedKernel;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -36,8 +39,8 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new DatabaseAuthenticationService(session, Log.Logger);
-            authenticationResult = await sut.AuthenticateUser(testUserName, testPassword);
+            var sut = DatabaseFixture.CreateMediator(session);
+            authenticationResult = await sut.Send(new LogInCommand(testUserName, testPassword));
         }
 
         using (new AssertionScope())
@@ -63,8 +66,8 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new DatabaseAuthenticationService(session, Log.Logger);
-            authenticationResult = await sut.AuthenticateUser(testUserName, "xxx42");
+            var sut = DatabaseFixture.CreateMediator(session);
+            authenticationResult = await sut.Send(new LogInCommand(testUserName, "xxx42"));
         }
 
         authenticationResult.IsSuccess.Should().BeFalse();
@@ -77,10 +80,50 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = new DatabaseAuthenticationService(session, Log.Logger);
-            authenticationResult = await sut.AuthenticateUser("not_existing_user", "xxx42");
+            var sut = DatabaseFixture.CreateMediator(session);
+            authenticationResult = await sut.Send(new LogInCommand("not_existing_user", "xxx42"));
         }
 
         authenticationResult.IsSuccess.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Logging_In_And_Out_Should_Raise_Events()
+    {
+        var testUser = new User((Nickname)"testuser4", (FullName)"test4 user4", Password.Create("password4").Value, (Email)"testuser4@acme.com", "bio4");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(testUser);
+        }
+
+        var raised = new List<IDomainEvent>();
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = DatabaseFixture.CreateMediator(session, configure: services =>
+            {
+                services.AddSingleton<INotificationHandler<UserLoggedInEvent>>(new RecordingHandler<UserLoggedInEvent>(raised));
+                services.AddSingleton<INotificationHandler<UserLoggedOutEvent>>(new RecordingHandler<UserLoggedOutEvent>(raised));
+            });
+
+            (await sut.Send(new LogInCommand("testuser4", "wrong"))).IsSuccess.Should().BeFalse();
+            (await sut.Send(new LogInCommand("testuser4", "password4"))).IsSuccess.Should().BeTrue();
+            (await sut.Send(new LogOutCommand(testUser.ID))).IsSuccess.Should().BeTrue();
+        }
+
+        raised.Should().Equal(new UserLoggedInEvent(testUser.ID), new UserLoggedOutEvent(testUser.ID));
+    }
+
+    private sealed class RecordingHandler<TEvent> : INotificationHandler<TEvent>
+        where TEvent : IDomainEvent
+    {
+        private readonly List<IDomainEvent> _raised;
+
+        public RecordingHandler(List<IDomainEvent> raised) => _raised = raised;
+
+        public Task Handle(TEvent notification, CancellationToken cancellationToken)
+        {
+            _raised.Add(notification);
+            return Task.CompletedTask;
+        }
     }
 }

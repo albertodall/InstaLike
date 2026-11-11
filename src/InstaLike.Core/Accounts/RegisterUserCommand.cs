@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using MediatR;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts;
 
-public sealed class RegisterUserCommand : IRequest<Result<int>>
+public sealed class RegisterUserCommand : ICommand<Result<int>>
 {
     public string Nickname { get; }
     public string Name { get; }

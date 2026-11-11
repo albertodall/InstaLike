@@ -1,16 +1,9 @@
-﻿using MediatR;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts;
 
-public sealed class UserLoggedInEvent : INotification
-{
-    public int UserID { get; }
-
-    public string Nickname { get; }
-
-    public UserLoggedInEvent(int userId, string nickname)
-    {
-        UserID = userId;
-        Nickname = nickname;
-    }
-}
+/// <summary>
+/// Occurs when a user logs in.
+/// </summary>
+/// <param name="UserID">The identifier of the logged-in user.</param>
+public sealed record UserLoggedInEvent(int UserID) : IDomainEvent;

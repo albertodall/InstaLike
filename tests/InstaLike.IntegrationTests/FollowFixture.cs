@@ -5,7 +5,6 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Social;
 using InstaLike.Web.Models;
-using InstaLike.Web.Social.CommandHandlers;
 using InstaLike.Web.Social.Queries;
 using NHibernate;
 using Serilog;
@@ -41,8 +40,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new FollowCommandHandler(session, Log.Logger);
-            followResult = await handler.Handle(followCommand, default);
+            var handler = DatabaseFixture.CreateMediator(session);
+            followResult = await handler.Send(followCommand, default);
         }
 
         using (new AssertionScope())
@@ -72,8 +71,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new UnfollowCommandHandler(session, Log.Logger);
-            unfollowResult = await handler.Handle(unfollowCommand, default);
+            var handler = DatabaseFixture.CreateMediator(session);
+            unfollowResult = await handler.Send(unfollowCommand, default);
         }
 
         using (new AssertionScope())
@@ -102,14 +101,14 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new FollowCommandHandler(session, Log.Logger);
-            await handler.Handle(followCommand, default);
+            var handler = DatabaseFixture.CreateMediator(session);
+            await handler.Send(followCommand, default);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new FollowCommandHandler(session, Log.Logger);
-            followResult = await handler.Handle(followCommand, default);
+            var handler = DatabaseFixture.CreateMediator(session);
+            followResult = await handler.Send(followCommand, default);
         }
 
         using (new AssertionScope())
@@ -139,8 +138,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new UnfollowCommandHandler(session, Log.Logger);
-            unfollowResult = await handler.Handle(unfollowCommand, default);
+            var handler = DatabaseFixture.CreateMediator(session);
+            unfollowResult = await handler.Send(unfollowCommand, default);
         }
 
         unfollowResult.IsSuccess.Should()
@@ -158,8 +157,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new FollowCommandHandler(session, Log.Logger);
-            (await handler.Handle(new FollowCommand(followerUser.ID, "nobody"), default)).IsSuccess.Should().BeFalse();
+            var handler = DatabaseFixture.CreateMediator(session);
+            (await handler.Send(new FollowCommand(followerUser.ID, "nobody"), default)).IsSuccess.Should().BeFalse();
         }
     }
 
@@ -174,8 +173,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = new FollowCommandHandler(session, Log.Logger);
-            (await handler.Handle(new FollowCommand(user.ID, user.Nickname), default)).IsSuccess.Should().BeFalse();
+            var handler = DatabaseFixture.CreateMediator(session);
+            (await handler.Send(new FollowCommand(user.ID, user.Nickname), default)).IsSuccess.Should().BeFalse();
             (await CountFollowsAsync(session, user.ID, user.ID)).Should().Be(0);
         }
     }

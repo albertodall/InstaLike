@@ -3,11 +3,11 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public class Like : EntityBase<int>
+public class Like : AggregateRoot<int>
 {
     protected Like() { }
 
-    internal Like(int postID, int userID)
+    private Like(int postID, int userID)
         : this()
     {
         PostID = postID;
@@ -20,4 +20,11 @@ public class Like : EntityBase<int>
     public virtual int UserID { get; protected set; }
 
     public virtual DateTimeOffset LikeDate { get; protected set; }
+
+    internal static Like Create(int postID, int userID, int postAuthorID)
+    {
+        var like = new Like(postID, userID);
+        like.RaiseDomainEvent(new PostLikedEvent(postID, userID, postAuthorID));
+        return like;
+    }
 }

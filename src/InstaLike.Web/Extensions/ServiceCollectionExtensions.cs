@@ -5,7 +5,6 @@ using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
-using InstaLike.Web.Accounts.Services;
 using InstaLike.Web.Data;
 using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Media;
@@ -44,6 +43,8 @@ internal static class ServiceCollectionExtensions
             var sessionFactory = sp.GetRequiredService<ISessionFactory>();
             return sessionFactory.OpenSession();
         });
+        services.AddScoped<UnitOfWork>();
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
 
         return services;
     }
@@ -59,7 +60,6 @@ internal static class ServiceCollectionExtensions
 
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services)
     {
-        services.AddScoped<IUserAuthenticationService, DatabaseAuthenticationService>();
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(opt =>
             {

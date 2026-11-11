@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Notifications;
 
-public sealed class MarkAllUserNotificationsReadCommand : IRequest<int>
+public sealed class MarkAllUserNotificationsReadCommand : ICommand<int>
 {
     public int UserID { get; }
 

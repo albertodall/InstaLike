@@ -24,81 +24,71 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
     {
         var logger = _logger.ForContext<LikePostCommand>();
 
-        using (var tx = _session.BeginTransaction())
+        var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+        if (post is null)
         {
-            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
-            if (post is null)
-            {
-                return Result.Failure($"Post {request.PostID} does not exist.");
-            }
-
-            var like = post.LikeBy(request.UserID);
-            if (like.IsFailure)
-            {
-                return like;
-            }
-
-            if (await FindLikeAsync(request.PostID, request.UserID, cancellationToken) is not null)
-            {
-                return Result.Failure($"User {request.UserID} already 'Liked' post {request.PostID}.");
-            }
-
-            try
-            {
-                await _session.SaveAsync(like.Value, cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-
-                logger.Information("User {UserID} put a 'Like' on post {PostID}", request.UserID, request.PostID);
-
-                return Result.Success();
-            }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-
-                logger.Error("Failed to put a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
-                    request.PostID,
-                    request.UserID,
-                    ex.Message);
-
-                return Result.Failure(ex.Message);
-            }
+            return Result.Failure($"Post {request.PostID} does not exist.");
         }
+
+        var like = post.LikeBy(request.UserID);
+        if (like.IsFailure)
+        {
+            return like;
+        }
+
+        if (await FindLikeAsync(request.PostID, request.UserID, cancellationToken) is not null)
+        {
+            return Result.Failure($"User {request.UserID} already 'Liked' post {request.PostID}.");
+        }
+
+        try
+        {
+            await _session.SaveAsync(like.Value, cancellationToken);
+            await _session.FlushAsync(cancellationToken);
+        }
+        catch (ADOException ex)
+        {
+            logger.Error("Failed to put a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
+                request.PostID,
+                request.UserID,
+                ex.Message);
+
+            return Result.Failure(ex.Message);
+        }
+
+        logger.Information("User {UserID} put a 'Like' on post {PostID}", request.UserID, request.PostID);
+
+        return Result.Success();
     }
 
     public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
     {
         var logger = _logger.ForContext<DislikePostCommand>();
 
-        using (var tx = _session.BeginTransaction())
+        var like = await FindLikeAsync(request.PostID, request.UserID, cancellationToken);
+        if (like is null)
         {
-            var like = await FindLikeAsync(request.PostID, request.UserID, cancellationToken);
-            if (like is null)
-            {
-                return Result.Failure($"User {request.UserID} did not put any 'Like' on post {request.PostID}.");
-            }
-
-            try
-            {
-                await _session.DeleteAsync(like, cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-
-                logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);
-
-                return Result.Success();
-            }
-            catch (ADOException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-
-                logger.Error("Failed to remove a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
-                    request.PostID,
-                    request.UserID,
-                    ex.Message);
-
-                return Result.Failure(ex.Message);
-            }
+            return Result.Failure($"User {request.UserID} did not put any 'Like' on post {request.PostID}.");
         }
+
+        try
+        {
+            await _session.DeleteAsync(like, cancellationToken);
+            await _session.FlushAsync(cancellationToken);
+        }
+        catch (ADOException ex)
+        {
+            logger.Error("Failed to remove a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
+                request.PostID,
+                request.UserID,
+                ex.Message);
+
+            return Result.Failure(ex.Message);
+        }
+
+        logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);
+
+        return Result.Success();
     }
 
     private Task<Like?> FindLikeAsync(int postID, int userID, CancellationToken cancellationToken)
