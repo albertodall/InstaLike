@@ -37,14 +37,6 @@ internal class UserMapping : ClassMap<User>
             m.Map(p => p.Surname).CustomType<string>().Not.Nullable();
         });
 
-        HasMany(p => p.Followers)
-            .KeyColumn("FollowedID")
-            .Access.CamelCaseField(Prefix.Underscore);
-
-        HasMany(p => p.Followed)
-            .KeyColumn("FollowerID")
-            .Access.CamelCaseField(Prefix.Underscore);
-
         DynamicInsert();
     }
 }

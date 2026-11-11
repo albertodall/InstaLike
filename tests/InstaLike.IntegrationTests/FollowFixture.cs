@@ -7,6 +7,7 @@ using InstaLike.Core.Social;
 using InstaLike.Web.Models;
 using InstaLike.Web.Social.CommandHandlers;
 using InstaLike.Web.Social.Queries;
+using NHibernate;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,8 +50,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
             followResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<User>(followerUser.ID)).Followed.Count.Should().Be(1);
-                (await session.GetAsync<User>(followedUser.ID)).Followers.Count.Should().Be(1);
+                (await CountFollowsAsync(session, followerUser.ID, followedUser.ID)).Should().Be(1);
             }
         }
     }
@@ -66,7 +66,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followerUser);
             await session.SaveAsync(followedUser);
-            await session.SaveAsync(new Follow(followerUser, followedUser));
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
         }
 
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
@@ -81,8 +81,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
             unfollowResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<User>(followerUser.ID)).Followed.Count.Should().Be(0);
-                (await session.GetAsync<User>(followedUser.ID)).Followers.Count.Should().Be(0);
+                (await CountFollowsAsync(session, followerUser.ID, followedUser.ID)).Should().Be(0);
             }
         }
     }
@@ -119,8 +118,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
                 .BeFalse($"User [{followedUser.Nickname}] is already followed by user [{followerUser.Nickname}].");
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<User>(followerUser.ID)).Followed.Count.Should().Be(1);
-                (await session.GetAsync<User>(followedUser.ID)).Followers.Count.Should().Be(1);
+                (await CountFollowsAsync(session, followerUser.ID, followedUser.ID)).Should().Be(1);
             }
         }
     }
@@ -150,6 +148,39 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task Should_Not_Follow_A_User_That_Does_Not_Exist()
+    {
+        var followerUser = new User((Nickname)"user13", (FullName)"test13 user13", Password.Create("password").Value, (Email)"testuser13@acme.com", "bio13");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(followerUser);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var handler = new FollowCommandHandler(session, Log.Logger);
+            (await handler.Handle(new FollowCommand(followerUser.ID, "nobody"), default)).IsSuccess.Should().BeFalse();
+        }
+    }
+
+    [Fact]
+    public async Task User_Should_Not_Follow_Themselves()
+    {
+        var user = new User((Nickname)"user14", (FullName)"test14 user14", Password.Create("password").Value, (Email)"testuser14@acme.com", "bio14");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(user);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var handler = new FollowCommandHandler(session, Log.Logger);
+            (await handler.Handle(new FollowCommand(user.ID, user.Nickname), default)).IsSuccess.Should().BeFalse();
+            (await CountFollowsAsync(session, user.ID, user.ID)).Should().Be(0);
+        }
+    }
+
+    [Fact]
     public async Task User_Should_Have_One_Follower()
     {
         var followerUser = new User((Nickname)"user9", (FullName)"test9 user9", Password.Create("password").Value, (Email)"testuser9@acme.com", "bio9");
@@ -159,8 +190,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followedUser);
-            followerUser.Follow(followedUser);
             await session.SaveAsync(followerUser);
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
         }
 
         var followersQuery = new FollowersQuery(followedUser.Nickname);
@@ -183,8 +214,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followedUser);
-            followerUser.Follow(followedUser);
             await session.SaveAsync(followerUser);
+            await session.SaveAsync(Follow.Create(followerUser.ID, followedUser.ID).Value);
         }
 
         var followingQuery = new FollowingQuery(followerUser.Nickname);
@@ -196,4 +227,9 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         result.Length.Should().Be(1);
     }
+
+    private static Task<int> CountFollowsAsync(ISession session, int followerID, int followedID) =>
+        session.QueryOver<Follow>()
+            .Where(f => f.FollowerID == followerID && f.FollowedID == followedID)
+            .RowCountAsync();
 }

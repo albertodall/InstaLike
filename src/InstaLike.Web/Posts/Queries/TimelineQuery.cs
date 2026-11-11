@@ -47,17 +47,17 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
         {
             Post post = null!;
             Comment comment = null!;
-            User postAuthor = null!;
-            Follow follow = null!;
+
+            var followedUserIdsQuery = QueryOver.Of<Follow>()
+                .Where(f => f.FollowerID == request.UserID)
+                .Select(f => f.FollowedID);
 
             // Post to show in the timeline (user's own posts and posts published by followed users)
             var postIdsToShowInTimelineQuery = QueryOver.Of<Post>()
-                .Inner.JoinAlias(p => p.Author, () => postAuthor)
-                    .Left.JoinAlias(() => postAuthor.Followers, () => follow)
                 .Where(
                     Restrictions.Disjunction()
-                        .Add(() => follow.Follower.ID == request.UserID)
-                        .Add(() => postAuthor.ID == request.UserID)
+                        .Add(Restrictions.Where<Post>(p => p.Author.ID == request.UserID))
+                        .Add(Subqueries.WhereProperty<Post>(p => p.Author.ID).In(followedUserIdsQuery))
                 )
                 .Select(p => p.ID)
                 .OrderBy(p => p.PostDate).Desc

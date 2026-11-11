@@ -85,20 +85,20 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
 
             // Number of followers
             var followersCountQuery = _session.QueryOver<Follow>()
-                .Where(f => f.Followed.ID == profile.UserID)
+                .Where(f => f.FollowedID == profile.UserID)
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 
             // Number of followed users
             var followingCountQuery = _session.QueryOver<Follow>()
-                .Where(f => f.Follower.ID == profile.UserID)
+                .Where(f => f.FollowerID == profile.UserID)
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 
             // Is the current user following the selected user?
             var isFollowedByCurrentUserQuery = _session.QueryOver<Follow>()
-                .Where(f => f.Followed.ID == profile.UserID)
-                .And(f => f.Follower.ID == request.CurrentUserID)
+                .Where(f => f.FollowedID == profile.UserID)
+                .And(f => f.FollowerID == request.CurrentUserID)
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 

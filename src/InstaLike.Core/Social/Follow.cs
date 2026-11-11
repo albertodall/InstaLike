@@ -1,24 +1,31 @@
 ﻿using System;
-using InstaLike.Core.Accounts;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Social;
 
 public class Follow : EntityBase<int>
 {
-#pragma warning disable CS8618
     protected Follow() { }
-#pragma warning restore CS8618
 
-    public Follow(User follower, User followed)
+    private Follow(int followerID, int followedID)
         : this()
     {
-        Follower = follower;
-        Followed = followed;
+        FollowerID = followerID;
+        FollowedID = followedID;
         FollowDate = DateTimeOffset.Now;
     }
 
-    public virtual User Follower { get; }
-    public virtual User Followed { get; }
-    public virtual DateTimeOffset FollowDate { get; }
+    public virtual int FollowerID { get; protected set; }
+
+    public virtual int FollowedID { get; protected set; }
+
+    public virtual DateTimeOffset FollowDate { get; protected set; }
+
+    public static Result<Follow> Create(int followerID, int followedID)
+    {
+        return followerID == followedID
+            ? Result.Failure<Follow>("You cannot follow yourself.")
+            : Result.Success(new Follow(followerID, followedID));
+    }
 }
