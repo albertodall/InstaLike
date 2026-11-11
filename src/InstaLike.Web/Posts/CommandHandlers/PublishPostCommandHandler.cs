@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
@@ -34,11 +33,10 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
             return Result.Failure<int>("Please select a picture to share together with your post.");
         }
 
-        var author = await _session.LoadAsync<User>(request.UserID, cancellationToken);
         var postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
         _unitOfWork.OnRolledBack(() => _pictureStore.TryDeleteAsync(PictureContainers.Posts, postPicture));
 
-        var post = new Post(author, postPicture, (PostText)request.Text);
+        var post = new Post(request.UserID, postPicture, (PostText)request.Text);
         try
         {
             await _session.SaveAsync(post, cancellationToken);

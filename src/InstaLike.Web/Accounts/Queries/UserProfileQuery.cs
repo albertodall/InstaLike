@@ -64,14 +64,14 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
 
             // Number of posts published by this author. 
             var postCountQuery = _session.QueryOver<Post>()
-                .Where(p => p.Author.ID == profile.UserID)
+                .Where(p => p.AuthorID == profile.UserID)
                 .Select(Projections.Count<Post>(p => p.ID))
                 .FutureValue<int>();
 
             // Thumbnails of the latest published posts.
             PostThumbnailModel thumbnailModel = null!;
             var thumbnailsQuery = _session.QueryOver<Post>()
-                .Where(p => p.Author.ID == profile.UserID)
+                .Where(p => p.AuthorID == profile.UserID)
                 .OrderBy(p => p.PostDate).Desc()
                 .Select(Projections.ProjectionList()
                     .Add(Projections.Property<Post>(p => p.ID)

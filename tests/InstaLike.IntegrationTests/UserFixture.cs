@@ -32,12 +32,13 @@ public class UserFixture : IClassFixture<DatabaseFixture>
         var author = new User((Nickname)"authoruser", (FullName)"author user", Password.Create("password").Value, (Email)"authoruser@acme.com", "my bio");
         var followed = new User((Nickname)"followeduser", (FullName)"followed user", Password.Create("password").Value, (Email)"followed@acme.com", "my bio");
         var follower = new User((Nickname)"followeruser", (FullName)"follower user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
-        var post = new Post(author, PictureId.New(), (PostText)"test post");
+        Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followed);
             await session.SaveAsync(follower);
             await session.SaveAsync(author);
+            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
             await session.SaveAsync(post);
             await session.SaveAsync(Follow.Create(author.ID, followed.ID).Value);
             await session.SaveAsync(Follow.Create(follower.ID, author.ID).Value);

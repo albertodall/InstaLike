@@ -24,8 +24,9 @@ internal class PostMapping : ClassMap<Post>
             .Column("PostGuid")
             .Not.Nullable();
 
-        References(p => p.Author)
-            .Column("UserID");
+        Map(p => p.AuthorID)
+            .Column("UserID")
+            .Not.Nullable();
 
         DynamicInsert();
     }

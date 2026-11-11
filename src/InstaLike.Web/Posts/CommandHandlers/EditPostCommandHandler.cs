@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
@@ -34,18 +33,14 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             return Result.Failure<int>("Please select a picture to share together with your post.");
         }
 
-        var editor = await _session.LoadAsync<User>(request.UserID, cancellationToken);
-        Post? postToEdit = await _session.QueryOver<Post>()
-            .Fetch(SelectMode.ChildFetch, p => p.Author)
-            .Where(p => p.ID == request.PostID)
-            .SingleOrDefaultAsync(cancellationToken);
+        var postToEdit = await _session.GetAsync<Post>(request.PostID, cancellationToken);
 
         if (postToEdit is null)
         {
             return Result.Failure<int>($"Post {request.PostID} does not exist.");
         }
 
-        if (!postToEdit.CanBeEditedBy(editor))
+        if (!postToEdit.CanBeEditedBy(request.UserID))
         {
             _logger.Warning("User {UserID} tried to edit post {PostID} but was not allowed to.",
                 request.UserID,
