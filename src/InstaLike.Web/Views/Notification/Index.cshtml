@@ -1,4 +1,5 @@
-﻿@using InstaLike.Web.Extensions
+﻿@using InstaLike.Core.Notifications
+@using InstaLike.Web.Extensions
 
 @model IEnumerable<NotificationModel>
 
@@ -21,7 +22,20 @@
                 </a>
                 <time title="@notification.NotificationDate.DateTime" datetime="@notification.NotificationDate.DateTime">@notification.NotificationDate.UtcDateTime.AsPastDays()</time>
 
-                <p>@Html.Raw(notification.Message)</p>
+                <p>
+                    @switch (notification.Kind)
+                    {
+                        case NotificationKind.Followed:
+                            <text>has started following you.</text>
+                            break;
+                        case NotificationKind.PostLiked:
+                            <text>liked your <a href="@Url.Action("Detail", "Post", new { id = notification.PostID })">post</a>.</text>
+                            break;
+                        case NotificationKind.PostCommented:
+                            <text>wrote a comment about your <a href="@Url.Action("Detail", "Post", new { id = notification.PostID })">post</a>.</text>
+                            break;
+                    }
+                </p>
             </div>
         }
     }

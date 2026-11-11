@@ -1,30 +1,47 @@
 ﻿using System;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Notifications;
 
+/// <summary>
+/// Represents a notification sent to a recipient when another user follows them,
+/// likes their post, or comments on their post.
+/// </summary>
 public class Notification : EntityBase<int>
 {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     protected Notification() { }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public Notification(User sender, User recipient, string message) : this()
+    private Notification(NotificationKind kind, int senderID, int recipientID, int? postID)
+        : this()
     {
-        Sender = sender;
-        Recipient = recipient;
-        Message = message;
-
+        Kind = kind;
+        SenderID = senderID;
+        RecipientID = recipientID;
+        PostID = postID;
         HasBeenReadByRecipient = false;
         NotificationDate = DateTimeOffset.Now;
     }
 
-    public virtual User Sender { get; }
-    public virtual User Recipient { get; }
-    public virtual string Message { get; }
+    public virtual NotificationKind Kind { get; protected set; }
+
+    public virtual int SenderID { get; protected set; }
+
+    public virtual int RecipientID { get; protected set; }
+
+    public virtual int? PostID { get; protected set; }
+
     public virtual bool HasBeenReadByRecipient { get; protected set; }
-    public virtual DateTimeOffset NotificationDate { get; }
+
+    public virtual DateTimeOffset NotificationDate { get; protected set; }
+
+    public static Notification Followed(int followerID, int followedID) =>
+        new(NotificationKind.Followed, followerID, followedID, null);
+
+    public static Notification PostLiked(int likerID, int postAuthorID, int postID) =>
+        new(NotificationKind.PostLiked, likerID, postAuthorID, postID);
+
+    public static Notification PostCommented(int commentAuthorID, int postAuthorID, int postID) =>
+        new(NotificationKind.PostCommented, commentAuthorID, postAuthorID, postID);
 
     public virtual void MarkAsRead()
     {

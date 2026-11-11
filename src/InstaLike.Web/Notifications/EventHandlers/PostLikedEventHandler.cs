@@ -13,8 +13,6 @@ namespace InstaLike.Web.Notifications.EventHandlers;
 
 public class PostLikedEventHandler : INotificationHandler<PostLikedEvent>
 {
-    private const string NotificationMessageTemplate = "<a href=\"{0}\">{1}</a> liked your <a href=\"{2}\">post.</a>";
-
     private readonly ISession _session;
     private readonly ILogger _logger;
 
@@ -41,13 +39,8 @@ public class PostLikedEventHandler : INotificationHandler<PostLikedEvent>
                     .FutureValue();
 
                 var post = await postQuery.GetValueAsync(cancellationToken);
-                var message = string.Format(NotificationMessageTemplate,
-                    notification.SenderProfileUrl,
-                    notification.SenderNickname,
-                    notification.PostUrl);
-
                 sender = await senderQuery.GetValueAsync(cancellationToken);
-                var notificationToInsert = new Notification(sender, post.Author, message);
+                var notificationToInsert = Notification.PostLiked(sender.ID, post.Author.ID, post.ID);
 
                 await _session.SaveAsync(notificationToInsert, cancellationToken);
                 await tx.CommitAsync(cancellationToken);

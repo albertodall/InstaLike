@@ -13,8 +13,6 @@ namespace InstaLike.Web.Notifications.EventHandlers;
 
 public class FollowedUserEventHandler : INotificationHandler<FollowedUserEvent>
 {
-    private const string NotificationMessageTemplate = "<a href=\"{0}\">{1}</a> has started following you.";
-
     private readonly ISession _session;
     private readonly ILogger _logger;
 
@@ -39,13 +37,9 @@ public class FollowedUserEventHandler : INotificationHandler<FollowedUserEvent>
                    .Where(Restrictions.Eq("Nickname", notification.FollowedNickname))
                    .FutureValue();
 
-                var message = string.Format(NotificationMessageTemplate,
-                    notification.SenderProfileUrl,
-                    notification.SenderNickname);
-
                 var sender = await senderQuery.GetValueAsync(cancellationToken);
                 recipient = await recipientQuery.GetValueAsync(cancellationToken);
-                var notificationToInsert = new Notification(sender, recipient, message);
+                var notificationToInsert = Notification.Followed(sender.ID, recipient.ID);
 
                 await _session.SaveAsync(notificationToInsert, cancellationToken);
                 await tx.CommitAsync(cancellationToken);

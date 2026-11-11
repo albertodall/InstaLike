@@ -13,8 +13,6 @@ namespace InstaLike.Web.Notifications.EventHandlers;
 
 public class CommentPublishedEventHandler : INotificationHandler<CommentPublishedEvent>
 {
-    private const string NotificationMessageTemplate = "<a href=\"{0}\">{1}</a> wrote a comment <a href=\"{2}\">about your post.</a>";
-
     private readonly NHibernate.ISession _session;
     private readonly ILogger _logger;
 
@@ -41,13 +39,8 @@ public class CommentPublishedEventHandler : INotificationHandler<CommentPublishe
                     .FutureValue();
 
                 var post = await postQuery.GetValueAsync(cancellationToken);
-                var message = string.Format(NotificationMessageTemplate,
-                    notification.SenderProfileUrl,
-                    notification.SenderNickname,
-                    notification.PostUrl);
-
                 sender = await senderQuery.GetValueAsync(cancellationToken);
-                var notificationToInsert = new Notification(sender, post.Author, message);
+                var notificationToInsert = Notification.PostCommented(sender.ID, post.Author.ID, post.ID);
                 await _session.SaveAsync(notificationToInsert, cancellationToken);
 
                 await tx.CommitAsync(cancellationToken);

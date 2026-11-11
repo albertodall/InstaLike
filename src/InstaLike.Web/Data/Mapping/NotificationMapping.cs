@@ -15,17 +15,22 @@ internal class NotificationMapping : ClassMap<Notification>
             .Column("[ReadByRecipient]")
             .Not.Nullable();
 
-        Map(p => p.Message).CustomType<string>()
+        Map(p => p.Kind).CustomType<NotificationKind>()
             .Not.Nullable();
 
         Map(p => p.NotificationDate)
             .Not.Nullable();
 
-        References(p => p.Recipient)
-            .Column("[RecipientID]");
+        Map(p => p.RecipientID)
+            .Column("[RecipientID]")
+            .Not.Nullable();
 
-        References(p => p.Sender)
-            .Column("[SenderID]");
+        Map(p => p.SenderID)
+            .Column("[SenderID]")
+            .Not.Nullable();
+
+        Map(p => p.PostID)
+            .Nullable();
 
         DynamicInsert();
     }
