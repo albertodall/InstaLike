@@ -12,7 +12,7 @@ internal sealed class PostMapping : ClassMap<Post>
 
         Id(p => p.ID).GeneratedBy.Native();
 
-        Map(p => p.Text).CustomType<string>()
+        Map(p => p.Text).AnsiString(500)
             .Access.CamelCaseField(Prefix.Underscore)
             .Not.Nullable();
 

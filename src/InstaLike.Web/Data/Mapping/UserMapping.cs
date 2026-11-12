@@ -12,16 +12,16 @@ internal sealed class UserMapping : ClassMap<User>
 
         Id(p => p.ID).GeneratedBy.Native();
 
-        Map(p => p.Biography).CustomType<string>()
+        Map(p => p.Biography).AnsiString(500)
             .Not.Nullable()
             .LazyLoad();
-        Map(p => p.Email).CustomType<string>()
+        Map(p => p.Email).AnsiString(50)
             .Access.CamelCaseField(Prefix.Underscore)
             .Not.Nullable();
-        Map(p => p.Nickname).CustomType<string>()
+        Map(p => p.Nickname).AnsiString(20)
             .Access.CamelCaseField(Prefix.Underscore)
             .Not.Nullable();
-        Map(p => p.Password).CustomType<string>()
+        Map(p => p.Password).AnsiString(64)
             .Access.CamelCaseField(Prefix.Underscore)
             .Not.Nullable();
         Map(p => p.RegistrationDate)
@@ -33,8 +33,8 @@ internal sealed class UserMapping : ClassMap<User>
 
         Component(p => p.FullName, m =>
         {
-            m.Map(p => p.Name).CustomType<string>().Not.Nullable();
-            m.Map(p => p.Surname).CustomType<string>().Not.Nullable();
+            m.Map(p => p.Name).AnsiString(30).Not.Nullable();
+            m.Map(p => p.Surname).AnsiString(50).Not.Nullable();
         });
 
         DynamicInsert();
