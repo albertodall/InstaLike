@@ -88,11 +88,9 @@ internal static class ServiceCollectionExtensions
     public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
     {
         services.AddTransient<IAuthorizationHandler, PostAuthorRequirementHandler>();
-        services.AddAuthorization(opt =>
-        {
-            opt.AddPolicy("IsPostAuthor", policy =>
+        services.AddAuthorizationBuilder()
+            .AddPolicy("IsPostAuthor", policy =>
                 policy.AddRequirements(new PostAuthorRequirement()));
-        });
 
         return services;
     }
