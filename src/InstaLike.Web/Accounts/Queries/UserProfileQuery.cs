@@ -30,10 +30,10 @@ public class UserProfileQuery : IRequest<UserProfileModel>
 
 internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery, UserProfileModel>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public UserProfileQueryHandler(ISession session, ILogger logger)
+    public UserProfileQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<UserProfileModel>() ?? throw new ArgumentNullException(nameof(logger));

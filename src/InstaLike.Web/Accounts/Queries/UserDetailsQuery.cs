@@ -22,10 +22,10 @@ internal sealed class UserDetailsQuery : IRequest<UserDetailsModel>
 
 internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery, UserDetailsModel>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public UserDetailsQueryHandler(ISession session, ILogger logger)
+    public UserDetailsQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
