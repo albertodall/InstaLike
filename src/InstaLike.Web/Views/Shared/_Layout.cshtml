@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - InstaLike</title>
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <div class="main">
@@ -37,7 +37,7 @@
                 crossorigin="anonymous">
         </script>
     </environment>
-    <script type="text/javascript" src="~/js/InstaLike.js"></script>
+    <script type="text/javascript" src="~/js/InstaLike.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
