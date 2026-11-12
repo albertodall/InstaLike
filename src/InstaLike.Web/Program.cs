@@ -27,7 +27,7 @@ builder.Services.ConfigureTelemetry(builder.Configuration);
 builder.Services.ConfigureOpenTelemetry(builder.Configuration);
 
 builder.Services.ConfigureMediator();
-builder.Services.ConfigureDataAccess(builder.Configuration);
+builder.Services.ConfigureDataAccess(builder.Configuration, builder.Environment);
 builder.Services.ConfigurePictureStorage(builder.Configuration);
 builder.Services.ConfigureImageTagging(builder.Configuration);
 

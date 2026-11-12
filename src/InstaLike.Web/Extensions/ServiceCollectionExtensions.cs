@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NHibernate;
 using NHibernate.Driver;
 using OpenAI;
@@ -31,11 +32,11 @@ internal static class ServiceCollectionExtensions
 {
     private const string AzureOpenAIScope = "https://cognitiveservices.azure.com/.default";
 
-    public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureDataAccess(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
             ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
-        var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
+        var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString, environment);
 
         services.AddSingleton(nhConfig.BuildSessionFactory());
         services.AddScoped(sp =>
@@ -158,19 +159,22 @@ internal static class ServiceCollectionExtensions
         new(model, new BearerTokenPolicy(AzureIdentity.Credential, AzureOpenAIScope), options);
 #pragma warning restore OPENAI001
 
-    private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
+    private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString, IHostEnvironment environment)
     {
+        var database = MsSqlConfiguration.MsSql2012
+            .Driver<MicrosoftDataSqlClientDriver>()
+            .ConnectionString(connectionString)
+            .DefaultSchema("dbo")
+            .AdoNetBatchSize(20)
+            .UseReflectionOptimizer();
+
+        if (environment.IsDevelopment())
+        {
+            database.ShowSql().FormatSql();
+        }
+
         return Fluently.Configure()
-            .Database(
-                MsSqlConfiguration.MsSql2012
-                    .Driver<MicrosoftDataSqlClientDriver>()
-                    .ConnectionString(connectionString)
-                    .DefaultSchema("dbo")
-                    .AdoNetBatchSize(20)
-                    .ShowSql()
-                    .FormatSql()
-                    .UseReflectionOptimizer()
-            )
+            .Database(database)
             .Mappings(m =>
                 m.FluentMappings
                     .Conventions.Add(
