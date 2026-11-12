@@ -2,6 +2,12 @@
 
 namespace InstaLike.Core.Posts;
 
+/// <summary>
+/// Represents validated text for a comment.
+/// </summary>
+/// <remarks>
+/// Comment text is trimmed and must contain at most 200 characters.
+/// </remarks>
 public class CommentText : SimpleValueObject<string>
 {
     private const int CommentTextMaxLength = 200;

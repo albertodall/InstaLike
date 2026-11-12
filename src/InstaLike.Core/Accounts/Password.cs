@@ -7,6 +7,12 @@ using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Accounts;
 
+/// <summary>
+/// Represents a password stored as a Base64-encoded salted hash and supports verification of plain-text passwords.
+/// </summary>
+/// <remarks>
+/// Passwords created through this type must contain at least six characters.
+/// </remarks>
 public class Password : ValueObject
 {
     private const byte MinimumPasswordLength = 6;

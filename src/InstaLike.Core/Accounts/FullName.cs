@@ -5,6 +5,13 @@ using CSharpFunctionalExtensions;
 
 namespace InstaLike.Core.Accounts;
 
+/// <summary>
+/// Represents a person's name and surname.
+/// </summary>
+/// <remarks>
+/// Equality is case-insensitive for both the name and surname.
+/// The string representation combines them with a space.
+/// </remarks>
 public class FullName : ValueObject
 {
     public string Name { get; }
