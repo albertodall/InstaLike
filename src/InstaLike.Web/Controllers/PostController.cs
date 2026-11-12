@@ -111,7 +111,7 @@ public class PostController : Controller
         var command = new LikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
 
-        return commandResult.IsSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
+        return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error);
     }
 
     [HttpPost]
@@ -120,7 +120,7 @@ public class PostController : Controller
         var command = new DislikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
 
-        return commandResult.IsSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
+        return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error);
     }
 
     [HttpPost]

@@ -243,6 +243,15 @@ textarea {
     background-image: url(../img/icon_heart.png);
 }
 
+.posts .post-likes .like-error,
+.post-detail .post-likes .like-error {
+    display: block;
+    padding-top: 5px;
+    color: red;
+    font-style: italic;
+    font-size: 11px;
+}
+
 .posts .post-author-comment {
     padding: 10px;
     background-color: #d8ecff;

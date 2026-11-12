@@ -49,14 +49,14 @@ public class Post : AggregateRoot<int>
 
     public virtual Result LikeBy(int userID)
     {
-        if (AuthorID == userID)
+        if (!CanBeLikedBy(userID))
         {
-            return Result.Failure("You cannot put a 'Like' on your own posts.");
+            return Result.Failure("You cannot like your own posts.");
         }
 
         if (IsLikedBy(userID))
         {
-            return Result.Failure($"User {userID} already 'Liked' post {ID}.");
+            return Result.Failure("You have already liked this post.");
         }
 
         _likes.Add(new Like(this, userID));
@@ -69,11 +69,16 @@ public class Post : AggregateRoot<int>
         var like = _likes.SingleOrDefault(l => l.UserID == userID);
         if (like is null)
         {
-            return Result.Failure($"User {userID} did not put any 'Like' on post {ID}.");
+            return Result.Failure("You have not liked this post.");
         }
 
         _likes.Remove(like);
         return Result.Success();
+    }
+
+    public virtual bool CanBeLikedBy(int userID)
+    {
+        return AuthorID != userID;
     }
 
     public virtual bool IsLikedBy(int userID)
