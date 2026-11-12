@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
-using InstaLike.Web.Data;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
@@ -38,8 +38,6 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
 
     public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)
     {
-        PostModel post = null!;
-
         _logger.Debug("Reading details for post {PostID} with parameters {@Request}", request.PostID, request);
 
         using (var tx = _session.BeginTransaction())
@@ -74,32 +72,38 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
                 .FutureValue<int>();
 
             // Post to show
+            var postQuery = _session.QueryOver<Post>()
+                .Where(p => p.ID == request.PostID)
+                .FutureValue();
+
             Post postEntity = null!;
             User postAuthor = null!;
-            var postQuery = _session.QueryOver(() => postEntity)
+            var authorQuery = _session.QueryOver(() => postEntity)
                 .JoinEntityAlias(() => postAuthor, () => postAuthor.ID == postEntity.AuthorID)
                 .Where(() => postEntity.ID == request.PostID)
                 .SelectList(list => list
-                    .Select(() => postEntity.ID).WithAlias(() => post.PostID)
-                    .Select(() => postEntity.Text).WithAlias(() => post.Text)
-                    .Select(() => postEntity.Picture).WithAlias(() => post.Picture)
-                    .Select(() => postEntity.PostDate).WithAlias(() => post.PostDate)
-                    .Select(() => postAuthor.Nickname).WithAlias(() => post.AuthorNickName)
-                    .Select(() => postAuthor.ProfilePicture).WithAlias(() => post.AuthorProfilePicture)
+                    .Select(() => postAuthor.Nickname)
+                    .Select(() => postAuthor.ProfilePicture)
                 )
-                .TransformUsing(new EntityToModelResultTransformer<PostModel>())
-                .FutureValue<PostModel>();
+                .FutureValue<object[]>();
 
-            // Add related data
-            post = await postQuery.GetValueAsync(cancellationToken);
-            post.LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken);
-            post.Comments = postCommentsQuery.ToArray();
-            post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0;
-            var loadedPost = await _session.LoadAsync<Post>(request.PostID, cancellationToken);
-            post.CanBeLikedByCurrentUser = loadedPost.CanBeLikedBy(request.CurrentUserID);
-            post.CanBeEditedByCurrentUser = loadedPost.CanBeEditedBy(request.CurrentUserID);
+            var post = await postQuery.GetValueAsync(cancellationToken);
+            var author = await authorQuery.GetValueAsync(cancellationToken);
+
+            return new PostModel
+            {
+                PostID = post.ID,
+                AuthorNickName = (string)author[0],
+                AuthorProfilePicture = (PictureId?)author[1],
+                Picture = post.Picture,
+                PostDate = post.PostDate,
+                Text = post.Text,
+                Comments = postCommentsQuery.ToArray(),
+                LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken),
+                IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0,
+                CanBeLikedByCurrentUser = post.CanBeLikedBy(request.CurrentUserID),
+                CanBeEditedByCurrentUser = post.CanBeEditedBy(request.CurrentUserID)
+            };
         }
-
-        return post;
     }
 }
