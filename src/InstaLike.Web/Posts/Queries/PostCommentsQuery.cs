@@ -24,10 +24,10 @@ public class PostCommentsQuery : IRequest<CommentModel[]>
 
 internal class PostCommentsQueryHandler : IRequestHandler<PostCommentsQuery, CommentModel[]>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public PostCommentsQueryHandler(ISession session, ILogger logger)
+    public PostCommentsQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

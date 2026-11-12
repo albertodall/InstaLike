@@ -72,7 +72,7 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new UnreadNotificationsQuery(recipient.ID);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -102,7 +102,7 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new NotificationsQuery(recipient.ID, true);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new NotificationsQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -136,7 +136,7 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new NotificationsQuery(recipient.ID, false);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new NotificationsQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);

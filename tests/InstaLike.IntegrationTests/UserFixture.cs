@@ -44,7 +44,7 @@ public class UserFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new UserProfileQuery(follower.ID, author.Nickname, 3);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new UserProfileQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -72,7 +72,7 @@ public class UserFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new UserDetailsQuery(user.ID);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new UserDetailsQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);

@@ -29,10 +29,10 @@ public class TimelineQuery : IRequest<PostModel[]>
 
 public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostModel[]>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public TimelineQueryHandler(ISession session, ILogger logger)
+    public TimelineQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<TimelineQuery>() ?? throw new ArgumentNullException(nameof(logger));

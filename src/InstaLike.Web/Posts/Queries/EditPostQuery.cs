@@ -24,10 +24,10 @@ public class EditPostQuery : IRequest<EditPostModel>
 
 internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, EditPostModel>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public EditPostQueryHandler(ISession session, ILogger logger)
+    public EditPostQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditPostQuery>() ?? throw new ArgumentNullException(nameof(logger));

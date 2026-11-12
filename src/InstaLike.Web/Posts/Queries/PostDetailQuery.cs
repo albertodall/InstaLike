@@ -27,10 +27,10 @@ public class PostDetailQuery : IRequest<PostModel>
 
 internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, PostModel>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public PostDetailQueryHandler(ISession session, ILogger logger)
+    public PostDetailQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<PostDetailQuery>() ?? throw new ArgumentNullException(nameof(logger));

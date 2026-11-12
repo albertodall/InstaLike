@@ -25,10 +25,10 @@ public class FollowingQuery : IRequest<FollowModel[]>
 
 internal sealed class FollowingQueryHandler : IRequestHandler<FollowingQuery, FollowModel[]>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public FollowingQueryHandler(ISession session, ILogger logger)
+    public FollowingQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<FollowingQuery>() ?? throw new ArgumentNullException(nameof(logger));

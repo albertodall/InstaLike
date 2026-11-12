@@ -66,6 +66,14 @@ public class DatabaseFixture : IDisposable
             .OpenSession();
     }
 
+    /// <summary>
+    /// A stateless session, like the ones the application's queries use.
+    /// </summary>
+    public IStatelessSession OpenStatelessSession()
+    {
+        return SessionFactory.OpenStatelessSession();
+    }
+
     public static IMediator CreateMediator(ISession session, IPictureStore? pictureStore = null, Action<IServiceCollection>? configure = null)
     {
         var services = new ServiceCollection();

@@ -20,10 +20,10 @@ public class UnreadNotificationsQuery : IRequest<int>
 
 internal sealed class UnreadNotificationsQueryHandler : IRequestHandler<UnreadNotificationsQuery, int>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public UnreadNotificationsQueryHandler(ISession session, ILogger logger)
+    public UnreadNotificationsQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<UnreadNotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));

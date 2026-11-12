@@ -26,10 +26,10 @@ public class NotificationsQuery : IRequest<NotificationModel[]>
 
 internal class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, NotificationModel[]>
 {
-    private readonly ISession _session;
+    private readonly IStatelessSession _session;
     private readonly ILogger _logger;
 
-    public NotificationsQueryHandler(ISession session, ILogger logger)
+    public NotificationsQueryHandler(IStatelessSession session, ILogger logger)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<NotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));
