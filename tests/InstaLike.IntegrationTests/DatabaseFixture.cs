@@ -42,12 +42,12 @@ public sealed class DatabaseFixture : IDisposable
                     .Add<LikeMapping>()
                     .Add<NotificationMapping>()
             )
-            .ExposeConfiguration(async cfg =>
+            .ExposeConfiguration(cfg =>
             {
                 var schemaExport = new SchemaExport(cfg);
                 schemaExport.SetOutputFile($"{databaseFileName}_Schema.sql");
-                await schemaExport.DropAsync(true, true);
-                await schemaExport.CreateAsync(true, true);
+                schemaExport.Drop(true, true);
+                schemaExport.Create(true, true);
             })
             .BuildSessionFactory();
     }
