@@ -12,7 +12,6 @@ using InstaLike.Web.Data;
 using InstaLike.Web.Posts.Commands;
 using InstaLike.Web.Social.Commands;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace InstaLike.IntegrationTests;
@@ -35,7 +34,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new LikePostCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new LikePostCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         var notifications = await GetNotificationsAsync(author.ID);
@@ -55,7 +54,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new PublishCommentCommand(post.ID, "nice", reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "nice", reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         var notifications = await GetNotificationsAsync(author.ID);
@@ -75,7 +74,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new PublishCommentCommand(post.ID, "my own post", author.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "my own post", author.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
@@ -88,7 +87,7 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await DatabaseFixture.CreateMediator(session).Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         var notifications = await GetNotificationsAsync(author.ID);
@@ -108,8 +107,9 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var mediator = DatabaseFixture.CreateMediator(session, configure: services =>
-                services.AddTransient<INotificationHandler<PostLikedEvent>, FailingHandler>());
+            var mediator = new TestMediatorBuilder(session)
+                .WithHandler<INotificationHandler<PostLikedEvent>, FailingHandler>()
+                .Build();
 
             var like = () => mediator.Send(new LikePostCommand(post.ID, reader.ID));
             await like.Should().ThrowAsync<InvalidOperationException>();
@@ -132,8 +132,9 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var mediator = DatabaseFixture.CreateMediator(session, configure: services =>
-                services.AddTransient<IRequestHandler<LikeThenFailCommand, Result>, LikeThenFailCommandHandler>());
+            var mediator = new TestMediatorBuilder(session)
+                .WithHandler<IRequestHandler<LikeThenFailCommand, Result>, LikeThenFailCommandHandler>()
+                .Build();
 
             (await mediator.Send(new LikeThenFailCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
             (await mediator.Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();

@@ -5,12 +5,8 @@ using FluentNHibernate.Conventions.Helpers;
 using InstaLike.IntegrationTests.Properties;
 using InstaLike.Web.Data;
 using InstaLike.Web.Data.Mapping;
-using InstaLike.Web.Media;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
-using Serilog;
 using Xunit;
 
 namespace InstaLike.IntegrationTests;
@@ -72,22 +68,6 @@ public class DatabaseFixture : IDisposable
     public IStatelessSession OpenStatelessSession()
     {
         return SessionFactory.OpenStatelessSession();
-    }
-
-    public static IMediator CreateMediator(ISession session, IPictureStore? pictureStore = null, Action<IServiceCollection>? configure = null)
-    {
-        var services = new ServiceCollection();
-        services.AddSingleton(session);
-        services.AddSingleton(pictureStore ?? new InMemoryPictureStore());
-        services.AddSingleton(Log.Logger);
-        services.AddScoped<UnitOfWork>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
-        services.AddMediatR(cfg => cfg
-            .RegisterServicesFromAssemblies(typeof(UnitOfWork).Assembly)
-            .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
-        configure?.Invoke(services);
-
-        return services.BuildServiceProvider().CreateScope().ServiceProvider.GetRequiredService<IMediator>();
     }
 
     public static string GetTestPictureBase64()

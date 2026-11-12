@@ -15,9 +15,9 @@ public class HomeController : Controller
 {
     private const int MaxNumberOfPosts = 10;
 
-    private readonly IMediator _dispatcher;
+    private readonly ISender _dispatcher;
 
-    public HomeController(IMediator dispatcher)
+    public HomeController(ISender dispatcher)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
     }

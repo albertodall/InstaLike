@@ -40,7 +40,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             followResult = await handler.Send(followCommand, TestContext.Current.CancellationToken);
         }
 
@@ -71,7 +71,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             unfollowResult = await handler.Send(unfollowCommand, TestContext.Current.CancellationToken);
         }
 
@@ -101,13 +101,13 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             await handler.Send(followCommand, TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             followResult = await handler.Send(followCommand, TestContext.Current.CancellationToken);
         }
 
@@ -138,7 +138,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             unfollowResult = await handler.Send(unfollowCommand, TestContext.Current.CancellationToken);
         }
 
@@ -157,7 +157,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             (await handler.Send(new FollowCommand(followerUser.ID, "nobody"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
         }
     }
@@ -173,7 +173,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var handler = DatabaseFixture.CreateMediator(session);
+            var handler = new TestMediatorBuilder(session).Build();
             (await handler.Send(new FollowCommand(user.ID, user.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
             (await CountFollowsAsync(session, user.ID, user.ID)).Should().Be(0);
         }
