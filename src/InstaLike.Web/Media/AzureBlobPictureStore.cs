@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
@@ -50,6 +52,25 @@ internal sealed class AzureBlobPictureStore : IPictureStore
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
             return null;
+        }
+    }
+
+    public async IAsyncEnumerable<PictureId> ListUploadedBeforeAsync(
+        string container,
+        DateTimeOffset uploadedBefore,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var blobs = _blobServiceClient
+            .GetBlobContainerClient(container)
+            .GetBlobsAsync(new GetBlobsOptions(), cancellationToken);
+
+        await foreach (var blob in blobs)
+        {
+            if (blob.Properties.CreatedOn < uploadedBefore
+                && Guid.TryParse(Path.GetFileNameWithoutExtension(blob.Name), out var pictureId))
+            {
+                yield return new PictureId(pictureId);
+            }
         }
     }
 
