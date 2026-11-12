@@ -36,7 +36,5 @@ internal sealed class UserMapping : ClassMap<User>
             m.Map(p => p.Name).AnsiString(30).Not.Nullable();
             m.Map(p => p.Surname).AnsiString(50).Not.Nullable();
         });
-
-        DynamicInsert();
     }
 }

@@ -30,18 +30,10 @@ internal sealed class PostMapping : ClassMap<Post>
 
         HasMany(p => p.Likes)
             .Access.CamelCaseField(Prefix.Underscore)
-            .KeyColumn("PostID")
-            .Inverse()
-            .Cascade.AllDeleteOrphan()
-            .AsBag();
+            .KeyColumn("PostID");
 
         HasMany(p => p.Comments)
             .Access.CamelCaseField(Prefix.Underscore)
-            .KeyColumn("PostID")
-            .Inverse()
-            .Cascade.AllDeleteOrphan()
-            .AsBag();
-
-        DynamicInsert();
+            .KeyColumn("PostID");
     }
 }

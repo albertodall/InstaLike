@@ -179,6 +179,7 @@ internal static class ServiceCollectionExtensions
                 m.FluentMappings
                     .Conventions.Add(
                         LazyLoad.Always(),
+                        DynamicInsert.AlwaysTrue(),
                         DynamicUpdate.AlwaysTrue())
                     .Conventions.Add<AssociationsMappingConvention>()
                     .AddFromAssembly(Assembly.GetExecutingAssembly()));

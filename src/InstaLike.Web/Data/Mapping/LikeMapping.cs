@@ -15,8 +15,7 @@ internal sealed class LikeMapping : ClassMap<Like>
             .Not.Nullable();
 
         References(p => p.Post)
-            .Column("PostID")
-            .Not.Nullable();
+            .Column("PostID");
 
         Map(p => p.UserID)
             .Not.Nullable();

@@ -19,13 +19,10 @@ internal sealed class CommentMapping : ClassMap<Comment>
             .Not.Nullable();
 
         References(p => p.Post)
-            .Column("PostID")
-            .Not.Nullable();
+            .Column("PostID");
 
         Map(p => p.AuthorID)
             .Column("UserID")
             .Not.Nullable();
-
-        DynamicInsert();
     }
 }
