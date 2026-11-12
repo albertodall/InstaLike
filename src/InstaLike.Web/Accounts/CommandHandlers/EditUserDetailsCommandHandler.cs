@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Web.Accounts.Commands;
-using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using MediatR;
 using NHibernate;
@@ -21,14 +20,12 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
     private readonly ISession _session;
     private readonly ILogger _logger;
     private readonly IPictureStore _pictureStore;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public EditUserDetailsCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore, IUnitOfWork unitOfWork)
+    public EditUserDetailsCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
         _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)
@@ -64,14 +61,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
         userToUpdate.UpdateBiography(request.Bio);
         if (request.ProfilePicture is { Length: > 0 })
         {
-            var replacedPicture = userToUpdate.ProfilePicture;
             var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken);
-            if (replacedPicture is not null)
-            {
-                _unitOfWork.OnCommitted(() => _pictureStore.TryDeleteAsync(PictureContainers.Profiles, replacedPicture));
-            }
-
-            _unitOfWork.OnRolledBack(() => _pictureStore.TryDeleteAsync(PictureContainers.Profiles, uploadedPicture));
             userToUpdate.SetProfilePicture(uploadedPicture);
         }
 

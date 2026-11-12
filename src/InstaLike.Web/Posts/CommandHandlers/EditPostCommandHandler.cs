@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
-using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using InstaLike.Web.Posts.Commands;
 using MediatR;
@@ -17,14 +16,12 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
     private readonly ISession _session;
     private readonly ILogger _logger;
     private readonly IPictureStore _pictureStore;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public EditPostCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore, IUnitOfWork unitOfWork)
+    public EditPostCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _logger = logger?.ForContext<EditPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
         _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     public async Task<Result<int>> Handle(EditPostCommand request, CancellationToken cancellationToken)
@@ -50,10 +47,7 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
         }
 
         postToEdit.UpdateText(PostText.Create(request.Text).Value);
-        var replacedPicture = postToEdit.Picture;
         var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
-        _unitOfWork.OnCommitted(() => _pictureStore.TryDeleteAsync(PictureContainers.Posts, replacedPicture));
-        _unitOfWork.OnRolledBack(() => _pictureStore.TryDeleteAsync(PictureContainers.Posts, uploadedPicture));
         postToEdit.UpdatePicture(uploadedPicture);
 
         try

@@ -475,7 +475,6 @@ public class PostFixture : IClassFixture<DatabaseFixture>
                 var editedPost = session.Load<Post>(post.ID);
                 editedPost.Text.Value.Should().Be("edited text on post 1");
                 editedPost.Picture.Should().NotBe(post.Picture, "stored pictures are never overwritten");
-                _pictureStore.GetContent(PictureContainers.Posts, picture).Should().BeNull("the replaced picture is deleted after the commit");
                 editResult.IsSuccess.Should().BeTrue();
             }
         }

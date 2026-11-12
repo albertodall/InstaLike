@@ -58,7 +58,6 @@ internal static class ServiceCollectionExtensions
             .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
             .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
         services.AddScoped<UnitOfWork>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
 
         return services;
     }
