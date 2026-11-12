@@ -5,7 +5,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class FullNameFixture
+public sealed class FullNameFixture
 {
     [Fact]
     public void Should_Create_Valid_FullName()

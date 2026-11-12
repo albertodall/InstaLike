@@ -13,7 +13,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts.Queries;
 
-public class PostDetailQuery : IRequest<PostModel>
+public sealed class PostDetailQuery : IRequest<PostModel>
 {
     public int PostID { get; }
     public int CurrentUserID { get; }

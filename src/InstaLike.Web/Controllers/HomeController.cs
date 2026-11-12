@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InstaLike.Web.Controllers;
 
 [Authorize]
-public class HomeController : Controller
+public sealed class HomeController : Controller
 {
     private const int MaxNumberOfPosts = 10;
 

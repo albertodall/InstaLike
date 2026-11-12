@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InstaLike.Web.Controllers;
 
 [Authorize]
-public class PostController : Controller
+public sealed class PostController : Controller
 {
     private readonly ISender _dispatcher;
     private readonly IImageRecognitionService _imageRecognition;

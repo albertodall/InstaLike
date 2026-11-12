@@ -4,7 +4,7 @@ using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal class PostMapping : ClassMap<Post>
+internal sealed class PostMapping : ClassMap<Post>
 {
     public PostMapping()
     {

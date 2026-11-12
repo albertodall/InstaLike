@@ -3,7 +3,7 @@ using InstaLike.Core.Social;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal class FollowMapping : ClassMap<Follow>
+internal sealed class FollowMapping : ClassMap<Follow>
 {
     public FollowMapping()
     {

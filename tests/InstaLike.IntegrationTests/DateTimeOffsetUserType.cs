@@ -18,7 +18,7 @@ namespace InstaLike.IntegrationTests;
 /// This type has to be injected into the NHibernate configuration by convention, because we don't want
 /// to change the types defined in the original mappings (<see cref="DateTimeOffsetTypeConvention"/>).
 /// </remarks>
-internal class DateTimeOffsetUserType : ICompositeUserType
+internal sealed class DateTimeOffsetUserType : ICompositeUserType
 {
     public string[] PropertyNames => new[] { "Ticks", "Offset" };
 

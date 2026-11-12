@@ -5,7 +5,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class PictureIdFixture
+public sealed class PictureIdFixture
 {
     [Fact]
     public void New_Pictures_Should_Have_Different_Identifiers()

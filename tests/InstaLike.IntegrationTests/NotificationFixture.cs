@@ -11,7 +11,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class NotificationFixture : IClassFixture<DatabaseFixture>
+public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;

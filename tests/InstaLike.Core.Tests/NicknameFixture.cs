@@ -4,7 +4,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class NicknameFixture
+public sealed class NicknameFixture
 {
     [Fact]
     public void Should_Create_A_Valid_Nickname()

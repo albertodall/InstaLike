@@ -6,7 +6,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class UserFixture
+public sealed class UserFixture
 {
     [Fact]
     public void New_User_Should_Have_No_Profile_Picture()

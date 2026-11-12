@@ -9,7 +9,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class UnusedPictureCleanupFixture : IClassFixture<DatabaseFixture>
+public sealed class UnusedPictureCleanupFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;

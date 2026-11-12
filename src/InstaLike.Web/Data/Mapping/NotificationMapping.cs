@@ -3,7 +3,7 @@ using InstaLike.Core.Notifications;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal class NotificationMapping : ClassMap<Notification>
+internal sealed class NotificationMapping : ClassMap<Notification>
 {
     public NotificationMapping()
     {

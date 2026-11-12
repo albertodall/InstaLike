@@ -5,7 +5,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class FollowFixture
+public sealed class FollowFixture
 {
     [Fact]
     public void User_Should_Follow_Another_User()

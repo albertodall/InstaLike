@@ -5,7 +5,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class PostTextFixture
+public sealed class PostTextFixture
 {
     [Fact]
     public void Should_Create_A_Valid_Text_For_A_Post()

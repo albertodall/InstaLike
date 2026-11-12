@@ -8,7 +8,7 @@ using Serilog;
 
 namespace InstaLike.Web.Notifications.Queries;
 
-public class UnreadNotificationsQuery : IRequest<int>
+public sealed class UnreadNotificationsQuery : IRequest<int>
 {
     public int UserID { get; }
 

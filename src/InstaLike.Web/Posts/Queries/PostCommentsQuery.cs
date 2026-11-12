@@ -12,7 +12,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts.Queries;
 
-public class PostCommentsQuery : IRequest<CommentModel[]>
+public sealed class PostCommentsQuery : IRequest<CommentModel[]>
 {
     public int PostID { get; }
 
@@ -22,7 +22,7 @@ public class PostCommentsQuery : IRequest<CommentModel[]>
     }
 }
 
-internal class PostCommentsQueryHandler : IRequestHandler<PostCommentsQuery, CommentModel[]>
+internal sealed class PostCommentsQueryHandler : IRequestHandler<PostCommentsQuery, CommentModel[]>
 {
     private readonly IStatelessSession _session;
     private readonly ILogger _logger;

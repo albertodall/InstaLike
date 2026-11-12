@@ -13,7 +13,7 @@ using Serilog;
 
 namespace InstaLike.Web.Social.Queries;
 
-public class FollowingQuery : IRequest<FollowModel[]>
+public sealed class FollowingQuery : IRequest<FollowModel[]>
 {
     public string Nickname { get; }
 

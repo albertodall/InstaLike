@@ -12,7 +12,7 @@ namespace InstaLike.Core.Accounts;
 /// Equality is case-insensitive for both the name and surname.
 /// The string representation combines them with a space.
 /// </remarks>
-public class FullName : ValueObject
+public sealed class FullName : ValueObject
 {
     public string Name { get; }
     public string Surname { get; }

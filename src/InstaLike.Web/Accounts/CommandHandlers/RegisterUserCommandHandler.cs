@@ -12,7 +12,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
-internal class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
+internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
 {
     private const string NicknameTaken = "This nickname is already taken.";
     private const string EmailInUse = "This email is already used by another account.";

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-internal class XUnitSqlStatementOutputInterceptor : EmptyInterceptor
+internal sealed class XUnitSqlStatementOutputInterceptor : EmptyInterceptor
 {
     private readonly ITestOutputHelper _output;
 

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
+public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;

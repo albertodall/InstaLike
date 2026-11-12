@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace InstaLike.Web.Posts.Security;
 
-internal class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorRequirement>
+internal sealed class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorRequirement>
 {
     private readonly NHibernate.ISession _session;
     private readonly IHttpContextAccessor _httpContextAccessor;

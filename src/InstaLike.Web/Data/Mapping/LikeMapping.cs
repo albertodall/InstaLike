@@ -3,7 +3,7 @@ using InstaLike.Core.Posts;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal class LikeMapping : ClassMap<Like>
+internal sealed class LikeMapping : ClassMap<Like>
 {
     public LikeMapping()
     {

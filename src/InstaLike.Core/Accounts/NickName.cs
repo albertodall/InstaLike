@@ -6,7 +6,7 @@ namespace InstaLike.Core.Accounts;
 /// Represents a non-empty nickname of up to 20 characters.
 /// </summary>
 /// <remarks>Leading and trailing whitespace is removed when a nickname is created.</remarks>
-public class Nickname : SimpleValueObject<string>
+public sealed class Nickname : SimpleValueObject<string>
 {
     private const int NickNameMaxLength = 20;
 

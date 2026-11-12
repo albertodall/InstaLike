@@ -9,7 +9,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts.Queries;
 
-public class EditPostQuery : IRequest<EditPostModel>
+public sealed class EditPostQuery : IRequest<EditPostModel>
 {
     public int PostID { get; }
 

@@ -19,7 +19,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class PostFixture : IClassFixture<DatabaseFixture>
+public sealed class PostFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;

@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InstaLike.Web.Controllers;
 
 [Authorize]
-public class AccountController : Controller
+public sealed class AccountController : Controller
 {
     private const int MaxThumbnailsInUserProfile = 20;
 

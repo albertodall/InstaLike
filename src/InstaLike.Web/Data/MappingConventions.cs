@@ -4,7 +4,7 @@ using FluentNHibernate.Mapping;
 
 namespace InstaLike.Web.Data;
 
-internal class AssociationsMappingConvention : IHasManyConvention, IReferenceConvention
+internal sealed class AssociationsMappingConvention : IHasManyConvention, IReferenceConvention
 {
     public void Apply(IOneToManyCollectionInstance instance)
     {

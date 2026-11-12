@@ -3,7 +3,7 @@ using InstaLike.Core.Posts;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal class CommentMapping : ClassMap<Comment>
+internal sealed class CommentMapping : ClassMap<Comment>
 {
     public CommentMapping()
     {

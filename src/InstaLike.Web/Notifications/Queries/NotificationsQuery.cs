@@ -12,7 +12,7 @@ using Serilog;
 
 namespace InstaLike.Web.Notifications.Queries;
 
-public class NotificationsQuery : IRequest<NotificationModel[]>
+public sealed class NotificationsQuery : IRequest<NotificationModel[]>
 {
     public int UserID { get; }
     public bool IncludeReadNotifications { get; }
@@ -24,7 +24,7 @@ public class NotificationsQuery : IRequest<NotificationModel[]>
     }
 }
 
-internal class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, NotificationModel[]>
+internal sealed class NotificationsQueryHandler : IRequestHandler<NotificationsQuery, NotificationModel[]>
 {
     private readonly IStatelessSession _session;
     private readonly ILogger _logger;

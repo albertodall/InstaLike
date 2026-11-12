@@ -4,7 +4,7 @@ using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal class UserMapping : ClassMap<User>
+internal sealed class UserMapping : ClassMap<User>
 {
     public UserMapping()
     {

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class EntityFixture
+public sealed class EntityFixture
 {
     [Fact]
     public void Entity_Should_Not_Be_Equal_To_Null()
@@ -64,7 +64,7 @@ public class EntityFixture
         TestEntity.Create(1).GetHashCode().Should().NotBe(OtherTestEntity.Create(1).GetHashCode());
     }
 
-    private class TestEntity : EntityBase<int>
+    private sealed class TestEntity : EntityBase<int>
     {
         private TestEntity(int id) : base(id) { }
 
@@ -76,7 +76,7 @@ public class EntityFixture
         }
     }
 
-    private class OtherTestEntity : EntityBase<int>
+    private sealed class OtherTestEntity : EntityBase<int>
     {
         private OtherTestEntity(int id) : base(id) { }
 
