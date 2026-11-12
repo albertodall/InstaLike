@@ -194,7 +194,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         }
 
         var followersQuery = new FollowersQuery(followedUser.Nickname);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new FollowersQueryHandler(session, Log.Logger);
             result = await sut.Handle(followersQuery, TestContext.Current.CancellationToken);
@@ -218,7 +218,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
         }
 
         var followingQuery = new FollowingQuery(followerUser.Nickname);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new FollowingQueryHandler(session, Log.Logger);
             result = await sut.Handle(followingQuery, TestContext.Current.CancellationToken);
