@@ -2,7 +2,7 @@
 
 namespace InstaLike.Web.Models;
 
-public class CommentModel
+public sealed class CommentModel
 {
     public int PostID { get; set; } = 0;
     public string AuthorNickName { get; set; } = string.Empty;

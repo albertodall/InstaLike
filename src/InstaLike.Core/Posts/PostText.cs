@@ -5,7 +5,7 @@ namespace InstaLike.Core.Posts;
 /// <summary>
 /// Represents non-empty, trimmed text for a post, limited to 500 characters.
 /// </summary>
-public class PostText : SimpleValueObject<string>
+public sealed class PostText : SimpleValueObject<string>
 {
     private PostText() : base(string.Empty) { }
 

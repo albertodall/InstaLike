@@ -11,7 +11,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class DatabaseFixture : IDisposable
+public sealed class DatabaseFixture : IDisposable
 {
     public DatabaseFixture()
     {

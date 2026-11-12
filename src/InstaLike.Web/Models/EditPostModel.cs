@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InstaLike.Web.Models;
 
 [Bind("PostID, AuthorID, Text")]
-public class EditPostModel
+public sealed class EditPostModel
 {
     public int PostID { get; set; }
 

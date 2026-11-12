@@ -2,6 +2,6 @@
 
 namespace InstaLike.Web.Posts.Security;
 
-internal class PostAuthorRequirement : IAuthorizationRequirement
+internal sealed class PostAuthorRequirement : IAuthorizationRequirement
 {
 }

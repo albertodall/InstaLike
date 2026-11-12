@@ -8,7 +8,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.EventHandlers;
 
-internal class UserLoggedInEventHandler : INotificationHandler<UserLoggedInEvent>
+internal sealed class UserLoggedInEventHandler : INotificationHandler<UserLoggedInEvent>
 {
     private readonly ISession _session;
     private readonly ILogger _logger;

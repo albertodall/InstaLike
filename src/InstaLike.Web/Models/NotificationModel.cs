@@ -4,7 +4,7 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Models;
 
-public class NotificationModel
+public sealed class NotificationModel
 {
     public string SenderNickname { get; set; } = string.Empty;
     public PictureId? SenderProfilePicture { get; set; }

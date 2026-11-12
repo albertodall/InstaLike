@@ -6,7 +6,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class PostFixture
+public sealed class PostFixture
 {
     private const int PostAuthorID = 1;
 

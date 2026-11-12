@@ -13,7 +13,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class FollowFixture : IClassFixture<DatabaseFixture>
+public sealed class FollowFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;

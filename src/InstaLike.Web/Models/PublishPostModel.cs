@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InstaLike.Web.Models;
 
 [Bind("AuthorID, Text")]
-public class PublishPostModel
+public sealed class PublishPostModel
 {
     public int AuthorID { get; set; }
 

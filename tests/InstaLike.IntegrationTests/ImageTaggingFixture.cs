@@ -12,7 +12,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class ImageTaggingFixture
+public sealed class ImageTaggingFixture
 {
     [Fact]
     public async Task Suggested_Tags_Should_Be_Formatted_As_Sorted_Unique_Hashtags()

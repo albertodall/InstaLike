@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Models;
 
-public class PostModel
+public sealed class PostModel
 {
     [HiddenInput]
     public int PostID { get; set; }

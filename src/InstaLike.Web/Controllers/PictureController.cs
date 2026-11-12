@@ -12,7 +12,7 @@ namespace InstaLike.Web.Controllers;
 
 [Authorize]
 [Route("pictures")]
-public class PictureController : Controller
+public sealed class PictureController : Controller
 {
     private const string MissingPicturePath = "~/img/no_image_available.png";
     private const string PictureContentType = "image/jpeg";

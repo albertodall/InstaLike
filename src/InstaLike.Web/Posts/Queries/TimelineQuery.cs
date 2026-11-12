@@ -15,7 +15,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts.Queries;
 
-public class TimelineQuery : IRequest<PostModel[]>
+public sealed class TimelineQuery : IRequest<PostModel[]>
 {
     public int UserID { get; }
     public int NumberOfPosts { get; }

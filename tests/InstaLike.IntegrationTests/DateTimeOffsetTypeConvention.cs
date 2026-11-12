@@ -6,7 +6,7 @@ using FluentNHibernate.Conventions.Instances;
 
 namespace InstaLike.IntegrationTests;
 
-internal class DateTimeOffsetTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
+internal sealed class DateTimeOffsetTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
 {
     public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
     {

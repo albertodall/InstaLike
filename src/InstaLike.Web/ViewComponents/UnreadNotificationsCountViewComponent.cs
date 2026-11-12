@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InstaLike.Web.ViewComponents;
 
 [Authorize]
-public class UnreadNotificationsCountViewComponent : ViewComponent
+public sealed class UnreadNotificationsCountViewComponent : ViewComponent
 {
     private readonly ISender _dispatcher;
 

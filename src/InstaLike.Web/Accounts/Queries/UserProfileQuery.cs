@@ -14,7 +14,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.Queries;
 
-public class UserProfileQuery : IRequest<UserProfileModel>
+public sealed class UserProfileQuery : IRequest<UserProfileModel>
 {
     public int CurrentUserID { get; }
     public string Nickname { get; }

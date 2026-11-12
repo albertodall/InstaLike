@@ -10,7 +10,7 @@ namespace InstaLike.Core.Accounts;
 /// Email values are trimmed, converted to lowercase, and checked for a basic address format
 /// when created.
 /// </remarks>
-public class Email : SimpleValueObject<string>
+public sealed class Email : SimpleValueObject<string>
 {
     private const string EMailValidationRegEx = @"^(.+)@(.+)$";
 

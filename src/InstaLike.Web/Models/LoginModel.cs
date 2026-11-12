@@ -2,7 +2,7 @@
 
 namespace InstaLike.Web.Models;
 
-public class LoginModel
+public sealed class LoginModel
 {
     [Required(ErrorMessage = "User name not specified.")]
     [Display(Name = "User name")]

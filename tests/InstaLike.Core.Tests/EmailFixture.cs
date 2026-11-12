@@ -5,7 +5,7 @@ using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public class EmailFixture
+public sealed class EmailFixture
 {
     [Fact]
     public void Should_Create_A_Valid_Email()

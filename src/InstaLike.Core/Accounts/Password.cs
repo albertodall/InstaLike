@@ -13,7 +13,7 @@ namespace InstaLike.Core.Accounts;
 /// <remarks>
 /// Passwords created through this type must contain at least six characters.
 /// </remarks>
-public class Password : ValueObject
+public sealed class Password : ValueObject
 {
     private const byte MinimumPasswordLength = 6;
     private const byte SaltSize = 16;

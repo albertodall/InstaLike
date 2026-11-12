@@ -11,7 +11,7 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public class UserFixture : IClassFixture<DatabaseFixture>
+public sealed class UserFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;
