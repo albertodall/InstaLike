@@ -17,10 +17,10 @@ namespace InstaLike.Web.Controllers;
 [Authorize]
 public class PostController : Controller
 {
-    private readonly IMediator _dispatcher;
+    private readonly ISender _dispatcher;
     private readonly IImageRecognitionService _imageRecognition;
 
-    public PostController(IMediator dispatcher, IImageRecognitionService imageRecognition)
+    public PostController(ISender dispatcher, IImageRecognitionService imageRecognition)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _imageRecognition = imageRecognition ?? throw new ArgumentNullException(nameof(imageRecognition));

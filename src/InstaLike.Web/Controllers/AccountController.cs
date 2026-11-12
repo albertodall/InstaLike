@@ -24,9 +24,9 @@ public class AccountController : Controller
 {
     private const int MaxThumbnailsInUserProfile = 20;
 
-    private readonly IMediator _dispatcher;
+    private readonly ISender _dispatcher;
 
-    public AccountController(IMediator dispatcher)
+    public AccountController(ISender dispatcher)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
     }

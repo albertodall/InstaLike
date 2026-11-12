@@ -12,9 +12,9 @@ namespace InstaLike.Web.Controllers;
 [Authorize]
 public class NotificationController : Controller
 {
-    private readonly IMediator _dispatcher;
+    private readonly ISender _dispatcher;
 
-    public NotificationController(IMediator dispatcher)
+    public NotificationController(ISender dispatcher)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
     }

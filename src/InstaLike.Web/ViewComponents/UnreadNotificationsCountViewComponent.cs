@@ -10,9 +10,9 @@ namespace InstaLike.Web.ViewComponents;
 [Authorize]
 public class UnreadNotificationsCountViewComponent : ViewComponent
 {
-    private readonly IMediator _dispatcher;
+    private readonly ISender _dispatcher;
 
-    public UnreadNotificationsCountViewComponent(IMediator dispatcher)
+    public UnreadNotificationsCountViewComponent(ISender dispatcher)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
     }
