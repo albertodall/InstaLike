@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,8 +39,7 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavio
                 response = await next(cancellationToken);
                 if (response is IResult { IsFailure: true })
                 {
-                    await tx.RollbackAsync(CancellationToken.None);
-                    await _unitOfWork.RolledBackAsync();
+                    await RollbackAsync(tx);
                     return response;
                 }
 
@@ -48,12 +48,7 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavio
             }
             catch
             {
-                if (tx.IsActive)
-                {
-                    await tx.RollbackAsync(CancellationToken.None);
-                }
-
-                await _unitOfWork.RolledBackAsync();
+                await RollbackAsync(tx);
                 throw;
             }
         }
@@ -62,21 +57,35 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavio
         return response;
     }
 
+    private async Task RollbackAsync(ITransaction tx)
+    {
+        if (tx.IsActive)
+        {
+            await tx.RollbackAsync(CancellationToken.None);
+        }
+
+        DiscardRolledBackChanges();
+        await _unitOfWork.RolledBackAsync();
+    }
+
+    private void DiscardRolledBackChanges()
+    {
+        AggregatesWithPendingEvents().ForEach(a => a.ClearDomainEvents());
+        _session.Clear();
+    }
+
     private async Task DispatchDomainEventsAsync(CancellationToken cancellationToken)
     {
         while (true)
         {
-            var entities = _session.GetSessionImplementation().PersistenceContext.EntitiesByKey.Values
-                .OfType<IAggregateRoot>()
-                .Where(e => e.DomainEvents.Count > 0)
-                .ToList();
-            if (entities.Count == 0)
+            var aggregates = AggregatesWithPendingEvents();
+            if (aggregates.Count == 0)
             {
                 return;
             }
 
-            var domainEvents = entities.SelectMany(e => e.DomainEvents).ToList();
-            entities.ForEach(e => e.ClearDomainEvents());
+            var domainEvents = aggregates.SelectMany(a => a.DomainEvents).ToList();
+            aggregates.ForEach(a => a.ClearDomainEvents());
 
             foreach (var domainEvent in domainEvents)
             {
@@ -85,5 +94,13 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavio
 
             await _session.FlushAsync(cancellationToken);
         }
+    }
+
+    private List<IAggregateRoot> AggregatesWithPendingEvents()
+    {
+        return _session.GetSessionImplementation().PersistenceContext.EntitiesByKey.Values
+            .OfType<IAggregateRoot>()
+            .Where(a => a.DomainEvents.Count > 0)
+            .ToList();
     }
 }
