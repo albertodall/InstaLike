@@ -126,6 +126,18 @@ public class PostFixture
     }
 
     [Fact]
+    public void Reader_Can_Like_A_Post_But_Its_Author_Cannot()
+    {
+        var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+
+        using (new AssertionScope())
+        {
+            sut.CanBeLikedBy(PostAuthorID + 1).Should().BeTrue();
+            sut.CanBeLikedBy(PostAuthorID).Should().BeFalse();
+        }
+    }
+
+    [Fact]
     public void Author_Can_Edit_His_Own_Post()
     {
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");

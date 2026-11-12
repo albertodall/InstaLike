@@ -136,6 +136,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                         .ToArray(),
                 LikesCount = postLikesCount.ContainsKey(p.ID) ? postLikesCount[p.ID] : 0,
                 IsLikedByCurrentUser = postsLikedByCurrentUserQuery.Any(id => id == p.ID),
+                CanBeLikedByCurrentUser = p.CanBeLikedBy(request.UserID),
                 CanBeEditedByCurrentUser = p.CanBeEditedBy(request.UserID)
             });
 

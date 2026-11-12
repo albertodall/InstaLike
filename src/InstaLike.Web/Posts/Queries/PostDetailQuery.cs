@@ -95,8 +95,9 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
             post.LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken);
             post.Comments = postCommentsQuery.ToArray();
             post.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0;
-            post.CanBeEditedByCurrentUser =
-                (await _session.LoadAsync<Post>(request.PostID, cancellationToken)).CanBeEditedBy(request.CurrentUserID);
+            var loadedPost = await _session.LoadAsync<Post>(request.PostID, cancellationToken);
+            post.CanBeLikedByCurrentUser = loadedPost.CanBeLikedBy(request.CurrentUserID);
+            post.CanBeEditedByCurrentUser = loadedPost.CanBeEditedBy(request.CurrentUserID);
         }
 
         return post;

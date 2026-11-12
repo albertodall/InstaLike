@@ -16,5 +16,6 @@ public class PostModel
     public CommentModel[] Comments { get; set; } = Array.Empty<CommentModel>();
     public int LikesCount { get; set; }
     public bool IsLikedByCurrentUser { get; set; }
+    public bool CanBeLikedByCurrentUser { get; set; }
     public bool CanBeEditedByCurrentUser { get; set; }
 }

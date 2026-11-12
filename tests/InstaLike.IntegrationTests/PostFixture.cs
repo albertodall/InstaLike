@@ -369,6 +369,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             result.LikesCount.Should().Be(1);
             result.Comments.Length.Should().Be(1);
             result.IsLikedByCurrentUser.Should().BeTrue();
+            result.CanBeLikedByCurrentUser.Should().BeTrue();
         }
     }
 
