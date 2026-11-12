@@ -7,7 +7,9 @@ using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
+using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 using InstaLike.Web.Posts.Commands;
 using InstaLike.Web.Social.Commands;
 using MediatR;
@@ -124,6 +126,31 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
         }
     }
 
+    [Fact]
+    public async Task A_Rolled_Back_Command_Should_Not_Leak_Its_Events_Into_The_Next_Command()
+    {
+        var (author, reader, post) = await CreatePostAsync("eventauthor6", "eventreader6");
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var mediator = DatabaseFixture.CreateMediator(session, configure: services =>
+                services.AddTransient<IRequestHandler<LikeThenFailCommand, Result>, LikeThenFailCommandHandler>());
+
+            (await mediator.Send(new LikeThenFailCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
+            (await mediator.Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            using (new AssertionScope())
+            {
+                (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
+                (await GetNotificationsAsync(author.ID)).Should().ContainSingle()
+                    .Which.Kind.Should().Be(NotificationKind.Followed);
+            }
+        }
+    }
+
     private async Task<(User Author, User Reader, Post Post)> CreatePostAsync(string authorNickname, string readerNickname)
     {
         var author = new User((Nickname)authorNickname, (FullName)"event author", Password.Create("password").Value, (Email)$"{authorNickname}@acme.com", "bio");
@@ -153,5 +180,35 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
     {
         public Task Handle(PostLikedEvent notification, CancellationToken cancellationToken) =>
             throw new InvalidOperationException("The notification could not be written.");
+    }
+
+    private sealed class LikeThenFailCommand : ICommand<Result>
+    {
+        public LikeThenFailCommand(int postID, int userID)
+        {
+            PostID = postID;
+            UserID = userID;
+        }
+
+        public int PostID { get; }
+
+        public int UserID { get; }
+    }
+
+    private sealed class LikeThenFailCommandHandler : IRequestHandler<LikeThenFailCommand, Result>
+    {
+        private readonly NHibernate.ISession _session;
+
+        public LikeThenFailCommandHandler(NHibernate.ISession session)
+        {
+            _session = session;
+        }
+
+        public async Task<Result> Handle(LikeThenFailCommand request, CancellationToken cancellationToken)
+        {
+            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+            post.LikeBy(request.UserID);
+            return Result.Failure("The command failed after the post was liked.");
+        }
     }
 }
