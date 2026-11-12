@@ -27,8 +27,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Follow_Another_User()
     {
-        var followerUser = new User((Nickname)"user1", (FullName)"test1 user1", Password.Create("password").Value, (Email)"testuser1@acme.com", "bio1");
-        var followedUser = new User((Nickname)"user2", (FullName)"test2 user2", Password.Create("password").Value, (Email)"testuser2@acme.com", "bio2");
+        var followerUser = TestDataHelper.NewUser("user1");
+        var followedUser = TestDataHelper.NewUser("user2");
         Result followResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -57,8 +57,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Unfollow_Another_User()
     {
-        var followerUser = new User((Nickname)"user3", (FullName)"test3 user3", Password.Create("password").Value, (Email)"testuser3@acme.com", "bio3");
-        var followedUser = new User((Nickname)"user4", (FullName)"test4 user4", Password.Create("password").Value, (Email)"testuser4@acme.com", "bio4");
+        var followerUser = TestDataHelper.NewUser("user3");
+        var followedUser = TestDataHelper.NewUser("user4");
         Result unfollowResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -88,8 +88,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Follow_User_Twice()
     {
-        var followerUser = new User((Nickname)"user5", (FullName)"test5 user5", Password.Create("password").Value, (Email)"testuser5@acme.com", "bio5");
-        var followedUser = new User((Nickname)"user6", (FullName)"test6 user6", Password.Create("password").Value, (Email)"testuser6@acme.com", "bio6");
+        var followerUser = TestDataHelper.NewUser("user5");
+        var followedUser = TestDataHelper.NewUser("user6");
         Result followResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -125,8 +125,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Unfollow_Non_Followed_User()
     {
-        var followerUser = new User((Nickname)"user7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio7");
-        var followedUser = new User((Nickname)"user8", (FullName)"test8 user8", Password.Create("password").Value, (Email)"testuser8@acme.com", "bio8");
+        var followerUser = TestDataHelper.NewUser("user7");
+        var followedUser = TestDataHelper.NewUser("user8");
         Result unfollowResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -149,7 +149,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Follow_A_User_That_Does_Not_Exist()
     {
-        var followerUser = new User((Nickname)"user13", (FullName)"test13 user13", Password.Create("password").Value, (Email)"testuser13@acme.com", "bio13");
+        var followerUser = TestDataHelper.NewUser("user13");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
@@ -165,7 +165,7 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Not_Follow_Themselves()
     {
-        var user = new User((Nickname)"user14", (FullName)"test14 user14", Password.Create("password").Value, (Email)"testuser14@acme.com", "bio14");
+        var user = TestDataHelper.NewUser("user14");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(user, TestContext.Current.CancellationToken);
@@ -182,8 +182,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Have_One_Follower()
     {
-        var followerUser = new User((Nickname)"user9", (FullName)"test9 user9", Password.Create("password").Value, (Email)"testuser9@acme.com", "bio9");
-        var followedUser = new User((Nickname)"user10", (FullName)"test10 user10", Password.Create("password").Value, (Email)"testuser10@acme.com", "bio10");
+        var followerUser = TestDataHelper.NewUser("user9");
+        var followedUser = TestDataHelper.NewUser("user10");
         FollowModel[] result;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -206,8 +206,8 @@ public class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Have_Been_Following_One_User()
     {
-        var followerUser = new User((Nickname)"user11", (FullName)"test11 user11", Password.Create("password").Value, (Email)"testuser11@acme.com", "bio11");
-        var followedUser = new User((Nickname)"user12", (FullName)"test12 user12", Password.Create("password").Value, (Email)"testuser12@acme.com", "bio12");
+        var followerUser = TestDataHelper.NewUser("user11");
+        var followedUser = TestDataHelper.NewUser("user12");
         FollowModel[] result;
 
         using (var session = _testFixture.OpenSession(_output))

@@ -8,7 +8,6 @@ using InstaLike.Core.Accounts;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using InstaLike.Web.Posts.Commands;
 using InstaLike.Web.Social.Commands;
@@ -153,14 +152,14 @@ public class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
     private async Task<(User Author, User Reader, Post Post)> CreatePostAsync(string authorNickname, string readerNickname)
     {
-        var author = new User((Nickname)authorNickname, (FullName)"event author", Password.Create("password").Value, (Email)$"{authorNickname}@acme.com", "bio");
-        var reader = new User((Nickname)readerNickname, (FullName)"event reader", Password.Create("password").Value, (Email)$"{readerNickname}@acme.com", "bio");
+        var author = TestDataHelper.NewUser(authorNickname);
+        var reader = TestDataHelper.NewUser(readerNickname);
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author);
             await session.SaveAsync(reader);
-            post = new Post(author.ID, PictureId.New(), (PostText)"event post");
+            post = TestDataHelper.NewPost(author, "event post");
             await session.SaveAsync(post);
             await session.FlushAsync();
         }
