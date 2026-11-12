@@ -56,7 +56,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
             CommentModel comment = null!;
             var postCommentsQuery = _session.QueryOver(() => commentEntity)
                 .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
-                .Where(() => commentEntity.PostID == request.PostID)
+                .Where(() => commentEntity.Post.ID == request.PostID)
                 .OrderBy(() => commentEntity.CommentDate).Asc
                 .SelectList(list => list
                     .Select(() => commentEntity.Text).WithAlias(() => comment.Text)

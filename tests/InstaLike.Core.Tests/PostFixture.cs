@@ -20,7 +20,8 @@ public class PostFixture
 
         using (new AssertionScope())
         {
-            comment.PostID.Should().Be(sut.ID);
+            sut.Comments.Should().ContainSingle().Which.Should().BeSameAs(comment);
+            comment.Post.Should().BeSameAs(sut);
             comment.AuthorID.Should().Be(commentAuthorID);
             comment.Text.Should().Be((CommentText)"test comment");
         }
@@ -104,9 +105,9 @@ public class PostFixture
         const int commentAuthorID = 42;
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-        var comment = sut.CommentBy(commentAuthorID, (CommentText)"test comment");
+        sut.CommentBy(commentAuthorID, (CommentText)"test comment");
 
-        comment.DomainEvents.Should().ContainSingle()
+        sut.DomainEvents.Should().ContainSingle()
             .Which.Should().Be(new CommentPublishedEvent(sut.ID, commentAuthorID, PostAuthorID));
     }
 

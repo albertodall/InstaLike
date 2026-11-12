@@ -35,6 +35,13 @@ internal class PostMapping : ClassMap<Post>
             .Cascade.AllDeleteOrphan()
             .AsBag();
 
+        HasMany(p => p.Comments)
+            .Access.CamelCaseField(Prefix.Underscore)
+            .KeyColumn("PostID")
+            .Inverse()
+            .Cascade.AllDeleteOrphan()
+            .AsBag();
+
         DynamicInsert();
     }
 }

@@ -38,7 +38,6 @@ internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishComm
         var comment = post.CommentBy(request.UserID, text.Value);
         try
         {
-            await _session.SaveAsync(comment, cancellationToken);
             await _session.FlushAsync(cancellationToken);
         }
         catch (ADOException ex)

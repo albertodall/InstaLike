@@ -70,9 +70,9 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             var commentsQuery = _session.QueryOver(() => commentEntity)
                 .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
                 .WithSubquery
-                    .WhereProperty(() => commentEntity.PostID).In(postIdsToShowInTimelineQuery)
+                    .WhereProperty(() => commentEntity.Post.ID).In(postIdsToShowInTimelineQuery)
                 .SelectList(list => list
-                    .Select(() => commentEntity.PostID).WithAlias(() => comment.PostID)
+                    .Select(() => commentEntity.Post.ID).WithAlias(() => comment.PostID)
                     .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
                     .Select(() => commentEntity.Text).WithAlias(() => comment.Text)
                     .Select(() => commentEntity.CommentDate).WithAlias(() => comment.CommentDate)

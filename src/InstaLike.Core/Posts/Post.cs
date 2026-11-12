@@ -32,6 +32,9 @@ public class Post : AggregateRoot<int>
     private readonly IList<Like> _likes = [];
     public virtual IReadOnlyCollection<Like> Likes => _likes.AsReadOnly();
 
+    private readonly IList<Comment> _comments = [];
+    public virtual IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
+
     public virtual DateTimeOffset PostDate { get; protected set; }
 
     public virtual void UpdatePicture(PictureId picture)
@@ -80,7 +83,10 @@ public class Post : AggregateRoot<int>
 
     public virtual Comment CommentBy(int authorID, CommentText text)
     {
-        return Comment.Create(ID, authorID, AuthorID, text);
+        var comment = new Comment(this, authorID, text);
+        _comments.Add(comment);
+        RaiseDomainEvent(new CommentPublishedEvent(ID, authorID, AuthorID));
+        return comment;
     }
 
     public virtual bool CanBeEditedBy(int userID)
