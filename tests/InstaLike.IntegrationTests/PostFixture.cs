@@ -326,13 +326,42 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new PostCommentsQuery(post.ID);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new PostCommentsQueryHandler(session, Log.Logger);
             comments = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         comments.Length.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Should_Read_A_Post_For_Editing()
+    {
+        EditPostModel result;
+        var author = TestDataHelper.NewUser("editingauthor");
+        Post post;
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            post = TestDataHelper.NewPost(author, "Text to edit");
+            await session.SaveAsync(post, TestContext.Current.CancellationToken);
+        }
+
+        var query = new EditPostQuery(post.ID, author.ID);
+        using (var session = _testFixture.OpenStatelessSession())
+        {
+            var sut = new EditPostQueryHandler(session, Log.Logger);
+            result = await sut.Handle(query, TestContext.Current.CancellationToken);
+        }
+
+        using (new AssertionScope())
+        {
+            result.PostID.Should().Be(post.ID);
+            result.AuthorID.Should().Be(author.ID);
+            result.Text.Should().Be("Text to edit");
+            result.Picture.Should().Be(post.Picture);
+        }
     }
 
     [Fact]
@@ -355,7 +384,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new PostDetailQuery(post.ID, reader.ID);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new PostDetailQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -400,7 +429,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         }
 
         var query = new TimelineQuery(reader.ID, 5);
-        using (var session = _testFixture.OpenSession(_output))
+        using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new TimelineQueryHandler(session, Log.Logger);
             timeline = await sut.Handle(query, TestContext.Current.CancellationToken);
