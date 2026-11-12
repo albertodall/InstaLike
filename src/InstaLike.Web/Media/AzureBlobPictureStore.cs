@@ -82,7 +82,7 @@ internal sealed class AzureBlobPictureStore : IPictureStore
         }
         catch (Exception ex)
         {
-            _logger.Warning(ex, "Could not delete picture {PictureId} from container {Container}; it is left orphaned.", picture.Value, container);
+            _logger.Warning(ex, "Could not delete picture {PictureId} from container {Container}; the next cleanup will retry.", picture.Value, container);
         }
     }
 

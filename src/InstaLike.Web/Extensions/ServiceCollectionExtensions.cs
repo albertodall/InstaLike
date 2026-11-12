@@ -68,6 +68,7 @@ internal static class ServiceCollectionExtensions
         var storageSettings = AzureBlobStorageSettings.FromConfiguration(configuration);
         services.AddSingleton(storageSettings.CreateClient());
         services.AddSingleton<IPictureStore, AzureBlobPictureStore>();
+        services.AddHostedService<UnusedPictureCleanupService>();
 
         return services;
     }
