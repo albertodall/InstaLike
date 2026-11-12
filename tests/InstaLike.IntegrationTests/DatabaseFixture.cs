@@ -52,7 +52,7 @@ public class DatabaseFixture : IDisposable
             .BuildSessionFactory();
     }
 
-    private ISessionFactory SessionFactory { get; }
+    public ISessionFactory SessionFactory { get; }
 
     public ISession OpenSession(ITestOutputHelper output)
     {

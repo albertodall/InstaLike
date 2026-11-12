@@ -58,7 +58,6 @@ internal static class ServiceCollectionExtensions
             .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
             .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
         services.AddScoped<UnitOfWork>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
 
         return services;
     }
@@ -68,6 +67,7 @@ internal static class ServiceCollectionExtensions
         var storageSettings = AzureBlobStorageSettings.FromConfiguration(configuration);
         services.AddSingleton(storageSettings.CreateClient());
         services.AddSingleton<IPictureStore, AzureBlobPictureStore>();
+        services.AddHostedService<UnusedPictureCleanupService>();
 
         return services;
     }

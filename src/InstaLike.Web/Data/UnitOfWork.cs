@@ -1,31 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using InstaLike.Core.SharedKernel;
+using MediatR;
+using NHibernate;
 
 namespace InstaLike.Web.Data;
 
-internal sealed class UnitOfWork : IUnitOfWork
+internal sealed class UnitOfWork
 {
-    private readonly List<Func<Task>> _onCommitted = new();
-    private readonly List<Func<Task>> _onRolledBack = new();
+    private readonly ISession _session;
+    private readonly IPublisher _publisher;
+    private ITransaction? _transaction;
 
-    public void OnCommitted(Func<Task> action) => _onCommitted.Add(action);
-
-    public void OnRolledBack(Func<Task> action) => _onRolledBack.Add(action);
-
-    public Task CommittedAsync() => RunAndClearAsync(_onCommitted);
-
-    public Task RolledBackAsync() => RunAndClearAsync(_onRolledBack);
-
-    private async Task RunAndClearAsync(List<Func<Task>> actions)
+    public UnitOfWork(ISession session, IPublisher publisher)
     {
-        var toRun = actions.ToArray();
-        _onCommitted.Clear();
-        _onRolledBack.Clear();
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
+    }
 
-        foreach (var action in toRun)
+    private ITransaction Transaction =>
+        _transaction ?? throw new InvalidOperationException("The unit of work has not begun.");
+
+    public void Begin() => _transaction = _session.BeginTransaction();
+
+    public async Task CommitAsync(CancellationToken cancellationToken)
+    {
+        await DispatchDomainEventsAsync(cancellationToken);
+        await Transaction.CommitAsync(cancellationToken);
+    }
+
+    public async Task RollbackAsync()
+    {
+        using var transaction = Transaction;
+        if (transaction.IsActive)
         {
-            await action();
+            await transaction.RollbackAsync(CancellationToken.None);
         }
+
+        AggregatesWithPendingEvents().ForEach(a => a.ClearDomainEvents());
+        _session.Clear();
+    }
+
+    private async Task DispatchDomainEventsAsync(CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var aggregates = AggregatesWithPendingEvents();
+            if (aggregates.Count == 0)
+            {
+                return;
+            }
+
+            var domainEvents = aggregates.SelectMany(a => a.DomainEvents).ToList();
+            aggregates.ForEach(a => a.ClearDomainEvents());
+
+            foreach (var domainEvent in domainEvents)
+            {
+                await _publisher.Publish(domainEvent, cancellationToken);
+            }
+
+            await _session.FlushAsync(cancellationToken);
+        }
+    }
+
+    private List<IAggregateRoot> AggregatesWithPendingEvents()
+    {
+        return _session.GetSessionImplementation().PersistenceContext.EntitiesByKey.Values
+            .OfType<IAggregateRoot>()
+            .Where(a => a.DomainEvents.Count > 0)
+            .ToList();
     }
 }

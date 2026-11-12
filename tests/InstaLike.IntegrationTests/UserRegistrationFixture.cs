@@ -227,28 +227,6 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Should_Delete_The_Replaced_Profile_Picture()
-    {
-        var picture = Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
-        var oldPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, picture, TestContext.Current.CancellationToken);
-        var testUser = TestDataHelper.NewUser("testuser8");
-        testUser.SetProfilePicture(oldPicture);
-        using (var session = _testFixture.OpenSession(_output))
-        {
-            await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
-        }
-
-        var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, testUser.Biography, picture);
-        using (var session = _testFixture.OpenSession(_output))
-        {
-            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
-            (await sut.Send(command, TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-        }
-
-        _pictureStore.GetContent(PictureContainers.Profiles, oldPicture).Should().BeNull();
-    }
-
-    [Fact]
     public async Task Should_Not_Edit_User_Email_If_Email_Is_Not_Valid()
     {
         const string testUserName = "testuser2";

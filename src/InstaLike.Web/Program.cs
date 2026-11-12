@@ -1,4 +1,6 @@
-﻿using InstaLike.Web.Extensions;
+﻿using Azure.Storage.Blobs;
+using InstaLike.Web.Extensions;
+using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,5 +52,7 @@ app.UseCookiePolicy();
 
 app.MapDefaultControllerRoute();
 
-await app.EnsurePictureContainersExistAsync();
+var blobServiceClient = app.Services.GetRequiredService<BlobServiceClient>();
+await AzureBlobPictureStore.EnsureContainersExistAsync(blobServiceClient, app.Lifetime.ApplicationStopping);
+
 await app.RunAsync();
