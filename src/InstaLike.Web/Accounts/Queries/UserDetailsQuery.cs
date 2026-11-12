@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
+using InstaLike.Web.Data;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
@@ -38,17 +39,19 @@ internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery
 
         using (var tx = _session.BeginTransaction())
         {
-            var user = await _session.GetAsync<User>(request.CurrentUserId, cancellationToken);
-
-            result = new UserDetailsModel()
-            {
-                Nickname = user.Nickname,
-                Name = user.FullName.Name,
-                Surname = user.FullName.Surname,
-                Email = user.Email,
-                Bio = user.Biography,
-                ProfilePicture = user.ProfilePicture
-            };
+            UserDetailsModel userDetails = null!;
+            result = await _session.QueryOver<User>()
+                .Where(u => u.ID == request.CurrentUserId)
+                .SelectList(list => list
+                    .Select(u => u.Nickname).WithAlias(() => userDetails.Nickname)
+                    .Select(u => u.FullName.Name).WithAlias(() => userDetails.Name)
+                    .Select(u => u.FullName.Surname).WithAlias(() => userDetails.Surname)
+                    .Select(u => u.Email).WithAlias(() => userDetails.Email)
+                    .Select(u => u.Biography).WithAlias(() => userDetails.Bio)
+                    .Select(u => u.ProfilePicture).WithAlias(() => userDetails.ProfilePicture)
+                )
+                .TransformUsing(new EntityToModelResultTransformer<UserDetailsModel>())
+                .SingleOrDefaultAsync<UserDetailsModel>(cancellationToken);
 
             await tx.CommitAsync(cancellationToken);
         }
