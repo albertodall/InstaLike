@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using MediatR;
@@ -13,7 +12,7 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavio
 
     public UnitOfWorkBehavior(UnitOfWork unitOfWork)
     {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)

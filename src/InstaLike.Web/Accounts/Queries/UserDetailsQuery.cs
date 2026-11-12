@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using InstaLike.Web.Data;
@@ -27,8 +26,8 @@ internal sealed class UserDetailsQueryHandler : IRequestHandler<UserDetailsQuery
 
     public UserDetailsQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<UserDetailsQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<UserDetailsQuery>();
     }
 
     public async Task<UserDetailsModel> Handle(UserDetailsQuery request, CancellationToken cancellationToken)

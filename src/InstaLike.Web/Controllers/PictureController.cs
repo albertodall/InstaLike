@@ -22,7 +22,7 @@ public sealed class PictureController : Controller
 
     public PictureController(IPictureStore pictureStore)
     {
-        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
+        _pictureStore = pictureStore;
     }
 
     [HttpGet("posts/{id:guid}")]

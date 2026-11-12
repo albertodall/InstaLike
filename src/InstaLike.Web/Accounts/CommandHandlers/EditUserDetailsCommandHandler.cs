@@ -23,9 +23,9 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
 
     public EditUserDetailsCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<EditUserDetailsCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
+        _session = session;
+        _logger = logger.ForContext<EditUserDetailsCommand>();
+        _pictureStore = pictureStore;
     }
 
     public async Task<Result> Handle(EditUserDetailsCommand request, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
 using InstaLike.Web.Notifications.Commands;
@@ -16,8 +15,8 @@ internal sealed class MarkAllUserNotificationsReadCommandHandler : IRequestHandl
 
     public MarkAllUserNotificationsReadCommandHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<MarkAllUserNotificationsReadCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<MarkAllUserNotificationsReadCommand>();
     }
 
     public async Task<int> Handle(MarkAllUserNotificationsReadCommand request, CancellationToken cancellationToken)

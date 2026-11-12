@@ -17,7 +17,7 @@ public class Comment : EntityBase<int>
     {
         Post = post;
         AuthorID = authorID;
-        _text = text ?? throw new ArgumentNullException(nameof(text));
+        _text = text;
         CommentDate = DateTimeOffset.Now;
     }
 

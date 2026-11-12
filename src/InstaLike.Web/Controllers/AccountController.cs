@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -28,7 +27,7 @@ public sealed class AccountController : Controller
 
     public AccountController(ISender dispatcher)
     {
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _dispatcher = dispatcher;
     }
 
     [AllowAnonymous]

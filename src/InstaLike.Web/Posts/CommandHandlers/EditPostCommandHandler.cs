@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
@@ -19,9 +18,9 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
 
     public EditPostCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<EditPostCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
+        _session = session;
+        _logger = logger.ForContext<EditPostCommand>();
+        _pictureStore = pictureStore;
     }
 
     public async Task<Result<int>> Handle(EditPostCommand request, CancellationToken cancellationToken)

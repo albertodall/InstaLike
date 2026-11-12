@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using MediatR;
@@ -15,8 +14,8 @@ internal sealed class UserLoggedInEventHandler : INotificationHandler<UserLogged
 
     public UserLoggedInEventHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<UserLoggedInEvent>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<UserLoggedInEvent>();
     }
 
     public async Task Handle(UserLoggedInEvent notification, CancellationToken cancellationToken)

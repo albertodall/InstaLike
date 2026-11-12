@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
@@ -14,7 +13,7 @@ internal sealed class PostLikedEventHandler : INotificationHandler<PostLikedEven
 
     public PostLikedEventHandler(ISession session)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _session = session;
     }
 
     public Task Handle(PostLikedEvent notification, CancellationToken cancellationToken) =>

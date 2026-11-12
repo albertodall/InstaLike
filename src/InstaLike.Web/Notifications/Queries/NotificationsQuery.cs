@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -31,8 +30,8 @@ internal sealed class NotificationsQueryHandler : IRequestHandler<NotificationsQ
 
     public NotificationsQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<NotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<NotificationsQuery>();
     }
 
     public async Task<NotificationModel[]> Handle(NotificationsQuery request, CancellationToken cancellationToken)

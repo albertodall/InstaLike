@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -19,8 +18,8 @@ internal sealed class UnfollowCommandHandler : IRequestHandler<UnfollowCommand, 
 
     public UnfollowCommandHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<UnfollowCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<UnfollowCommand>();
     }
 
     public async Task<Result> Handle(UnfollowCommand request, CancellationToken cancellationToken)

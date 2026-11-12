@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using InstaLike.Web.Notifications.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +13,7 @@ public sealed class UnreadNotificationsCountViewComponent : ViewComponent
 
     public UnreadNotificationsCountViewComponent(ISender dispatcher)
     {
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _dispatcher = dispatcher;
     }
 
     public async Task<IViewComponentResult> InvokeAsync(int userID)

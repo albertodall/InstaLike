@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Notifications.Commands;
 using InstaLike.Web.Notifications.Queries;
@@ -16,7 +15,7 @@ public sealed class NotificationController : Controller
 
     public NotificationController(ISender dispatcher)
     {
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _dispatcher = dispatcher;
     }
 
     public async Task<IActionResult> Index()

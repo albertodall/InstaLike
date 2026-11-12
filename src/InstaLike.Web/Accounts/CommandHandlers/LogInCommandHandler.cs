@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -20,8 +19,8 @@ internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result
 
     public LogInCommandHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<LogInCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<LogInCommand>();
     }
 
     public async Task<Result<User>> Handle(LogInCommand request, CancellationToken cancellationToken)

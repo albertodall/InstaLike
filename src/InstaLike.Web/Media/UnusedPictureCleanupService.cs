@@ -31,9 +31,9 @@ internal sealed class UnusedPictureCleanupService : BackgroundService
 
     public UnusedPictureCleanupService(ISessionFactory sessionFactory, IPictureStore pictureStore, ILogger logger)
     {
-        _sessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
-        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
-        _logger = logger?.ForContext<UnusedPictureCleanupService>() ?? throw new ArgumentNullException(nameof(logger));
+        _sessionFactory = sessionFactory;
+        _pictureStore = pictureStore;
+        _logger = logger.ForContext<UnusedPictureCleanupService>();
     }
 
     public async Task CleanUpUploadedBeforeAsync(DateTimeOffset uploadedBefore, CancellationToken cancellationToken)
