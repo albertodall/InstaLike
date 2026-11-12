@@ -3,7 +3,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Posts;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Accounts.Queries;
 using InstaLike.Web.Models;
@@ -28,16 +27,16 @@ public class UserFixture : IClassFixture<DatabaseFixture>
     {
         UserProfileModel result;
 
-        var author = new User((Nickname)"authoruser", (FullName)"author user", Password.Create("password").Value, (Email)"authoruser@acme.com", "my bio");
-        var followed = new User((Nickname)"followeduser", (FullName)"followed user", Password.Create("password").Value, (Email)"followed@acme.com", "my bio");
-        var follower = new User((Nickname)"followeruser", (FullName)"follower user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("authoruser");
+        var followed = TestDataHelper.NewUser("followeduser");
+        var follower = TestDataHelper.NewUser("followeruser");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followed, TestContext.Current.CancellationToken);
             await session.SaveAsync(follower, TestContext.Current.CancellationToken);
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             await session.SaveAsync(Follow.Create(author.ID, followed.ID).Value, TestContext.Current.CancellationToken);
             await session.SaveAsync(Follow.Create(follower.ID, author.ID).Value, TestContext.Current.CancellationToken);
@@ -66,7 +65,7 @@ public class UserFixture : IClassFixture<DatabaseFixture>
     {
         UserDetailsModel result;
 
-        var user = new User((Nickname)"testuser", (FullName)"test user", Password.Create("password").Value, (Email)"testuser@acme.com", "my bio");
+        var user = TestDataHelper.NewUser("testuser");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(user, TestContext.Current.CancellationToken);

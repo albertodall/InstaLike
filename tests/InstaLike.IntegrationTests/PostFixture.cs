@@ -35,10 +35,9 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Publish_A_New_Post()
     {
         const string testUserName = "testuser1";
-        const string testPassword = "password";
         Result<int> publishCommandResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
+        var testUser = TestDataHelper.NewUser(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -66,7 +65,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Publish_A_Post_Without_A_Picture()
     {
-        var author = new User((Nickname)"nopictureauthor", (FullName)"nopicture author", Password.Create("password").Value, (Email)"nopictureauthor@acme.com", "bio");
+        var author = TestDataHelper.NewUser("nopictureauthor");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
@@ -84,14 +83,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Put_a_Comment_On_A_Post()
     {
         Result<int> commentPostResult;
-        var author = new User((Nickname)"author1", (FullName)"author one", Password.Create("password").Value, (Email)"author1@acme.com", "my bio");
-        var commenter = new User((Nickname)"commenter1", (FullName)"commenter one", Password.Create("password").Value, (Email)"commenter1@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author1");
+        var commenter = TestDataHelper.NewUser("commenter1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(commenter, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -117,16 +116,16 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Commenting_A_Post_Should_Not_Load_Its_Existing_Comments()
     {
         Result<int> commentPostResult;
-        var author = new User((Nickname)"author9", (FullName)"author nine", Password.Create("password").Value, (Email)"author9@acme.com", "my bio");
-        var reader = new User((Nickname)"reader9", (FullName)"reader nine", Password.Create("password").Value, (Email)"reader9@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author9");
+        var reader = TestDataHelper.NewUser("reader9");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            post.CommentBy(reader.ID, (CommentText)"first comment");
+            TestDataHelper.CommentOn(post, reader, "first comment");
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
@@ -152,14 +151,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Put_A_Like_To_A_Post()
     {
         Result likeResult;
-        var author = new User((Nickname)"author2", (FullName)"author two", Password.Create("password").Value, (Email)"author2@acme.com", "my bio");
-        var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author2");
+        var reader = TestDataHelper.NewUser("reader1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -183,14 +182,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task A_Like_Put_Before_The_Post_Is_Saved_Should_Be_Stored_With_Its_Post()
     {
-        var author = new User((Nickname)"author8", (FullName)"author eight", Password.Create("password").Value, (Email)"author8@acme.com", "my bio");
-        var reader = new User((Nickname)"reader8", (FullName)"reader eight", Password.Create("password").Value, (Email)"reader8@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author8");
+        var reader = TestDataHelper.NewUser("reader8");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             post.LikeBy(reader.ID);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -207,14 +206,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Dislike_A_Post()
     {
         Result likeResult;
-        var author = new User((Nickname)"author3", (FullName)"author three", Password.Create("password").Value, (Email)"author3@acme.com", "my bio");
-        var reader = new User((Nickname)"reader2", (FullName)"reader two", Password.Create("password").Value, (Email)"reader2@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author3");
+        var reader = TestDataHelper.NewUser("reader2");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             post.LikeBy(reader.ID);
             await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -241,14 +240,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Cannot_Dislike_A_Post_Without_Putting_A_Like_First()
     {
         Result likeResult;
-        var author = new User((Nickname)"author4", (FullName)"author four", Password.Create("password").Value, (Email)"author4@acme.com", "my bio");
-        var reader = new User((Nickname)"reader3", (FullName)"reader three", Password.Create("password").Value, (Email)"reader3@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author4");
+        var reader = TestDataHelper.NewUser("reader3");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -266,14 +265,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Cannot_Like_A_Post_Twice()
     {
         Result likeResult;
-        var author = new User((Nickname)"author5", (FullName)"author five", Password.Create("password").Value, (Email)"author5@acme.com", "my bio");
-        var reader = new User((Nickname)"reader4", (FullName)"reader four", Password.Create("password").Value, (Email)"reader4@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author5");
+        var reader = TestDataHelper.NewUser("reader4");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -292,12 +291,12 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Author_Cannot_Put_Likes_On_Their_Own_Posts()
     {
         Result likeResult;
-        var author = new User((Nickname)"author6", (FullName)"author six", Password.Create("password").Value, (Email)"author6@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author6");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -315,12 +314,12 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Find_One_Comment_For_Post()
     {
         CommentModel[] comments;
-        var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author7");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             post.CommentBy(author.ID, CommentText.Create("First comment").Value);
             await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -340,14 +339,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Load_All_Details_For_A_Post()
     {
         PostModel result;
-        var author = new User((Nickname)"author7", (FullName)"author seven", Password.Create("password").Value, (Email)"author7@acme.com", "my bio");
-        var reader = new User((Nickname)"reader1", (FullName)"reader one", Password.Create("password").Value, (Email)"reader1@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("author7");
+        var reader = TestDataHelper.NewUser("reader1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             post.CommentBy(reader.ID, CommentText.Create("My comment").Value);
             await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -377,9 +376,9 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Read_Posts_Created_By_Followed_Users()
     {
         PostModel[] timeline;
-        var author1 = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
-        var author2 = new User((Nickname)"authoruser2", (FullName)"author2 user2", Password.Create("password").Value, (Email)"author2user2@acme.com", "my bio");
-        var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
+        var author1 = TestDataHelper.NewUser("authoruser1");
+        var author2 = TestDataHelper.NewUser("authoruser2");
+        var reader = TestDataHelper.NewUser("readeruser");
         Post post1;
         Post post2;
         Post post3;
@@ -388,14 +387,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author1, TestContext.Current.CancellationToken);
             await session.SaveAsync(author2, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post1 = new Post(author1.ID, PictureId.New(), (PostText)"test post 1");
+            post1 = TestDataHelper.NewPost(author1, "test post 1");
             await session.SaveAsync(post1, TestContext.Current.CancellationToken);
-            post2 = new Post(author1.ID, PictureId.New(), (PostText)"test post 2");
+            post2 = TestDataHelper.NewPost(author1, "test post 2");
             await session.SaveAsync(post2, TestContext.Current.CancellationToken);
-            post3 = new Post(author2.ID, PictureId.New(), (PostText)"test post 3");
+            post3 = TestDataHelper.NewPost(author2, "test post 3");
             await session.SaveAsync(post3, TestContext.Current.CancellationToken);
             await session.SaveAsync(Follow.Create(reader.ID, author1.ID).Value, TestContext.Current.CancellationToken);
-            post1.CommentBy(reader.ID, (CommentText)"nice picture");
+            TestDataHelper.CommentOn(post1, reader, "nice picture");
             await session.FlushAsync(TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
@@ -424,12 +423,12 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     {
         Result editResult;
         var picture = await _pictureStore.SaveAsync(PictureContainers.Posts, Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), TestContext.Current.CancellationToken);
-        var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("authoruser1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, picture, (PostText)"test post 1");
+            post = TestDataHelper.NewPost(author, "test post 1", picture);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -458,14 +457,14 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     {
         Result editResult;
         var picture = PictureId.New();
-        var author = new User((Nickname)"authoruser1", (FullName)"author1 user1", Password.Create("password").Value, (Email)"author1user1@acme.com", "my bio");
-        var reader = new User((Nickname)"readeruser", (FullName)"reader user", Password.Create("password").Value, (Email)"reader@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("authoruser1");
+        var reader = TestDataHelper.NewUser("readeruser");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
-            post = new Post(author.ID, picture, (PostText)"test post 1");
+            post = TestDataHelper.NewPost(author, "test post 1", picture);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
         }
 
@@ -483,7 +482,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Cannot_Edit_A_Post_That_Does_Not_Exist()
     {
         const int missingPostID = int.MaxValue;
-        var author = new User((Nickname)"authoruser2", (FullName)"author2 user2", Password.Create("password").Value, (Email)"author2user2@acme.com", "my bio");
+        var author = TestDataHelper.NewUser("authoruser2");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);

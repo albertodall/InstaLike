@@ -31,7 +31,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         const string testPassword = "password";
         Result<User> authenticationResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
+        var testUser = TestDataHelper.NewUser(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -58,7 +58,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         const string testPassword = "password3";
         Result<User> authenticationResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");
+        var testUser = TestDataHelper.NewUserWithPassword(testUserName, testPassword);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -90,7 +90,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Logging_In_And_Out_Should_Raise_Events()
     {
-        var testUser = new User((Nickname)"testuser4", (FullName)"test4 user4", Password.Create("password4").Value, (Email)"testuser4@acme.com", "bio4");
+        var testUser = TestDataHelper.NewUserWithPassword("testuser4", "password4");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);

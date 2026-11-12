@@ -26,8 +26,8 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Mark_All_Notifications_Read()
     {
         int result;
-        var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-        var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+        var sender = TestDataHelper.NewUser("sender");
+        var recipient = TestDataHelper.NewUser("recipient");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
@@ -55,8 +55,8 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Count_Unread_Notifications()
     {
         int result;
-        var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-        var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+        var sender = TestDataHelper.NewUser("sender");
+        var recipient = TestDataHelper.NewUser("recipient");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
@@ -85,8 +85,8 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Read_All_Notifications()
     {
         NotificationModel[] result;
-        var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-        var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+        var sender = TestDataHelper.NewUser("sender");
+        var recipient = TestDataHelper.NewUser("recipient");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
@@ -119,8 +119,8 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Read_Only_Unread_Notifications()
     {
         NotificationModel[] result;
-        var sender = new User((Nickname)"sender", (FullName)"sender user", Password.Create("password").Value, (Email)"sender@acme.com", "my bio");
-        var recipient = new User((Nickname)"recipient", (FullName)"recipient user", Password.Create("password").Value, (Email)"follower@acme.com", "my bio");
+        var sender = TestDataHelper.NewUser("sender");
+        var recipient = TestDataHelper.NewUser("recipient");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);

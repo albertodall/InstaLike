@@ -78,7 +78,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Register_A_User_With_An_Email_Already_In_Use()
     {
-        var existingUser = new User((Nickname)"emailowner", (FullName)"email owner", Password.Create("password").Value, (Email)"taken@acme.com", "bio");
+        var existingUser = TestDataHelper.NewUser("emailowner", "taken@acme.com");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(existingUser, TestContext.Current.CancellationToken);
@@ -95,7 +95,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Register_A_User_With_A_Nickname_Already_Taken()
     {
-        var existingUser = new User((Nickname)"takennick", (FullName)"nick owner", Password.Create("password").Value, (Email)"nickowner@acme.com", "bio");
+        var existingUser = TestDataHelper.NewUser("takennick", "nickowner@acme.com");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(existingUser, TestContext.Current.CancellationToken);
@@ -112,8 +112,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Change_The_Email_To_One_Used_By_Another_Account()
     {
-        var firstUser = new User((Nickname)"firstowner", (FullName)"first owner", Password.Create("password").Value, (Email)"first@acme.com", "bio");
-        var secondUser = new User((Nickname)"secondowner", (FullName)"second owner", Password.Create("password").Value, (Email)"second@acme.com", "bio");
+        var firstUser = TestDataHelper.NewUser("firstowner", "first@acme.com");
+        var secondUser = TestDataHelper.NewUser("secondowner", "second@acme.com");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(firstUser, TestContext.Current.CancellationToken);
@@ -128,7 +128,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await session.GetAsync<User>(secondUser.ID, TestContext.Current.CancellationToken)).Email.Should().Be((Email)"second@acme.com");
+            (await session.GetAsync<User>(secondUser.ID, TestContext.Current.CancellationToken)).Email.Value.Should().Be("second@acme.com");
         }
     }
 
@@ -136,10 +136,9 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Edit_Registered_User_Information()
     {
         const string testUserName = "testuser1";
-        const string testPassword = "password";
         Result editCommandResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test1 user1", Password.Create(testPassword).Value, (Email)"testuser1@acme.com", "bio1");
+        var testUser = TestDataHelper.NewUser(testUserName);
 
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -166,9 +165,10 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             using (var session = _testFixture.OpenSession(_output))
             {
                 var modifiedUser = await session.GetAsync<User>(testUser.ID, TestContext.Current.CancellationToken);
-                modifiedUser.Nickname.Should().Be((Nickname)$"{testUser.Nickname}_mod");
-                modifiedUser.FullName.Should().Be((FullName)$"{testUser.FullName.Name}_mod {testUser.FullName.Surname}_mod");
-                modifiedUser.Email.Should().Be((Email)"new@email.com");
+                modifiedUser.Nickname.Value.Should().Be($"{testUser.Nickname}_mod");
+                modifiedUser.FullName.Name.Should().Be($"{testUser.FullName.Name}_mod");
+                modifiedUser.FullName.Surname.Should().Be($"{testUser.FullName.Surname}_mod");
+                modifiedUser.Email.Value.Should().Be("new@email.com");
                 modifiedUser.Biography.Should().Be("new bio");
                 _pictureStore.GetContent(PictureContainers.Profiles, modifiedUser.ProfilePicture!).Should().Equal(Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
             }
@@ -178,8 +178,8 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Give_Each_New_Profile_Picture_Its_Own_Identifier()
     {
-        var firstUser = new User((Nickname)"testuser5", (FullName)"test5 user5", Password.Create("password").Value, (Email)"testuser5@acme.com", "bio5");
-        var secondUser = new User((Nickname)"testuser6", (FullName)"test6 user6", Password.Create("password").Value, (Email)"testuser6@acme.com", "bio6");
+        var firstUser = TestDataHelper.NewUser("testuser5");
+        var secondUser = TestDataHelper.NewUser("testuser6");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(firstUser, TestContext.Current.CancellationToken);
@@ -206,7 +206,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Keep_The_Profile_Picture_When_No_New_Picture_Is_Uploaded()
     {
-        var testUser = new User((Nickname)"testuser7", (FullName)"test7 user7", Password.Create("password").Value, (Email)"testuser7@acme.com", "bio7");
+        var testUser = TestDataHelper.NewUser("testuser7");
         testUser.SetProfilePicture(PictureId.New());
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -231,7 +231,7 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     {
         var picture = Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
         var oldPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, picture, TestContext.Current.CancellationToken);
-        var testUser = new User((Nickname)"testuser8", (FullName)"test8 user8", Password.Create("password").Value, (Email)"testuser8@acme.com", "bio8");
+        var testUser = TestDataHelper.NewUser("testuser8");
         testUser.SetProfilePicture(oldPicture);
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -252,10 +252,9 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Not_Edit_User_Email_If_Email_Is_Not_Valid()
     {
         const string testUserName = "testuser2";
-        const string testPassword = "password";
         Result editCommandResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test2 user2", Password.Create(testPassword).Value, (Email)"testuser2@acme.com", "bio2");
+        var testUser = TestDataHelper.NewUser(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -282,10 +281,9 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Not_Edit_User_Nickname_If_Nickname_Is_Not_Valid()
     {
         const string testUserName = "testuser3";
-        const string testPassword = "password";
         Result editCommandResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test3 user3", Password.Create(testPassword).Value, (Email)"testuser3@acme.com", "bio3");
+        var testUser = TestDataHelper.NewUser(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -312,10 +310,9 @@ public class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Not_Edit_User_Full_Name_If_Full_Name_Is_Not_Valid()
     {
         const string testUserName = "testuser4";
-        const string testPassword = "password";
         Result editCommandResult;
 
-        var testUser = new User((Nickname)testUserName, (FullName)"test4 user4", Password.Create(testPassword).Value, (Email)"testuser4@acme.com", "bio4");
+        var testUser = TestDataHelper.NewUser(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
