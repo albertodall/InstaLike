@@ -11,7 +11,7 @@ internal sealed class CommentMapping : ClassMap<Comment>
 
         Id(p => p.ID).GeneratedBy.Native();
 
-        Map(p => p.Text).CustomType<string>()
+        Map(p => p.Text).AnsiString(500)
             .Access.CamelCaseField(Prefix.Underscore)
             .Not.Nullable();
 
@@ -19,13 +19,10 @@ internal sealed class CommentMapping : ClassMap<Comment>
             .Not.Nullable();
 
         References(p => p.Post)
-            .Column("PostID")
-            .Not.Nullable();
+            .Column("PostID");
 
         Map(p => p.AuthorID)
             .Column("UserID")
             .Not.Nullable();
-
-        DynamicInsert();
     }
 }

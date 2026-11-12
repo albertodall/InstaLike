@@ -11,8 +11,8 @@ internal sealed class NotificationMapping : ClassMap<Notification>
 
         Id(p => p.ID).GeneratedBy.Native();
 
-        Map(p => p.HasBeenReadByRecipient).CustomType<bool>()
-            .Column("[ReadByRecipient]")
+        Map(p => p.HasBeenReadByRecipient)
+            .Column("ReadByRecipient")
             .Not.Nullable();
 
         Map(p => p.Kind).CustomType<NotificationKind>()
@@ -22,16 +22,12 @@ internal sealed class NotificationMapping : ClassMap<Notification>
             .Not.Nullable();
 
         Map(p => p.RecipientID)
-            .Column("[RecipientID]")
             .Not.Nullable();
 
         Map(p => p.SenderID)
-            .Column("[SenderID]")
             .Not.Nullable();
 
         Map(p => p.PostID)
             .Nullable();
-
-        DynamicInsert();
     }
 }
