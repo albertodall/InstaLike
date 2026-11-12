@@ -120,7 +120,7 @@ public class PostFixture
         {
             sut.LikeBy(PostAuthorID).IsSuccess
                 .Should()
-                .BeFalse("users cannot put a 'Like' on their own posts");
+                .BeFalse("authors cannot like their own posts");
             sut.DomainEvents.Should().BeEmpty();
         }
     }

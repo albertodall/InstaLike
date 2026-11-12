@@ -259,7 +259,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
-        likeResult.IsSuccess.Should().BeFalse($"User [{reader.Nickname}] did not put any 'Like' on this post.");
+        likeResult.IsSuccess.Should().BeFalse("the reader has not liked this post");
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
-        likeResult.IsSuccess.Should().BeFalse($"User [{reader.Nickname}] already 'Liked' this post.");
+        likeResult.IsSuccess.Should().BeFalse("the reader has already liked this post");
     }
 
     [Fact]
@@ -308,7 +308,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
-        likeResult.IsSuccess.Should().BeFalse("You cannot put a 'Like' on your own posts.");
+        likeResult.IsSuccess.Should().BeFalse("authors cannot like their own posts");
     }
 
     [Fact]

@@ -28,7 +28,7 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
         var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
         if (post is null)
         {
-            return Result.Failure($"Post {request.PostID} does not exist.");
+            return Result.Failure("This post does not exist.");
         }
 
         var like = post.LikeBy(request.UserID);
@@ -48,7 +48,7 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
                 request.UserID,
                 ex.Message);
 
-            return Result.Failure(ex.Message);
+            return Result.Failure("Your like could not be saved. Please try again.");
         }
 
         logger.Information("User {UserID} put a 'Like' on post {PostID}", request.UserID, request.PostID);
@@ -63,7 +63,7 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
         var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
         if (post is null)
         {
-            return Result.Failure($"Post {request.PostID} does not exist.");
+            return Result.Failure("This post does not exist.");
         }
 
         var dislike = post.DislikeBy(request.UserID);
@@ -83,7 +83,7 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
                 request.UserID,
                 ex.Message);
 
-            return Result.Failure(ex.Message);
+            return Result.Failure("Your like could not be removed. Please try again.");
         }
 
         logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);

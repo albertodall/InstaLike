@@ -106,12 +106,16 @@ $('.like-button').click(function (e) {
 
     var endpoint = likeButton.hasClass('post-liked') ? '/Post/Dislike' : '/Post/Like';
 
+    likeButton.siblings('.like-error').remove();
+
     $.post(endpoint, { PostID: postId }, function () {
         likeButton.toggleClass('post-liked');
 
         // Increments o decrements the number of likes.
         const increment = likeButton.hasClass('post-liked') ? 1 : -1;
         likesMarkup.html(likes + increment);
+    }).fail(function (response) {
+        $('<span class="like-error"></span>').text(response.responseText).insertAfter(likeButton.next('strong'));
     });
 });
 
