@@ -46,7 +46,7 @@ internal class PostCommentsQueryHandler : IRequestHandler<PostCommentsQuery, Com
             User commentAuthor = null!;
             var commentsQuery = _session.QueryOver(() => commentEntity)
                 .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
-                .Where(() => commentEntity.PostID == request.PostID)
+                .Where(() => commentEntity.Post.ID == request.PostID)
                 .OrderBy(() => commentEntity.CommentDate).Asc
                 .SelectList(list => list
                     .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)

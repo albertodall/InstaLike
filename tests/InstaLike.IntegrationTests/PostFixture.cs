@@ -12,6 +12,8 @@ using InstaLike.Web.Media;
 using InstaLike.Web.Models;
 using InstaLike.Web.Posts.Commands;
 using InstaLike.Web.Posts.Queries;
+using NHibernate;
+using NHibernate.Collection;
 using Serilog;
 using Xunit;
 
@@ -106,8 +108,43 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             using (var session = _testFixture.OpenSession(_output))
             {
                 (await session.GetAsync<Comment>(commentPostResult.Value, TestContext.Current.CancellationToken)).Should().NotBeNull();
-                (await session.QueryOver<Comment>().Where(c => c.PostID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+                (await session.QueryOver<Comment>().Where(c => c.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
             }
+        }
+    }
+
+    [Fact]
+    public async Task Commenting_A_Post_Should_Not_Load_Its_Existing_Comments()
+    {
+        Result<int> commentPostResult;
+        var author = new User((Nickname)"author9", (FullName)"author nine", Password.Create("password").Value, (Email)"author9@acme.com", "my bio");
+        var reader = new User((Nickname)"reader9", (FullName)"reader nine", Password.Create("password").Value, (Email)"reader9@acme.com", "my bio");
+        Post post;
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+            post = new Post(author.ID, PictureId.New(), (PostText)"test post");
+            await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            post.CommentBy(reader.ID, (CommentText)"first comment");
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = DatabaseFixture.CreateMediator(session);
+            commentPostResult = await sut.Send(new PublishCommentCommand(post.ID, "second comment", reader.ID), TestContext.Current.CancellationToken);
+
+            using (new AssertionScope())
+            {
+                commentPostResult.IsSuccess.Should().BeTrue();
+                CommentsOf(session, post.ID).WasInitialized.Should().BeFalse("adding a comment does not need the other comments");
+            }
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await session.QueryOver<Comment>().Where(c => c.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(2);
         }
     }
 
@@ -285,7 +322,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = new Post(author.ID, PictureId.New(), (PostText)"test post");
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            await session.SaveAsync(post.CommentBy(author.ID, CommentText.Create("First comment").Value), TestContext.Current.CancellationToken);
+            post.CommentBy(author.ID, CommentText.Create("First comment").Value);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new PostCommentsQuery(post.ID);
@@ -311,7 +349,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = new Post(author.ID, PictureId.New(), (PostText)"test post");
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            await session.SaveAsync(post.CommentBy(reader.ID, CommentText.Create("My comment").Value), TestContext.Current.CancellationToken);
+            post.CommentBy(reader.ID, CommentText.Create("My comment").Value);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
             post.LikeBy(reader.ID);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
@@ -355,7 +394,8 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             post3 = new Post(author2.ID, PictureId.New(), (PostText)"test post 3");
             await session.SaveAsync(post3, TestContext.Current.CancellationToken);
             await session.SaveAsync(Follow.Create(reader.ID, author1.ID).Value, TestContext.Current.CancellationToken);
-            await session.SaveAsync(post1.CommentBy(reader.ID, (CommentText)"nice picture"), TestContext.Current.CancellationToken);
+            post1.CommentBy(reader.ID, (CommentText)"nice picture");
+            await session.FlushAsync(TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
@@ -457,5 +497,13 @@ public class PostFixture : IClassFixture<DatabaseFixture>
             editResult.IsFailure.Should().BeTrue();
             editResult.Error.Should().Be($"Post {missingPostID} does not exist.");
         }
+    }
+
+    private static IPersistentCollection CommentsOf(ISession session, int postID)
+    {
+        var role = $"{typeof(Post).FullName}.{nameof(Post.Comments)}";
+        return session.GetSessionImplementation().PersistenceContext.CollectionEntries.Keys
+            .OfType<IPersistentCollection>()
+            .Single(c => c.Role == role && Equals(c.Key, postID));
     }
 }

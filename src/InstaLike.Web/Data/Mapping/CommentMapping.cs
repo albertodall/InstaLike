@@ -18,7 +18,8 @@ internal class CommentMapping : ClassMap<Comment>
         Map(p => p.CommentDate)
             .Not.Nullable();
 
-        Map(p => p.PostID)
+        References(p => p.Post)
+            .Column("PostID")
             .Not.Nullable();
 
         Map(p => p.AuthorID)
