@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using InstaLike.Web.Data;
-using InstaLike.Web.Extensions;
+﻿using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,10 +24,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureTelemetry(builder.Configuration);
 builder.Services.ConfigureOpenTelemetry(builder.Configuration);
 
-builder.Services.AddMediatR(cfg => cfg
-    .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
-    .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
-
+builder.Services.ConfigureMediator();
 builder.Services.ConfigureDataAccess(builder.Configuration);
 builder.Services.ConfigurePictureStorage(builder.Configuration);
 builder.Services.ConfigureImageTagging(builder.Configuration);

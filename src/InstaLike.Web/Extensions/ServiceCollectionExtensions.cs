@@ -48,6 +48,15 @@ internal static class ServiceCollectionExtensions
             var sessionFactory = sp.GetRequiredService<ISessionFactory>();
             return sessionFactory.OpenStatelessSession();
         });
+
+        return services;
+    }
+
+    public static IServiceCollection ConfigureMediator(this IServiceCollection services)
+    {
+        services.AddMediatR(cfg => cfg
+            .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
+            .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
         services.AddScoped<UnitOfWork>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
 

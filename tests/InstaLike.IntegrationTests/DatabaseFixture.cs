@@ -5,6 +5,7 @@ using FluentNHibernate.Conventions.Helpers;
 using InstaLike.IntegrationTests.Properties;
 using InstaLike.Web.Data;
 using InstaLike.Web.Data.Mapping;
+using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,11 +78,7 @@ public class DatabaseFixture : IDisposable
         services.AddSingleton(session);
         services.AddSingleton(pictureStore ?? new InMemoryPictureStore());
         services.AddSingleton(Log.Logger);
-        services.AddScoped<UnitOfWork>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
-        services.AddMediatR(cfg => cfg
-            .RegisterServicesFromAssemblies(typeof(UnitOfWork).Assembly)
-            .AddOpenBehavior(typeof(UnitOfWorkBehavior<,>)));
+        services.ConfigureMediator();
         configure?.Invoke(services);
 
         return services.BuildServiceProvider().CreateScope().ServiceProvider.GetRequiredService<IMediator>();
