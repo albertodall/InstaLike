@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -32,8 +31,8 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
 
     public PostDetailQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<PostDetailQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<PostDetailQuery>();
     }
 
     public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)

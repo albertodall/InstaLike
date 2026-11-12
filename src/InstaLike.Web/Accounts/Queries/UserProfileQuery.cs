@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -35,8 +34,8 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
 
     public UserProfileQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<UserProfileModel>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<UserProfileModel>();
     }
 
     public async Task<UserProfileModel> Handle(UserProfileQuery request, CancellationToken cancellationToken)

@@ -24,7 +24,7 @@ internal sealed class ChatClientImageTagging : IImageRecognitionService
 
     public ChatClientImageTagging(IChatClient chatClient)
     {
-        _chatClient = chatClient ?? throw new ArgumentNullException(nameof(chatClient));
+        _chatClient = chatClient;
     }
 
     public async Task<Result<string[]>> AutoTagImage(Stream imageStream, string mediaType)

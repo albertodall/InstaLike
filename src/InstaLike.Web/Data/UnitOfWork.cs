@@ -17,8 +17,8 @@ internal sealed class UnitOfWork
 
     public UnitOfWork(ISession session, IPublisher publisher)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
+        _session = session;
+        _publisher = publisher;
     }
 
     private ITransaction Transaction =>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
 using MediatR;
@@ -25,8 +24,8 @@ internal sealed class UnreadNotificationsQueryHandler : IRequestHandler<UnreadNo
 
     public UnreadNotificationsQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<UnreadNotificationsQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<UnreadNotificationsQuery>();
     }
 
     public async Task<int> Handle(UnreadNotificationsQuery request, CancellationToken cancellationToken)

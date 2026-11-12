@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -19,8 +18,8 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
 
     public FollowCommandHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<FollowCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<FollowCommand>();
     }
 
     public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)

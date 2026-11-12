@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Models;
@@ -19,7 +18,7 @@ public sealed class HomeController : Controller
 
     public HomeController(ISender dispatcher)
     {
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _dispatcher = dispatcher;
     }
 
     public async Task<IActionResult> Index()

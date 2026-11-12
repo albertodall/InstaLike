@@ -22,8 +22,8 @@ internal sealed class AzureBlobPictureStore : IPictureStore
 
     public AzureBlobPictureStore(BlobServiceClient blobServiceClient, ILogger logger)
     {
-        _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
-        _logger = logger?.ForContext<AzureBlobPictureStore>() ?? throw new ArgumentNullException(nameof(logger));
+        _blobServiceClient = blobServiceClient;
+        _logger = logger.ForContext<AzureBlobPictureStore>();
     }
 
     public async Task<PictureId> SaveAsync(string container, byte[] content, CancellationToken cancellationToken)

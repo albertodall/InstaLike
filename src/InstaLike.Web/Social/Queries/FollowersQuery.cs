@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -30,8 +29,8 @@ internal sealed class FollowersQueryHandler : IRequestHandler<FollowersQuery, Fo
 
     public FollowersQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<FollowersQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<FollowersQuery>();
     }
 
     public async Task<FollowModel[]> Handle(FollowersQuery request, CancellationToken cancellationToken)

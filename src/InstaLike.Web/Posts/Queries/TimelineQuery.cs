@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -34,8 +33,8 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
 
     public TimelineQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<TimelineQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<TimelineQuery>();
     }
 
     public async Task<PostModel[]> Handle(TimelineQuery request, CancellationToken cancellationToken)

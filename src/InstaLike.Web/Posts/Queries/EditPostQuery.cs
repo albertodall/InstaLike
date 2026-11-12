@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Models;
@@ -29,8 +28,8 @@ internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, Edit
 
     public EditPostQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<EditPostQuery>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<EditPostQuery>();
     }
 
     public async Task<EditPostModel> Handle(EditPostQuery request, CancellationToken cancellationToken)

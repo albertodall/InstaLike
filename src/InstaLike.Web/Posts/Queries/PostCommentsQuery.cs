@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -29,8 +28,8 @@ internal sealed class PostCommentsQueryHandler : IRequestHandler<PostCommentsQue
 
     public PostCommentsQueryHandler(IStatelessSession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger;
     }
 
     public async Task<CommentModel[]> Handle(PostCommentsQuery request, CancellationToken cancellationToken)

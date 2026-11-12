@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using MediatR;
@@ -15,8 +14,8 @@ internal sealed class UserLoggedOutEventHandler : INotificationHandler<UserLogge
 
     public UserLoggedOutEventHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<UserLoggedOutEvent>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<UserLoggedOutEvent>();
     }
 
     public async Task Handle(UserLoggedOutEvent notification, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Extensions;
@@ -22,8 +21,8 @@ public sealed class PostController : Controller
 
     public PostController(ISender dispatcher, IImageRecognitionService imageRecognition)
     {
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
-        _imageRecognition = imageRecognition ?? throw new ArgumentNullException(nameof(imageRecognition));
+        _dispatcher = dispatcher;
+        _imageRecognition = imageRecognition;
     }
 
     public IActionResult Publish()

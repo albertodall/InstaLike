@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
@@ -14,7 +13,7 @@ internal sealed class CommentPublishedEventHandler : INotificationHandler<Commen
 
     public CommentPublishedEventHandler(ISession session)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _session = session;
     }
 
     public Task Handle(CommentPublishedEvent notification, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
@@ -17,8 +16,8 @@ internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishComm
 
     public PublishCommentCommandHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<PublishCommentCommand>() ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger.ForContext<PublishCommentCommand>();
     }
 
     public async Task<Result<int>> Handle(PublishCommentCommand request, CancellationToken cancellationToken)

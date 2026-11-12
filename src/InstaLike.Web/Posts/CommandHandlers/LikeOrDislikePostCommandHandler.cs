@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
@@ -17,8 +16,8 @@ internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePost
 
     public LikeOrDislikePostCommandHandler(ISession session, ILogger logger)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _session = session;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(LikePostCommand request, CancellationToken cancellationToken)

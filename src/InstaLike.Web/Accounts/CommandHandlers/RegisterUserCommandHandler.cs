@@ -23,9 +23,9 @@ internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserC
 
     public RegisterUserCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _logger = logger?.ForContext<RegisterUserCommand>() ?? throw new ArgumentNullException(nameof(logger));
-        _pictureStore = pictureStore ?? throw new ArgumentNullException(nameof(pictureStore));
+        _session = session;
+        _logger = logger.ForContext<RegisterUserCommand>();
+        _pictureStore = pictureStore;
     }
 
     public async Task<Result<int>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +14,7 @@ internal sealed class PostAuthorRequirementHandler : AuthorizationHandler<PostAu
 
     public PostAuthorRequirementHandler(NHibernate.ISession session, IHttpContextAccessor httpContextAccessor)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _session = session;
         _httpContextAccessor = httpContextAccessor;
     }
 

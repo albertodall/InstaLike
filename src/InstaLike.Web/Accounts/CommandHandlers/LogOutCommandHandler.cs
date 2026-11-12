@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -15,7 +14,7 @@ internal sealed class LogOutCommandHandler : IRequestHandler<LogOutCommand, Resu
 
     public LogOutCommandHandler(ISession session)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _session = session;
     }
 
     public async Task<Result> Handle(LogOutCommand request, CancellationToken cancellationToken)
