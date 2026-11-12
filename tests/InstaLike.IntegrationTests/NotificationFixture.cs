@@ -44,7 +44,7 @@ public class NotificationFixture : IClassFixture<DatabaseFixture>
         var command = new MarkAllUserNotificationsReadCommand(recipient.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             result = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 

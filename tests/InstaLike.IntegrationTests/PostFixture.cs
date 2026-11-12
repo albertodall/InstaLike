@@ -46,7 +46,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
             publishCommandResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -74,7 +74,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishPostCommand(author.ID, "post without a picture", []);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
             (await sut.Send(command, TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
         }
     }
@@ -97,7 +97,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new PublishCommentCommand(post.ID, "test comment", commenter.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             commentPostResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -131,7 +131,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             commentPostResult = await sut.Send(new PublishCommentCommand(post.ID, "second comment", reader.ID), TestContext.Current.CancellationToken);
 
             using (new AssertionScope())
@@ -165,7 +165,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new LikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -222,7 +222,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new DislikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -254,7 +254,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new DislikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -279,7 +279,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new LikePostCommand(post.ID, reader.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             await sut.Send(command, TestContext.Current.CancellationToken);
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
@@ -303,7 +303,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new LikePostCommand(post.ID, author.ID);
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             likeResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -464,7 +464,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
             editResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -500,7 +500,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
             editResult = await sut.Send(command, TestContext.Current.CancellationToken);
         }
 
@@ -520,7 +520,7 @@ public class PostFixture : IClassFixture<DatabaseFixture>
         var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session, _pictureStore);
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
             var editResult = await sut.Send(command, TestContext.Current.CancellationToken);
 
             editResult.IsFailure.Should().BeTrue();

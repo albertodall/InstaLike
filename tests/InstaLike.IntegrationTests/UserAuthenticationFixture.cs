@@ -8,7 +8,6 @@ using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Accounts.Commands;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace InstaLike.IntegrationTests;
@@ -39,7 +38,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             authenticationResult = await sut.Send(new LogInCommand(testUserName, testPassword), TestContext.Current.CancellationToken);
         }
 
@@ -66,7 +65,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             authenticationResult = await sut.Send(new LogInCommand(testUserName, "xxx42"), TestContext.Current.CancellationToken);
         }
 
@@ -80,7 +79,7 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session);
+            var sut = new TestMediatorBuilder(session).Build();
             authenticationResult = await sut.Send(new LogInCommand("not_existing_user", "xxx42"), TestContext.Current.CancellationToken);
         }
 
@@ -99,11 +98,10 @@ public class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         var raised = new List<IDomainEvent>();
         using (var session = _testFixture.OpenSession(_output))
         {
-            var sut = DatabaseFixture.CreateMediator(session, configure: services =>
-            {
-                services.AddSingleton<INotificationHandler<UserLoggedInEvent>>(new RecordingHandler<UserLoggedInEvent>(raised));
-                services.AddSingleton<INotificationHandler<UserLoggedOutEvent>>(new RecordingHandler<UserLoggedOutEvent>(raised));
-            });
+            var sut = new TestMediatorBuilder(session)
+                .WithHandler<INotificationHandler<UserLoggedInEvent>>(new RecordingHandler<UserLoggedInEvent>(raised))
+                .WithHandler<INotificationHandler<UserLoggedOutEvent>>(new RecordingHandler<UserLoggedOutEvent>(raised))
+                .Build();
 
             (await sut.Send(new LogInCommand("testuser4", "wrong"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
             (await sut.Send(new LogInCommand("testuser4", "password4"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
