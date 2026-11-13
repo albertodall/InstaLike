@@ -30,9 +30,15 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
             return Result.Failure<PostId>("Please select a picture to share together with your post.");
         }
 
+        var text = PostText.Create(request.Text);
+        if (text.IsFailure)
+        {
+            return Result.Failure<PostId>(text.Error);
+        }
+
         var postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
 
-        var post = new Post(request.UserID, postPicture, (PostText)request.Text);
+        var post = new Post(request.UserID, postPicture, text.Value);
         try
         {
             await _session.SaveAsync(post, cancellationToken);
