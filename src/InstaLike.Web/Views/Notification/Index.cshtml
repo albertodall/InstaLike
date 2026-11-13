@@ -10,6 +10,14 @@
 <div class="alerts">
     @if (Model.Any())
     {
+        <form method="post" asp-action="MarkRead" asp-controller="Notification">
+            @foreach (var notification in Model)
+            {
+                <input type="hidden" name="notificationIDs" value="@notification.ID" />
+            }
+            <button type="submit">Mark all as read</button>
+        </form>
+
         foreach (var notification in Model)
         {
             <div>

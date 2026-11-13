@@ -538,6 +538,28 @@ textarea {
 }
 
 /* Alerts */
+.alerts form {
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+    .alerts form button[type=submit] {
+        height: 32px;
+        line-height: 32px;
+        border-radius: 3px;
+        border: 1px solid #CCC;
+        float: right;
+        padding: 0 10px 0 40px;
+        background-color: white;
+        background-image: url(../img/icon_alert.png);
+        background-repeat: no-repeat;
+        background-position: 10px center;
+        background-size: 20px;
+        font-size: 11px;
+        font-family: inherit;
+        cursor: pointer;
+    }
+
 .alerts > div {
     margin-bottom: 20px;
     position: relative;
