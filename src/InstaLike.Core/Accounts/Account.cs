@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
@@ -47,5 +47,21 @@ public class Account : AggregateRoot<AccountId>
     public virtual void LogOut()
     {
         RaiseDomainEvent(new AccountLoggedOutEvent(ID));
+    }
+
+    public virtual Result ChangePassword(string currentPassword, Password newPassword)
+    {
+        if (!Password.HashMatches(currentPassword))
+        {
+            return Result.Failure("The current password is not valid.");
+        }
+
+        _password = newPassword;
+        return Result.Success();
+    }
+
+    public virtual void ChangeEmailAddress(Email email)
+    {
+        _email = email;
     }
 }
