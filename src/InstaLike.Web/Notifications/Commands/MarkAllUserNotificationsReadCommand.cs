@@ -1,12 +1,13 @@
-﻿using InstaLike.Web.Data;
+﻿using System;
+using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Notifications.Commands;
 
 public sealed class MarkAllUserNotificationsReadCommand : ICommand<int>
 {
-    public int UserID { get; }
+    public Guid UserID { get; }
 
-    public MarkAllUserNotificationsReadCommand(int userID)
+    public MarkAllUserNotificationsReadCommand(Guid userID)
     {
         UserID = userID;
     }

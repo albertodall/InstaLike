@@ -1,9 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
+using InstaLike.Core.Accounts;
 using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Accounts.Commands;
 
-public sealed class RegisterUserCommand : ICommand<Result<int>>
+public sealed class RegisterUserCommand : ICommand<Result<UserId>>
 {
     public string Nickname { get; }
     public string Name { get; }

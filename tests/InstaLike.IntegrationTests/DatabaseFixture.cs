@@ -56,9 +56,14 @@ public sealed class DatabaseFixture : IDisposable
 
     public ISession OpenSession(ITestOutputHelper output)
     {
+        return OpenSession(new XUnitSqlStatementOutputInterceptor(output));
+    }
+
+    internal ISession OpenSession(XUnitSqlStatementOutputInterceptor interceptor)
+    {
         return SessionFactory
             .WithOptions()
-                .Interceptor(new XUnitSqlStatementOutputInterceptor(output))
+                .Interceptor(interceptor)
             .OpenSession();
     }
 

@@ -1,11 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
+using InstaLike.Core.Accounts;
 using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Accounts.Commands;
 
 public sealed class EditUserDetailsCommand : ICommand<Result>
 {
-    public int UserID { get; }
+    public UserId UserID { get; }
     public string Nickname { get; }
     public string Name { get; }
     public string Surname { get; }
@@ -14,7 +15,7 @@ public sealed class EditUserDetailsCommand : ICommand<Result>
     /// <summary>The new profile picture, or <see langword="null"/> to keep the current one.</summary>
     public byte[]? ProfilePicture { get; }
 
-    public EditUserDetailsCommand(int userID, string nickname, string name, string surname, string email, string bio, byte[]? profilePicture)
+    public EditUserDetailsCommand(UserId userID, string nickname, string name, string surname, string email, string bio, byte[]? profilePicture)
     {
         UserID = userID;
         Nickname = nickname;

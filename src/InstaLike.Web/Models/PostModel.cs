@@ -1,4 +1,5 @@
 ﻿using System;
+using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace InstaLike.Web.Models;
 public sealed class PostModel
 {
     [HiddenInput]
-    public int PostID { get; set; }
+    public required PostId PostID { get; set; }
     public string AuthorNickName { get; set; } = string.Empty;
     public PictureId? AuthorProfilePicture { get; set; }
     public DateTimeOffset PostDate { get; set; }

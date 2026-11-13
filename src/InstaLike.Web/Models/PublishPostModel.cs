@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Models;
@@ -6,7 +7,7 @@ namespace InstaLike.Web.Models;
 [Bind("AuthorID, Text")]
 public sealed class PublishPostModel
 {
-    public int AuthorID { get; set; }
+    public Guid AuthorID { get; set; }
 
     [Required(ErrorMessage = "Please, write a text for the picture you're publishing.")]
     public string Text { get; set; } = string.Empty;

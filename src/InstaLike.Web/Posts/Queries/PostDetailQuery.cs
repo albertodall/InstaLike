@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -7,6 +8,8 @@ using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
+using NHibernate.Criterion;
+using NHibernate.SqlCommand;
 using NHibernate.Transform;
 using Serilog;
 
@@ -14,10 +17,10 @@ namespace InstaLike.Web.Posts.Queries;
 
 public sealed class PostDetailQuery : IRequest<PostModel>
 {
-    public int PostID { get; }
-    public int CurrentUserID { get; }
+    public PostId PostID { get; }
+    public Guid CurrentUserID { get; }
 
-    public PostDetailQuery(int postID, int currentUserID)
+    public PostDetailQuery(PostId postID, Guid currentUserID)
     {
         PostID = postID;
         CurrentUserID = currentUserID;
@@ -52,7 +55,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
             User commentAuthor = null!;
             CommentModel comment = null!;
             var postCommentsQuery = _session.QueryOver(() => commentEntity)
-                .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
+                .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                 .Where(() => commentEntity.Post.ID == request.PostID)
                 .OrderBy(() => commentEntity.CommentDate).Asc
                 .SelectList(list => list
@@ -78,7 +81,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
             Post postEntity = null!;
             User postAuthor = null!;
             var authorQuery = _session.QueryOver(() => postEntity)
-                .JoinEntityAlias(() => postAuthor, () => postAuthor.ID == postEntity.AuthorID)
+                .JoinEntityAlias(() => postAuthor, Restrictions.EqProperty(Projections.Property(() => postAuthor.ID), Projections.Property(() => postEntity.AuthorID)), JoinType.InnerJoin)
                 .Where(() => postEntity.ID == request.PostID)
                 .SelectList(list => list
                     .Select(() => postAuthor.Nickname)

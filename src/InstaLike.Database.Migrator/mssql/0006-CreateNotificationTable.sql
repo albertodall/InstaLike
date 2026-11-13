@@ -2,9 +2,9 @@
 BEGIN
 	CREATE TABLE [dbo].[Notification]
 	(
-		[ID] [int] IDENTITY(1,1) NOT NULL,
-		[SenderID] [int] NOT NULL,
-		[RecipientID] [int] NOT NULL,
+		[ID] [uniqueidentifier] NOT NULL,
+		[SenderID] [uniqueidentifier] NOT NULL,
+		[RecipientID] [uniqueidentifier] NOT NULL,
 		[Message] [varchar](200) NOT NULL,
 		[ReadByRecipient] [bit] NOT NULL,
 		[NotificationDate] [datetimeoffset](7) NOT NULL

@@ -6,13 +6,13 @@ namespace InstaLike.Core.Posts;
 /// <summary>
 /// Represents a comment on a post.
 /// </summary>
-public class Comment : EntityBase<int>
+public class Comment : EntityBase<Guid>
 {
 #pragma warning disable CS8618
     protected Comment() { }
 #pragma warning restore CS8618
 
-    internal Comment(Post post, int authorID, CommentText text)
+    internal Comment(Post post, Guid authorID, CommentText text)
         : this()
     {
         Post = post;
@@ -23,7 +23,7 @@ public class Comment : EntityBase<int>
 
     public virtual Post Post { get; protected set; }
 
-    public virtual int AuthorID { get; protected set; }
+    public virtual Guid AuthorID { get; protected set; }
 
     private readonly string _text;
     public virtual CommentText Text => (CommentText)_text;

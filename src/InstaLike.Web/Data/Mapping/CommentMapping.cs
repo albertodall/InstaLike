@@ -9,7 +9,7 @@ internal sealed class CommentMapping : ClassMap<Comment>
     {
         Table("[Comment]");
 
-        Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).GeneratedBy.GuidComb();
 
         Map(p => p.Text).AnsiString(500)
             .Access.CamelCaseField(Prefix.Underscore)

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -9,6 +10,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using NHibernate.SqlCommand;
 using NHibernate.Transform;
 using Serilog;
 
@@ -16,10 +18,10 @@ namespace InstaLike.Web.Posts.Queries;
 
 public sealed class TimelineQuery : IRequest<PostModel[]>
 {
-    public int UserID { get; }
+    public Guid UserID { get; }
     public int NumberOfPosts { get; }
 
-    public TimelineQuery(int userID, int numberOfPosts)
+    public TimelineQuery(Guid userID, int numberOfPosts)
     {
         UserID = userID;
         NumberOfPosts = numberOfPosts;
@@ -67,7 +69,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             User commentAuthor = null!;
             CommentModel comment = null!;
             var commentsQuery = _session.QueryOver(() => commentEntity)
-                .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
+                .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                 .WithSubquery
                     .WhereProperty(() => commentEntity.Post.ID).In(postIdsToShowInTimelineQuery)
                 .SelectList(list => list
@@ -95,7 +97,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                     .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
                     .And(l => l.UserID == request.UserID)
                 .Select(l => l.Post.ID)
-                .Future<int>();
+                .Future<PostId>();
 
             var authorsQuery = _session.QueryOver<User>()
                 .WithSubquery
@@ -115,10 +117,10 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
                 .Future<Post>();
 
             var timelineQueryResult = await timelineQuery.GetEnumerableAsync(cancellationToken);
-            var postLikesCount = postLikesCountQuery.ToDictionary(o => (int)o[0], o => (int)o[1]);
+            var postLikesCount = postLikesCountQuery.ToDictionary(o => (PostId)o[0], o => (int)o[1]);
             var commentsByPost = commentsQuery.ToLookup(c => c.PostID);
             var authors = authorsQuery.ToDictionary(
-                a => (int)a[0],
+                a => ((UserId)a[0]).Value,
                 a => (Nickname: (string)a[1], ProfilePicture: (PictureId?)a[2]));
 
             // Mapping

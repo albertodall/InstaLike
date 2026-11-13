@@ -10,12 +10,15 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace InstaLike.Web.Controllers;
 
 [Authorize]
 public sealed class PostController : Controller
 {
+    private const string MissingPost = "This post does not exist.";
+
     private readonly ISender _dispatcher;
     private readonly IImageRecognitionService _imageRecognition;
 
@@ -52,7 +55,7 @@ public sealed class PostController : Controller
         return View(newPost);
     }
 
-    public async Task<IActionResult> Detail(int id)
+    public async Task<IActionResult> Detail(PostId id)
     {
         var postQuery = new PostDetailQuery(id, User.GetIdentifier());
         var model = await _dispatcher.Send(postQuery);
@@ -61,7 +64,7 @@ public sealed class PostController : Controller
     }
 
     [Authorize(Policy = "IsPostAuthor")]
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(PostId id)
     {
         var editPostQuery = new EditPostQuery(id, User.GetIdentifier());
         var model = await _dispatcher.Send(editPostQuery);
@@ -95,6 +98,11 @@ public sealed class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> PublishComment(PublishCommentModel newComment)
     {
+        if (ModelState.GetFieldValidationState(nameof(PublishCommentModel.PostID)) == ModelValidationState.Invalid)
+        {
+            return BadRequest(MissingPost);
+        }
+
         var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetIdentifier());
         await _dispatcher.Send(command);
 
@@ -107,6 +115,11 @@ public sealed class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Like(LikePostModel like)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(MissingPost);
+        }
+
         var command = new LikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
 
@@ -116,6 +129,11 @@ public sealed class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Dislike(LikePostModel like)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(MissingPost);
+        }
+
         var command = new DislikePostCommand(like.PostID, User.GetIdentifier());
         var commandResult = await _dispatcher.Send(command);
 

@@ -6,4 +6,4 @@ namespace InstaLike.Core.Accounts;
 /// Represents an event raised when a user logs out.
 /// </summary>
 /// <param name="UserID">The ID of the user who logged out.</param>
-public sealed record UserLoggedOutEvent(int UserID) : IDomainEvent;
+public sealed record UserLoggedOutEvent(UserId UserID) : IDomainEvent;

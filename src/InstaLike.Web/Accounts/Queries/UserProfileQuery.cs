@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -15,11 +16,11 @@ namespace InstaLike.Web.Accounts.Queries;
 
 public sealed class UserProfileQuery : IRequest<UserProfileModel>
 {
-    public int CurrentUserID { get; }
+    public Guid CurrentUserID { get; }
     public string Nickname { get; }
     public int NumberOfThumbnails { get; }
 
-    public UserProfileQuery(int currentUserID, string nickname, int numberOfThumbnails)
+    public UserProfileQuery(Guid currentUserID, string nickname, int numberOfThumbnails)
     {
         CurrentUserID = currentUserID;
         Nickname = nickname;
@@ -63,14 +64,14 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
 
             // Number of posts published by this author. 
             var postCountQuery = _session.QueryOver<Post>()
-                .Where(p => p.AuthorID == profile.UserID)
+                .Where(p => p.AuthorID == profile.UserID.Value)
                 .Select(Projections.Count<Post>(p => p.ID))
                 .FutureValue<int>();
 
             // Thumbnails of the latest published posts.
             PostThumbnailModel thumbnailModel = null!;
             var thumbnailsQuery = _session.QueryOver<Post>()
-                .Where(p => p.AuthorID == profile.UserID)
+                .Where(p => p.AuthorID == profile.UserID.Value)
                 .OrderBy(p => p.PostDate).Desc()
                 .Select(Projections.ProjectionList()
                     .Add(Projections.Property<Post>(p => p.ID)
@@ -84,19 +85,19 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
 
             // Number of followers
             var followersCountQuery = _session.QueryOver<Follow>()
-                .Where(f => f.FollowedID == profile.UserID)
+                .Where(f => f.FollowedID == profile.UserID.Value)
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 
             // Number of followed users
             var followingCountQuery = _session.QueryOver<Follow>()
-                .Where(f => f.FollowerID == profile.UserID)
+                .Where(f => f.FollowerID == profile.UserID.Value)
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 
             // Is the current user following the selected user?
             var isFollowedByCurrentUserQuery = _session.QueryOver<Follow>()
-                .Where(f => f.FollowedID == profile.UserID)
+                .Where(f => f.FollowedID == profile.UserID.Value)
                 .And(f => f.FollowerID == request.CurrentUserID)
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
@@ -105,7 +106,7 @@ internal sealed class UserProfileQueryHandler : IRequestHandler<UserProfileQuery
             profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync(cancellationToken)).ToArray();
             profile.NumberOfFollowers = await followersCountQuery.GetValueAsync(cancellationToken);
             profile.NumberOfFollows = await followingCountQuery.GetValueAsync(cancellationToken);
-            profile.IsCurrentUserProfile = profile.UserID == request.CurrentUserID;
+            profile.IsCurrentUserProfile = profile.UserID.Value == request.CurrentUserID;
 
             profile.Following =
                 await isFollowedByCurrentUserQuery.GetValueAsync(cancellationToken) == 1

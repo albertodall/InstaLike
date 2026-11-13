@@ -32,16 +32,16 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
             await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID, recipient.ID);
-            var not2 = Notification.Followed(sender.ID, recipient.ID);
-            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             await session.SaveAsync(not1, TestContext.Current.CancellationToken);
             await session.SaveAsync(not2, TestContext.Current.CancellationToken);
             await session.SaveAsync(not3, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new MarkAllUserNotificationsReadCommand(recipient.ID);
+        var command = new MarkAllUserNotificationsReadCommand(recipient.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -61,9 +61,9 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
             await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID, recipient.ID);
-            var not2 = Notification.Followed(sender.ID, recipient.ID);
-            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             not1.MarkAsRead();
             await session.SaveAsync(not1, TestContext.Current.CancellationToken);
             await session.SaveAsync(not2, TestContext.Current.CancellationToken);
@@ -71,7 +71,7 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new UnreadNotificationsQuery(recipient.ID);
+        var query = new UnreadNotificationsQuery(recipient.ID.Value);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
@@ -91,9 +91,9 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
             await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID, recipient.ID);
-            var not2 = Notification.Followed(sender.ID, recipient.ID);
-            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             not1.MarkAsRead();
             await session.SaveAsync(not1, TestContext.Current.CancellationToken);
             await session.SaveAsync(not2, TestContext.Current.CancellationToken);
@@ -101,7 +101,7 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new NotificationsQuery(recipient.ID, true);
+        var query = new NotificationsQuery(recipient.ID.Value, true);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new NotificationsQueryHandler(session, Log.Logger);
@@ -125,9 +125,9 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(sender, TestContext.Current.CancellationToken);
             await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID, recipient.ID);
-            var not2 = Notification.Followed(sender.ID, recipient.ID);
-            var not3 = Notification.Followed(sender.ID, recipient.ID);
+            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             not1.MarkAsRead();
             await session.SaveAsync(not1, TestContext.Current.CancellationToken);
             await session.SaveAsync(not2, TestContext.Current.CancellationToken);
@@ -135,7 +135,7 @@ public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new NotificationsQuery(recipient.ID, false);
+        var query = new NotificationsQuery(recipient.ID.Value, false);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new NotificationsQueryHandler(session, Log.Logger);

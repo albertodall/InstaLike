@@ -6,6 +6,8 @@ using InstaLike.Core.Posts;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
+using NHibernate.Criterion;
+using NHibernate.SqlCommand;
 using NHibernate.Transform;
 using Serilog;
 
@@ -13,9 +15,9 @@ namespace InstaLike.Web.Posts.Queries;
 
 public sealed class PostCommentsQuery : IRequest<CommentModel[]>
 {
-    public int PostID { get; }
+    public PostId PostID { get; }
 
-    public PostCommentsQuery(int postID)
+    public PostCommentsQuery(PostId postID)
     {
         PostID = postID;
     }
@@ -44,7 +46,7 @@ internal sealed class PostCommentsQueryHandler : IRequestHandler<PostCommentsQue
             Comment commentEntity = null!;
             User commentAuthor = null!;
             var commentsQuery = _session.QueryOver(() => commentEntity)
-                .JoinEntityAlias(() => commentAuthor, () => commentAuthor.ID == commentEntity.AuthorID)
+                .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                 .Where(() => commentEntity.Post.ID == request.PostID)
                 .OrderBy(() => commentEntity.CommentDate).Asc
                 .SelectList(list => list

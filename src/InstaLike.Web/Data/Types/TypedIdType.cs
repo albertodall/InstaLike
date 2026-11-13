@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data.Common;
 using InstaLike.Core.SharedKernel;
 using NHibernate;
@@ -8,11 +8,12 @@ using NHibernate.UserTypes;
 
 namespace InstaLike.Web.Data.Types;
 
-internal sealed class PictureIdType : IUserType
+internal sealed class TypedIdType<TId> : IUserType
+    where TId : class, ITypedId<TId>
 {
     public SqlType[] SqlTypes => [SqlTypeFactory.Guid];
 
-    public Type ReturnedType => typeof(PictureId);
+    public Type ReturnedType => typeof(TId);
 
     public bool IsMutable => false;
 
@@ -29,8 +30,8 @@ internal sealed class PictureIdType : IUserType
     public object Replace(object original, object target, object owner) => original;
 
     public object? NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner) =>
-        NHibernateUtil.Guid.NullSafeGet(rs, names[0], session) is Guid value ? new PictureId(value) : null;
+        NHibernateUtil.Guid.NullSafeGet(rs, names[0], session) is Guid value ? TId.From(value) : null;
 
     public void NullSafeSet(DbCommand cmd, object? value, int index, ISessionImplementor session) =>
-        NHibernateUtil.Guid.NullSafeSet(cmd, (value as PictureId)?.Value, index, session);
+        NHibernateUtil.Guid.NullSafeSet(cmd, (value as TId)?.Value, index, session);
 }

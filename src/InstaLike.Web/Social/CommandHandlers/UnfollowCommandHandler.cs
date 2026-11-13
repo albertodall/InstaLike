@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -27,8 +28,8 @@ internal sealed class UnfollowCommandHandler : IRequestHandler<UnfollowCommand, 
         var unfollowedID = await _session.QueryOver<User>()
             .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
             .Select(u => u.ID)
-            .SingleOrDefaultAsync<int?>(cancellationToken);
-        if (unfollowedID is not int unfollowedUserID)
+            .SingleOrDefaultAsync<UserId?>(cancellationToken);
+        if (unfollowedID?.Value is not Guid unfollowedUserID)
         {
             return Result.Failure($"User [{request.UnfollowedNickname}] does not exist.");
         }

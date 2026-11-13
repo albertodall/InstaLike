@@ -1,5 +1,6 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Notifications;
+using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
 
@@ -9,7 +10,7 @@ internal sealed class NotificationMapping : ClassMap<Notification>
     {
         Table("[Notification]");
 
-        Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).CustomType<TypedIdType<NotificationId>>().GeneratedBy.Assigned();
 
         Map(p => p.HasBeenReadByRecipient)
             .Column("ReadByRecipient")

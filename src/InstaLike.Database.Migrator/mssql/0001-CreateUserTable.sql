@@ -2,7 +2,7 @@
 BEGIN
 	CREATE TABLE [dbo].[User]
 	(
-		[ID] [int] IDENTITY(1,1) NOT NULL,
+		[ID] [uniqueidentifier] NOT NULL,
 		[Nickname] [varchar](20) NOT NULL,
 		[Password] [varchar](64) NOT NULL,
 		[Name] [varchar](30) NOT NULL,

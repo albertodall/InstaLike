@@ -26,7 +26,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Register_User()
     {
-        Result<int> userRegistrationResult;
+        Result<UserId> userRegistrationResult;
 
         var userRegistrationCommand = new RegisterUserCommand(
             "registereduser",
@@ -46,7 +46,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (new AssertionScope())
         {
             userRegistrationResult.IsSuccess.Should().BeTrue();
-            userRegistrationResult.Value.Should().BeGreaterThan(0);
+            userRegistrationResult.Value.Value.Should().NotBeEmpty();
             using (var session = _testFixture.OpenSession(_output))
             {
                 var registeredUser = await session.GetAsync<User>(userRegistrationResult.Value, TestContext.Current.CancellationToken);
@@ -61,7 +61,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     {
         var command = new RegisterUserCommand("nopictureuser", "nopicture", "user", "password", "nopictureuser@acme.com", "bio", null);
 
-        Result<int> registrationResult;
+        Result<UserId> registrationResult;
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -82,6 +82,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(existingUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new RegisterUserCommand("emailthief", "email", "thief", "password", "Taken@Acme.com", "bio", null);
@@ -99,6 +100,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(existingUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new RegisterUserCommand("takennick", "nick", "thief", "password", "nickthief@acme.com", "bio", null);
@@ -118,6 +120,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(firstUser, TestContext.Current.CancellationToken);
             await session.SaveAsync(secondUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new EditUserDetailsCommand(secondUser.ID, secondUser.Nickname, secondUser.FullName.Name, secondUser.FullName.Surname, "FIRST@acme.com", secondUser.Biography, null);
@@ -143,6 +146,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new EditUserDetailsCommand(
@@ -184,6 +188,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(firstUser, TestContext.Current.CancellationToken);
             await session.SaveAsync(secondUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var picture = Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
@@ -211,6 +216,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, "new bio", null);
@@ -236,6 +242,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new EditUserDetailsCommand(
@@ -265,6 +272,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new EditUserDetailsCommand(
@@ -294,6 +302,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var command = new EditUserDetailsCommand(

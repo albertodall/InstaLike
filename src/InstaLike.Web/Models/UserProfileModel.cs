@@ -1,11 +1,12 @@
 ﻿using System;
+using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Models;
 
 public record UserProfileModel
 {
-    public int UserID { get; set; }
+    public required UserId UserID { get; set; }
     public string Nickname { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;

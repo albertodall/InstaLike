@@ -1,5 +1,6 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
@@ -10,7 +11,7 @@ internal sealed class UserMapping : ClassMap<User>
     {
         Table("[User]");
 
-        Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).CustomType<TypedIdType<UserId>>().GeneratedBy.Assigned();
 
         Map(p => p.Biography).AnsiString(500)
             .Not.Nullable()
@@ -27,7 +28,7 @@ internal sealed class UserMapping : ClassMap<User>
         Map(p => p.RegistrationDate)
             .Not.Nullable();
         Map(p => p.ProfilePicture)
-            .CustomType<PictureIdType>()
+            .CustomType<TypedIdType<PictureId>>()
             .Column("ProfilePictureGuid")
             .Nullable();
 

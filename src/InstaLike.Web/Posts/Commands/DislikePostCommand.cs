@@ -1,14 +1,16 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System;
+using CSharpFunctionalExtensions;
+using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Posts.Commands;
 
 public sealed class DislikePostCommand : ICommand<Result>
 {
-    public int PostID { get; }
-    public int UserID { get; }
+    public PostId PostID { get; }
+    public Guid UserID { get; }
 
-    public DislikePostCommand(int postID, int userID)
+    public DislikePostCommand(PostId postID, Guid userID)
     {
         PostID = postID;
         UserID = userID;

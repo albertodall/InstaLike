@@ -1,6 +1,8 @@
-﻿namespace InstaLike.Web.Models;
+﻿using InstaLike.Core.Posts;
+
+namespace InstaLike.Web.Models;
 
 public sealed class LikePostModel
 {
-    public int PostID { get; set; }
+    public required PostId PostID { get; set; }
 }

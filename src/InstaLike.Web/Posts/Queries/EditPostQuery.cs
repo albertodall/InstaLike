@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Models;
@@ -10,11 +11,11 @@ namespace InstaLike.Web.Posts.Queries;
 
 public sealed class EditPostQuery : IRequest<EditPostModel>
 {
-    public int PostID { get; }
+    public PostId PostID { get; }
 
-    public int CurrentUserID { get; }
+    public Guid CurrentUserID { get; }
 
-    public EditPostQuery(int postID, int currentUserID)
+    public EditPostQuery(PostId postID, Guid currentUserID)
     {
         PostID = postID;
         CurrentUserID = currentUserID;

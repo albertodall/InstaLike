@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -27,8 +28,8 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
         var followedID = await _session.QueryOver<User>()
             .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
             .Select(u => u.ID)
-            .SingleOrDefaultAsync<int?>(cancellationToken);
-        if (followedID is not int followedUserID)
+            .SingleOrDefaultAsync<UserId?>(cancellationToken);
+        if (followedID?.Value is not Guid followedUserID)
         {
             return Result.Failure($"User [{request.FollowedNickname}] does not exist.");
         }

@@ -2,10 +2,10 @@
 BEGIN
 	CREATE TABLE [dbo].[Comment]
 	(
-		[ID] [int] IDENTITY(1,1) NOT NULL,
+		[ID] [uniqueidentifier] NOT NULL,
 		[Text] [varchar](500) NOT NULL,
-		[UserID] [int] NOT NULL,
-		[PostID] [int] NOT NULL,
+		[UserID] [uniqueidentifier] NOT NULL,
+		[PostID] [uniqueidentifier] NOT NULL,
 		[CommentDate] [datetimeoffset](7) NOT NULL
 	)
 
