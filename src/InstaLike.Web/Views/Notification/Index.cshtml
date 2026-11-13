@@ -17,7 +17,7 @@
                     var senderProfilePicture = Url.ProfilePicture(notification.SenderProfilePicture);
                 }
                 <img src="@senderProfilePicture" alt="Sender's profile picture" />
-                <a href="@Url.Action("Profile", "Account", new { @id = notification.SenderNickname})">
+                <a href="@Url.Action("Profile", "Member", new { @id = notification.SenderNickname})">
                     @notification.SenderNickname
                 </a>
                 <time title="@notification.NotificationDate.DateTime" datetime="@notification.NotificationDate.DateTime">@notification.NotificationDate.UtcDateTime.AsPastDays()</time>

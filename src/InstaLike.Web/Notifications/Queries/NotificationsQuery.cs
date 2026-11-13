@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Notifications;
 using InstaLike.Web.Data;
 using InstaLike.Web.Models;
@@ -47,7 +48,7 @@ internal sealed class NotificationsQueryHandler : IRequestHandler<NotificationsQ
         {
             NotificationModel notification = null!;
             Notification notificationEntity = null!;
-            User sender = null!;
+            Member sender = null!;
 
             var notificationsQuery = _session.QueryOver(() => notificationEntity)
                 .JoinEntityAlias(() => sender, Restrictions.EqProperty(Projections.Property(() => sender.ID), Projections.Property(() => notificationEntity.SenderID)), JoinType.InnerJoin)

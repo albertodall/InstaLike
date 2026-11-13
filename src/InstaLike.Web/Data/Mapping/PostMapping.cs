@@ -26,7 +26,7 @@ internal sealed class PostMapping : ClassMap<Post>
             .Not.Nullable();
 
         Map(p => p.AuthorID)
-            .Column("UserID")
+            .Column("MemberID")
             .Not.Nullable();
 
         HasMany(p => p.Likes)

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Social;
 using InstaLike.Web.Data;
 using InstaLike.Web.Models;
@@ -44,8 +44,8 @@ internal sealed class FollowersQueryHandler : IRequestHandler<FollowersQuery, Fo
         {
             FollowModel model = null!;
             Follow follow = null!;
-            User followed = null!;
-            User follower = null!;
+            Member followed = null!;
+            Member follower = null!;
 
             var followersQuery = _session.QueryOver(() => follow)
                 .JoinEntityAlias(() => follower, Restrictions.EqProperty(Projections.Property(() => follower.ID), Projections.Property(() => follow.FollowerID)), JoinType.InnerJoin)

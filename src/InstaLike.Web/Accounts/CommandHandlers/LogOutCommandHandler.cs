@@ -19,13 +19,13 @@ internal sealed class LogOutCommandHandler : IRequestHandler<LogOutCommand, Resu
 
     public async Task<Result> Handle(LogOutCommand request, CancellationToken cancellationToken)
     {
-        var user = await _session.GetAsync<User>(request.UserID, cancellationToken);
-        if (user is null)
+        var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
+        if (account is null)
         {
-            return Result.Failure($"User {request.UserID} does not exist.");
+            return Result.Failure($"Account {request.AccountID} does not exist.");
         }
 
-        user.LogOut();
+        account.LogOut();
         return Result.Success();
     }
 }

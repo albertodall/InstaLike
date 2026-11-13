@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social.Commands;
 using MediatR;
@@ -25,10 +26,10 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
 
     public async Task<Result> Handle(FollowCommand request, CancellationToken cancellationToken)
     {
-        var followedID = await _session.QueryOver<User>()
+        var followedID = await _session.QueryOver<Member>()
             .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
             .Select(u => u.ID)
-            .SingleOrDefaultAsync<UserId?>(cancellationToken);
+            .SingleOrDefaultAsync<MemberId?>(cancellationToken);
         if (followedID?.Value is not Guid followedUserID)
         {
             return Result.Failure($"User [{request.FollowedNickname}] does not exist.");

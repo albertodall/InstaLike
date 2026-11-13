@@ -28,12 +28,12 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  - Pictures auto-tagging with a vision-capable model (GPT-4.1 nano) on [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/overview).
  
 ## Features
- - User registration. 
+ - Member registration. 
  - Sharing of pictures. 
  - Put "Likes" on shared pictures. 
  - Comments on shared pictures. 
- - Follow and unfollow users. 
- - Get notifications when other users interact with the content you shared.
+ - Follow and unfollow members. 
+ - Get notifications when other members interact with the content you shared.
  - Pictures Auto-tagging.
  - Cloud storage compatibility (e.g. [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs)) for pictures.
 

@@ -28,7 +28,7 @@ public sealed class UnusedPictureCleanupFixture : IClassFixture<DatabaseFixture>
         var unusedPostPicture = await UploadAsync(PictureContainers.Posts);
         var profilePicture = await UploadAsync(PictureContainers.Profiles);
         var unusedProfilePicture = await UploadAsync(PictureContainers.Profiles);
-        var author = TestDataHelper.NewUser("cleanupuser1");
+        var author = TestDataHelper.NewMember("cleanupuser1");
         author.SetProfilePicture(profilePicture);
         using (var session = _testFixture.OpenSession(_output))
         {

@@ -16,7 +16,7 @@
         </a>
     </li>
     <li class="btn_user">
-        <a asp-action="Profile" asp-controller="Account" , asp-route-id="@User.Identity.Name" title="User profile">
+        <a asp-action="Profile" asp-controller="Member" asp-route-id="@User.Identity.Name" title="User profile">
             User profile
         </a>
     </li>
@@ -29,7 +29,7 @@ else
 {
     <ul>
         <li class="btn_register">
-            <a asp-action="Register" asp-controller="Account" title="Register">Register</a>
+            <a asp-action="Register" asp-controller="Member" title="Register">Register</a>
         </li>
         <li class="btn_login">
             <a asp-action="Login" asp-controller="Account" title="Login">Login</a>

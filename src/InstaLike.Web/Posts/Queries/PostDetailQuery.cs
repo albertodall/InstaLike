@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Models;
@@ -52,7 +53,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
 
             // Comments for this post
             Comment commentEntity = null!;
-            User commentAuthor = null!;
+            Member commentAuthor = null!;
             CommentModel comment = null!;
             var postCommentsQuery = _session.QueryOver(() => commentEntity)
                 .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
@@ -69,7 +70,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
             // Is this post liked by the current user?
             var isLikedByCurrentUserQuery = _session.QueryOver<Like>()
                 .Where(l => l.Post.ID == request.PostID)
-                    .And(l => l.UserID == request.CurrentUserID)
+                    .And(l => l.MemberID == request.CurrentUserID)
                 .ToRowCountQuery()
                 .FutureValue<int>();
 
@@ -79,7 +80,7 @@ internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, 
                 .FutureValue();
 
             Post postEntity = null!;
-            User postAuthor = null!;
+            Member postAuthor = null!;
             var authorQuery = _session.QueryOver(() => postEntity)
                 .JoinEntityAlias(() => postAuthor, Restrictions.EqProperty(Projections.Property(() => postAuthor.ID), Projections.Property(() => postEntity.AuthorID)), JoinType.InnerJoin)
                 .Where(() => postEntity.ID == request.PostID)

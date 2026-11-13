@@ -6,10 +6,10 @@ namespace InstaLike.Web.Accounts.Commands;
 
 public sealed class LogOutCommand : ICommand<Result>
 {
-    public UserId UserID { get; }
+    public AccountId AccountID { get; }
 
-    public LogOutCommand(UserId userID)
+    public LogOutCommand(AccountId accountID)
     {
-        UserID = userID;
+        AccountID = accountID;
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using Microsoft.Extensions.Hosting;
@@ -45,7 +46,7 @@ internal sealed class UnusedPictureCleanupService : BackgroundService
             usedPostPictures = await session.QueryOver<Post>()
                 .Select(p => p.Picture)
                 .ListAsync<PictureId>(cancellationToken);
-            usedProfilePictures = await session.QueryOver<User>()
+            usedProfilePictures = await session.QueryOver<Member>()
                 .Select(u => u.ProfilePicture)
                 .ListAsync<PictureId>(cancellationToken);
         }

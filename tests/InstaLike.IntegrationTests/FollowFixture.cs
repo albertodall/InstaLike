@@ -4,6 +4,7 @@ using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Social;
 using InstaLike.Web.Models;
 using InstaLike.Web.Social.Commands;
@@ -28,8 +29,8 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Follow_Another_User()
     {
-        var followerUser = TestDataHelper.NewUser("user1");
-        var followedUser = TestDataHelper.NewUser("user2");
+        var followerUser = TestDataHelper.NewMember("user1");
+        var followedUser = TestDataHelper.NewMember("user2");
         Result followResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -59,8 +60,8 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Unfollow_Another_User()
     {
-        var followerUser = TestDataHelper.NewUser("user3");
-        var followedUser = TestDataHelper.NewUser("user4");
+        var followerUser = TestDataHelper.NewMember("user3");
+        var followedUser = TestDataHelper.NewMember("user4");
         Result unfollowResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -91,8 +92,8 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Follow_User_Twice()
     {
-        var followerUser = TestDataHelper.NewUser("user5");
-        var followedUser = TestDataHelper.NewUser("user6");
+        var followerUser = TestDataHelper.NewMember("user5");
+        var followedUser = TestDataHelper.NewMember("user6");
         Result followResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -129,8 +130,8 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Unfollow_Non_Followed_User()
     {
-        var followerUser = TestDataHelper.NewUser("user7");
-        var followedUser = TestDataHelper.NewUser("user8");
+        var followerUser = TestDataHelper.NewMember("user7");
+        var followedUser = TestDataHelper.NewMember("user8");
         Result unfollowResult;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -154,7 +155,7 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Follow_A_User_That_Does_Not_Exist()
     {
-        var followerUser = TestDataHelper.NewUser("user13");
+        var followerUser = TestDataHelper.NewMember("user13");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
@@ -171,7 +172,7 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Not_Follow_Themselves()
     {
-        var user = TestDataHelper.NewUser("user14");
+        var user = TestDataHelper.NewMember("user14");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(user, TestContext.Current.CancellationToken);
@@ -189,8 +190,8 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Have_One_Follower()
     {
-        var followerUser = TestDataHelper.NewUser("user9");
-        var followedUser = TestDataHelper.NewUser("user10");
+        var followerUser = TestDataHelper.NewMember("user9");
+        var followedUser = TestDataHelper.NewMember("user10");
         FollowModel[] result;
 
         using (var session = _testFixture.OpenSession(_output))
@@ -214,8 +215,8 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task User_Should_Have_Been_Following_One_User()
     {
-        var followerUser = TestDataHelper.NewUser("user11");
-        var followedUser = TestDataHelper.NewUser("user12");
+        var followerUser = TestDataHelper.NewMember("user11");
+        var followedUser = TestDataHelper.NewMember("user12");
         FollowModel[] result;
 
         using (var session = _testFixture.OpenSession(_output))

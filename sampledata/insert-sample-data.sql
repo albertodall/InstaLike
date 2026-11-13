@@ -9,8 +9,8 @@ SET QUOTED_IDENTIFIER ON
 
 BEGIN TRANSACTION
 
-DECLARE @SampleUser TABLE ([ID] uniqueidentifier, [SampleID] int PRIMARY KEY, [Nickname] varchar(20), [Password] varchar(64), [Name] varchar(30), [Surname] varchar(50), [Email] varchar(50), [Biography] varchar(500), [RegistrationDate] datetimeoffset(7), [ProfilePictureGuid] uniqueidentifier)
-INSERT INTO @SampleUser VALUES
+DECLARE @SampleMember TABLE ([ID] uniqueidentifier, [SampleID] int PRIMARY KEY, [Nickname] varchar(20), [Password] varchar(64), [Name] varchar(30), [Surname] varchar(50), [Email] varchar(50), [Biography] varchar(500), [RegistrationDate] datetimeoffset(7), [ProfilePictureGuid] uniqueidentifier)
+INSERT INTO @SampleMember VALUES
 	('0780bc4b-e542-d873-47a0-0168cc98d4d4', 1, N'alby', N'fttfRh0fPGfLEHiGPItbciHFCPE9MM7H1xpm8z2RCiNedObS', N'Alberto', N'Dallagiacoma', N'alberto.dallagiacoma@live.it', N'Stréordinério!', '2019-02-08T11:13:14.5809801+01:00', '19323a28-8a2b-e911-a7e3-58fb840515da'),
 	('3149efb2-2f0b-5bca-7a8e-01692fc86b5b', 2, N'batman', N'QmKzllM73U8vlSixhvMYycAsAPzozJmBXHEDrKDZAjHPiyA1', N'Bruce', N'Wayne', N'batman@gotham.com', N'The Dark Knight!', '2019-02-27T17:27:37.6910298+01:00', '85e5f397-ac3a-e911-a7eb-58fb840515da'),
 	('99fbea2e-10ed-7a2b-0349-01692fc963b1', 3, N'joker', N'6YhQLcYh2a6MOuFlfburf5yTgm3+5f1n1D3D5D8crwCD8GV7', N'Jack', N'Napier', N'joker@gotham.com', N'Smile, and your life will smile you as well!', '2019-02-27T17:28:41.2652968+01:00', '85a0b4bd-ac3a-e911-a7eb-58fb840515da'),
@@ -19,17 +19,24 @@ INSERT INTO @SampleUser VALUES
 	('7b1f0159-20df-9aad-f081-016f7266a0f6', 1008, N'penguin', N'u0NGsaO+l1HEeB90SY3VOb61TXrPuxDKpTatCf3oQbDiiYiC', N'Oswald', N'Cobblepot', N'mayor@gotham.com', N'A penguin is a bird that cannot fly! I am a man.', '2020-01-04T22:12:06.1342688+01:00', NULL),
 	('2c1b67f1-6568-9a7a-7853-0175cc276e23', 10004, N'unknown', N'04wipx8WnVEG/uaTFx/aYtj5s+ZKdT2cHsP4cv+nHZsnpWp5', N'No', N'One', N'noone@nowhere.xx', N'Who knows...', '2020-11-15T14:45:37.5710575+01:00', NULL)
 
-INSERT INTO [dbo].[User] ([ID], [Nickname], [Password], [Name], [Surname], [Email], [Biography], [RegistrationDate], [ProfilePictureGuid])
-SELECT s.[ID], s.[Nickname], s.[Password], s.[Name], s.[Surname], s.[Email], s.[Biography], s.[RegistrationDate], s.[ProfilePictureGuid]
-FROM @SampleUser s
-WHERE NOT EXISTS (SELECT 1 FROM [dbo].[User] u WHERE u.[Nickname] = s.[Nickname] OR u.[Email] = s.[Email])
+INSERT INTO [dbo].[Member] ([ID], [Nickname], [Name], [Surname], [Biography], [RegistrationDate], [ProfilePictureGuid])
+SELECT s.[ID], s.[Nickname], s.[Name], s.[Surname], s.[Biography], s.[RegistrationDate], s.[ProfilePictureGuid]
+FROM @SampleMember s
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Member] u WHERE u.[Nickname] = s.[Nickname])
 ORDER BY s.[SampleID]
 
-DECLARE @UserID TABLE ([SampleID] int PRIMARY KEY, [ID] uniqueidentifier)
-INSERT INTO @UserID
-SELECT s.[SampleID], u.[ID] FROM @SampleUser s INNER JOIN [dbo].[User] u ON u.[Nickname] = s.[Nickname]
+DECLARE @MemberID TABLE ([SampleID] int PRIMARY KEY, [ID] uniqueidentifier)
+INSERT INTO @MemberID
+SELECT s.[SampleID], u.[ID] FROM @SampleMember s INNER JOIN [dbo].[Member] u ON u.[Nickname] = s.[Nickname]
 
-DECLARE @SamplePost TABLE ([ID] uniqueidentifier, [SampleID] int PRIMARY KEY, [SampleUserID] int, [Text] varchar(500), [PostDate] datetimeoffset(7), [PostGuid] uniqueidentifier)
+INSERT INTO [dbo].[Account] ([ID], [Username], [Password], [Email])
+SELECT u.[ID], s.[Nickname], s.[Password], s.[Email]
+FROM @SampleMember s
+	INNER JOIN @MemberID u ON u.[SampleID] = s.[SampleID]
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Account] a WHERE a.[ID] = u.[ID] OR a.[Username] = s.[Nickname] OR a.[Email] = s.[Email])
+ORDER BY s.[SampleID]
+
+DECLARE @SamplePost TABLE ([ID] uniqueidentifier, [SampleID] int PRIMARY KEY, [SampleMemberID] int, [Text] varchar(500), [PostDate] datetimeoffset(7), [PostGuid] uniqueidentifier)
 INSERT INTO @SamplePost VALUES
 	('498b88fe-408f-7cbf-30a1-01691552c8dc', 1, 1, N'Foggy street', '2019-02-22T14:09:00.7640603+01:00', 'c7ab5008-a336-e911-a7eb-58fb840515da'),
 	('05eabce7-35d9-4c1f-ea8f-016938b73bac', 2, 2, N'Typical night on the Gotham''s roof. @joker #vigilante', '2019-03-01T11:05:26.3168209+01:00', '66c69388-093c-e911-a7ec-58fb840515da'),
@@ -42,10 +49,10 @@ INSERT INTO @SamplePost VALUES
 	('cfe87767-309a-c687-1557-016a317f3741', 10005, 1, N'Masters! #guitar #bass #livemusic', '2019-04-18T19:29:41.9538994+02:00', '887e5f8c-ff61-e911-93b6-5cf370843de4'),
 	('bc74123b-5905-f4e4-6df0-01701cbd24ee', 10006, 1, N'Even if @batman has the Batmobile, I have this german version of #GeneralLee #vehicle #car', '2020-02-07T00:02:02.7343248+01:00', '351658f0-b2f0-4155-bb51-28052905aba9')
 
-INSERT INTO [dbo].[Post] ([ID], [UserID], [Text], [PostDate], [PostGuid])
+INSERT INTO [dbo].[Post] ([ID], [MemberID], [Text], [PostDate], [PostGuid])
 SELECT s.[ID], u.[ID], s.[Text], s.[PostDate], s.[PostGuid]
 FROM @SamplePost s
-	INNER JOIN @UserID u ON u.[SampleID] = s.[SampleUserID]
+	INNER JOIN @MemberID u ON u.[SampleID] = s.[SampleMemberID]
 WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Post] p WHERE p.[PostGuid] = s.[PostGuid])
 ORDER BY s.[SampleID]
 
@@ -53,7 +60,7 @@ DECLARE @PostID TABLE ([SampleID] int PRIMARY KEY, [ID] uniqueidentifier)
 INSERT INTO @PostID
 SELECT s.[SampleID], p.[ID] FROM @SamplePost s INNER JOIN [dbo].[Post] p ON p.[PostGuid] = s.[PostGuid]
 
-INSERT INTO [dbo].[Comment] ([ID], [Text], [UserID], [PostID], [CommentDate])
+INSERT INTO [dbo].[Comment] ([ID], [Text], [MemberID], [PostID], [CommentDate])
 SELECT s.[ID], s.[Text], u.[ID], p.[ID], s.[CommentDate]
 FROM (VALUES
 	('17a53ef8-4320-13ad-b888-016947cf4092', 4, N'I feel safe now! #gothamcitizen', 1, 2, '2019-03-04T09:25:58.6743344+01:00'),
@@ -68,10 +75,10 @@ FROM (VALUES
 	('7106c515-8811-17d2-75ad-016926c3ebc7', 10006, N'I played many fantastic games!', 1, 10001, '2019-02-25T23:26:07.9435602+01:00'),
 	('9dff6fc6-7e32-9180-4bd4-01692bedcd40', 10007, N'I will find you!', 2, 10003, '2019-02-26T23:29:58.7209252+01:00'),
 	('04b494bd-768b-f237-5aae-016942bbb7e3', 10012, N'Number 2, My favourite! @joker', 1, 10004, '2019-03-03T09:46:32.4191183+01:00')
-) s ([ID], [SampleID], [Text], [SampleUserID], [SamplePostID], [CommentDate])
-	INNER JOIN @UserID u ON u.[SampleID] = s.[SampleUserID]
+) s ([ID], [SampleID], [Text], [SampleMemberID], [SamplePostID], [CommentDate])
+	INNER JOIN @MemberID u ON u.[SampleID] = s.[SampleMemberID]
 	INNER JOIN @PostID p ON p.[SampleID] = s.[SamplePostID]
-WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Comment] c WHERE c.[UserID] = u.[ID] AND c.[PostID] = p.[ID] AND c.[CommentDate] = s.[CommentDate])
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Comment] c WHERE c.[MemberID] = u.[ID] AND c.[PostID] = p.[ID] AND c.[CommentDate] = s.[CommentDate])
 ORDER BY s.[SampleID]
 
 INSERT INTO [dbo].[Follow] ([ID], [FollowerID], [FollowedID], [FollowDate])
@@ -82,12 +89,12 @@ FROM (VALUES
 	('9754a970-4984-7fa5-3c6d-016983817f3a', 1, 2, '2019-03-15T23:38:15.8666933+01:00'),
 	('7aae9ba5-0ba0-18d5-a7d6-0169984decf5', 3, 1, '2019-03-20T00:33:57.6216236+01:00')
 ) s ([ID], [SampleFollowerID], [SampleFollowedID], [FollowDate])
-	INNER JOIN @UserID follower ON follower.[SampleID] = s.[SampleFollowerID]
-	INNER JOIN @UserID followed ON followed.[SampleID] = s.[SampleFollowedID]
+	INNER JOIN @MemberID follower ON follower.[SampleID] = s.[SampleFollowerID]
+	INNER JOIN @MemberID followed ON followed.[SampleID] = s.[SampleFollowedID]
 WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Follow] f WHERE f.[FollowerID] = follower.[ID] AND f.[FollowedID] = followed.[ID])
 ORDER BY s.[FollowDate]
 
-INSERT INTO [dbo].[Like] ([ID], [PostID], [UserID], [LikeDate])
+INSERT INTO [dbo].[Like] ([ID], [PostID], [MemberID], [LikeDate])
 SELECT s.[ID], p.[ID], u.[ID], s.[LikeDate]
 FROM (VALUES
 	('f23125ec-580c-a595-6470-01692fca9de7', 2, 2, 3, '2019-02-27T17:30:01.7030482+01:00'),
@@ -96,10 +103,10 @@ FROM (VALUES
 	('c4398a8b-f740-f218-58f7-016953b1d12d', 3002, 1, 3, '2019-03-06T16:49:16.2051776+01:00'),
 	('18a0f89a-e49d-4441-2516-016a35b8ac55', 5003, 1, 1003, '2019-04-19T15:10:56.3414257+02:00'),
 	('e4d612fc-a3e1-ca88-a09c-016a31805508', 10003, 10005, 3, '2019-04-18T19:30:55.1121673+02:00')
-) s ([ID], [SampleID], [SamplePostID], [SampleUserID], [LikeDate])
+) s ([ID], [SampleID], [SamplePostID], [SampleMemberID], [LikeDate])
 	INNER JOIN @PostID p ON p.[SampleID] = s.[SamplePostID]
-	INNER JOIN @UserID u ON u.[SampleID] = s.[SampleUserID]
-WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Like] l WHERE l.[PostID] = p.[ID] AND l.[UserID] = u.[ID])
+	INNER JOIN @MemberID u ON u.[SampleID] = s.[SampleMemberID]
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Like] l WHERE l.[PostID] = p.[ID] AND l.[MemberID] = u.[ID])
 ORDER BY s.[SampleID]
 
 INSERT INTO [dbo].[Notification] ([ID], [SenderID], [RecipientID], [ReadByRecipient], [NotificationDate], [Kind], [PostID])
@@ -132,8 +139,8 @@ FROM (VALUES
 	('4ab51bed-c4e0-ef84-a88a-016a31805612', 10003, 3, 1, 1, '2019-04-18T19:30:55.3781691+02:00', 2, 10005),
 	('85291923-bd10-8dc2-ec33-01701ce1706b', 10004, 2, 1, 1, '2020-02-07T00:41:41.3552176+01:00', 1, NULL)
 ) s ([ID], [SampleID], [SampleSenderID], [SampleRecipientID], [ReadByRecipient], [NotificationDate], [Kind], [SamplePostID])
-	INNER JOIN @UserID sender ON sender.[SampleID] = s.[SampleSenderID]
-	INNER JOIN @UserID recipient ON recipient.[SampleID] = s.[SampleRecipientID]
+	INNER JOIN @MemberID sender ON sender.[SampleID] = s.[SampleSenderID]
+	INNER JOIN @MemberID recipient ON recipient.[SampleID] = s.[SampleRecipientID]
 	LEFT JOIN @PostID p ON p.[SampleID] = s.[SamplePostID]
 WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Notification] n WHERE n.[SenderID] = sender.[ID] AND n.[RecipientID] = recipient.[ID] AND n.[Kind] = s.[Kind] AND n.[NotificationDate] = s.[NotificationDate])
 ORDER BY s.[SampleID]

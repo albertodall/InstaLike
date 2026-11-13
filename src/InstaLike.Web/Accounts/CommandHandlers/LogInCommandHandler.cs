@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
@@ -10,7 +11,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
-internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<User>>
+internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Guid>>
 {
     private const string InvalidCredentials = "Username or password are not valid.";
 
@@ -23,24 +24,24 @@ internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result
         _logger = logger.ForContext<LogInCommand>();
     }
 
-    public async Task<Result<User>> Handle(LogInCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(LogInCommand request, CancellationToken cancellationToken)
     {
-        var user = await _session.QueryOver<User>()
-            .Where(Restrictions.Eq("Nickname", request.Nickname))
+        var account = await _session.QueryOver<Account>()
+            .Where(Restrictions.Eq("Username", request.Username))
             .SingleOrDefaultAsync(cancellationToken);
-        if (user is null)
+        if (account is null)
         {
-            _logger.Debug("User {Nickname} does not exist.", request.Nickname);
-            return Result.Failure<User>(InvalidCredentials);
+            _logger.Debug("Account {Username} does not exist.", request.Username);
+            return Result.Failure<Guid>(InvalidCredentials);
         }
 
-        var logIn = user.LogIn(request.Password);
+        var logIn = account.LogIn(request.Password);
         if (logIn.IsFailure)
         {
-            _logger.Debug("User {Nickname} did not authenticate correctly.", request.Nickname);
-            return Result.Failure<User>(logIn.Error);
+            _logger.Debug("Account {Username} did not authenticate correctly.", request.Username);
+            return Result.Failure<Guid>(logIn.Error);
         }
 
-        return Result.Success(user);
+        return Result.Success(account.ID.Value);
     }
 }

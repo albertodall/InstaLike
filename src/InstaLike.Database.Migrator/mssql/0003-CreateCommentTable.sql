@@ -1,10 +1,10 @@
-﻿IF ((OBJECT_ID(N'[dbo].[Comment]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[User]', N'U') IS NOT NULL) AND (OBJECT_ID(N'[dbo].[Post]', N'U') IS NOT NULL))
+﻿IF ((OBJECT_ID(N'[dbo].[Comment]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[Member]', N'U') IS NOT NULL) AND (OBJECT_ID(N'[dbo].[Post]', N'U') IS NOT NULL))
 BEGIN
 	CREATE TABLE [dbo].[Comment]
 	(
 		[ID] [uniqueidentifier] NOT NULL,
 		[Text] [varchar](500) NOT NULL,
-		[UserID] [uniqueidentifier] NOT NULL,
+		[MemberID] [uniqueidentifier] NOT NULL,
 		[PostID] [uniqueidentifier] NOT NULL,
 		[CommentDate] [datetimeoffset](7) NOT NULL
 	)
@@ -21,8 +21,8 @@ BEGIN
 	ALTER TABLE [dbo].[Comment] WITH CHECK ADD CONSTRAINT [FK_Post_Comment] FOREIGN KEY([PostID]) REFERENCES [dbo].[Post] ([ID])
 	ALTER TABLE [dbo].[Comment] CHECK CONSTRAINT [FK_Post_Comment]
 
-	ALTER TABLE [dbo].[Comment] WITH CHECK ADD CONSTRAINT [FK_User_Comment] FOREIGN KEY([UserID]) REFERENCES [dbo].[User] ([ID])
-	ALTER TABLE [dbo].[Comment] CHECK CONSTRAINT [FK_User_Comment]
+	ALTER TABLE [dbo].[Comment] WITH CHECK ADD CONSTRAINT [FK_Member_Comment] FOREIGN KEY([MemberID]) REFERENCES [dbo].[Member] ([ID])
+	ALTER TABLE [dbo].[Comment] CHECK CONSTRAINT [FK_Member_Comment]
 
 	CREATE NONCLUSTERED INDEX [IX_Comment_Post] ON [dbo].[Comment]
 	(

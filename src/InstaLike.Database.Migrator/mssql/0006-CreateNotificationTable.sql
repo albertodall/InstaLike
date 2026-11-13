@@ -1,4 +1,4 @@
-﻿IF (OBJECT_ID(N'[dbo].[Notification]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[User]', N'U') IS NOT NULL)
+﻿IF (OBJECT_ID(N'[dbo].[Notification]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[Member]', N'U') IS NOT NULL)
 BEGIN
 	CREATE TABLE [dbo].[Notification]
 	(
@@ -21,10 +21,10 @@ BEGIN
 
 	ALTER TABLE [dbo].[Notification] ADD CONSTRAINT [DF_Notification_NotificationDate] DEFAULT (sysdatetimeoffset()) FOR [NotificationDate]
 
-	ALTER TABLE [dbo].[Notification] WITH CHECK ADD CONSTRAINT [FK_Recipient_Notification] FOREIGN KEY([RecipientID]) REFERENCES [dbo].[User] ([ID])
+	ALTER TABLE [dbo].[Notification] WITH CHECK ADD CONSTRAINT [FK_Recipient_Notification] FOREIGN KEY([RecipientID]) REFERENCES [dbo].[Member] ([ID])
 	ALTER TABLE [dbo].[Notification] CHECK CONSTRAINT [FK_Recipient_Notification]
 
-	ALTER TABLE [dbo].[Notification] WITH CHECK ADD CONSTRAINT [FK_Sender_Notification] FOREIGN KEY([SenderID]) REFERENCES [dbo].[User] ([ID])
+	ALTER TABLE [dbo].[Notification] WITH CHECK ADD CONSTRAINT [FK_Sender_Notification] FOREIGN KEY([SenderID]) REFERENCES [dbo].[Member] ([ID])
 	ALTER TABLE [dbo].[Notification] CHECK CONSTRAINT [FK_Sender_Notification]
 
 	CREATE NONCLUSTERED INDEX [IX_Notification_Recipient] ON [dbo].[Notification]

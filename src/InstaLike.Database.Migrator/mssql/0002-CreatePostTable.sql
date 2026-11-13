@@ -1,9 +1,9 @@
-﻿IF (OBJECT_ID(N'[dbo].[Post]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[User]', N'U') IS NOT NULL)
+﻿IF (OBJECT_ID(N'[dbo].[Post]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[Member]', N'U') IS NOT NULL)
 BEGIN
 	CREATE TABLE [dbo].[Post]
 	(
 		[ID] [uniqueidentifier] NOT NULL,
-		[UserID] [uniqueidentifier] NOT NULL,
+		[MemberID] [uniqueidentifier] NOT NULL,
 		[Text] [varchar](500) NOT NULL,
 		[PostDate] [datetimeoffset](7) NOT NULL,
 		[PostGuid] [uniqueidentifier] ROWGUIDCOL NOT NULL
@@ -25,6 +25,6 @@ BEGIN
 								 
 	ALTER TABLE [dbo].[Post] ADD CONSTRAINT [DF_Post_PostGuid] DEFAULT (newsequentialid()) FOR [PostGuid]
 
-	ALTER TABLE [dbo].[Post] WITH CHECK ADD CONSTRAINT [FK_User_Post] FOREIGN KEY([UserID]) REFERENCES [dbo].[User] ([ID])
-	ALTER TABLE [dbo].[Post] CHECK CONSTRAINT [FK_User_Post]
+	ALTER TABLE [dbo].[Post] WITH CHECK ADD CONSTRAINT [FK_Member_Post] FOREIGN KEY([MemberID]) REFERENCES [dbo].[Member] ([ID])
+	ALTER TABLE [dbo].[Post] CHECK CONSTRAINT [FK_Member_Post]
 END

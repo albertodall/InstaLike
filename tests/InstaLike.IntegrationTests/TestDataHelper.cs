@@ -1,4 +1,5 @@
 ﻿using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 
@@ -8,43 +9,73 @@ internal static class TestDataHelper
 {
     private const string DefaultPassword = "password";
 
-    public static User NewUser(string nickname)
+    /// <summary>
+    /// A newly registered member, using the nickname as username and the default password.
+    /// </summary>
+    public static Member NewMember(string nickname)
     {
-        return NewUser(nickname, $"{nickname}@acme.com");
+        return Member.Register(
+            (Nickname)nickname,
+            (FullName)$"{nickname} user",
+            "my bio",
+            (Username)nickname,
+            Password.Create(DefaultPassword).Value,
+            (Email)$"{nickname}@acme.com");
     }
 
-    public static User NewUser(string nickname, string email)
+    /// <summary>
+    /// The member's account, with the default password.
+    /// </summary>
+    public static Account NewAccount(Member member)
     {
-        return CreateUser(nickname, email, DefaultPassword);
+        return NewAccountWithPassword(member, DefaultPassword);
     }
 
-    public static User NewUserWithPassword(string nickname, string password)
+    /// <summary>
+    /// The member's account, with the given password.
+    /// </summary>
+    public static Account NewAccountWithPassword(Member member, string password)
     {
-        return CreateUser(nickname, $"{nickname}@acme.com", password);
+        return Account.Create(member.ID.Value, (Username)member.Nickname.Value, Password.Create(password).Value, (Email)$"{member.Nickname.Value}@acme.com");
     }
 
-    public static Post NewPost(User author)
+    /// <summary>
+    /// The member's account, with the given email address.
+    /// </summary>
+    public static Account NewAccountWithEmail(Member member, string email)
+    {
+        return Account.Create(member.ID.Value, (Username)member.Nickname.Value, Password.Create(DefaultPassword).Value, (Email)email);
+    }
+
+    /// <summary>
+    /// A post by the author, with a default text and a new picture.
+    /// </summary>
+    public static Post NewPost(Member author)
     {
         return NewPost(author, "test post");
     }
 
-    public static Post NewPost(User author, string text)
+    /// <summary>
+    /// A post by the author with the given text and a new picture.
+    /// </summary>
+    public static Post NewPost(Member author, string text)
     {
         return NewPost(author, text, PictureId.New());
     }
 
-    public static Post NewPost(User author, string text, PictureId picture)
+    /// <summary>
+    /// A post by the author with the given text and picture.
+    /// </summary>
+    public static Post NewPost(Member author, string text, PictureId picture)
     {
         return new Post(author.ID.Value, picture, (PostText)text);
     }
 
-    public static Comment CommentOn(Post post, User author, string text)
+    /// <summary>
+    /// The author's comment on the post.
+    /// </summary>
+    public static Comment CommentOn(Post post, Member author, string text)
     {
         return post.CommentBy(author.ID.Value, (CommentText)text);
-    }
-
-    private static User CreateUser(string nickname, string email, string password)
-    {
-        return new User((Nickname)nickname, (FullName)$"{nickname} user", Password.Create(password).Value, (Email)email, "my bio");
     }
 }

@@ -50,7 +50,7 @@ public sealed class PostFixture
             sut.IsLikedBy(readerID).Should().BeTrue();
             var like = sut.Likes.Should().ContainSingle().Subject;
             like.Post.Should().BeSameAs(sut);
-            like.UserID.Should().Be(readerID);
+            like.MemberID.Should().Be(readerID);
         }
     }
 

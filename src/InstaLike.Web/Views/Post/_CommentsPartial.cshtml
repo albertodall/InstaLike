@@ -10,7 +10,7 @@
         {
             <li>
                 <strong>
-                    <a class="comment-author-nickname" asp-action="Profile" asp-controller="Account" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
+                    <a class="comment-author-nickname" asp-action="Profile" asp-controller="Member" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
                 </strong>
                 <p>
                     &nbsp;@comment.Text
@@ -26,7 +26,7 @@
         {
             <li class="comment-hidden">
                 <strong>
-                    <a asp-action="Profile" asp-controller="Account" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
+                    <a asp-action="Profile" asp-controller="Member" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
                 </strong>
                 <p>
                     &nbsp;@comment.Text
