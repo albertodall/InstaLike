@@ -1,4 +1,8 @@
-﻿// Highlights hashtags (#string) and Users' nicknames (@string)
+﻿$.ajaxSetup({
+    headers: { 'RequestVerificationToken': $('meta[name="request-verification-token"]').attr('content') }
+});
+
+// Highlights hashtags (#string) and Users' nicknames (@string)
 // Nicknames becomes clickable, redirecting the user to the related profile page
 function highlightHashtagsAndNicknames() {
     const nicknamePattern = new RegExp('@\\w+', 'gi');
