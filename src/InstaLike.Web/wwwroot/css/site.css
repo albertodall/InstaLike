@@ -90,10 +90,7 @@ textarea {
 .validation-summary-errors li {
     color: red;
     font-style: italic;
-    background-image: url(../img/icon_warning.png);
-    background-position: 0 top;
-    background-size: 14px;
-    background-repeat: no-repeat;
+    position: relative;
     padding-left: 20px;
     margin-top: 5px;
 }
@@ -128,9 +125,7 @@ textarea {
         display: block;
         text-decoration: none;
         padding: 0 10px 0 40px;
-        background-repeat: no-repeat;
-        background-position: 10px center;
-        background-size: 20px;
+        position: relative;
         font-size: 11px;
         font-family: inherit;
         color: black;
@@ -139,15 +134,15 @@ textarea {
     }
 
     .user .btn_home a {
-        background-image: url(../img/icon_home.png);
+        --icon: url(../lib/fontawesome/svgs/solid/house.svg);
     }
 
     .user .btn_share a {
-        background-image: url(../img/icon_photo.png);
+        --icon: url(../lib/fontawesome/svgs/solid/camera.svg);
     }
 
     .user .btn_alert a {
-        background-image: url(../img/icon_alert.png);
+        --icon: url(../lib/fontawesome/svgs/solid/bell.svg);
     }
 
     .user .btn_alert .alerts_count {
@@ -165,23 +160,23 @@ textarea {
     }
 
     .user .btn_user a {
-        background-image: url(../img/icon_user.png);
+        --icon: url(../lib/fontawesome/svgs/solid/user.svg);
     }
 
     .user .btn_settings a {
-        background-image: url(../img/icon_edit.png);
+        --icon: url(../lib/fontawesome/svgs/regular/pen-to-square.svg);
     }
 
     .user .btn_logout button {
-        background-image: url(../img/icon_logout.png);
+        --icon: url(../lib/fontawesome/svgs/solid/power-off.svg);
     }
 
     .user .btn_login a {
-        background-image: url(../img/icon_login.png);
+        --icon: url(../lib/fontawesome/svgs/solid/right-to-bracket.svg);
     }
 
     .user .btn_register a {
-        background-image: url(../img/icon_register.png);
+        --icon: url(../lib/fontawesome/svgs/solid/square-pen.svg);
     }
 
 .at-nickname {
@@ -236,10 +231,8 @@ textarea {
     line-height: 32px;
     border-radius: 3px;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
-    background-image: url(../img/icon_heart_empty.png);
+    position: relative;
+    --icon: url(../lib/fontawesome/svgs/regular/heart.svg);
     font-size: 11px;
     color: black;
 }
@@ -252,7 +245,7 @@ textarea {
 
 .posts .post-likes .post-liked {
     opacity: 0.4;
-    background-image: url(../img/icon_heart.png);
+    --icon: url(../lib/fontawesome/svgs/solid/heart.svg);
 }
 
 .posts .post-likes .like-error,
@@ -366,10 +359,8 @@ textarea {
     background-color: #FFF;
     float: right;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
-    background-image: url(../img/icon_show.png);
+    position: relative;
+    --icon: url(../lib/fontawesome/svgs/solid/eye.svg);
     font-size: 11px;
 }
 
@@ -423,10 +414,8 @@ textarea {
     line-height: 32px;
     border-radius: 3px;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
-    background-image: url(../img/icon_heart_empty.png);
+    position: relative;
+    --icon: url(../lib/fontawesome/svgs/regular/heart.svg);
     font-size: 11px;
     color: black;
 }
@@ -439,7 +428,7 @@ textarea {
 
 .post-detail .post-likes .post-liked {
     opacity: 0.4;
-    background-image: url(../img/icon_heart.png);
+    --icon: url(../lib/fontawesome/svgs/solid/heart.svg);
 }
 
 .post-detail .post-author-comment {
@@ -530,10 +519,8 @@ textarea {
     background-color: white;
     float: right;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
-    background-image: url(../img/icon_show.png);
+    position: relative;
+    --icon: url(../lib/fontawesome/svgs/solid/eye.svg);
     font-size: 11px;
 }
 
@@ -551,10 +538,8 @@ textarea {
         float: right;
         padding: 0 10px 0 40px;
         background-color: white;
-        background-image: url(../img/icon_alert.png);
-        background-repeat: no-repeat;
-        background-position: 10px center;
-        background-size: 20px;
+        --icon: url(../lib/fontawesome/svgs/solid/bell.svg);
+        position: relative;
         font-size: 11px;
         font-family: inherit;
         cursor: pointer;
@@ -609,10 +594,7 @@ textarea {
         display: block;
         color: red;
         font-style: italic;
-        background-image: url(../img/icon_warning.png);
-        background-position: 0 top;
-        background-size: 14px;
-        background-repeat: no-repeat;
+        position: relative;
         padding-left: 20px;
         margin-top: 5px;
     }
@@ -626,12 +608,10 @@ textarea {
     display: block;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     background-color: white;
-    background-image: url(../img/icon_floppy.png);
+    --icon: url(../lib/fontawesome/svgs/regular/floppy-disk.svg);
 }
 
 /* Login form */
@@ -643,10 +623,7 @@ textarea {
         display: block;
         color: red;
         font-style: italic;
-        background-image: url(../img/icon_warning.png);
-        background-position: 0 top;
-        background-size: 14px;
-        background-repeat: no-repeat;
+        position: relative;
         padding-left: 20px;
         margin-top: 5px;
     }
@@ -660,12 +637,10 @@ textarea {
     display: block;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     background-color: white;
-    background-image: url(../img/icon_login.png);
+    --icon: url(../lib/fontawesome/svgs/solid/right-to-bracket.svg);
 }
 
 /* Publish post */
@@ -677,10 +652,7 @@ textarea {
         display: block;
         color: red;
         font-style: italic;
-        background-image: url(../img/icon_warning.png);
-        background-position: 0 top;
-        background-size: 14px;
-        background-repeat: no-repeat;
+        position: relative;
         padding-left: 20px;
         margin-top: 5px;
     }
@@ -694,12 +666,10 @@ textarea {
     display: block;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     background-color: white;
-    background-image: url(../img/icon_send.png);
+    --icon: url(../lib/fontawesome/svgs/solid/paper-plane.svg);
 }
 
 .form_post .autotag-button {
@@ -711,16 +681,14 @@ textarea {
     display: block;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     background-color: white;
-    background-image: url(../img/icon_hashtag.png);
+    --icon: url(../lib/fontawesome/svgs/solid/hashtag.svg);
 }
 
 .form_post .button-progress {
-    background-image: url(../img/icon_progress.svg);
+    --icon: url(../lib/fontawesome/svgs/solid/spinner.svg);
 }
 
 .form_post .picture-placeholder {
@@ -749,13 +717,11 @@ textarea {
     display: block;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     float: right;
     background-color: white;
-    background-image: url(../img/icon_send.png);
+    --icon: url(../lib/fontawesome/svgs/solid/paper-plane.svg);
 }
 
 /* Edit user details */
@@ -772,10 +738,7 @@ textarea {
         display: block;
         color: red;
         font-style: italic;
-        background-image: url(../img/icon_warning.png);
-        background-position: 0 top;
-        background-size: 14px;
-        background-repeat: no-repeat;
+        position: relative;
         padding-left: 20px;
         margin-top: 5px;
     }
@@ -799,12 +762,10 @@ textarea {
     display: block;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     background-color: white;
-    background-image: url(../img/icon_floppy.png);
+    --icon: url(../lib/fontawesome/svgs/regular/floppy-disk.svg);
 }
 
 .user-details-profile-picture > label > img {
@@ -993,9 +954,7 @@ textarea {
     float: left;
     text-decoration: none;
     padding: 0 10px 0 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 20px;
+    position: relative;
     font-size: 11px;
     font-family: inherit;
     color: black;
@@ -1004,12 +963,12 @@ textarea {
 }
 
     .user-profile-info a.btn_edit {
-        background-image: url(../img/icon_edit.png);
+        --icon: url(../lib/fontawesome/svgs/regular/pen-to-square.svg);
     }
 
     .user-profile-info button.btn_follow,
     .user-profile-info button.btn_following {
-        background-image: url(../img/icon_follow.png)
+        --icon: url(../lib/fontawesome/svgs/solid/user-check.svg);
     }
 
     .user-profile-info button.btn_following {
@@ -1073,6 +1032,58 @@ textarea {
         .tag:hover::after, .tag-selected::after {
             border-left-color: crimson;
         }
+
+/* Icons */
+.user a::before,
+.user button::before,
+.posts .post-likes button::before,
+.posts .show-all-comments::before,
+.post-detail .post-likes button::before,
+.post-detail .show-all-comments::before,
+.alerts form button[type=submit]::before,
+.form_reg button[type=submit]::before,
+.form_login button[type=submit]::before,
+.form_post button[type=submit]::before,
+.form_post .autotag-button::before,
+.form_comment button[type=submit]::before,
+.form_edit button[type=submit]::before,
+.user-profile-info a::before,
+.user-profile-info button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    background-color: currentColor;
+    mask: var(--icon) center / contain no-repeat;
+}
+
+.form_post .button-progress::before {
+    animation: icon-spin 1s steps(8) infinite;
+}
+
+@keyframes icon-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.validation-summary-errors li:not(:empty)::before,
+.form_reg > div span:not(:empty)::before,
+.form_login > div span span:not(:empty)::before,
+.form_post > div span:not(:empty)::before,
+.form_edit > div span:not(:empty)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    background-color: currentColor;
+    mask: url(../lib/fontawesome/svgs/solid/circle-exclamation.svg) center / contain no-repeat;
+}
 
 @media (max-width: 640px) {
     body {

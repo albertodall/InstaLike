@@ -13,6 +13,31 @@
     {
       "library": "jquery-validation-unobtrusive@4.0.0",
       "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "@fortawesome/fontawesome-free@7.3.1",
+      "destination": "wwwroot/lib/fontawesome/",
+      "files": [
+        "LICENSE.txt",
+        "svgs/regular/floppy-disk.svg",
+        "svgs/regular/heart.svg",
+        "svgs/regular/pen-to-square.svg",
+        "svgs/solid/bell.svg",
+        "svgs/solid/camera.svg",
+        "svgs/solid/circle-exclamation.svg",
+        "svgs/solid/eye.svg",
+        "svgs/solid/hashtag.svg",
+        "svgs/solid/heart.svg",
+        "svgs/solid/house.svg",
+        "svgs/solid/paper-plane.svg",
+        "svgs/solid/power-off.svg",
+        "svgs/solid/right-to-bracket.svg",
+        "svgs/solid/spinner.svg",
+        "svgs/solid/square-pen.svg",
+        "svgs/solid/user-check.svg",
+        "svgs/solid/user.svg"
+      ]
     }
   ]
 }
