@@ -617,7 +617,7 @@ textarea {
         margin-top: 5px;
     }
 
-.form_reg input[type=submit] {
+.form_reg button[type=submit] {
     height: 32px;
     line-height: 32px;
     margin: 20px 3px 3px 3px;
@@ -790,7 +790,7 @@ textarea {
         box-shadow: rgba(0,0,0,0.5) 0 0 10px;
     }
 
-.form_edit input[type=submit] {
+.form_edit button[type=submit] {
     height: 32px;
     line-height: 32px;
     margin: 20px 3px 3px 3px;
