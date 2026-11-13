@@ -30,6 +30,12 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             return Result.Failure<PostId>("Please select a picture to share together with your post.");
         }
 
+        var text = PostText.Create(request.Text);
+        if (text.IsFailure)
+        {
+            return Result.Failure<PostId>(text.Error);
+        }
+
         var postToEdit = await _session.GetAsync<Post>(request.PostID, cancellationToken);
 
         if (postToEdit is null)
@@ -45,7 +51,7 @@ internal sealed class EditPostCommandHandler : IRequestHandler<EditPostCommand, 
             return Result.Failure<PostId>($"You're not allowed to edit post {postToEdit.ID}.");
         }
 
-        postToEdit.UpdateText(PostText.Create(request.Text).Value);
+        postToEdit.UpdateText(text.Value);
         var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
         postToEdit.UpdatePicture(uploadedPicture);
 

@@ -517,6 +517,63 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task Should_Not_Publish_A_Post_With_An_Invalid_Text()
+    {
+        var author = TestDataHelper.NewUser("invalidtextauthor");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        var command = new PublishPostCommand(author.ID.Value, new string('x', 501), Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
+            var publishResult = await sut.Send(command, TestContext.Current.CancellationToken);
+
+            using (new AssertionScope())
+            {
+                publishResult.IsFailure.Should().BeTrue();
+                publishResult.Error.Should().Be("Text for a post should not be longer than 500 chars");
+                (await _pictureStore.ListUploadedBeforeAsync(PictureContainers.Posts, DateTimeOffset.MaxValue, TestContext.Current.CancellationToken).CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task Should_Not_Edit_A_Post_With_An_Invalid_Text()
+    {
+        var author = TestDataHelper.NewUser("invalideditauthor");
+        var post = TestDataHelper.NewPost(author, "original text");
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        var command = new EditPostCommand(author.ID.Value, post.ID, new string('x', 501), Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
+            var editResult = await sut.Send(command, TestContext.Current.CancellationToken);
+
+            using (new AssertionScope())
+            {
+                editResult.IsFailure.Should().BeTrue();
+                editResult.Error.Should().Be("Text for a post should not be longer than 500 chars");
+                (await _pictureStore.ListUploadedBeforeAsync(PictureContainers.Posts, DateTimeOffset.MaxValue, TestContext.Current.CancellationToken).CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
+            }
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken)).Text.Value.Should().Be("original text");
+        }
+    }
+
+    [Fact]
     public async Task Cannot_Edit_A_Post_That_Does_Not_Exist()
     {
         var missingPostID = PostId.New();
