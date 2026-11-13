@@ -1,5 +1,6 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
@@ -20,7 +21,7 @@ internal sealed class PostMapping : ClassMap<Post>
             .Not.Nullable();
 
         Map(p => p.Picture)
-            .CustomType<PictureIdType>()
+            .CustomType<TypedIdType<PictureId>>()
             .Column("PostGuid")
             .Not.Nullable();
 
