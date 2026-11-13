@@ -11,17 +11,28 @@ internal static class TestDataHelper
 
     public static Member NewMember(string nickname)
     {
-        return NewMember(nickname, $"{nickname}@acme.com");
+        return Member.Register(
+            (Nickname)nickname,
+            (FullName)$"{nickname} user",
+            "my bio",
+            (Username)nickname,
+            Password.Create(DefaultPassword).Value,
+            (Email)$"{nickname}@acme.com");
     }
 
-    public static Member NewMember(string nickname, string email)
+    public static Account NewAccount(Member member)
     {
-        return CreateMember(nickname, email, DefaultPassword);
+        return NewAccountWithPassword(member, DefaultPassword);
     }
 
-    public static Member NewMemberWithPassword(string nickname, string password)
+    public static Account NewAccountWithPassword(Member member, string password)
     {
-        return CreateMember(nickname, $"{nickname}@acme.com", password);
+        return Account.Create(member.ID.Value, (Username)member.Nickname.Value, Password.Create(password).Value, (Email)$"{member.Nickname.Value}@acme.com");
+    }
+
+    public static Account NewAccountWithEmail(Member member, string email)
+    {
+        return Account.Create(member.ID.Value, (Username)member.Nickname.Value, Password.Create(DefaultPassword).Value, (Email)email);
     }
 
     public static Post NewPost(Member author)
@@ -42,10 +53,5 @@ internal static class TestDataHelper
     public static Comment CommentOn(Post post, Member author, string text)
     {
         return post.CommentBy(author.ID.Value, (CommentText)text);
-    }
-
-    private static Member CreateMember(string nickname, string email, string password)
-    {
-        return new Member((Nickname)nickname, (FullName)$"{nickname} user", Password.Create(password).Value, (Email)email, "my bio");
     }
 }

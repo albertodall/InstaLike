@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using InstaLike.Core.Membership;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Membership.Commands;
@@ -84,7 +84,6 @@ public sealed class MemberController : Controller
                 memberDetails.Nickname,
                 memberDetails.Name,
                 memberDetails.Surname,
-                memberDetails.Email,
                 memberDetails.Bio,
                 profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
 

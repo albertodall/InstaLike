@@ -10,7 +10,7 @@ namespace InstaLike.Core.Tests;
 public sealed class MemberFixture
 {
     [Fact]
-    public void A_New_User_Should_Be_Identified_Before_It_Is_Stored()
+    public void A_New_Member_Should_Be_Identified_Before_It_Is_Stored()
     {
         var sut = CreateTestMember();
 
@@ -18,7 +18,7 @@ public sealed class MemberFixture
     }
 
     [Fact]
-    public void New_User_Should_Have_No_Profile_Picture()
+    public void New_Member_Should_Have_No_Profile_Picture()
     {
         var sut = CreateTestMember();
 
@@ -26,7 +26,7 @@ public sealed class MemberFixture
     }
 
     [Fact]
-    public void User_Should_Change_Nickname()
+    public void Member_Should_Change_Nickname()
     {
         var sut = CreateTestMember();
         var newNickname = Nickname.Create("newnickname");
@@ -37,7 +37,7 @@ public sealed class MemberFixture
     }
 
     [Fact]
-    public void User_Should_Change_Full_Name()
+    public void Member_Should_Change_Full_Name()
     {
         var sut = CreateTestMember();
         var newFullName = (FullName)"Test User New";
@@ -48,18 +48,7 @@ public sealed class MemberFixture
     }
 
     [Fact]
-    public void User_Should_Change_Email_Address()
-    {
-        var sut = CreateTestMember();
-        var newEmailAddress = (Email)"user1@newdomain.com";
-
-        sut.ChangeEmailAddress(newEmailAddress);
-
-        sut.Email.Should().Be(newEmailAddress);
-    }
-
-    [Fact]
-    public void User_Should_Update_Biography()
+    public void Member_Should_Update_Biography()
     {
         var sut = CreateTestMember();
         var newBiographyText = "This is my new bio";
@@ -67,23 +56,6 @@ public sealed class MemberFixture
         sut.UpdateBiography(newBiographyText);
 
         sut.Biography.Should().Be(newBiographyText);
-    }
-
-    [Fact]
-    public void Should_Change_User_Password()
-    {
-        var password1 = Password.Create("password1").Value;
-        var password2 = Password.Create("password2").Value;
-        var sut = new Member(
-            (Nickname)"user1",
-            (FullName)"Test User",
-            password1,
-            (Email)"user1@acme.com",
-            "My Bio");
-
-        sut.ChangePassword(password2);
-
-        sut.Password.HashMatches(password1).Should().BeFalse();
     }
 
     [Fact]
@@ -110,51 +82,26 @@ public sealed class MemberFixture
     }
 
     [Fact]
-    public void Logging_In_With_The_Right_Password_Should_Raise_An_Event()
+    public void Registering_Should_Pass_The_Credentials_To_The_Account_Without_Keeping_Them()
     {
-        var sut = CreateMemberWithPassword("password");
+        var username = (Username)"user1";
+        var password = Password.Create("password").Value;
+        var email = (Email)"user1@acme.com";
 
-        using (new AssertionScope())
-        {
-            sut.LogIn("password").IsSuccess.Should().BeTrue();
-            sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new MemberLoggedInEvent(sut.ID));
-        }
-    }
+        var sut = Member.Register((Nickname)"user1", (FullName)"Test User", "My Bio", username, password, email);
 
-    [Fact]
-    public void Logging_In_With_A_Wrong_Password_Should_Fail_Without_Events()
-    {
-        var sut = CreateMemberWithPassword("password");
-
-        using (new AssertionScope())
-        {
-            sut.LogIn("wrong").IsSuccess.Should().BeFalse();
-            sut.DomainEvents.Should().BeEmpty();
-        }
-    }
-
-    [Fact]
-    public void Logging_Out_Should_Raise_An_Event()
-    {
-        var sut = CreateMemberWithPassword("password");
-
-        sut.LogOut();
-
-        sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new MemberLoggedOutEvent(sut.ID));
-    }
-
-    private static Member CreateMemberWithPassword(string password)
-    {
-        return new Member((Nickname)"user1", (FullName)"Test User", Password.Create(password).Value, (Email)"user1@acme.com", "My Bio");
+        sut.DomainEvents.Should().ContainSingle()
+            .Which.Should().Be(new MemberRegisteredEvent(sut.ID, username, password, email));
     }
 
     private static Member CreateTestMember()
     {
-        return new Member(
+        return Member.Register(
             (Nickname)"user1",
             (FullName)"Test User",
-            (Password)"password",
-            (Email)"user1@acme.com",
-            "My Bio");
+            "My Bio",
+            (Username)"user1",
+            Password.Create("password").Value,
+            (Email)"user1@acme.com");
     }
 }

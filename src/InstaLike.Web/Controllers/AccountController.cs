@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using InstaLike.Core.Membership;
+using InstaLike.Core.Accounts;
 using InstaLike.Web.Accounts.Commands;
 using InstaLike.Web.Extensions;
+using InstaLike.Web.Membership.Queries;
 using InstaLike.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -47,8 +49,10 @@ public sealed class AccountController : Controller
             }
             else
             {
+                var memberID = authenticationResult.Value;
+                var nickname = await _dispatcher.Send(new MemberNicknameQuery(memberID));
                 var memberIdentity = new ClaimsIdentity(
-                    GetMemberClaims(authenticationResult.Value),
+                    GetMemberClaims(memberID, nickname),
                     CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(
@@ -71,7 +75,7 @@ public sealed class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        await _dispatcher.Send(new LogOutCommand(MemberId.From(User.GetIdentifier())));
+        await _dispatcher.Send(new LogOutCommand(AccountId.From(User.GetIdentifier())));
 
         return RedirectToAction("Index", "Home");
     }
@@ -79,17 +83,15 @@ public sealed class AccountController : Controller
     /// <summary>
     /// Builds the list of claims for the authenticated member.
     /// </summary>
-    /// <param name="member">Authenticated member.</param>
+    /// <param name="memberID">Identifier of the authenticated member.</param>
+    /// <param name="nickname">Nickname of the authenticated member.</param>
     /// <returns>The list of claims.</returns>
-    private static IEnumerable<Claim> GetMemberClaims(Member member)
+    private static IEnumerable<Claim> GetMemberClaims(Guid memberID, string nickname)
     {
         return new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, member.ID.ToString(), ClaimValueTypes.String),
-            new Claim(ClaimTypes.Name, member.Nickname, ClaimValueTypes.String),
-            new Claim(ClaimTypes.GivenName, member.FullName.Name, ClaimValueTypes.String),
-            new Claim(ClaimTypes.Surname, member.FullName.Surname, ClaimValueTypes.String),
-            new Claim(ClaimTypes.Email, member.Email, ClaimValueTypes.Email)
+            new Claim(ClaimTypes.NameIdentifier, memberID.ToString(), ClaimValueTypes.String),
+            new Claim(ClaimTypes.Name, nickname, ClaimValueTypes.String)
         };
     }
 }

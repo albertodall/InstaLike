@@ -17,15 +17,22 @@ INSERT INTO @SampleMember VALUES
 	('595d7ab3-6581-2df1-92a4-016d3aa075e0', 1007, N'riddler', N'J2EFJXv1jypBU7frFYKyD8o3PbfKhEc9uSHaYoJtd10fPSeG', N'Edward', N'Nygma', N'riddler@gotham.com', N'Guess who!', '2019-09-16T17:10:57.5046807+02:00', NULL),
 	('7b1f0159-20df-9aad-f081-016f7266a0f6', 1008, N'penguin', N'u0NGsaO+l1HEeB90SY3VOb61TXrPuxDKpTatCf3oQbDiiYiC', N'Oswald', N'Cobblepot', N'mayor@gotham.com', N'A penguin is a bird that cannot fly! I am a man.', '2020-01-04T22:12:06.1342688+01:00', NULL)
 
-INSERT INTO [dbo].[Member] ([ID], [Nickname], [Password], [Name], [Surname], [Email], [Biography], [RegistrationDate], [ProfilePictureGuid])
-SELECT s.[ID], s.[Nickname], s.[Password], s.[Name], s.[Surname], s.[Email], s.[Biography], s.[RegistrationDate], s.[ProfilePictureGuid]
+INSERT INTO [dbo].[Member] ([ID], [Nickname], [Name], [Surname], [Biography], [RegistrationDate], [ProfilePictureGuid])
+SELECT s.[ID], s.[Nickname], s.[Name], s.[Surname], s.[Biography], s.[RegistrationDate], s.[ProfilePictureGuid]
 FROM @SampleMember s
-WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Member] u WHERE u.[Nickname] = s.[Nickname] OR u.[Email] = s.[Email])
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Member] u WHERE u.[Nickname] = s.[Nickname])
 ORDER BY s.[SampleID]
 
 DECLARE @MemberID TABLE ([SampleID] int PRIMARY KEY, [ID] uniqueidentifier)
 INSERT INTO @MemberID
 SELECT s.[SampleID], u.[ID] FROM @SampleMember s INNER JOIN [dbo].[Member] u ON u.[Nickname] = s.[Nickname]
+
+INSERT INTO [dbo].[Account] ([ID], [Username], [Password], [Email])
+SELECT u.[ID], s.[Nickname], s.[Password], s.[Email]
+FROM @SampleMember s
+	INNER JOIN @MemberID u ON u.[SampleID] = s.[SampleID]
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Account] a WHERE a.[ID] = u.[ID] OR a.[Username] = s.[Nickname] OR a.[Email] = s.[Email])
+ORDER BY s.[SampleID]
 
 DECLARE @SamplePost TABLE ([ID] uniqueidentifier, [SampleID] int PRIMARY KEY, [SampleMemberID] int, [Text] varchar(500), [PostDate] datetimeoffset(7), [PostGuid] uniqueidentifier)
 INSERT INTO @SamplePost VALUES

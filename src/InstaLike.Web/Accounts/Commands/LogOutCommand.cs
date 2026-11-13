@@ -1,16 +1,15 @@
 ﻿using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
 using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Accounts.Commands;
 
 public sealed class LogOutCommand : ICommand<Result>
 {
-    public MemberId MemberID { get; }
+    public AccountId AccountID { get; }
 
-    public LogOutCommand(MemberId memberID)
+    public LogOutCommand(AccountId accountID)
     {
-        MemberID = memberID;
+        AccountID = accountID;
     }
 }

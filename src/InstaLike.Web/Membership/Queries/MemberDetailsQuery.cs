@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Web.Data;
 using InstaLike.Web.Models;
@@ -46,7 +45,6 @@ internal sealed class MemberDetailsQueryHandler : IRequestHandler<MemberDetailsQ
                     .Select(m => m.Nickname).WithAlias(() => memberDetails.Nickname)
                     .Select(m => m.FullName.Name).WithAlias(() => memberDetails.Name)
                     .Select(m => m.FullName.Surname).WithAlias(() => memberDetails.Surname)
-                    .Select(m => m.Email).WithAlias(() => memberDetails.Email)
                     .Select(m => m.Biography).WithAlias(() => memberDetails.Bio)
                     .Select(m => m.ProfilePicture).WithAlias(() => memberDetails.ProfilePicture)
                 )

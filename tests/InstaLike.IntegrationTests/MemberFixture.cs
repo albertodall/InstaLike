@@ -85,7 +85,6 @@ public sealed class MemberFixture : IClassFixture<DatabaseFixture>
             result.Name.Should().Be(user.FullName.Name);
             result.Surname.Should().Be(user.FullName.Surname);
             result.Nickname.Should().Be(user.Nickname);
-            result.Email.Should().Be(user.Email);
             result.Bio.Should().Be(user.Biography);
         }
     }

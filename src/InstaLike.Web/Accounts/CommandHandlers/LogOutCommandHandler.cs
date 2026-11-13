@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
 using InstaLike.Web.Accounts.Commands;
 using MediatR;
 using NHibernate;
@@ -20,13 +19,13 @@ internal sealed class LogOutCommandHandler : IRequestHandler<LogOutCommand, Resu
 
     public async Task<Result> Handle(LogOutCommand request, CancellationToken cancellationToken)
     {
-        var member = await _session.GetAsync<Member>(request.MemberID, cancellationToken);
-        if (member is null)
+        var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
+        if (account is null)
         {
-            return Result.Failure($"Member {request.MemberID} does not exist.");
+            return Result.Failure($"Account {request.AccountID} does not exist.");
         }
 
-        member.LogOut();
+        account.LogOut();
         return Result.Success();
     }
 }

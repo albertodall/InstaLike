@@ -1,8 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
 using InstaLike.Web.Accounts.Commands;
 using MediatR;
 using NHibernate;
@@ -11,7 +11,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
-internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Member>>
+internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Guid>>
 {
     private const string InvalidCredentials = "Username or password are not valid.";
 
@@ -24,24 +24,24 @@ internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result
         _logger = logger.ForContext<LogInCommand>();
     }
 
-    public async Task<Result<Member>> Handle(LogInCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(LogInCommand request, CancellationToken cancellationToken)
     {
-        var member = await _session.QueryOver<Member>()
-            .Where(Restrictions.Eq("Nickname", request.Nickname))
+        var account = await _session.QueryOver<Account>()
+            .Where(Restrictions.Eq("Username", request.Username))
             .SingleOrDefaultAsync(cancellationToken);
-        if (member is null)
+        if (account is null)
         {
-            _logger.Debug("Member {Nickname} does not exist.", request.Nickname);
-            return Result.Failure<Member>(InvalidCredentials);
+            _logger.Debug("Account {Username} does not exist.", request.Username);
+            return Result.Failure<Guid>(InvalidCredentials);
         }
 
-        var logIn = member.LogIn(request.Password);
+        var logIn = account.LogIn(request.Password);
         if (logIn.IsFailure)
         {
-            _logger.Debug("Member {Nickname} did not authenticate correctly.", request.Nickname);
-            return Result.Failure<Member>(logIn.Error);
+            _logger.Debug("Account {Username} did not authenticate correctly.", request.Username);
+            return Result.Failure<Guid>(logIn.Error);
         }
 
-        return Result.Success(member);
+        return Result.Success(account.ID.Value);
     }
 }

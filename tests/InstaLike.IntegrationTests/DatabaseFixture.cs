@@ -36,6 +36,7 @@ public sealed class DatabaseFixture : IDisposable
                         new DateTimeOffsetTypeConvention()
                     )
                     .Add<MemberMapping>()
+                    .Add<AccountMapping>()
                     .Add<FollowMapping>()
                     .Add<PostMapping>()
                     .Add<CommentMapping>()

@@ -1,5 +1,4 @@
 ﻿using FluentNHibernate.Mapping;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data.Types;
@@ -17,13 +16,7 @@ internal sealed class MemberMapping : ClassMap<Member>
         Map(p => p.Biography).AnsiString(500)
             .Not.Nullable()
             .LazyLoad();
-        Map(p => p.Email).AnsiString(50)
-            .Access.CamelCaseField(Prefix.Underscore)
-            .Not.Nullable();
         Map(p => p.Nickname).AnsiString(20)
-            .Access.CamelCaseField(Prefix.Underscore)
-            .Not.Nullable();
-        Map(p => p.Password).AnsiString(64)
             .Access.CamelCaseField(Prefix.Underscore)
             .Not.Nullable();
         Map(p => p.RegistrationDate)

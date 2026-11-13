@@ -1,12 +1,11 @@
 ﻿using System;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Membership;
 
 /// <summary>
-/// Represents a member of the community, with a public profile and the credentials used to log in.
+/// Represents a member of the community and the public profile other members see.
 /// </summary>
 public class Member : AggregateRoot<MemberId>
 {
@@ -14,12 +13,10 @@ public class Member : AggregateRoot<MemberId>
     protected Member() { }
 #pragma warning restore CS8618
 
-    public Member(Nickname nickname, FullName fullName, Password password, Email email, string biography)
+    private Member(Nickname nickname, FullName fullName, string biography)
         : base(MemberId.New())
     {
         _nickname = nickname;
-        _email = email;
-        _password = password;
         _fullName = fullName;
         Biography = biography;
         RegistrationDate = DateTimeOffset.Now;
@@ -39,43 +36,19 @@ public class Member : AggregateRoot<MemberId>
         protected set => _fullName = value;
     }
 
-    private string _password;
-    public virtual Password Password
-    {
-        get => (Password)_password;
-        set => _password = value;
-    }
-
-    private string _email;
-    public virtual Email Email
-    {
-        get => (Email)_email;
-        set => _email = value;
-    }
-
     public virtual PictureId? ProfilePicture { get; protected set; }
     public virtual string Biography { get; protected set; }
     public virtual DateTimeOffset RegistrationDate { get; protected set; }
 
-    public virtual Result LogIn(string password)
+    /// <summary>
+    /// Registers a new member; the credentials are not kept by the member but travel in the
+    /// <see cref="MemberRegisteredEvent"/> to the member's account.
+    /// </summary>
+    public static Member Register(Nickname nickname, FullName fullName, string biography, Username username, Password password, Email email)
     {
-        if (!Password.HashMatches(password))
-        {
-            return Result.Failure("Username or password are not valid.");
-        }
-
-        RaiseDomainEvent(new MemberLoggedInEvent(ID));
-        return Result.Success();
-    }
-
-    public virtual void LogOut()
-    {
-        RaiseDomainEvent(new MemberLoggedOutEvent(ID));
-    }
-
-    public virtual void ChangePassword(Password password)
-    {
-        Password = password;
+        var member = new Member(nickname, fullName, biography);
+        member.RaiseDomainEvent(new MemberRegisteredEvent(member.ID, username, password, email));
+        return member;
     }
 
     public virtual void SetProfilePicture(PictureId picture)
@@ -96,11 +69,6 @@ public class Member : AggregateRoot<MemberId>
     public virtual void ChangeFullName(FullName fullName)
     {
         FullName = fullName;
-    }
-
-    public virtual void ChangeEmailAddress(Email email)
-    {
-        Email = email;
     }
 
     public virtual void UpdateBiography(string newBiography)
