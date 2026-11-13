@@ -1,9 +1,10 @@
-﻿namespace InstaLike.Web.Media;
-
-internal static class PictureContainers
+﻿namespace InstaLike.Web.Media
 {
-    public const string Posts = "posts";
-    public const string Profiles = "profiles";
+    internal static class PictureContainers
+    {
+        public const string Posts = "posts";
+        public const string Profiles = "profiles";
 
-    public static readonly string[] All = { Posts, Profiles };
+        public static readonly string[] All = { Posts, Profiles };
+    }
 }

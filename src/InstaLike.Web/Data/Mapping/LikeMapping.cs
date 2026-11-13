@@ -1,23 +1,24 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Posts;
 
-namespace InstaLike.Web.Data.Mapping;
-
-internal sealed class LikeMapping : ClassMap<Like>
+namespace InstaLike.Web.Data.Mapping
 {
-    public LikeMapping()
+    internal sealed class LikeMapping : ClassMap<Like>
     {
-        Table("[Like]");
+        public LikeMapping()
+        {
+            Table("[Like]");
 
-        Id(p => p.ID).GeneratedBy.GuidComb();
+            Id(p => p.ID).GeneratedBy.GuidComb();
 
-        Map(p => p.LikeDate)
-            .Not.Nullable();
+            Map(p => p.LikeDate)
+                .Not.Nullable();
 
-        References(p => p.Post)
-            .Column("PostID");
+            References(p => p.Post)
+                .Column("PostID");
 
-        Map(p => p.MemberID)
-            .Not.Nullable();
+            Map(p => p.MemberID)
+                .Not.Nullable();
+        }
     }
 }

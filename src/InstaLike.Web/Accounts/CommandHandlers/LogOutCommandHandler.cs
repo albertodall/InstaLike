@@ -6,26 +6,27 @@ using InstaLike.Web.Accounts.Commands;
 using MediatR;
 using NHibernate;
 
-namespace InstaLike.Web.Accounts.CommandHandlers;
-
-internal sealed class LogOutCommandHandler : IRequestHandler<LogOutCommand, Result>
+namespace InstaLike.Web.Accounts.CommandHandlers
 {
-    private readonly ISession _session;
-
-    public LogOutCommandHandler(ISession session)
+    internal sealed class LogOutCommandHandler : IRequestHandler<LogOutCommand, Result>
     {
-        _session = session;
-    }
+        private readonly ISession _session;
 
-    public async Task<Result> Handle(LogOutCommand request, CancellationToken cancellationToken)
-    {
-        var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
-        if (account is null)
+        public LogOutCommandHandler(ISession session)
         {
-            return Result.Failure($"Account {request.AccountID} does not exist.");
+            _session = session;
         }
 
-        account.LogOut();
-        return Result.Success();
+        public async Task<Result> Handle(LogOutCommand request, CancellationToken cancellationToken)
+        {
+            var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
+            if (account is null)
+            {
+                return Result.Failure($"Account {request.AccountID} does not exist.");
+            }
+
+            account.LogOut();
+            return Result.Success();
+        }
     }
 }

@@ -10,94 +10,95 @@ using Azure.Storage.Blobs.Models;
 using InstaLike.Core.SharedKernel;
 using Serilog;
 
-namespace InstaLike.Web.Media;
-
-/// <summary>
-/// Stores pictures in Azure Blob Storage.
-/// </summary>
-internal sealed class AzureBlobPictureStore : IPictureStore
+namespace InstaLike.Web.Media
 {
-    private readonly BlobServiceClient _blobServiceClient;
-    private readonly ILogger _logger;
-
-    public AzureBlobPictureStore(BlobServiceClient blobServiceClient, ILogger logger)
+    /// <summary>
+    /// Stores pictures in Azure Blob Storage.
+    /// </summary>
+    internal sealed class AzureBlobPictureStore : IPictureStore
     {
-        _blobServiceClient = blobServiceClient;
-        _logger = logger.ForContext<AzureBlobPictureStore>();
-    }
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly ILogger _logger;
 
-    public async Task<PictureId> SaveAsync(string container, byte[] content, CancellationToken cancellationToken)
-    {
-        if (content.Length == 0)
+        public AzureBlobPictureStore(BlobServiceClient blobServiceClient, ILogger logger)
         {
-            throw new ArgumentException("A picture cannot be empty.", nameof(content));
+            _blobServiceClient = blobServiceClient;
+            _logger = logger.ForContext<AzureBlobPictureStore>();
         }
 
-        var picture = PictureId.New();
-        await GetBlob(container, picture).UploadAsync(
-            BinaryData.FromBytes(content),
-            new BlobUploadOptions { Conditions = new BlobRequestConditions { IfNoneMatch = ETag.All } },
-            cancellationToken);
-
-        return picture;
-    }
-
-    public async Task<Stream?> OpenReadAsync(string container, PictureId picture, CancellationToken cancellationToken)
-    {
-        try
+        public async Task<PictureId> SaveAsync(string container, byte[] content, CancellationToken cancellationToken)
         {
-            var download = await GetBlob(container, picture).DownloadStreamingAsync(cancellationToken: cancellationToken);
-            return download.Value.Content;
-        }
-        catch (RequestFailedException ex) when (ex.Status == 404)
-        {
-            return null;
-        }
-    }
-
-    public async IAsyncEnumerable<PictureId> ListUploadedBeforeAsync(
-        string container,
-        DateTimeOffset uploadedBefore,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var blobs = _blobServiceClient
-            .GetBlobContainerClient(container)
-            .GetBlobsAsync(new GetBlobsOptions(), cancellationToken);
-
-        await foreach (var blob in blobs)
-        {
-            if (blob.Properties.CreatedOn < uploadedBefore
-                && Guid.TryParse(Path.GetFileNameWithoutExtension(blob.Name), out var pictureId))
+            if (content.Length == 0)
             {
-                yield return new PictureId(pictureId);
+                throw new ArgumentException("A picture cannot be empty.", nameof(content));
+            }
+
+            var picture = PictureId.New();
+            await GetBlob(container, picture).UploadAsync(
+                BinaryData.FromBytes(content),
+                new BlobUploadOptions { Conditions = new BlobRequestConditions { IfNoneMatch = ETag.All } },
+                cancellationToken);
+
+            return picture;
+        }
+
+        public async Task<Stream?> OpenReadAsync(string container, PictureId picture, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var download = await GetBlob(container, picture).DownloadStreamingAsync(cancellationToken: cancellationToken);
+                return download.Value.Content;
+            }
+            catch (RequestFailedException ex) when (ex.Status == 404)
+            {
+                return null;
             }
         }
-    }
 
-    public async Task TryDeleteAsync(string container, PictureId picture)
-    {
-        try
+        public async IAsyncEnumerable<PictureId> ListUploadedBeforeAsync(
+            string container,
+            DateTimeOffset uploadedBefore,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            await GetBlob(container, picture).DeleteIfExistsAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "Could not delete picture {PictureId} from container {Container}; the next cleanup will retry.", picture.Value, container);
-        }
-    }
+            var blobs = _blobServiceClient
+                .GetBlobContainerClient(container)
+                .GetBlobsAsync(new GetBlobsOptions(), cancellationToken);
 
-    public static async Task EnsureContainersExistAsync(BlobServiceClient blobServiceClient, CancellationToken cancellationToken = default)
-    {
-        foreach (var containerName in PictureContainers.All)
-        {
-            await blobServiceClient
-                .GetBlobContainerClient(containerName)
-                .CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+            await foreach (var blob in blobs)
+            {
+                if (blob.Properties.CreatedOn < uploadedBefore
+                    && Guid.TryParse(Path.GetFileNameWithoutExtension(blob.Name), out var pictureId))
+                {
+                    yield return new PictureId(pictureId);
+                }
+            }
         }
-    }
 
-    private BlobClient GetBlob(string container, PictureId picture) =>
-        _blobServiceClient
-            .GetBlobContainerClient(container)
-            .GetBlobClient($"{picture.Value}.jpg");
+        public async Task TryDeleteAsync(string container, PictureId picture)
+        {
+            try
+            {
+                await GetBlob(container, picture).DeleteIfExistsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Could not delete picture {PictureId} from container {Container}; the next cleanup will retry.", picture.Value, container);
+            }
+        }
+
+        public static async Task EnsureContainersExistAsync(BlobServiceClient blobServiceClient, CancellationToken cancellationToken = default)
+        {
+            foreach (var containerName in PictureContainers.All)
+            {
+                await blobServiceClient
+                    .GetBlobContainerClient(containerName)
+                    .CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+            }
+        }
+
+        private BlobClient GetBlob(string container, PictureId picture) =>
+            _blobServiceClient
+                .GetBlobContainerClient(container)
+                .GetBlobClient($"{picture.Value}.jpg");
+    }
 }

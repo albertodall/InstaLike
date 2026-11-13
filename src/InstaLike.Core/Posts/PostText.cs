@@ -1,40 +1,41 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Posts;
-
-/// <summary>
-/// Represents non-empty, trimmed text for a post, limited to 500 characters.
-/// </summary>
-public sealed class PostText : SimpleValueObject<string>
+namespace InstaLike.Core.Posts
 {
-    private PostText() : base(string.Empty) { }
-
-    private PostText(string text) : base(text) { }
-
-    public static Result<PostText> Create(string text)
+    /// <summary>
+    /// Represents non-empty, trimmed text for a post, limited to 500 characters.
+    /// </summary>
+    public sealed class PostText : SimpleValueObject<string>
     {
-        var trimmedText = (text ?? string.Empty).Trim();
+        private PostText() : base(string.Empty) { }
 
-        if (trimmedText.Length == 0)
+        private PostText(string text) : base(text) { }
+
+        public static Result<PostText> Create(string text)
         {
-            return Result.Failure<PostText>("Text for a post should not be empty");
+            var trimmedText = (text ?? string.Empty).Trim();
+
+            if (trimmedText.Length == 0)
+            {
+                return Result.Failure<PostText>("Text for a post should not be empty");
+            }
+
+            if (trimmedText.Length > 500)
+            {
+                return Result.Failure<PostText>("Text for a post should not be longer than 500 chars");
+            }
+
+            return Result.Success(new PostText(trimmedText));
         }
 
-        if (trimmedText.Length > 500)
+        public static implicit operator string(PostText text)
         {
-            return Result.Failure<PostText>("Text for a post should not be longer than 500 chars");
+            return text.Value;
         }
 
-        return Result.Success(new PostText(trimmedText));
-    }
-
-    public static implicit operator string(PostText text)
-    {
-        return text.Value;
-    }
-
-    public static explicit operator PostText(string text)
-    {
-        return Create(text).Value;
+        public static explicit operator PostText(string text)
+        {
+            return Create(text).Value;
+        }
     }
 }

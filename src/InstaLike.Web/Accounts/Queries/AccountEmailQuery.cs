@@ -4,37 +4,38 @@ using InstaLike.Core.Accounts;
 using MediatR;
 using NHibernate;
 
-namespace InstaLike.Web.Accounts.Queries;
-
-public sealed class AccountEmailQuery : IRequest<string>
+namespace InstaLike.Web.Accounts.Queries
 {
-    public AccountId AccountID { get; }
-
-    public AccountEmailQuery(AccountId accountID)
+    public sealed class AccountEmailQuery : IRequest<string>
     {
-        AccountID = accountID;
-    }
-}
+        public AccountId AccountID { get; }
 
-internal sealed class AccountEmailQueryHandler : IRequestHandler<AccountEmailQuery, string>
-{
-    private readonly IStatelessSession _session;
-
-    public AccountEmailQueryHandler(IStatelessSession session)
-    {
-        _session = session;
+        public AccountEmailQuery(AccountId accountID)
+        {
+            AccountID = accountID;
+        }
     }
 
-    public async Task<string> Handle(AccountEmailQuery request, CancellationToken cancellationToken)
+    internal sealed class AccountEmailQueryHandler : IRequestHandler<AccountEmailQuery, string>
     {
-        using var tx = _session.BeginTransaction();
+        private readonly IStatelessSession _session;
 
-        var email = await _session.QueryOver<Account>()
-            .Where(a => a.ID == request.AccountID)
-            .Select(a => a.Email)
-            .SingleOrDefaultAsync<string>(cancellationToken);
+        public AccountEmailQueryHandler(IStatelessSession session)
+        {
+            _session = session;
+        }
 
-        await tx.CommitAsync(cancellationToken);
-        return email;
+        public async Task<string> Handle(AccountEmailQuery request, CancellationToken cancellationToken)
+        {
+            using var tx = _session.BeginTransaction();
+
+            var email = await _session.QueryOver<Account>()
+                .Where(a => a.ID == request.AccountID)
+                .Select(a => a.Email)
+                .SingleOrDefaultAsync<string>(cancellationToken);
+
+            await tx.CommitAsync(cancellationToken);
+            return email;
+        }
     }
 }

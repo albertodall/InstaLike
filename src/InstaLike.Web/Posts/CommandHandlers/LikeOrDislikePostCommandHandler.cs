@@ -7,86 +7,87 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.Posts.CommandHandlers;
-
-internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>
+namespace InstaLike.Web.Posts.CommandHandlers
 {
-    private readonly ISession _session;
-    private readonly ILogger _logger;
-
-    public LikeOrDislikePostCommandHandler(ISession session, ILogger logger)
+    internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>
     {
-        _session = session;
-        _logger = logger;
-    }
+        private readonly ISession _session;
+        private readonly ILogger _logger;
 
-    public async Task<Result> Handle(LikePostCommand request, CancellationToken cancellationToken)
-    {
-        var logger = _logger.ForContext<LikePostCommand>();
-
-        var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
-        if (post is null)
+        public LikeOrDislikePostCommandHandler(ISession session, ILogger logger)
         {
-            return Result.Failure("This post does not exist.");
+            _session = session;
+            _logger = logger;
         }
 
-        var like = post.LikeBy(request.UserID);
-        if (like.IsFailure)
+        public async Task<Result> Handle(LikePostCommand request, CancellationToken cancellationToken)
         {
-            return like;
+            var logger = _logger.ForContext<LikePostCommand>();
+
+            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+            if (post is null)
+            {
+                return Result.Failure("This post does not exist.");
+            }
+
+            var like = post.LikeBy(request.UserID);
+            if (like.IsFailure)
+            {
+                return like;
+            }
+
+            try
+            {
+                await _session.FlushAsync(cancellationToken);
+            }
+            catch (ADOException ex)
+            {
+                logger.Error("Failed to put a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
+                    request.PostID,
+                    request.UserID,
+                    ex.Message);
+
+                return Result.Failure("Your like could not be saved. Please try again.");
+            }
+
+            logger.Information("User {UserID} put a 'Like' on post {PostID}", request.UserID, request.PostID);
+
+            return Result.Success();
         }
 
-        try
+        public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
         {
-            await _session.FlushAsync(cancellationToken);
+            var logger = _logger.ForContext<DislikePostCommand>();
+
+            var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+            if (post is null)
+            {
+                return Result.Failure("This post does not exist.");
+            }
+
+            var dislike = post.DislikeBy(request.UserID);
+            if (dislike.IsFailure)
+            {
+                return dislike;
+            }
+
+            try
+            {
+                await _session.FlushAsync(cancellationToken);
+            }
+            catch (ADOException ex)
+            {
+                logger.Error("Failed to remove a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
+                    request.PostID,
+                    request.UserID,
+                    ex.Message);
+
+                return Result.Failure("Your like could not be removed. Please try again.");
+            }
+
+            logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);
+
+            return Result.Success();
         }
-        catch (ADOException ex)
-        {
-            logger.Error("Failed to put a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
-                request.PostID,
-                request.UserID,
-                ex.Message);
-
-            return Result.Failure("Your like could not be saved. Please try again.");
-        }
-
-        logger.Information("User {UserID} put a 'Like' on post {PostID}", request.UserID, request.PostID);
-
-        return Result.Success();
-    }
-
-    public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
-    {
-        var logger = _logger.ForContext<DislikePostCommand>();
-
-        var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
-        if (post is null)
-        {
-            return Result.Failure("This post does not exist.");
-        }
-
-        var dislike = post.DislikeBy(request.UserID);
-        if (dislike.IsFailure)
-        {
-            return dislike;
-        }
-
-        try
-        {
-            await _session.FlushAsync(cancellationToken);
-        }
-        catch (ADOException ex)
-        {
-            logger.Error("Failed to remove a 'Like' on post {PostID} by user {UserID}. Error message: {ErrorMessage}",
-                request.PostID,
-                request.UserID,
-                ex.Message);
-
-            return Result.Failure("Your like could not be removed. Please try again.");
-        }
-
-        logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);
-
-        return Result.Success();
     }
 }

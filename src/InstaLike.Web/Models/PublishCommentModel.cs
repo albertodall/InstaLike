@@ -1,9 +1,10 @@
 ﻿using InstaLike.Core.Posts;
 
-namespace InstaLike.Web.Models;
-
-public sealed class PublishCommentModel
+namespace InstaLike.Web.Models
 {
-    public required PostId PostID { get; set; }
-    public string CommentText { get; set; } = string.Empty;
+    public sealed class PublishCommentModel
+    {
+        public required PostId PostID { get; set; }
+        public string CommentText { get; set; } = string.Empty;
+    }
 }

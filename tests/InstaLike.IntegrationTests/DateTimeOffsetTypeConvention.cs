@@ -4,17 +4,18 @@ using FluentNHibernate.Conventions.AcceptanceCriteria;
 using FluentNHibernate.Conventions.Inspections;
 using FluentNHibernate.Conventions.Instances;
 
-namespace InstaLike.IntegrationTests;
-
-internal sealed class DateTimeOffsetTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
+namespace InstaLike.IntegrationTests
 {
-    public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
+    internal sealed class DateTimeOffsetTypeConvention : IPropertyConvention, IPropertyConventionAcceptance
     {
-        criteria.Expect(x => x.Property.PropertyType == typeof(DateTimeOffset));
-    }
+        public void Accept(IAcceptanceCriteria<IPropertyInspector> criteria)
+        {
+            criteria.Expect(x => x.Property.PropertyType == typeof(DateTimeOffset));
+        }
 
-    public void Apply(IPropertyInstance instance)
-    {
-        instance.CustomType<DateTimeOffsetUserType>();
+        public void Apply(IPropertyInstance instance)
+        {
+            instance.CustomType<DateTimeOffsetUserType>();
+        }
     }
 }

@@ -8,53 +8,54 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.Posts.CommandHandlers;
-
-internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<PostId>>
+namespace InstaLike.Web.Posts.CommandHandlers
 {
-    private readonly ISession _session;
-    private readonly ILogger _logger;
-    private readonly IPictureStore _pictureStore;
-
-    public PublishPostCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
+    internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<PostId>>
     {
-        _session = session;
-        _logger = logger.ForContext<PublishPostCommand>();
-        _pictureStore = pictureStore;
-    }
+        private readonly ISession _session;
+        private readonly ILogger _logger;
+        private readonly IPictureStore _pictureStore;
 
-    public async Task<Result<PostId>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
-    {
-        if (request.PictureRawBytes is not { Length: > 0 })
+        public PublishPostCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
         {
-            return Result.Failure<PostId>("Please select a picture to share together with your post.");
+            _session = session;
+            _logger = logger.ForContext<PublishPostCommand>();
+            _pictureStore = pictureStore;
         }
 
-        var text = PostText.Create(request.Text);
-        if (text.IsFailure)
+        public async Task<Result<PostId>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
         {
-            return Result.Failure<PostId>(text.Error);
+            if (request.PictureRawBytes is not { Length: > 0 })
+            {
+                return Result.Failure<PostId>("Please select a picture to share together with your post.");
+            }
+
+            var text = PostText.Create(request.Text);
+            if (text.IsFailure)
+            {
+                return Result.Failure<PostId>(text.Error);
+            }
+
+            var postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
+
+            var post = new Post(request.UserID, postPicture, text.Value);
+            try
+            {
+                await _session.SaveAsync(post, cancellationToken);
+                await _session.FlushAsync(cancellationToken);
+            }
+            catch (ADOException ex)
+            {
+                _logger.Error("Failed to publish a post for user {UserID}. Error message: {ErrorMessage}",
+                    request.UserID,
+                    ex.Message);
+
+                return Result.Failure<PostId>(ex.Message);
+            }
+
+            _logger.Information("User {UserID} has just shared post {PostID}.", request.UserID, post.ID);
+
+            return Result.Success(post.ID);
         }
-
-        var postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
-
-        var post = new Post(request.UserID, postPicture, text.Value);
-        try
-        {
-            await _session.SaveAsync(post, cancellationToken);
-            await _session.FlushAsync(cancellationToken);
-        }
-        catch (ADOException ex)
-        {
-            _logger.Error("Failed to publish a post for user {UserID}. Error message: {ErrorMessage}",
-                request.UserID,
-                ex.Message);
-
-            return Result.Failure<PostId>(ex.Message);
-        }
-
-        _logger.Information("User {UserID} has just shared post {PostID}.", request.UserID, post.ID);
-
-        return Result.Success(post.ID);
     }
 }

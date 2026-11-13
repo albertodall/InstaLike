@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using InstaLike.Web.Data;
 
-namespace InstaLike.Web.Notifications.Commands;
-
-public sealed class MarkNotificationsReadCommand : ICommand<int>
+namespace InstaLike.Web.Notifications.Commands
 {
-    public Guid RecipientID { get; }
-    public IReadOnlyCollection<Guid> NotificationIDs { get; }
-
-    public MarkNotificationsReadCommand(Guid recipientID, IReadOnlyCollection<Guid> notificationIDs)
+    public sealed class MarkNotificationsReadCommand : ICommand<int>
     {
-        RecipientID = recipientID;
-        NotificationIDs = notificationIDs;
+        public Guid RecipientID { get; }
+        public IReadOnlyCollection<Guid> NotificationIDs { get; }
+
+        public MarkNotificationsReadCommand(Guid recipientID, IReadOnlyCollection<Guid> notificationIDs)
+        {
+            RecipientID = recipientID;
+            NotificationIDs = notificationIDs;
+        }
     }
 }
