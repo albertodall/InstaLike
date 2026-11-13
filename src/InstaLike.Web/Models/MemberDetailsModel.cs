@@ -3,7 +3,7 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Models;
 
-public record UserDetailsModel
+public record MemberDetailsModel
 {
     public string Nickname { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;

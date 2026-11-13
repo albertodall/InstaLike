@@ -1,17 +1,18 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using Xunit;
 
 namespace InstaLike.Core.Tests;
 
-public sealed class UserFixture
+public sealed class MemberFixture
 {
     [Fact]
     public void A_New_User_Should_Be_Identified_Before_It_Is_Stored()
     {
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
 
         sut.ID.Value.Should().NotBeEmpty();
     }
@@ -19,7 +20,7 @@ public sealed class UserFixture
     [Fact]
     public void New_User_Should_Have_No_Profile_Picture()
     {
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
 
         sut.ProfilePicture.Should().BeNull();
     }
@@ -27,7 +28,7 @@ public sealed class UserFixture
     [Fact]
     public void User_Should_Change_Nickname()
     {
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
         var newNickname = Nickname.Create("newnickname");
 
         sut.ChangeNickname(newNickname.Value);
@@ -38,7 +39,7 @@ public sealed class UserFixture
     [Fact]
     public void User_Should_Change_Full_Name()
     {
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
         var newFullName = (FullName)"Test User New";
 
         sut.ChangeFullName(newFullName);
@@ -49,7 +50,7 @@ public sealed class UserFixture
     [Fact]
     public void User_Should_Change_Email_Address()
     {
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
         var newEmailAddress = (Email)"user1@newdomain.com";
 
         sut.ChangeEmailAddress(newEmailAddress);
@@ -60,7 +61,7 @@ public sealed class UserFixture
     [Fact]
     public void User_Should_Update_Biography()
     {
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
         var newBiographyText = "This is my new bio";
 
         sut.UpdateBiography(newBiographyText);
@@ -73,7 +74,7 @@ public sealed class UserFixture
     {
         var password1 = Password.Create("password1").Value;
         var password2 = Password.Create("password2").Value;
-        var sut = new User(
+        var sut = new Member(
             (Nickname)"user1",
             (FullName)"Test User",
             password1,
@@ -89,7 +90,7 @@ public sealed class UserFixture
     public void Should_Set_New_Profile_Picture()
     {
         var newProfilePicture = PictureId.New();
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
 
         sut.SetProfilePicture(newProfilePicture);
 
@@ -100,7 +101,7 @@ public sealed class UserFixture
     public void Should_Remove_Profile_Picture()
     {
         var newProfilePicture = PictureId.New();
-        var sut = CreateTestUser();
+        var sut = CreateTestMember();
 
         sut.SetProfilePicture(newProfilePicture);
         sut.RemoveProfilePicture();
@@ -111,19 +112,19 @@ public sealed class UserFixture
     [Fact]
     public void Logging_In_With_The_Right_Password_Should_Raise_An_Event()
     {
-        var sut = CreateUserWithPassword("password");
+        var sut = CreateMemberWithPassword("password");
 
         using (new AssertionScope())
         {
             sut.LogIn("password").IsSuccess.Should().BeTrue();
-            sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new UserLoggedInEvent(sut.ID));
+            sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new MemberLoggedInEvent(sut.ID));
         }
     }
 
     [Fact]
     public void Logging_In_With_A_Wrong_Password_Should_Fail_Without_Events()
     {
-        var sut = CreateUserWithPassword("password");
+        var sut = CreateMemberWithPassword("password");
 
         using (new AssertionScope())
         {
@@ -135,21 +136,21 @@ public sealed class UserFixture
     [Fact]
     public void Logging_Out_Should_Raise_An_Event()
     {
-        var sut = CreateUserWithPassword("password");
+        var sut = CreateMemberWithPassword("password");
 
         sut.LogOut();
 
-        sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new UserLoggedOutEvent(sut.ID));
+        sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new MemberLoggedOutEvent(sut.ID));
     }
 
-    private static User CreateUserWithPassword(string password)
+    private static Member CreateMemberWithPassword(string password)
     {
-        return new User((Nickname)"user1", (FullName)"Test User", Password.Create(password).Value, (Email)"user1@acme.com", "My Bio");
+        return new Member((Nickname)"user1", (FullName)"Test User", Password.Create(password).Value, (Email)"user1@acme.com", "My Bio");
     }
 
-    private static User CreateTestUser()
+    private static Member CreateTestMember()
     {
-        return new User(
+        return new Member(
             (Nickname)"user1",
             (FullName)"Test User",
             (Password)"password",

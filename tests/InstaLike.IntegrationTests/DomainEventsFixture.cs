@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
 using CSharpFunctionalExtensions;
@@ -151,10 +152,10 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
         }
     }
 
-    private async Task<(User Author, User Reader, Post Post)> CreatePostAsync(string authorNickname, string readerNickname)
+    private async Task<(Member Author, Member Reader, Post Post)> CreatePostAsync(string authorNickname, string readerNickname)
     {
-        var author = TestDataHelper.NewUser(authorNickname);
-        var reader = TestDataHelper.NewUser(readerNickname);
+        var author = TestDataHelper.NewMember(authorNickname);
+        var reader = TestDataHelper.NewMember(readerNickname);
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {

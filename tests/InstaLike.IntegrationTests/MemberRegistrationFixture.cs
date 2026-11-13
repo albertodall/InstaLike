@@ -4,20 +4,21 @@ using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
-using InstaLike.Web.Accounts.Commands;
+using InstaLike.Web.Membership.Commands;
 using InstaLike.Web.Media;
 using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
+public sealed class MemberRegistrationFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;
     private readonly InMemoryPictureStore _pictureStore = new();
 
-    public UserRegistrationFixture(DatabaseFixture fixture, ITestOutputHelper output)
+    public MemberRegistrationFixture(DatabaseFixture fixture, ITestOutputHelper output)
     {
         _testFixture = fixture;
         _output = output;
@@ -26,9 +27,9 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Register_User()
     {
-        Result<UserId> userRegistrationResult;
+        Result<MemberId> userRegistrationResult;
 
-        var userRegistrationCommand = new RegisterUserCommand(
+        var userRegistrationCommand = new RegisterMemberCommand(
             "registereduser",
             "registered",
             "user",
@@ -49,7 +50,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             userRegistrationResult.Value.Value.Should().NotBeEmpty();
             using (var session = _testFixture.OpenSession(_output))
             {
-                var registeredUser = await session.GetAsync<User>(userRegistrationResult.Value, TestContext.Current.CancellationToken);
+                var registeredUser = await session.GetAsync<Member>(userRegistrationResult.Value, TestContext.Current.CancellationToken);
                 registeredUser.Should().NotBeNull();
                 _pictureStore.GetContent(PictureContainers.Profiles, registeredUser.ProfilePicture!).Should().Equal(userRegistrationCommand.ProfilePicture);
             }
@@ -59,9 +60,9 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Register_User_Without_A_Profile_Picture()
     {
-        var command = new RegisterUserCommand("nopictureuser", "nopicture", "user", "password", "nopictureuser@acme.com", "bio", null);
+        var command = new RegisterMemberCommand("nopictureuser", "nopicture", "user", "password", "nopictureuser@acme.com", "bio", null);
 
-        Result<UserId> registrationResult;
+        Result<MemberId> registrationResult;
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -71,21 +72,21 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         registrationResult.IsSuccess.Should().BeTrue();
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await session.GetAsync<User>(registrationResult.Value, TestContext.Current.CancellationToken)).ProfilePicture.Should().BeNull();
+            (await session.GetAsync<Member>(registrationResult.Value, TestContext.Current.CancellationToken)).ProfilePicture.Should().BeNull();
         }
     }
 
     [Fact]
     public async Task Should_Not_Register_A_User_With_An_Email_Already_In_Use()
     {
-        var existingUser = TestDataHelper.NewUser("emailowner", "taken@acme.com");
+        var existingUser = TestDataHelper.NewMember("emailowner", "taken@acme.com");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(existingUser, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new RegisterUserCommand("emailthief", "email", "thief", "password", "Taken@Acme.com", "bio", null);
+        var command = new RegisterMemberCommand("emailthief", "email", "thief", "password", "Taken@Acme.com", "bio", null);
         using (var session = _testFixture.OpenSession(_output))
         {
             var result = await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken);
@@ -96,14 +97,14 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Register_A_User_With_A_Nickname_Already_Taken()
     {
-        var existingUser = TestDataHelper.NewUser("takennick", "nickowner@acme.com");
+        var existingUser = TestDataHelper.NewMember("takennick", "nickowner@acme.com");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(existingUser, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new RegisterUserCommand("takennick", "nick", "thief", "password", "nickthief@acme.com", "bio", null);
+        var command = new RegisterMemberCommand("takennick", "nick", "thief", "password", "nickthief@acme.com", "bio", null);
         using (var session = _testFixture.OpenSession(_output))
         {
             var result = await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken);
@@ -114,8 +115,8 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Change_The_Email_To_One_Used_By_Another_Account()
     {
-        var firstUser = TestDataHelper.NewUser("firstowner", "first@acme.com");
-        var secondUser = TestDataHelper.NewUser("secondowner", "second@acme.com");
+        var firstUser = TestDataHelper.NewMember("firstowner", "first@acme.com");
+        var secondUser = TestDataHelper.NewMember("secondowner", "second@acme.com");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(firstUser, TestContext.Current.CancellationToken);
@@ -123,7 +124,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditUserDetailsCommand(secondUser.ID, secondUser.Nickname, secondUser.FullName.Name, secondUser.FullName.Surname, "FIRST@acme.com", secondUser.Biography, null);
+        var command = new EditMemberProfileCommand(secondUser.ID, secondUser.Nickname, secondUser.FullName.Name, secondUser.FullName.Surname, "FIRST@acme.com", secondUser.Biography, null);
         using (var session = _testFixture.OpenSession(_output))
         {
             (await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
@@ -131,7 +132,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await session.GetAsync<User>(secondUser.ID, TestContext.Current.CancellationToken)).Email.Value.Should().Be("second@acme.com");
+            (await session.GetAsync<Member>(secondUser.ID, TestContext.Current.CancellationToken)).Email.Value.Should().Be("second@acme.com");
         }
     }
 
@@ -141,7 +142,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         const string testUserName = "testuser1";
         Result editCommandResult;
 
-        var testUser = TestDataHelper.NewUser(testUserName);
+        var testUser = TestDataHelper.NewMember(testUserName);
 
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -149,7 +150,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditUserDetailsCommand(
+        var command = new EditMemberProfileCommand(
             testUser.ID,
             $"{testUser.Nickname}_mod",
             $"{testUser.FullName.Name}_mod",
@@ -168,7 +169,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             editCommandResult.IsSuccess.Should().BeTrue();
             using (var session = _testFixture.OpenSession(_output))
             {
-                var modifiedUser = await session.GetAsync<User>(testUser.ID, TestContext.Current.CancellationToken);
+                var modifiedUser = await session.GetAsync<Member>(testUser.ID, TestContext.Current.CancellationToken);
                 modifiedUser.Nickname.Value.Should().Be($"{testUser.Nickname}_mod");
                 modifiedUser.FullName.Name.Should().Be($"{testUser.FullName.Name}_mod");
                 modifiedUser.FullName.Surname.Should().Be($"{testUser.FullName.Surname}_mod");
@@ -182,8 +183,8 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Give_Each_New_Profile_Picture_Its_Own_Identifier()
     {
-        var firstUser = TestDataHelper.NewUser("testuser5");
-        var secondUser = TestDataHelper.NewUser("testuser6");
+        var firstUser = TestDataHelper.NewMember("testuser5");
+        var secondUser = TestDataHelper.NewMember("testuser6");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(firstUser, TestContext.Current.CancellationToken);
@@ -194,7 +195,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         var picture = Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64());
         foreach (var user in new[] { firstUser, secondUser })
         {
-            var command = new EditUserDetailsCommand(user.ID, user.Nickname, user.FullName.Name, user.FullName.Surname, user.Email, user.Biography, picture);
+            var command = new EditMemberProfileCommand(user.ID, user.Nickname, user.FullName.Name, user.FullName.Surname, user.Email, user.Biography, picture);
             using var session = _testFixture.OpenSession(_output);
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
             (await sut.Send(command, TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
@@ -202,8 +203,8 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            var firstPicture = (await session.GetAsync<User>(firstUser.ID, TestContext.Current.CancellationToken)).ProfilePicture;
-            var secondPicture = (await session.GetAsync<User>(secondUser.ID, TestContext.Current.CancellationToken)).ProfilePicture;
+            var firstPicture = (await session.GetAsync<Member>(firstUser.ID, TestContext.Current.CancellationToken)).ProfilePicture;
+            var secondPicture = (await session.GetAsync<Member>(secondUser.ID, TestContext.Current.CancellationToken)).ProfilePicture;
             firstPicture.Should().NotBe(secondPicture);
         }
     }
@@ -211,7 +212,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Keep_The_Profile_Picture_When_No_New_Picture_Is_Uploaded()
     {
-        var testUser = TestDataHelper.NewUser("testuser7");
+        var testUser = TestDataHelper.NewMember("testuser7");
         testUser.SetProfilePicture(PictureId.New());
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -219,7 +220,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditUserDetailsCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, "new bio", null);
+        var command = new EditMemberProfileCommand(testUser.ID, testUser.Nickname, testUser.FullName.Name, testUser.FullName.Surname, testUser.Email, "new bio", null);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -228,7 +229,7 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await session.GetAsync<User>(testUser.ID, TestContext.Current.CancellationToken)).ProfilePicture.Should().Be(testUser.ProfilePicture);
+            (await session.GetAsync<Member>(testUser.ID, TestContext.Current.CancellationToken)).ProfilePicture.Should().Be(testUser.ProfilePicture);
         }
     }
 
@@ -238,14 +239,14 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         const string testUserName = "testuser2";
         Result editCommandResult;
 
-        var testUser = TestDataHelper.NewUser(testUserName);
+        var testUser = TestDataHelper.NewMember(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditUserDetailsCommand(
+        var command = new EditMemberProfileCommand(
             testUser.ID,
             testUser.Nickname,
             testUser.FullName.Name,
@@ -268,14 +269,14 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         const string testUserName = "testuser3";
         Result editCommandResult;
 
-        var testUser = TestDataHelper.NewUser(testUserName);
+        var testUser = TestDataHelper.NewMember(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditUserDetailsCommand(
+        var command = new EditMemberProfileCommand(
             testUser.ID,
             string.Empty,
             testUser.FullName.Name,
@@ -298,14 +299,14 @@ public sealed class UserRegistrationFixture : IClassFixture<DatabaseFixture>
         const string testUserName = "testuser4";
         Result editCommandResult;
 
-        var testUser = TestDataHelper.NewUser(testUserName);
+        var testUser = TestDataHelper.NewMember(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditUserDetailsCommand(
+        var command = new EditMemberProfileCommand(
             testUser.ID,
             testUser.Nickname,
             string.Empty,

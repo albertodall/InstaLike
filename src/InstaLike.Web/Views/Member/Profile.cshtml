@@ -1,6 +1,6 @@
 ﻿@using InstaLike.Web.Models
 
-@model UserProfileModel
+@model MemberProfileModel
 
 @{
     ViewData["Title"] = $"{Model.Nickname} user profile";
@@ -19,14 +19,14 @@
             <p>@Model.Bio</p>
         </div>
 
-        @if (Model.IsCurrentUserProfile)
+        @if (Model.IsCurrentMemberProfile)
         {
-            <a class="btn_edit" asp-action="Edit" asp-controller="Account">Edit</a>
+            <a class="btn_edit" asp-action="Edit" asp-controller="Member">Edit</a>
         }
         else
         {
             <a class="@(Model.Following ? "btn_following" : "btn_follow")"
-               asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Account" asp-route-id="@Model.Nickname">
+               asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Member" asp-route-id="@Model.Nickname">
                 @(Model.Following ? "Unfollow" : "Follow")
             </a>
         }
@@ -38,12 +38,12 @@
             <ul>
                 <li>@Model.NumberOfPosts <label>post</label></li>
                 <li>
-                    <a asp-action="Followers" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Followers", "Account", new { id = Model.Nickname })">
+                    <a asp-action="Followers" asp-controller="Member" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Followers", "Member", new { id = Model.Nickname })">
                         @Model.NumberOfFollowers <label>followers</label>
                     </a>
                 </li>
                 <li>
-                    <a asp-action="Following" asp-controller="Account" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Following", "Account", new { id = Model.Nickname })">
+                    <a asp-action="Following" asp-controller="Member" asp-route-id="@Model.Nickname" class="popup-link" data-ajax-url="@Url.Action("Following", "Member", new { id = Model.Nickname })">
                         @Model.NumberOfFollows <label>following</label>
                     </a>
                 </li>
@@ -68,7 +68,7 @@
     <div class="user-profile-images">
         @if (Model.NumberOfPosts == 0)
         {
-            <p>@(Model.IsCurrentUserProfile ? "You haven't" : $"{Model.Nickname} hasn't") shared anything yet.</p>
+            <p>@(Model.IsCurrentMemberProfile ? "You haven't" : $"{Model.Nickname} hasn't") shared anything yet.</p>
         }
         else
         {

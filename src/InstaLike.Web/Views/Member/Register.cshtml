@@ -1,4 +1,4 @@
-﻿@model RegisterUserModel
+﻿@model RegisterMemberModel
 
 @{
     ViewData["Title"] = "Register on InstaLike";
@@ -9,7 +9,7 @@
 @{
     var profilePicture = Url.ProfilePicture(null);
 }
-<form method="post" enctype="multipart/form-data" asp-action="Register" asp-controller="Account" asp-antiforgery="true">
+<form method="post" enctype="multipart/form-data" asp-action="Register" asp-controller="Member" asp-antiforgery="true">
     <div class="form_reg">
         <div asp-validation-summary="ModelOnly"></div>
         <div>

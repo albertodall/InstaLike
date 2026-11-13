@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Accounts;
+namespace InstaLike.Core.Membership;
 
 /// <summary>
 /// Represents a person's name and surname.

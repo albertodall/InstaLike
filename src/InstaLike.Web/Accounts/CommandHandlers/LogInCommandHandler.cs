@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Web.Accounts.Commands;
 using MediatR;
 using NHibernate;
@@ -10,7 +11,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
-internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<User>>
+internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Member>>
 {
     private const string InvalidCredentials = "Username or password are not valid.";
 
@@ -23,24 +24,24 @@ internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result
         _logger = logger.ForContext<LogInCommand>();
     }
 
-    public async Task<Result<User>> Handle(LogInCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Member>> Handle(LogInCommand request, CancellationToken cancellationToken)
     {
-        var user = await _session.QueryOver<User>()
+        var member = await _session.QueryOver<Member>()
             .Where(Restrictions.Eq("Nickname", request.Nickname))
             .SingleOrDefaultAsync(cancellationToken);
-        if (user is null)
+        if (member is null)
         {
-            _logger.Debug("User {Nickname} does not exist.", request.Nickname);
-            return Result.Failure<User>(InvalidCredentials);
+            _logger.Debug("Member {Nickname} does not exist.", request.Nickname);
+            return Result.Failure<Member>(InvalidCredentials);
         }
 
-        var logIn = user.LogIn(request.Password);
+        var logIn = member.LogIn(request.Password);
         if (logIn.IsFailure)
         {
-            _logger.Debug("User {Nickname} did not authenticate correctly.", request.Nickname);
-            return Result.Failure<User>(logIn.Error);
+            _logger.Debug("Member {Nickname} did not authenticate correctly.", request.Nickname);
+            return Result.Failure<Member>(logIn.Error);
         }
 
-        return Result.Success(user);
+        return Result.Success(member);
     }
 }

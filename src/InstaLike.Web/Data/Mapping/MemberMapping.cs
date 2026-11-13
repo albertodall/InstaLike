@@ -1,17 +1,18 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
 
-internal sealed class UserMapping : ClassMap<User>
+internal sealed class MemberMapping : ClassMap<Member>
 {
-    public UserMapping()
+    public MemberMapping()
     {
-        Table("[User]");
+        Table("[Member]");
 
-        Id(p => p.ID).CustomType<TypedIdType<UserId>>().GeneratedBy.Assigned();
+        Id(p => p.ID).CustomType<TypedIdType<MemberId>>().GeneratedBy.Assigned();
 
         Map(p => p.Biography).AnsiString(500)
             .Not.Nullable()

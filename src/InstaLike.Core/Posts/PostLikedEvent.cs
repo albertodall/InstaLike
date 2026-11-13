@@ -7,6 +7,6 @@ namespace InstaLike.Core.Posts;
 /// Represents an event raised when a post is liked.
 /// </summary>
 /// <param name="PostID">The identifier of the liked post.</param>
-/// <param name="LikerID">The identifier of the user who liked the post.</param>
+/// <param name="LikerID">The identifier of the member who liked the post.</param>
 /// <param name="PostAuthorID">The identifier of the post's author.</param>
 public sealed record PostLikedEvent(PostId PostID, Guid LikerID, Guid PostAuthorID) : IDomainEvent;

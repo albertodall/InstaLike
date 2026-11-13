@@ -47,26 +47,26 @@ public class Post : AggregateRoot<PostId>
         _text = text.Value;
     }
 
-    public virtual Result LikeBy(Guid userID)
+    public virtual Result LikeBy(Guid memberID)
     {
-        if (!CanBeLikedBy(userID))
+        if (!CanBeLikedBy(memberID))
         {
             return Result.Failure("You cannot like your own posts.");
         }
 
-        if (IsLikedBy(userID))
+        if (IsLikedBy(memberID))
         {
             return Result.Failure("You have already liked this post.");
         }
 
-        _likes.Add(new Like(this, userID));
-        RaiseDomainEvent(new PostLikedEvent(ID, userID, AuthorID));
+        _likes.Add(new Like(this, memberID));
+        RaiseDomainEvent(new PostLikedEvent(ID, memberID, AuthorID));
         return Result.Success();
     }
 
-    public virtual Result DislikeBy(Guid userID)
+    public virtual Result DislikeBy(Guid memberID)
     {
-        var like = _likes.SingleOrDefault(l => l.UserID == userID);
+        var like = _likes.SingleOrDefault(l => l.MemberID == memberID);
         if (like is null)
         {
             return Result.Failure("You have not liked this post.");
@@ -76,14 +76,14 @@ public class Post : AggregateRoot<PostId>
         return Result.Success();
     }
 
-    public virtual bool CanBeLikedBy(Guid userID)
+    public virtual bool CanBeLikedBy(Guid memberID)
     {
-        return AuthorID != userID;
+        return AuthorID != memberID;
     }
 
-    public virtual bool IsLikedBy(Guid userID)
+    public virtual bool IsLikedBy(Guid memberID)
     {
-        return _likes.Any(l => l.UserID == userID);
+        return _likes.Any(l => l.MemberID == memberID);
     }
 
     public virtual Comment CommentBy(Guid authorID, CommentText text)
@@ -94,8 +94,8 @@ public class Post : AggregateRoot<PostId>
         return comment;
     }
 
-    public virtual bool CanBeEditedBy(Guid userID)
+    public virtual bool CanBeEditedBy(Guid memberID)
     {
-        return AuthorID == userID;
+        return AuthorID == memberID;
     }
 }

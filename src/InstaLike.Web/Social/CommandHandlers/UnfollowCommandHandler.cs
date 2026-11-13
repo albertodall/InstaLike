@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social.Commands;
 using MediatR;
@@ -25,10 +26,10 @@ internal sealed class UnfollowCommandHandler : IRequestHandler<UnfollowCommand, 
 
     public async Task<Result> Handle(UnfollowCommand request, CancellationToken cancellationToken)
     {
-        var unfollowedID = await _session.QueryOver<User>()
+        var unfollowedID = await _session.QueryOver<Member>()
             .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
             .Select(u => u.ID)
-            .SingleOrDefaultAsync<UserId?>(cancellationToken);
+            .SingleOrDefaultAsync<MemberId?>(cancellationToken);
         if (unfollowedID?.Value is not Guid unfollowedUserID)
         {
             return Result.Failure($"User [{request.UnfollowedNickname}] does not exist.");

@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Accounts;
+namespace InstaLike.Core.Membership;
 
 /// <summary>
 /// Represents a non-empty nickname of up to 20 characters.

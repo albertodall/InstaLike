@@ -9,7 +9,7 @@ function highlightHashtagsAndNicknames() {
             var commentText = this.innerHTML;
 
             commentText = commentText.replace(nicknamePattern, function (nickname) {
-                return `<a class='at-nickname' href='/Account/Profile/${nickname.substring(1, nickname.length)}'>${nickname}</a>`;
+                return `<a class='at-nickname' href='/Member/Profile/${nickname.substring(1, nickname.length)}'>${nickname}</a>`;
             });
 
             this.innerHTML = commentText;

@@ -22,7 +22,7 @@ internal sealed class CommentMapping : ClassMap<Comment>
             .Column("PostID");
 
         Map(p => p.AuthorID)
-            .Column("UserID")
+            .Column("MemberID")
             .Not.Nullable();
     }
 }

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Models;
 using MediatR;
@@ -44,7 +45,7 @@ internal sealed class PostCommentsQueryHandler : IRequestHandler<PostCommentsQue
         {
             CommentModel comment = null!;
             Comment commentEntity = null!;
-            User commentAuthor = null!;
+            Member commentAuthor = null!;
             var commentsQuery = _session.QueryOver(() => commentEntity)
                 .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                 .Where(() => commentEntity.Post.ID == request.PostID)

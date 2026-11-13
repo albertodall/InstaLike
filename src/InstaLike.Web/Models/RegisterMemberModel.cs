@@ -2,7 +2,7 @@
 
 namespace InstaLike.Web.Models;
 
-public sealed class RegisterUserModel
+public sealed class RegisterMemberModel
 {
     [Required(ErrorMessage = "Nickname not specified.")]
     [Display(Name = "Nickname")]

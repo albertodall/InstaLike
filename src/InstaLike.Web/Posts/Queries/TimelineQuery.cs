@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
@@ -66,7 +67,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
 
             // Comments for all posts included in the timeline.
             Comment commentEntity = null!;
-            User commentAuthor = null!;
+            Member commentAuthor = null!;
             CommentModel comment = null!;
             var commentsQuery = _session.QueryOver(() => commentEntity)
                 .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
@@ -95,11 +96,11 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             var postsLikedByCurrentUserQuery = _session.QueryOver<Like>()
                 .WithSubquery
                     .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
-                    .And(l => l.UserID == request.UserID)
+                    .And(l => l.MemberID == request.UserID)
                 .Select(l => l.Post.ID)
                 .Future<PostId>();
 
-            var authorsQuery = _session.QueryOver<User>()
+            var authorsQuery = _session.QueryOver<Member>()
                 .WithSubquery
                     .WhereProperty(u => u.ID).In(QueryOver.Of<Post>()
                         .WithSubquery.WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
@@ -120,7 +121,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             var postLikesCount = postLikesCountQuery.ToDictionary(o => (PostId)o[0], o => (int)o[1]);
             var commentsByPost = commentsQuery.ToLookup(c => c.PostID);
             var authors = authorsQuery.ToDictionary(
-                a => ((UserId)a[0]).Value,
+                a => ((MemberId)a[0]).Value,
                 a => (Nickname: (string)a[1], ProfilePicture: (PictureId?)a[2]));
 
             // Mapping

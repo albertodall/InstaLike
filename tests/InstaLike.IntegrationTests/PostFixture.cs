@@ -5,6 +5,7 @@ using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
@@ -37,7 +38,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
         const string testUserName = "testuser1";
         Result<PostId> publishCommandResult;
 
-        var testUser = TestDataHelper.NewUser(testUserName);
+        var testUser = TestDataHelper.NewMember(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -66,7 +67,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Publish_A_Post_Without_A_Picture()
     {
-        var author = TestDataHelper.NewUser("nopictureauthor");
+        var author = TestDataHelper.NewMember("nopictureauthor");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
@@ -85,8 +86,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Put_a_Comment_On_A_Post()
     {
         Result<Guid> commentPostResult;
-        var author = TestDataHelper.NewUser("author1");
-        var commenter = TestDataHelper.NewUser("commenter1");
+        var author = TestDataHelper.NewMember("author1");
+        var commenter = TestDataHelper.NewMember("commenter1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -119,8 +120,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Commenting_A_Post_Should_Not_Load_Its_Existing_Comments()
     {
         Result<Guid> commentPostResult;
-        var author = TestDataHelper.NewUser("author9");
-        var reader = TestDataHelper.NewUser("reader9");
+        var author = TestDataHelper.NewMember("author9");
+        var reader = TestDataHelper.NewMember("reader9");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -154,8 +155,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Put_A_Like_To_A_Post()
     {
         Result likeResult;
-        var author = TestDataHelper.NewUser("author2");
-        var reader = TestDataHelper.NewUser("reader1");
+        var author = TestDataHelper.NewMember("author2");
+        var reader = TestDataHelper.NewMember("reader1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -186,8 +187,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task A_Like_Put_Before_The_Post_Is_Saved_Should_Be_Stored_With_Its_Post()
     {
-        var author = TestDataHelper.NewUser("author8");
-        var reader = TestDataHelper.NewUser("reader8");
+        var author = TestDataHelper.NewMember("author8");
+        var reader = TestDataHelper.NewMember("reader8");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -210,8 +211,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Dislike_A_Post()
     {
         Result likeResult;
-        var author = TestDataHelper.NewUser("author3");
-        var reader = TestDataHelper.NewUser("reader2");
+        var author = TestDataHelper.NewMember("author3");
+        var reader = TestDataHelper.NewMember("reader2");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -244,8 +245,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Cannot_Dislike_A_Post_Without_Putting_A_Like_First()
     {
         Result likeResult;
-        var author = TestDataHelper.NewUser("author4");
-        var reader = TestDataHelper.NewUser("reader3");
+        var author = TestDataHelper.NewMember("author4");
+        var reader = TestDataHelper.NewMember("reader3");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -270,8 +271,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Cannot_Like_A_Post_Twice()
     {
         Result likeResult;
-        var author = TestDataHelper.NewUser("author5");
-        var reader = TestDataHelper.NewUser("reader4");
+        var author = TestDataHelper.NewMember("author5");
+        var reader = TestDataHelper.NewMember("reader4");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -297,7 +298,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Author_Cannot_Put_Likes_On_Their_Own_Posts()
     {
         Result likeResult;
-        var author = TestDataHelper.NewUser("author6");
+        var author = TestDataHelper.NewMember("author6");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -321,7 +322,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Find_One_Comment_For_Post()
     {
         CommentModel[] comments;
-        var author = TestDataHelper.NewUser("author7");
+        var author = TestDataHelper.NewMember("author7");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -346,7 +347,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Read_A_Post_For_Editing()
     {
         EditPostModel result;
-        var author = TestDataHelper.NewUser("editingauthor");
+        var author = TestDataHelper.NewMember("editingauthor");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -376,8 +377,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Load_All_Details_For_A_Post()
     {
         PostModel result;
-        var author = TestDataHelper.NewUser("author7");
-        var reader = TestDataHelper.NewUser("reader1");
+        var author = TestDataHelper.NewMember("author7");
+        var reader = TestDataHelper.NewMember("reader1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -413,9 +414,9 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Read_Posts_Created_By_Followed_Users()
     {
         PostModel[] timeline;
-        var author1 = TestDataHelper.NewUser("authoruser1");
-        var author2 = TestDataHelper.NewUser("authoruser2");
-        var reader = TestDataHelper.NewUser("readeruser");
+        var author1 = TestDataHelper.NewMember("authoruser1");
+        var author2 = TestDataHelper.NewMember("authoruser2");
+        var reader = TestDataHelper.NewMember("readeruser");
         Post post1;
         Post post2;
         Post post3;
@@ -460,7 +461,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     {
         Result editResult;
         var picture = await _pictureStore.SaveAsync(PictureContainers.Posts, Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), TestContext.Current.CancellationToken);
-        var author = TestDataHelper.NewUser("authoruser1");
+        var author = TestDataHelper.NewMember("authoruser1");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -494,8 +495,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     {
         Result editResult;
         var picture = PictureId.New();
-        var author = TestDataHelper.NewUser("authoruser1");
-        var reader = TestDataHelper.NewUser("readeruser");
+        var author = TestDataHelper.NewMember("authoruser1");
+        var reader = TestDataHelper.NewMember("readeruser");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -519,7 +520,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Publish_A_Post_With_An_Invalid_Text()
     {
-        var author = TestDataHelper.NewUser("invalidtextauthor");
+        var author = TestDataHelper.NewMember("invalidtextauthor");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
@@ -544,7 +545,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Not_Edit_A_Post_With_An_Invalid_Text()
     {
-        var author = TestDataHelper.NewUser("invalideditauthor");
+        var author = TestDataHelper.NewMember("invalideditauthor");
         var post = TestDataHelper.NewPost(author, "original text");
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -577,7 +578,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Cannot_Edit_A_Post_That_Does_Not_Exist()
     {
         var missingPostID = PostId.New();
-        var author = TestDataHelper.NewUser("authoruser2");
+        var author = TestDataHelper.NewMember("authoruser2");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
@@ -598,7 +599,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task A_New_Post_Should_Be_Stored_When_The_Session_Is_Flushed()
     {
-        var author = TestDataHelper.NewUser("flushauthor");
+        var author = TestDataHelper.NewMember("flushauthor");
         using var session = _testFixture.OpenSession(_output);
         await session.SaveAsync(author, TestContext.Current.CancellationToken);
         await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -618,8 +619,8 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Liking_And_Commenting_A_Post_Should_Only_Insert_The_New_Rows()
     {
-        var author = TestDataHelper.NewUser("insertauthor");
-        var reader = TestDataHelper.NewUser("insertreader");
+        var author = TestDataHelper.NewMember("insertauthor");
+        var reader = TestDataHelper.NewMember("insertreader");
         var post = TestDataHelper.NewPost(author);
         using (var session = _testFixture.OpenSession(_output))
         {

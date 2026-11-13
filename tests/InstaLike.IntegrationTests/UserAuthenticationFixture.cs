@@ -5,6 +5,7 @@ using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Accounts.Commands;
 using MediatR;
@@ -28,9 +29,9 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     {
         const string testUserName = "testuser2";
         const string testPassword = "password";
-        Result<User> authenticationResult;
+        Result<Member> authenticationResult;
 
-        var testUser = TestDataHelper.NewUser(testUserName);
+        var testUser = TestDataHelper.NewMember(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -56,9 +57,9 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     {
         const string testUserName = "testuser3";
         const string testPassword = "password3";
-        Result<User> authenticationResult;
+        Result<Member> authenticationResult;
 
-        var testUser = TestDataHelper.NewUserWithPassword(testUserName, testPassword);
+        var testUser = TestDataHelper.NewMemberWithPassword(testUserName, testPassword);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -77,7 +78,7 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Unregistered_User_Should_Not_Be_Able_To_Log_In()
     {
-        Result<User> authenticationResult;
+        Result<Member> authenticationResult;
 
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -91,7 +92,7 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Logging_In_And_Out_Should_Raise_Events()
     {
-        var testUser = TestDataHelper.NewUserWithPassword("testuser4", "password4");
+        var testUser = TestDataHelper.NewMemberWithPassword("testuser4", "password4");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
@@ -102,8 +103,8 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session)
-                .WithHandler<INotificationHandler<UserLoggedInEvent>>(new RecordingHandler<UserLoggedInEvent>(raised))
-                .WithHandler<INotificationHandler<UserLoggedOutEvent>>(new RecordingHandler<UserLoggedOutEvent>(raised))
+                .WithHandler<INotificationHandler<MemberLoggedInEvent>>(new RecordingHandler<MemberLoggedInEvent>(raised))
+                .WithHandler<INotificationHandler<MemberLoggedOutEvent>>(new RecordingHandler<MemberLoggedOutEvent>(raised))
                 .Build();
 
             (await sut.Send(new LogInCommand("testuser4", "wrong"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
@@ -111,7 +112,7 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
             (await sut.Send(new LogOutCommand(testUser.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
-        raised.Should().Equal(new UserLoggedInEvent(testUser.ID), new UserLoggedOutEvent(testUser.ID));
+        raised.Should().Equal(new MemberLoggedInEvent(testUser.ID), new MemberLoggedOutEvent(testUser.ID));
     }
 
     private sealed class RecordingHandler<TEvent> : INotificationHandler<TEvent>

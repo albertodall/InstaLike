@@ -13,7 +13,7 @@
         }
         <img src="@profilePicture" alt="User's profile picture" />
 
-        <a asp-action="Profile" asp-controller="Account" asp-route-id="@Model.AuthorNickName">@Model.AuthorNickName</a>
+        <a asp-action="Profile" asp-controller="Member" asp-route-id="@Model.AuthorNickName">@Model.AuthorNickName</a>
 
         <time title="@Model.PostDate.DateTime.ToString("dd/MM/yyyy HH:mm")" datetime="@Model.PostDate.DateTime.ToString("dd/MM/yyyy HH:mm")">
             @Model.PostDate.UtcDateTime.AsPastDays()

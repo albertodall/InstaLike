@@ -4,7 +4,7 @@ using InstaLike.Core.SharedKernel;
 namespace InstaLike.Core.Posts;
 
 /// <summary>
-/// Represents a user's like on a post.
+/// Represents a member's like on a post.
 /// </summary>
 public class Like : EntityBase<Guid>
 {
@@ -12,17 +12,17 @@ public class Like : EntityBase<Guid>
     protected Like() { }
 #pragma warning restore CS8618
 
-    internal Like(Post post, Guid userID)
+    internal Like(Post post, Guid memberID)
         : this()
     {
         Post = post;
-        UserID = userID;
+        MemberID = memberID;
         LikeDate = DateTimeOffset.Now;
     }
 
     public virtual Post Post { get; protected set; }
 
-    public virtual Guid UserID { get; protected set; }
+    public virtual Guid MemberID { get; protected set; }
 
     public virtual DateTimeOffset LikeDate { get; protected set; }
 }

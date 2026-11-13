@@ -1,20 +1,21 @@
 ﻿using System;
 using CSharpFunctionalExtensions;
+using InstaLike.Core.Accounts;
 using InstaLike.Core.SharedKernel;
 
-namespace InstaLike.Core.Accounts;
+namespace InstaLike.Core.Membership;
 
 /// <summary>
-/// Represents a user account with profile information and authentication capabilities.
+/// Represents a member of the community, with a public profile and the credentials used to log in.
 /// </summary>
-public class User : AggregateRoot<UserId>
+public class Member : AggregateRoot<MemberId>
 {
 #pragma warning disable CS8618
-    protected User() { }
+    protected Member() { }
 #pragma warning restore CS8618
 
-    public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
-        : base(UserId.New())
+    public Member(Nickname nickname, FullName fullName, Password password, Email email, string biography)
+        : base(MemberId.New())
     {
         _nickname = nickname;
         _email = email;
@@ -63,13 +64,13 @@ public class User : AggregateRoot<UserId>
             return Result.Failure("Username or password are not valid.");
         }
 
-        RaiseDomainEvent(new UserLoggedInEvent(ID));
+        RaiseDomainEvent(new MemberLoggedInEvent(ID));
         return Result.Success();
     }
 
     public virtual void LogOut()
     {
-        RaiseDomainEvent(new UserLoggedOutEvent(ID));
+        RaiseDomainEvent(new MemberLoggedOutEvent(ID));
     }
 
     public virtual void ChangePassword(Password password)

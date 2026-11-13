@@ -1,10 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Web.Data;
 
-namespace InstaLike.Web.Accounts.Commands;
+namespace InstaLike.Web.Membership.Commands;
 
-public sealed class RegisterUserCommand : ICommand<Result<UserId>>
+public sealed class RegisterMemberCommand : ICommand<Result<MemberId>>
 {
     public string Nickname { get; }
     public string Name { get; }
@@ -14,7 +15,7 @@ public sealed class RegisterUserCommand : ICommand<Result<UserId>>
     public string Biography { get; }
     public byte[]? ProfilePicture { get; }
 
-    public RegisterUserCommand(string nickname, string name, string surname, string password, string email, string biography, byte[]? profilePicture)
+    public RegisterMemberCommand(string nickname, string name, string surname, string password, string email, string biography, byte[]? profilePicture)
     {
         Nickname = nickname;
         Name = name;

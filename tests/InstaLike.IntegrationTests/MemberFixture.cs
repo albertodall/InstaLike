@@ -2,21 +2,22 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.Social;
-using InstaLike.Web.Accounts.Queries;
+using InstaLike.Web.Membership.Queries;
 using InstaLike.Web.Models;
 using Serilog;
 using Xunit;
 
 namespace InstaLike.IntegrationTests;
 
-public sealed class UserFixture : IClassFixture<DatabaseFixture>
+public sealed class MemberFixture : IClassFixture<DatabaseFixture>
 {
     private readonly DatabaseFixture _testFixture;
     private readonly ITestOutputHelper _output;
 
-    public UserFixture(DatabaseFixture fixture, ITestOutputHelper output)
+    public MemberFixture(DatabaseFixture fixture, ITestOutputHelper output)
     {
         _testFixture = fixture;
         _output = output;
@@ -25,11 +26,11 @@ public sealed class UserFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Load_User_Profile()
     {
-        UserProfileModel result;
+        MemberProfileModel result;
 
-        var author = TestDataHelper.NewUser("authoruser");
-        var followed = TestDataHelper.NewUser("followeduser");
-        var follower = TestDataHelper.NewUser("followeruser");
+        var author = TestDataHelper.NewMember("authoruser");
+        var followed = TestDataHelper.NewMember("followeduser");
+        var follower = TestDataHelper.NewMember("followeruser");
         Post post;
         using (var session = _testFixture.OpenSession(_output))
         {
@@ -43,16 +44,16 @@ public sealed class UserFixture : IClassFixture<DatabaseFixture>
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new UserProfileQuery(follower.ID.Value, author.Nickname, 3);
+        var query = new MemberProfileQuery(follower.ID.Value, author.Nickname, 3);
         using (var session = _testFixture.OpenStatelessSession())
         {
-            var sut = new UserProfileQueryHandler(session, Log.Logger);
+            var sut = new MemberProfileQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
         using (new AssertionScope())
         {
-            result.IsCurrentUserProfile.Should().BeFalse();
+            result.IsCurrentMemberProfile.Should().BeFalse();
             result.NumberOfFollowers.Should().Be(1);
             result.NumberOfFollows.Should().Be(1);
             result.NumberOfPosts.Should().Be(1);
@@ -63,19 +64,19 @@ public sealed class UserFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Read_User_Details_For_Editing()
     {
-        UserDetailsModel result;
+        MemberDetailsModel result;
 
-        var user = TestDataHelper.NewUser("testuser");
+        var user = TestDataHelper.NewMember("testuser");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(user, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new UserDetailsQuery(user.ID);
+        var query = new MemberDetailsQuery(user.ID);
         using (var session = _testFixture.OpenStatelessSession())
         {
-            var sut = new UserDetailsQueryHandler(session, Log.Logger);
+            var sut = new MemberDetailsQueryHandler(session, Log.Logger);
             result = await sut.Handle(query, TestContext.Current.CancellationToken);
         }
 
