@@ -947,7 +947,13 @@ textarea {
     padding: 5px 0;
 }
 
-.user-profile-info a {
+.user-profile-info form {
+    float: left;
+    margin: 0;
+}
+
+.user-profile-info a,
+.user-profile-info button {
     height: 32px;
     line-height: 32px;
     margin: 3px;
@@ -961,19 +967,22 @@ textarea {
     background-position: 10px center;
     background-size: 20px;
     font-size: 11px;
+    font-family: inherit;
     color: black;
+    background-color: transparent;
+    cursor: pointer;
 }
 
     .user-profile-info a.btn_edit {
         background-image: url(../img/icon_edit.png);
     }
 
-    .user-profile-info a.btn_follow,
-    .user-profile-info a.btn_following {
+    .user-profile-info button.btn_follow,
+    .user-profile-info button.btn_following {
         background-image: url(../img/icon_follow.png)
     }
 
-    .user-profile-info a.btn_following {
+    .user-profile-info button.btn_following {
         opacity: 0.5;
     }
 
