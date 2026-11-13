@@ -431,7 +431,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post2, TestContext.Current.CancellationToken);
             post3 = TestDataHelper.NewPost(author2, "test post 3");
             await session.SaveAsync(post3, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(reader.ID.Value, author1.ID.Value).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(reader, author1), TestContext.Current.CancellationToken);
             TestDataHelper.CommentOn(post1, reader, "nice picture");
             await session.FlushAsync(TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);

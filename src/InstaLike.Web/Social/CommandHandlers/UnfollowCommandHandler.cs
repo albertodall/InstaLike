@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social.Commands;
@@ -30,39 +28,30 @@ internal sealed class UnfollowCommandHandler : IRequestHandler<UnfollowCommand, 
             .Where(Restrictions.Eq("Nickname", request.UnfollowedNickname))
             .Select(u => u.ID)
             .SingleOrDefaultAsync<MemberId?>(cancellationToken);
-        if (unfollowedID?.Value is not Guid unfollowedUserID)
+        if (unfollowedID is null)
         {
-            return Result.Failure($"User [{request.UnfollowedNickname}] does not exist.");
+            return Result.Failure($"Member [{request.UnfollowedNickname}] does not exist.");
         }
 
-        var follow = await _session.QueryOver<Follow>()
-            .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == unfollowedUserID)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (follow is null)
+        var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID), cancellationToken);
+        var result = follower?.Unfollow(unfollowedID.Value) ?? Result.Failure("You are not following this member.");
+        if (result.IsFailure)
         {
-            return Result.Failure($"User {request.FollowerID} is not following user [{request.UnfollowedNickname}].");
-        }
-
-        try
-        {
-            await _session.DeleteAsync(follow, cancellationToken);
-            await _session.FlushAsync(cancellationToken);
-        }
-        catch (ADOException ex)
-        {
-            _logger.Error("Error while unfollowing [{UnfollowedNickname}({UnfollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                request.UnfollowedNickname,
-                unfollowedUserID,
+            _logger.Warning("Member {MemberID} could not unfollow [{UnfollowedNickname}({UnfollowedMemberID})]: {Error}",
                 request.FollowerID,
-                ex.Message);
+                request.UnfollowedNickname,
+                unfollowedID,
+                result.Error);
 
-            return Result.Failure(ex.Message);
+            return result;
         }
 
-        _logger.Information("User {UserID} stopped following user [{UnfollowedNickname}({UnfollowedUserID})]",
+        await _session.FlushAsync(cancellationToken);
+
+        _logger.Information("Member {MemberID} stopped following [{UnfollowedNickname}({UnfollowedMemberID})]",
             request.FollowerID,
             request.UnfollowedNickname,
-            unfollowedUserID);
+            unfollowedID);
 
         return Result.Success();
     }

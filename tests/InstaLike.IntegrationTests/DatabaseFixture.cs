@@ -37,6 +37,7 @@ public sealed class DatabaseFixture : IDisposable
                     )
                     .Add<MemberMapping>()
                     .Add<AccountMapping>()
+                    .Add<FollowerMapping>()
                     .Add<FollowMapping>()
                     .Add<PostMapping>()
                     .Add<CommentMapping>()

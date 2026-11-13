@@ -39,8 +39,8 @@ public sealed class MemberFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(author.ID.Value, followed.ID.Value).Value, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(follower.ID.Value, author.ID.Value).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(author, followed), TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(follower, author), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 

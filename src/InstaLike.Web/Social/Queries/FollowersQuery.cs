@@ -48,7 +48,7 @@ internal sealed class FollowersQueryHandler : IRequestHandler<FollowersQuery, Fo
             Member follower = null!;
 
             var followersQuery = _session.QueryOver(() => follow)
-                .JoinEntityAlias(() => follower, Restrictions.EqProperty(Projections.Property(() => follower.ID), Projections.Property(() => follow.FollowerID)), JoinType.InnerJoin)
+                .JoinEntityAlias(() => follower, Restrictions.EqProperty(Projections.Property(() => follower.ID), Projections.Property(() => follow.Follower.ID)), JoinType.InnerJoin)
                 .JoinEntityAlias(() => followed, Restrictions.EqProperty(Projections.Property(() => followed.ID), Projections.Property(() => follow.FollowedID)), JoinType.InnerJoin)
                 .Where(Restrictions.Eq(Projections.Property(() => followed.Nickname), request.Nickname))
                 .SelectList(fields => fields

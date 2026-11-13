@@ -1,4 +1,19 @@
-﻿IF (OBJECT_ID(N'[dbo].[Follow]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[Member]', N'U') IS NOT NULL)
+﻿IF (OBJECT_ID(N'[dbo].[Follower]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[Member]', N'U') IS NOT NULL)
+BEGIN
+	CREATE TABLE [dbo].[Follower]
+	(
+		[ID] [uniqueidentifier] NOT NULL
+	)
+
+	ALTER TABLE [dbo].[Follower] ADD CONSTRAINT [PK_Follower] PRIMARY KEY CLUSTERED 
+	(
+		[ID] ASC
+	)
+
+	ALTER TABLE [dbo].[Follower] WITH CHECK ADD CONSTRAINT [FK_Member_Follower] FOREIGN KEY([ID]) REFERENCES [dbo].[Member] ([ID])
+END
+
+IF (OBJECT_ID(N'[dbo].[Follow]', N'U') IS NULL) AND (OBJECT_ID(N'[dbo].[Follower]', N'U') IS NOT NULL)
 BEGIN
 	CREATE TABLE [dbo].[Follow]
 	(
@@ -15,8 +30,8 @@ BEGIN
 
 	ALTER TABLE [dbo].[Follow] ADD CONSTRAINT [DF_Follow_FollowDate] DEFAULT (sysdatetimeoffset()) FOR [FollowDate]
 
-	ALTER TABLE [dbo].[Follow] WITH CHECK ADD CONSTRAINT [FK_Member_Follower] FOREIGN KEY([FollowerID]) REFERENCES [dbo].[Member] ([ID])
-	ALTER TABLE [dbo].[Follow] CHECK CONSTRAINT [FK_Member_Follower]
+	ALTER TABLE [dbo].[Follow] WITH CHECK ADD CONSTRAINT [FK_Follower_Follow] FOREIGN KEY([FollowerID]) REFERENCES [dbo].[Follower] ([ID])
+	ALTER TABLE [dbo].[Follow] CHECK CONSTRAINT [FK_Follower_Follow]
 
 	ALTER TABLE [dbo].[Follow] WITH CHECK ADD CONSTRAINT [FK_Member_Following] FOREIGN KEY([FollowedID]) REFERENCES [dbo].[Member] ([ID])
 	ALTER TABLE [dbo].[Follow] CHECK CONSTRAINT [FK_Member_Following]
