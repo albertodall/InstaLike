@@ -37,7 +37,7 @@ public class Follower : AggregateRoot<FollowerId>
         }
 
         _follows.Add(new Follow(this, followedID));
-        RaiseDomainEvent(new FollowedUserEvent(ID.Value, followedID));
+        RaiseDomainEvent(new MemberFollowedEvent(ID.Value, followedID));
         return Result.Success();
     }
 

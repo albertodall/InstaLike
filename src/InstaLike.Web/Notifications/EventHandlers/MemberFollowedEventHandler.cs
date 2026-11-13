@@ -7,15 +7,15 @@ using NHibernate;
 
 namespace InstaLike.Web.Notifications.EventHandlers;
 
-internal sealed class FollowedUserEventHandler : INotificationHandler<FollowedUserEvent>
+internal sealed class MemberFollowedEventHandler : INotificationHandler<MemberFollowedEvent>
 {
     private readonly ISession _session;
 
-    public FollowedUserEventHandler(ISession session)
+    public MemberFollowedEventHandler(ISession session)
     {
         _session = session;
     }
 
-    public Task Handle(FollowedUserEvent notification, CancellationToken cancellationToken) =>
+    public Task Handle(MemberFollowedEvent notification, CancellationToken cancellationToken) =>
         _session.SaveAsync(Notification.Followed(notification.FollowerID, notification.FollowedID), cancellationToken);
 }

@@ -36,7 +36,7 @@ public sealed class FollowFixture
         follower.Follow(FollowedID);
 
         follower.DomainEvents.Should().ContainSingle()
-            .Which.Should().Be(new FollowedUserEvent(MemberID, FollowedID));
+            .Which.Should().Be(new MemberFollowedEvent(MemberID, FollowedID));
     }
 
     [Fact]
