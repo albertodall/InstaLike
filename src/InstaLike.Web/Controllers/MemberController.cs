@@ -117,6 +117,7 @@ public sealed class MemberController : Controller
         return PartialView("_UserListPartial", followedList);
     }
 
+    [HttpPost]
     public async Task<IActionResult> Follow(string id)
     {
         var command = new FollowCommand(User.GetIdentifier(), id);
@@ -130,6 +131,7 @@ public sealed class MemberController : Controller
         return RedirectToAction("Error", "Home");
     }
 
+    [HttpPost]
     public async Task<IActionResult> Unfollow(string id)
     {
         var command = new UnfollowCommand(User.GetIdentifier(), id);

@@ -3,6 +3,7 @@ using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ builder.Services.ConfigureImageTagging(builder.Configuration);
 builder.Services.ConfigureAuthentication();
 builder.Services.ConfigureAuthorization();
 
-builder.Services.AddControllersWithViews()
+builder.Services.AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
     .AddCookieTempDataProvider(options => options.Cookie.IsEssential = true);
 
 var app = builder.Build();

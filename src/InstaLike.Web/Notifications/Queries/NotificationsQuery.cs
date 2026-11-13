@@ -62,6 +62,7 @@ internal sealed class NotificationsQueryHandler : IRequestHandler<NotificationsQ
             notificationsQuery
                 .OrderBy(() => notificationEntity.NotificationDate).Desc
                 .SelectList(fields => fields
+                    .Select(() => notificationEntity.ID).WithAlias(() => notification.ID)
                     .Select(() => sender.Nickname).WithAlias(() => notification.SenderNickname)
                     .Select(() => sender.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
                     .Select(() => notificationEntity.Kind).WithAlias(() => notification.Kind)

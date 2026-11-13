@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Notifications.Commands;
 using InstaLike.Web.Notifications.Queries;
@@ -20,14 +21,18 @@ public sealed class NotificationController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // Loads all unread notifications
         var query = new NotificationsQuery(User.GetIdentifier(), false);
         var notifications = await _dispatcher.Send(query);
 
-        // Marks all unread notifications as read
-        var markAllAsReadCommand = new MarkAllUserNotificationsReadCommand(User.GetIdentifier());
-        await _dispatcher.Send(markAllAsReadCommand);
-
         return View(notifications);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MarkRead(Guid[] notificationIDs)
+    {
+        var command = new MarkNotificationsReadCommand(User.GetIdentifier(), notificationIDs);
+        await _dispatcher.Send(command);
+
+        return RedirectToAction(nameof(Index));
     }
 }

@@ -25,10 +25,11 @@
         }
         else
         {
-            <a class="@(Model.Following ? "btn_following" : "btn_follow")"
-               asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Member" asp-route-id="@Model.Nickname">
-                @(Model.Following ? "Unfollow" : "Follow")
-            </a>
+            <form method="post" asp-action="@(Model.Following ? "Unfollow" : "Follow")" asp-controller="Member" asp-route-id="@Model.Nickname">
+                <button type="submit" class="@(Model.Following ? "btn_following" : "btn_follow")">
+                    @(Model.Following ? "Unfollow" : "Follow")
+                </button>
+            </form>
         }
     </div>
 

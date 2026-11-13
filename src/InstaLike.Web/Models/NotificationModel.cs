@@ -6,6 +6,7 @@ namespace InstaLike.Web.Models;
 
 public sealed class NotificationModel
 {
+    public NotificationId ID { get; set; } = null!;
     public string SenderNickname { get; set; } = string.Empty;
     public PictureId? SenderProfilePicture { get; set; }
     public NotificationKind Kind { get; set; }
