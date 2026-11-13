@@ -1,28 +1,29 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Posts;
 
-namespace InstaLike.Web.Data.Mapping;
-
-internal sealed class CommentMapping : ClassMap<Comment>
+namespace InstaLike.Web.Data.Mapping
 {
-    public CommentMapping()
+    internal sealed class CommentMapping : ClassMap<Comment>
     {
-        Table("[Comment]");
+        public CommentMapping()
+        {
+            Table("[Comment]");
 
-        Id(p => p.ID).GeneratedBy.GuidComb();
+            Id(p => p.ID).GeneratedBy.GuidComb();
 
-        Map(p => p.Text).AnsiString(500)
-            .Access.CamelCaseField(Prefix.Underscore)
-            .Not.Nullable();
+            Map(p => p.Text).AnsiString(500)
+                .Access.CamelCaseField(Prefix.Underscore)
+                .Not.Nullable();
 
-        Map(p => p.CommentDate)
-            .Not.Nullable();
+            Map(p => p.CommentDate)
+                .Not.Nullable();
 
-        References(p => p.Post)
-            .Column("PostID");
+            References(p => p.Post)
+                .Column("PostID");
 
-        Map(p => p.AuthorID)
-            .Column("MemberID")
-            .Not.Nullable();
+            Map(p => p.AuthorID)
+                .Column("MemberID")
+                .Not.Nullable();
+        }
     }
 }

@@ -5,17 +5,18 @@ using InstaLike.Core.Posts;
 using MediatR;
 using NHibernate;
 
-namespace InstaLike.Web.Notifications.EventHandlers;
-
-internal sealed class PostLikedEventHandler : INotificationHandler<PostLikedEvent>
+namespace InstaLike.Web.Notifications.EventHandlers
 {
-    private readonly ISession _session;
-
-    public PostLikedEventHandler(ISession session)
+    internal sealed class PostLikedEventHandler : INotificationHandler<PostLikedEvent>
     {
-        _session = session;
-    }
+        private readonly ISession _session;
 
-    public Task Handle(PostLikedEvent notification, CancellationToken cancellationToken) =>
-        _session.SaveAsync(Notification.PostLiked(notification.LikerID, notification.PostAuthorID, notification.PostID.Value), cancellationToken);
+        public PostLikedEventHandler(ISession session)
+        {
+            _session = session;
+        }
+
+        public Task Handle(PostLikedEvent notification, CancellationToken cancellationToken) =>
+            _session.SaveAsync(Notification.PostLiked(notification.LikerID, notification.PostAuthorID, notification.PostID.Value), cancellationToken);
+    }
 }

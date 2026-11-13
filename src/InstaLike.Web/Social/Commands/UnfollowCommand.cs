@@ -2,16 +2,17 @@
 using CSharpFunctionalExtensions;
 using InstaLike.Web.Data;
 
-namespace InstaLike.Web.Social.Commands;
-
-public sealed class UnfollowCommand : ICommand<Result>
+namespace InstaLike.Web.Social.Commands
 {
-    public Guid FollowerID { get; }
-    public string UnfollowedNickname { get; }
-
-    public UnfollowCommand(Guid followerID, string unfollowedNickname)
+    public sealed class UnfollowCommand : ICommand<Result>
     {
-        FollowerID = followerID;
-        UnfollowedNickname = unfollowedNickname;
+        public Guid FollowerID { get; }
+        public string UnfollowedNickname { get; }
+
+        public UnfollowCommand(Guid followerID, string unfollowedNickname)
+        {
+            FollowerID = followerID;
+            UnfollowedNickname = unfollowedNickname;
+        }
     }
 }

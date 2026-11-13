@@ -3,25 +3,26 @@ using NHibernate;
 using NHibernate.SqlCommand;
 using Xunit;
 
-namespace InstaLike.IntegrationTests;
-
-internal sealed class XUnitSqlStatementOutputInterceptor : EmptyInterceptor
+namespace InstaLike.IntegrationTests
 {
-    private readonly ITestOutputHelper _output;
-    private readonly List<string> _statements = [];
-
-    public XUnitSqlStatementOutputInterceptor(ITestOutputHelper output)
+    internal sealed class XUnitSqlStatementOutputInterceptor : EmptyInterceptor
     {
-        _output = output;
-    }
+        private readonly ITestOutputHelper _output;
+        private readonly List<string> _statements = [];
 
-    public IReadOnlyList<string> Statements => _statements;
+        public XUnitSqlStatementOutputInterceptor(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
-    public override SqlString OnPrepareStatement(SqlString sql)
-    {
-        _statements.Add(sql.ToString());
-        _output.WriteLine(sql.ToString());
+        public IReadOnlyList<string> Statements => _statements;
 
-        return base.OnPrepareStatement(sql);
+        public override SqlString OnPrepareStatement(SqlString sql)
+        {
+            _statements.Add(sql.ToString());
+            _output.WriteLine(sql.ToString());
+
+            return base.OnPrepareStatement(sql);
+        }
     }
 }

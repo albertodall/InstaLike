@@ -7,37 +7,38 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InstaLike.Web.Controllers;
-
-[Authorize]
-public sealed class HomeController : Controller
+namespace InstaLike.Web.Controllers
 {
-    private const int MaxNumberOfPosts = 10;
-
-    private readonly ISender _dispatcher;
-
-    public HomeController(ISender dispatcher)
+    [Authorize]
+    public sealed class HomeController : Controller
     {
-        _dispatcher = dispatcher;
-    }
+        private const int MaxNumberOfPosts = 10;
 
-    public async Task<IActionResult> Index()
-    {
-        var query = new TimelineQuery(User.GetIdentifier(), MaxNumberOfPosts);
-        var model = await _dispatcher.Send(query);
+        private readonly ISender _dispatcher;
 
-        return View(model);
-    }
+        public HomeController(ISender dispatcher)
+        {
+            _dispatcher = dispatcher;
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        public async Task<IActionResult> Index()
+        {
+            var query = new TimelineQuery(User.GetIdentifier(), MaxNumberOfPosts);
+            var model = await _dispatcher.Send(query);
 
-    [AllowAnonymous]
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(model);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
     }
 }

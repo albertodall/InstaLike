@@ -1,50 +1,51 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Posts;
-
-/// <summary>
-/// Represents validated text for a comment.
-/// </summary>
-/// <remarks>
-/// Comment text is trimmed and must contain at most 200 characters.
-/// </remarks>
-public sealed class CommentText : SimpleValueObject<string>
+namespace InstaLike.Core.Posts
 {
-    private const int CommentTextMaxLength = 200;
-
-    private CommentText() : base(string.Empty) { }
-
-    private CommentText(string text) : base(text) { }
-
-    public static Result<CommentText> Create(string text)
+    /// <summary>
+    /// Represents validated text for a comment.
+    /// </summary>
+    /// <remarks>
+    /// Comment text is trimmed and must contain at most 200 characters.
+    /// </remarks>
+    public sealed class CommentText : SimpleValueObject<string>
     {
-        var trimmedText = (text ?? string.Empty).Trim();
+        private const int CommentTextMaxLength = 200;
 
-        if (trimmedText.Length == 0)
+        private CommentText() : base(string.Empty) { }
+
+        private CommentText(string text) : base(text) { }
+
+        public static Result<CommentText> Create(string text)
         {
-            return Result.Failure<CommentText>("Text for a comment should not be empty.");
+            var trimmedText = (text ?? string.Empty).Trim();
+
+            if (trimmedText.Length == 0)
+            {
+                return Result.Failure<CommentText>("Text for a comment should not be empty.");
+            }
+
+            if (trimmedText.Length > CommentTextMaxLength)
+            {
+                return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
+            }
+
+            return Result.Success(new CommentText(trimmedText));
         }
 
-        if (trimmedText.Length > CommentTextMaxLength)
+        public static implicit operator string(CommentText text)
         {
-            return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
+            return text.Value;
         }
 
-        return Result.Success(new CommentText(trimmedText));
-    }
+        public static explicit operator CommentText(string text)
+        {
+            return Create(text).Value;
+        }
 
-    public static implicit operator string(CommentText text)
-    {
-        return text.Value;
-    }
-
-    public static explicit operator CommentText(string text)
-    {
-        return Create(text).Value;
-    }
-
-    public override string ToString()
-    {
-        return Value;
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 }

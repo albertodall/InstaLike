@@ -6,50 +6,51 @@ using MediatR;
 using NHibernate;
 using Serilog;
 
-namespace InstaLike.Web.Notifications.Queries;
-
-public sealed class UnreadNotificationsQuery : IRequest<int>
+namespace InstaLike.Web.Notifications.Queries
 {
-    public Guid UserID { get; }
-
-    public UnreadNotificationsQuery(Guid userID)
+    public sealed class UnreadNotificationsQuery : IRequest<int>
     {
-        UserID = userID;
-    }
-}
+        public Guid UserID { get; }
 
-internal sealed class UnreadNotificationsQueryHandler : IRequestHandler<UnreadNotificationsQuery, int>
-{
-    private readonly IStatelessSession _session;
-    private readonly ILogger _logger;
-
-    public UnreadNotificationsQueryHandler(IStatelessSession session, ILogger logger)
-    {
-        _session = session;
-        _logger = logger.ForContext<UnreadNotificationsQuery>();
+        public UnreadNotificationsQuery(Guid userID)
+        {
+            UserID = userID;
+        }
     }
 
-    public async Task<int> Handle(UnreadNotificationsQuery request, CancellationToken cancellationToken)
+    internal sealed class UnreadNotificationsQueryHandler : IRequestHandler<UnreadNotificationsQuery, int>
     {
-        int unreadNotifications;
+        private readonly IStatelessSession _session;
+        private readonly ILogger _logger;
 
-        _logger.Debug("Counting unread notifications for user {UserID}", request.UserID);
-
-        using (var tx = _session.BeginTransaction())
+        public UnreadNotificationsQueryHandler(IStatelessSession session, ILogger logger)
         {
-            var countQuery = _session.QueryOver<Notification>()
-                .Where(n => n.RecipientID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
-
-            unreadNotifications = await countQuery.RowCountAsync(cancellationToken);
-
-            await tx.CommitAsync(cancellationToken);
+            _session = session;
+            _logger = logger.ForContext<UnreadNotificationsQuery>();
         }
 
-        if (unreadNotifications > 0)
+        public async Task<int> Handle(UnreadNotificationsQuery request, CancellationToken cancellationToken)
         {
-            _logger.Information("User {UserID} has {UnreadNotifications} unread notifications", request.UserID, unreadNotifications);
-        }
+            int unreadNotifications;
 
-        return unreadNotifications;
+            _logger.Debug("Counting unread notifications for user {UserID}", request.UserID);
+
+            using (var tx = _session.BeginTransaction())
+            {
+                var countQuery = _session.QueryOver<Notification>()
+                    .Where(n => n.RecipientID == request.UserID).AndNot(n => n.HasBeenReadByRecipient);
+
+                unreadNotifications = await countQuery.RowCountAsync(cancellationToken);
+
+                await tx.CommitAsync(cancellationToken);
+            }
+
+            if (unreadNotifications > 0)
+            {
+                _logger.Information("User {UserID} has {UnreadNotifications} unread notifications", request.UserID, unreadNotifications);
+            }
+
+            return unreadNotifications;
+        }
     }
 }

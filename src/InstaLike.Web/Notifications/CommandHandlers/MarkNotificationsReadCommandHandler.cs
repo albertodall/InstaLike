@@ -8,46 +8,47 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-namespace InstaLike.Web.Notifications.CommandHandlers;
-
-internal sealed class MarkNotificationsReadCommandHandler : IRequestHandler<MarkNotificationsReadCommand, int>
+namespace InstaLike.Web.Notifications.CommandHandlers
 {
-    private readonly ISession _session;
-    private readonly ILogger _logger;
-
-    public MarkNotificationsReadCommandHandler(ISession session, ILogger logger)
+    internal sealed class MarkNotificationsReadCommandHandler : IRequestHandler<MarkNotificationsReadCommand, int>
     {
-        _session = session;
-        _logger = logger.ForContext<MarkNotificationsReadCommand>();
-    }
+        private readonly ISession _session;
+        private readonly ILogger _logger;
 
-    public async Task<int> Handle(MarkNotificationsReadCommand request, CancellationToken cancellationToken)
-    {
-        if (request.NotificationIDs.Count == 0)
+        public MarkNotificationsReadCommandHandler(ISession session, ILogger logger)
         {
-            return 0;
+            _session = session;
+            _logger = logger.ForContext<MarkNotificationsReadCommand>();
         }
 
-        var unreadNotifications = await _session.QueryOver<Notification>()
-            .Where(n => n.RecipientID == request.RecipientID)
-            .AndNot(n => n.HasBeenReadByRecipient)
-            .AndRestrictionOn(n => n.ID).IsIn(request.NotificationIDs.Select(NotificationId.From).ToArray())
-            .ListAsync(cancellationToken);
-
-        foreach (var notification in unreadNotifications)
+        public async Task<int> Handle(MarkNotificationsReadCommand request, CancellationToken cancellationToken)
         {
-            notification.MarkAsRead();
+            if (request.NotificationIDs.Count == 0)
+            {
+                return 0;
+            }
+
+            var unreadNotifications = await _session.QueryOver<Notification>()
+                .Where(n => n.RecipientID == request.RecipientID)
+                .AndNot(n => n.HasBeenReadByRecipient)
+                .AndRestrictionOn(n => n.ID).IsIn(request.NotificationIDs.Select(NotificationId.From).ToArray())
+                .ListAsync(cancellationToken);
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.MarkAsRead();
+            }
+
+            await _session.FlushAsync(cancellationToken);
+
+            if (unreadNotifications.Count > 0)
+            {
+                _logger.Information("Member {MemberID} marked {ReadNotifications} notifications as read.",
+                    request.RecipientID,
+                    unreadNotifications.Count);
+            }
+
+            return unreadNotifications.Count;
         }
-
-        await _session.FlushAsync(cancellationToken);
-
-        if (unreadNotifications.Count > 0)
-        {
-            _logger.Information("Member {MemberID} marked {ReadNotifications} notifications as read.",
-                request.RecipientID,
-                unreadNotifications.Count);
-        }
-
-        return unreadNotifications.Count;
     }
 }

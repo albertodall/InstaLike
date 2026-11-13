@@ -3,93 +3,94 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Membership;
-using InstaLike.Web.Membership.Commands;
 using InstaLike.Web.Media;
+using InstaLike.Web.Membership.Commands;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-namespace InstaLike.Web.Membership.CommandHandlers;
-
-public sealed class EditMemberProfileCommandHandler : IRequestHandler<EditMemberProfileCommand, Result>
+namespace InstaLike.Web.Membership.CommandHandlers
 {
-    private const string NicknameTaken = "This nickname is already taken.";
-
-    private readonly ISession _session;
-    private readonly ILogger _logger;
-    private readonly IPictureStore _pictureStore;
-
-    public EditMemberProfileCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
+    public sealed class EditMemberProfileCommandHandler : IRequestHandler<EditMemberProfileCommand, Result>
     {
-        _session = session;
-        _logger = logger.ForContext<EditMemberProfileCommand>();
-        _pictureStore = pictureStore;
-    }
+        private const string NicknameTaken = "This nickname is already taken.";
 
-    public async Task<Result> Handle(EditMemberProfileCommand request, CancellationToken cancellationToken)
-    {
-        var nicknameValidationResult = Nickname.Create(request.Nickname);
-        var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
+        private readonly ISession _session;
+        private readonly ILogger _logger;
+        private readonly IPictureStore _pictureStore;
 
-        var validationResult = Result.Combine(Environment.NewLine, nicknameValidationResult, fullNameValidationResult);
-        if (validationResult.IsFailure)
+        public EditMemberProfileCommandHandler(ISession session, ILogger logger, IPictureStore pictureStore)
         {
-            _logger.Warning("Tried to update the profile of member [{Nickname}({MemberID})] but some data were not valid: {WarningMessage}",
+            _session = session;
+            _logger = logger.ForContext<EditMemberProfileCommand>();
+            _pictureStore = pictureStore;
+        }
+
+        public async Task<Result> Handle(EditMemberProfileCommand request, CancellationToken cancellationToken)
+        {
+            var nicknameValidationResult = Nickname.Create(request.Nickname);
+            var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
+
+            var validationResult = Result.Combine(Environment.NewLine, nicknameValidationResult, fullNameValidationResult);
+            if (validationResult.IsFailure)
+            {
+                _logger.Warning("Tried to update the profile of member [{Nickname}({MemberID})] but some data were not valid: {WarningMessage}",
+                    request.Nickname,
+                    request.MemberID,
+                    validationResult.Error);
+                return Result.Failure(validationResult.Error);
+            }
+
+            var availabilityResult = await CheckNicknameAvailabilityAsync(request.MemberID, nicknameValidationResult.Value, cancellationToken);
+            if (availabilityResult.IsFailure)
+            {
+                _logger.Warning("Tried to update the profile of member [{Nickname}({MemberID})] but some data were already in use: {WarningMessage}",
+                    request.Nickname,
+                    request.MemberID,
+                    availabilityResult.Error);
+                return availabilityResult;
+            }
+
+            var memberToUpdate = await _session.GetAsync<Member>(request.MemberID, cancellationToken);
+            memberToUpdate.ChangeNickname(nicknameValidationResult.Value);
+            memberToUpdate.ChangeFullName(fullNameValidationResult.Value);
+            memberToUpdate.UpdateBiography(request.Bio);
+            if (request.ProfilePicture is { Length: > 0 })
+            {
+                var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken);
+                memberToUpdate.SetProfilePicture(uploadedPicture);
+            }
+
+            try
+            {
+                await _session.FlushAsync(cancellationToken);
+            }
+            catch (ADOException ex)
+            {
+                _logger.Error("Error updating the profile of member [{Nickname}({MemberID})]. Error message: {ErrorMessage}",
+                    request.Nickname,
+                    request.MemberID,
+                    ex.Message);
+
+                return Result.Failure(ex.Message);
+            }
+
+            _logger.Information("Successfully updated the profile of member [{Nickname}({MemberID})]",
                 request.Nickname,
-                request.MemberID,
-                validationResult.Error);
-            return Result.Failure(validationResult.Error);
+                request.MemberID);
+
+            return Result.Success();
         }
 
-        var availabilityResult = await CheckNicknameAvailabilityAsync(request.MemberID, nicknameValidationResult.Value, cancellationToken);
-        if (availabilityResult.IsFailure)
+        private async Task<Result> CheckNicknameAvailabilityAsync(MemberId memberID, Nickname nickname, CancellationToken cancellationToken)
         {
-            _logger.Warning("Tried to update the profile of member [{Nickname}({MemberID})] but some data were already in use: {WarningMessage}",
-                request.Nickname,
-                request.MemberID,
-                availabilityResult.Error);
-            return availabilityResult;
+            var otherMembersWithNickname = await _session.QueryOver<Member>()
+                .Where(Restrictions.Eq("Nickname", nickname.Value))
+                .And(m => m.ID != memberID)
+                .RowCountAsync(cancellationToken);
+
+            return Result.FailureIf(otherMembersWithNickname > 0, NicknameTaken);
         }
-
-        var memberToUpdate = await _session.GetAsync<Member>(request.MemberID, cancellationToken);
-        memberToUpdate.ChangeNickname(nicknameValidationResult.Value);
-        memberToUpdate.ChangeFullName(fullNameValidationResult.Value);
-        memberToUpdate.UpdateBiography(request.Bio);
-        if (request.ProfilePicture is { Length: > 0 })
-        {
-            var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Profiles, request.ProfilePicture, cancellationToken);
-            memberToUpdate.SetProfilePicture(uploadedPicture);
-        }
-
-        try
-        {
-            await _session.FlushAsync(cancellationToken);
-        }
-        catch (ADOException ex)
-        {
-            _logger.Error("Error updating the profile of member [{Nickname}({MemberID})]. Error message: {ErrorMessage}",
-                request.Nickname,
-                request.MemberID,
-                ex.Message);
-
-            return Result.Failure(ex.Message);
-        }
-
-        _logger.Information("Successfully updated the profile of member [{Nickname}({MemberID})]",
-            request.Nickname,
-            request.MemberID);
-
-        return Result.Success();
-    }
-
-    private async Task<Result> CheckNicknameAvailabilityAsync(MemberId memberID, Nickname nickname, CancellationToken cancellationToken)
-    {
-        var otherMembersWithNickname = await _session.QueryOver<Member>()
-            .Where(Restrictions.Eq("Nickname", nickname.Value))
-            .And(m => m.ID != memberID)
-            .RowCountAsync(cancellationToken);
-
-        return Result.FailureIf(otherMembersWithNickname > 0, NicknameTaken);
     }
 }

@@ -9,39 +9,40 @@ using NHibernate;
 using NHibernate.Criterion;
 using Serilog;
 
-namespace InstaLike.Web.Accounts.CommandHandlers;
-
-internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Guid>>
+namespace InstaLike.Web.Accounts.CommandHandlers
 {
-    private const string InvalidCredentials = "Username or password are not valid.";
-
-    private readonly ISession _session;
-    private readonly ILogger _logger;
-
-    public LogInCommandHandler(ISession session, ILogger logger)
+    internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Guid>>
     {
-        _session = session;
-        _logger = logger.ForContext<LogInCommand>();
-    }
+        private const string InvalidCredentials = "Username or password are not valid.";
 
-    public async Task<Result<Guid>> Handle(LogInCommand request, CancellationToken cancellationToken)
-    {
-        var account = await _session.QueryOver<Account>()
-            .Where(Restrictions.Eq("Username", request.Username))
-            .SingleOrDefaultAsync(cancellationToken);
-        if (account is null)
+        private readonly ISession _session;
+        private readonly ILogger _logger;
+
+        public LogInCommandHandler(ISession session, ILogger logger)
         {
-            _logger.Debug("Account {Username} does not exist.", request.Username);
-            return Result.Failure<Guid>(InvalidCredentials);
+            _session = session;
+            _logger = logger.ForContext<LogInCommand>();
         }
 
-        var logIn = account.LogIn(request.Password);
-        if (logIn.IsFailure)
+        public async Task<Result<Guid>> Handle(LogInCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug("Account {Username} did not authenticate correctly.", request.Username);
-            return Result.Failure<Guid>(logIn.Error);
-        }
+            var account = await _session.QueryOver<Account>()
+                .Where(Restrictions.Eq("Username", request.Username))
+                .SingleOrDefaultAsync(cancellationToken);
+            if (account is null)
+            {
+                _logger.Debug("Account {Username} does not exist.", request.Username);
+                return Result.Failure<Guid>(InvalidCredentials);
+            }
 
-        return Result.Success(account.ID.Value);
+            var logIn = account.LogIn(request.Password);
+            if (logIn.IsFailure)
+            {
+                _logger.Debug("Account {Username} did not authenticate correctly.", request.Username);
+                return Result.Failure<Guid>(logIn.Error);
+            }
+
+            return Result.Success(account.ID.Value);
+        }
     }
 }

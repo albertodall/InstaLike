@@ -1,47 +1,48 @@
 ﻿using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Accounts;
-
-/// <summary>
-/// Represents a normalized email address.
-/// </summary>
-/// <remarks>
-/// Email values are trimmed, converted to lowercase, and checked for a basic address format
-/// when created.
-/// </remarks>
-public sealed class Email : SimpleValueObject<string>
+namespace InstaLike.Core.Accounts
 {
-    private const string EMailValidationRegEx = @"^(.+)@(.+)$";
-
-    private Email() : base(string.Empty) { }
-
-    private Email(string email) : base(email) { }
-
-    public static Result<Email> Create(string input)
+    /// <summary>
+    /// Represents a normalized email address.
+    /// </summary>
+    /// <remarks>
+    /// Email values are trimmed, converted to lowercase, and checked for a basic address format
+    /// when created.
+    /// </remarks>
+    public sealed class Email : SimpleValueObject<string>
     {
-        input = (input ?? string.Empty).Trim().ToLowerInvariant();
+        private const string EMailValidationRegEx = @"^(.+)@(.+)$";
 
-        if (input.Length == 0)
+        private Email() : base(string.Empty) { }
+
+        private Email(string email) : base(email) { }
+
+        public static Result<Email> Create(string input)
         {
-            return Result.Failure<Email>("Email should not be empty");
+            input = (input ?? string.Empty).Trim().ToLowerInvariant();
+
+            if (input.Length == 0)
+            {
+                return Result.Failure<Email>("Email should not be empty");
+            }
+
+            if (!Regex.IsMatch(input, EMailValidationRegEx))
+            {
+                return Result.Failure<Email>("Email is invalid");
+            }
+
+            return Result.Success(new Email(input));
         }
 
-        if (!Regex.IsMatch(input, EMailValidationRegEx))
+        public static explicit operator Email(string email)
         {
-            return Result.Failure<Email>("Email is invalid");
+            return Create(email).Value;
         }
 
-        return Result.Success(new Email(input));
-    }
-
-    public static explicit operator Email(string email)
-    {
-        return Create(email).Value;
-    }
-
-    public static implicit operator string(Email email)
-    {
-        return email.Value;
+        public static implicit operator string(Email email)
+        {
+            return email.Value;
+        }
     }
 }

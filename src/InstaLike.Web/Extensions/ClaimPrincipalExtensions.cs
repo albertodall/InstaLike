@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Security.Claims;
 
-namespace InstaLike.Web.Extensions;
-
-public static class ClaimPrincipalExtensions
+namespace InstaLike.Web.Extensions
 {
-    public static Guid GetIdentifier(this ClaimsPrincipal principal)
+    public static class ClaimPrincipalExtensions
     {
-        string? claimValue = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(claimValue))
+        public static Guid GetIdentifier(this ClaimsPrincipal principal)
         {
-            throw new InvalidOperationException("NameIdentifier not found. Did you authenticate correctly?");
-        }
+            string? claimValue = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(claimValue))
+            {
+                throw new InvalidOperationException("NameIdentifier not found. Did you authenticate correctly?");
+            }
 
-        return Guid.Parse(claimValue);
+            return Guid.Parse(claimValue);
+        }
     }
 }

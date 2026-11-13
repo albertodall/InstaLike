@@ -2,14 +2,15 @@
 using InstaLike.Core.Accounts;
 using InstaLike.Web.Data;
 
-namespace InstaLike.Web.Accounts.Commands;
-
-public sealed class LogOutCommand : ICommand<Result>
+namespace InstaLike.Web.Accounts.Commands
 {
-    public AccountId AccountID { get; }
-
-    public LogOutCommand(AccountId accountID)
+    public sealed class LogOutCommand : ICommand<Result>
     {
-        AccountID = accountID;
+        public AccountId AccountID { get; }
+
+        public LogOutCommand(AccountId accountID)
+        {
+            AccountID = accountID;
+        }
     }
 }

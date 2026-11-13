@@ -1,15 +1,16 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace InstaLike.Web.Extensions;
-
-internal static class ModelStateDictionaryExtensions
+namespace InstaLike.Web.Extensions
 {
-    public static void AddModelErrors(this ModelStateDictionary modelState, string errorLines)
+    internal static class ModelStateDictionaryExtensions
     {
-        foreach (var error in errorLines.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        public static void AddModelErrors(this ModelStateDictionary modelState, string errorLines)
         {
-            modelState.AddModelError(string.Empty, error);
+            foreach (var error in errorLines.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                modelState.AddModelError(string.Empty, error);
+            }
         }
     }
 }

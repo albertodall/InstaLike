@@ -5,38 +5,39 @@ using InstaLike.Core.Membership;
 using MediatR;
 using NHibernate;
 
-namespace InstaLike.Web.Membership.Queries;
-
-public sealed class MemberNicknameQuery : IRequest<string>
+namespace InstaLike.Web.Membership.Queries
 {
-    public Guid MemberID { get; }
-
-    public MemberNicknameQuery(Guid memberID)
+    public sealed class MemberNicknameQuery : IRequest<string>
     {
-        MemberID = memberID;
-    }
-}
+        public Guid MemberID { get; }
 
-internal sealed class MemberNicknameQueryHandler : IRequestHandler<MemberNicknameQuery, string>
-{
-    private readonly IStatelessSession _session;
-
-    public MemberNicknameQueryHandler(IStatelessSession session)
-    {
-        _session = session;
+        public MemberNicknameQuery(Guid memberID)
+        {
+            MemberID = memberID;
+        }
     }
 
-    public async Task<string> Handle(MemberNicknameQuery request, CancellationToken cancellationToken)
+    internal sealed class MemberNicknameQueryHandler : IRequestHandler<MemberNicknameQuery, string>
     {
-        var memberID = MemberId.From(request.MemberID);
-        using var tx = _session.BeginTransaction();
+        private readonly IStatelessSession _session;
 
-        var nickname = await _session.QueryOver<Member>()
-            .Where(m => m.ID == memberID)
-            .Select(m => m.Nickname)
-            .SingleOrDefaultAsync<string>(cancellationToken);
+        public MemberNicknameQueryHandler(IStatelessSession session)
+        {
+            _session = session;
+        }
 
-        await tx.CommitAsync(cancellationToken);
-        return nickname;
+        public async Task<string> Handle(MemberNicknameQuery request, CancellationToken cancellationToken)
+        {
+            var memberID = MemberId.From(request.MemberID);
+            using var tx = _session.BeginTransaction();
+
+            var nickname = await _session.QueryOver<Member>()
+                .Where(m => m.ID == memberID)
+                .Select(m => m.Nickname)
+                .SingleOrDefaultAsync<string>(cancellationToken);
+
+            await tx.CommitAsync(cancellationToken);
+            return nickname;
+        }
     }
 }

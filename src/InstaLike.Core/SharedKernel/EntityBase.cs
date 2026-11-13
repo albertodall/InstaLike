@@ -2,115 +2,116 @@
 using System.Runtime.CompilerServices;
 using NHibernate.Proxy;
 
-namespace InstaLike.Core.SharedKernel;
-
-/// <summary>
-/// Provides a base class for entities identified by an ID.
-/// </summary>
-/// <remarks>
-/// Entities of the same unproxied type are equal when their IDs are equal. Entities with transient IDs
-/// are equal only when they are the same instance.
-/// </remarks>
-/// <typeparam name="TId">The non-nullable type of the entity identifier.</typeparam>
-public abstract class EntityBase<TId> : IEquatable<EntityBase<TId>>
-    where TId : notnull
+namespace InstaLike.Core.SharedKernel
 {
-    private const int HashMultiplier = 29;
+    /// <summary>
+    /// Provides a base class for entities identified by an ID.
+    /// </summary>
+    /// <remarks>
+    /// Entities of the same unproxied type are equal when their IDs are equal. Entities with transient IDs
+    /// are equal only when they are the same instance.
+    /// </remarks>
+    /// <typeparam name="TId">The non-nullable type of the entity identifier.</typeparam>
+    public abstract class EntityBase<TId> : IEquatable<EntityBase<TId>>
+        where TId : notnull
+    {
+        private const int HashMultiplier = 29;
 
 #pragma warning disable CS8618
-    protected EntityBase() { }
+        protected EntityBase() { }
 #pragma warning restore CS8618
 
-    protected EntityBase(TId id)
-        : this()
-    {
-        ID = id;
-    }
-
-    public virtual TId ID { get; private init; }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
+        protected EntityBase(TId id)
+            : this()
         {
-            return false;
+            ID = id;
         }
 
-        if (obj is not EntityBase<TId> other)
+        public virtual TId ID { get; private init; }
+
+        public override bool Equals(object? obj)
         {
-            return false;
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (obj is not EntityBase<TId> other)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (GetUnproxiedType() != other.GetUnproxiedType())
+            {
+                return false;
+            }
+
+            if (IsTransient() && other.IsTransient())
+            {
+                return ReferenceEquals(this, other);
+            }
+
+            return ID.Equals(other.ID);
         }
 
-        if (ReferenceEquals(this, other))
+        public override int GetHashCode()
         {
-            return true;
+            if (IsTransient())
+            {
+                return RuntimeHelpers.GetHashCode(this);
+            }
+
+            return (HashMultiplier * GetUnproxiedType().GetHashCode()) ^ ID.GetHashCode();
         }
 
-        if (GetUnproxiedType() != other.GetUnproxiedType())
+        public virtual bool Equals(EntityBase<TId>? other)
         {
-            return false;
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (GetUnproxiedType() != other.GetUnproxiedType())
+            {
+                return false;
+            }
+
+            if (IsTransient() && other.IsTransient())
+            {
+                return ReferenceEquals(this, other);
+            }
+
+            return ID.Equals(other.ID);
         }
 
-        if (IsTransient() && other.IsTransient())
+        public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
         {
-            return ReferenceEquals(this, other);
+            return left is not null && right is not null && left.Equals(right);
         }
 
-        return ID.Equals(other.ID);
-    }
-
-    public override int GetHashCode()
-    {
-        if (IsTransient())
+        public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
         {
-            return RuntimeHelpers.GetHashCode(this);
+            return !(left == right);
         }
 
-        return (HashMultiplier * GetUnproxiedType().GetHashCode()) ^ ID.GetHashCode();
-    }
-
-    public virtual bool Equals(EntityBase<TId>? other)
-    {
-        if (other is null)
+        private bool IsTransient()
         {
-            return false;
+            return ID == null || ID.Equals(default(TId));
         }
 
-        if (GetUnproxiedType() != other.GetUnproxiedType())
+        /// <remarks>
+        /// Small violation of Separation of Concerns here...
+        /// </remarks>
+        private Type GetUnproxiedType()
         {
-            return false;
+            return GetType().Name.Contains("ProxyForFieldInterceptor")
+                ? GetType().BaseType!
+                : NHibernateProxyHelper.GetClassWithoutInitializingProxy(this);
         }
-
-        if (IsTransient() && other.IsTransient())
-        {
-            return ReferenceEquals(this, other);
-        }
-
-        return ID.Equals(other.ID);
-    }
-
-    public static bool operator ==(EntityBase<TId> left, EntityBase<TId> right)
-    {
-        return left is not null && right is not null && left.Equals(right);
-    }
-
-    public static bool operator !=(EntityBase<TId> left, EntityBase<TId> right)
-    {
-        return !(left == right);
-    }
-
-    private bool IsTransient()
-    {
-        return ID == null || ID.Equals(default(TId));
-    }
-
-    /// <remarks>
-    /// Small violation of Separation of Concerns here...
-    /// </remarks>
-    private Type GetUnproxiedType()
-    {
-        return GetType().Name.Contains("ProxyForFieldInterceptor")
-            ? GetType().BaseType!
-            : NHibernateProxyHelper.GetClassWithoutInitializingProxy(this);
     }
 }

@@ -1,8 +1,9 @@
-﻿namespace InstaLike.Core.Notifications;
-
-public enum NotificationKind : byte
+﻿namespace InstaLike.Core.Notifications
 {
-    Followed = 1,
-    PostLiked = 2,
-    PostCommented = 3
+    public enum NotificationKind : byte
+    {
+        Followed = 1,
+        PostLiked = 2,
+        PostCommented = 3
+    }
 }

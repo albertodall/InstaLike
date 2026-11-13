@@ -7,32 +7,33 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InstaLike.Web.Controllers;
-
-[Authorize]
-public sealed class NotificationController : Controller
+namespace InstaLike.Web.Controllers
 {
-    private readonly ISender _dispatcher;
-
-    public NotificationController(ISender dispatcher)
+    [Authorize]
+    public sealed class NotificationController : Controller
     {
-        _dispatcher = dispatcher;
-    }
+        private readonly ISender _dispatcher;
 
-    public async Task<IActionResult> Index()
-    {
-        var query = new NotificationsQuery(User.GetIdentifier(), false);
-        var notifications = await _dispatcher.Send(query);
+        public NotificationController(ISender dispatcher)
+        {
+            _dispatcher = dispatcher;
+        }
 
-        return View(notifications);
-    }
+        public async Task<IActionResult> Index()
+        {
+            var query = new NotificationsQuery(User.GetIdentifier(), false);
+            var notifications = await _dispatcher.Send(query);
 
-    [HttpPost]
-    public async Task<IActionResult> MarkRead(Guid[] notificationIDs)
-    {
-        var command = new MarkNotificationsReadCommand(User.GetIdentifier(), notificationIDs);
-        await _dispatcher.Send(command);
+            return View(notifications);
+        }
 
-        return RedirectToAction(nameof(Index));
+        [HttpPost]
+        public async Task<IActionResult> MarkRead(Guid[] notificationIDs)
+        {
+            var command = new MarkNotificationsReadCommand(User.GetIdentifier(), notificationIDs);
+            await _dispatcher.Send(command);
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

@@ -11,137 +11,138 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InstaLike.Web.Controllers;
-
-[Authorize]
-public sealed class MemberController : Controller
+namespace InstaLike.Web.Controllers
 {
-    private const int MaxThumbnailsInMemberProfile = 20;
-
-    private readonly ISender _dispatcher;
-
-    public MemberController(ISender dispatcher)
+    [Authorize]
+    public sealed class MemberController : Controller
     {
-        _dispatcher = dispatcher;
-    }
+        private const int MaxThumbnailsInMemberProfile = 20;
 
-    [AllowAnonymous]
-    public IActionResult Register()
-    {
-        return View(new RegisterMemberModel());
-    }
+        private readonly ISender _dispatcher;
 
-    [HttpPost]
-    [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterMemberModel newMember, IFormFile? profilePictureFile)
-    {
-        if (ModelState.IsValid)
+        public MemberController(ISender dispatcher)
         {
-            var command = new RegisterMemberCommand(
-                newMember.Nickname,
-                newMember.Name,
-                newMember.Surname,
-                newMember.Password,
-                newMember.Email,
-                newMember.Biography,
-                profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
+            _dispatcher = dispatcher;
+        }
 
-            var processCommandResult = await _dispatcher.Send(command);
-            if (processCommandResult.IsSuccess)
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            return View(new RegisterMemberModel());
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Register(RegisterMemberModel newMember, IFormFile? profilePictureFile)
+        {
+            if (ModelState.IsValid)
             {
-                return RedirectToAction("Index", "Home");
+                var command = new RegisterMemberCommand(
+                    newMember.Nickname,
+                    newMember.Name,
+                    newMember.Surname,
+                    newMember.Password,
+                    newMember.Email,
+                    newMember.Biography,
+                    profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
+
+                var processCommandResult = await _dispatcher.Send(command);
+                if (processCommandResult.IsSuccess)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
+                ModelState.AddModelErrors(processCommandResult.Error);
             }
 
-            ModelState.AddModelErrors(processCommandResult.Error);
+            return View(newMember);
         }
 
-        return View(newMember);
-    }
-
-    public async Task<IActionResult> Profile(string id)
-    {
-        var query = new MemberProfileQuery(User.GetIdentifier(), id, MaxThumbnailsInMemberProfile);
-        var model = await _dispatcher.Send(query);
-
-        return View(model);
-    }
-
-    public async Task<IActionResult> Edit()
-    {
-        var query = new MemberDetailsQuery(MemberId.From(User.GetIdentifier()));
-        var model = await _dispatcher.Send(query);
-
-        return View(model);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Edit(MemberDetailsModel memberDetails, IFormFile? profilePictureFile)
-    {
-        if (ModelState.IsValid)
+        public async Task<IActionResult> Profile(string id)
         {
-            var command = new EditMemberProfileCommand(
-                MemberId.From(User.GetIdentifier()),
-                memberDetails.Nickname,
-                memberDetails.Name,
-                memberDetails.Surname,
-                memberDetails.Bio,
-                profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
+            var query = new MemberProfileQuery(User.GetIdentifier(), id, MaxThumbnailsInMemberProfile);
+            var model = await _dispatcher.Send(query);
 
-            var processCommandResult = await _dispatcher.Send(command);
-            if (processCommandResult.IsSuccess)
+            return View(model);
+        }
+
+        public async Task<IActionResult> Edit()
+        {
+            var query = new MemberDetailsQuery(MemberId.From(User.GetIdentifier()));
+            var model = await _dispatcher.Send(query);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(MemberDetailsModel memberDetails, IFormFile? profilePictureFile)
+        {
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Edit));
+                var command = new EditMemberProfileCommand(
+                    MemberId.From(User.GetIdentifier()),
+                    memberDetails.Nickname,
+                    memberDetails.Name,
+                    memberDetails.Surname,
+                    memberDetails.Bio,
+                    profilePictureFile is null ? null : await profilePictureFile.ToByteArrayAsync());
+
+                var processCommandResult = await _dispatcher.Send(command);
+                if (processCommandResult.IsSuccess)
+                {
+                    return RedirectToAction(nameof(Edit));
+                }
+
+                ModelState.AddModelErrors(processCommandResult.Error);
             }
 
-            ModelState.AddModelErrors(processCommandResult.Error);
+            return View(memberDetails);
         }
 
-        return View(memberDetails);
-    }
-
-    public async Task<IActionResult> Followers(string id)
-    {
-        ViewBag.Message = $"Members following {id}";
-        var query = new FollowersQuery(id);
-        var followersList = await _dispatcher.Send(query);
-
-        return PartialView("_UserListPartial", followersList);
-    }
-
-    public async Task<IActionResult> Following(string id)
-    {
-        ViewBag.Message = $"Members followed by {id}";
-        var query = new FollowingQuery(id);
-        var followedList = await _dispatcher.Send(query);
-
-        return PartialView("_UserListPartial", followedList);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Follow(string id)
-    {
-        var command = new FollowCommand(User.GetIdentifier(), id);
-        var processCommandResult = await _dispatcher.Send(command);
-
-        if (processCommandResult.IsSuccess)
+        public async Task<IActionResult> Followers(string id)
         {
-            return RedirectToAction(nameof(Profile), new { id });
+            ViewBag.Message = $"Members following {id}";
+            var query = new FollowersQuery(id);
+            var followersList = await _dispatcher.Send(query);
+
+            return PartialView("_UserListPartial", followersList);
         }
 
-        return RedirectToAction("Error", "Home");
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Unfollow(string id)
-    {
-        var command = new UnfollowCommand(User.GetIdentifier(), id);
-        var processCommandResult = await _dispatcher.Send(command);
-
-        if (processCommandResult.IsSuccess)
+        public async Task<IActionResult> Following(string id)
         {
-            return RedirectToAction(nameof(Profile), new { id });
+            ViewBag.Message = $"Members followed by {id}";
+            var query = new FollowingQuery(id);
+            var followedList = await _dispatcher.Send(query);
+
+            return PartialView("_UserListPartial", followedList);
         }
 
-        return RedirectToAction("Error", "Home");
+        [HttpPost]
+        public async Task<IActionResult> Follow(string id)
+        {
+            var command = new FollowCommand(User.GetIdentifier(), id);
+            var processCommandResult = await _dispatcher.Send(command);
+
+            if (processCommandResult.IsSuccess)
+            {
+                return RedirectToAction(nameof(Profile), new { id });
+            }
+
+            return RedirectToAction("Error", "Home");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Unfollow(string id)
+        {
+            var command = new UnfollowCommand(User.GetIdentifier(), id);
+            var processCommandResult = await _dispatcher.Send(command);
+
+            if (processCommandResult.IsSuccess)
+            {
+                return RedirectToAction(nameof(Profile), new { id });
+            }
+
+            return RedirectToAction("Error", "Home");
+        }
     }
 }

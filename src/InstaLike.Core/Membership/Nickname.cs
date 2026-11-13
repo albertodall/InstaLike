@@ -1,43 +1,44 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace InstaLike.Core.Membership;
-
-/// <summary>
-/// Represents a non-empty nickname of up to 20 characters.
-/// </summary>
-/// <remarks>Leading and trailing whitespace is removed when a nickname is created.</remarks>
-public sealed class Nickname : SimpleValueObject<string>
+namespace InstaLike.Core.Membership
 {
-    private const int NickNameMaxLength = 20;
-
-    private Nickname() : base(string.Empty) { }
-
-    private Nickname(string nickname) : base(nickname) { }
-
-    public static Result<Nickname> Create(string nickname)
+    /// <summary>
+    /// Represents a non-empty nickname of up to 20 characters.
+    /// </summary>
+    /// <remarks>Leading and trailing whitespace is removed when a nickname is created.</remarks>
+    public sealed class Nickname : SimpleValueObject<string>
     {
-        var input = (nickname ?? string.Empty).Trim();
+        private const int NickNameMaxLength = 20;
 
-        if (input.Length == 0)
+        private Nickname() : base(string.Empty) { }
+
+        private Nickname(string nickname) : base(nickname) { }
+
+        public static Result<Nickname> Create(string nickname)
         {
-            return Result.Failure<Nickname>("Nickname should not be empty");
+            var input = (nickname ?? string.Empty).Trim();
+
+            if (input.Length == 0)
+            {
+                return Result.Failure<Nickname>("Nickname should not be empty");
+            }
+
+            if (input.Length > NickNameMaxLength)
+            {
+                return Result.Failure<Nickname>($"Nickname is too long (max {NickNameMaxLength} chars)");
+            }
+
+            return Result.Success(new Nickname(input));
         }
 
-        if (input.Length > NickNameMaxLength)
+        public static implicit operator string(Nickname nickname)
         {
-            return Result.Failure<Nickname>($"Nickname is too long (max {NickNameMaxLength} chars)");
+            return nickname.Value;
         }
 
-        return Result.Success(new Nickname(input));
-    }
-
-    public static implicit operator string(Nickname nickname)
-    {
-        return nickname.Value;
-    }
-
-    public static explicit operator Nickname(string nickname)
-    {
-        return Create(nickname).Value;
+        public static explicit operator Nickname(string nickname)
+        {
+            return Create(nickname).Value;
+        }
     }
 }

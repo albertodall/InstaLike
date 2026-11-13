@@ -5,26 +5,27 @@ using InstaLike.Core.Posts;
 using MediatR;
 using NHibernate;
 
-namespace InstaLike.Web.Notifications.EventHandlers;
-
-internal sealed class CommentPublishedEventHandler : INotificationHandler<CommentPublishedEvent>
+namespace InstaLike.Web.Notifications.EventHandlers
 {
-    private readonly ISession _session;
-
-    public CommentPublishedEventHandler(ISession session)
+    internal sealed class CommentPublishedEventHandler : INotificationHandler<CommentPublishedEvent>
     {
-        _session = session;
-    }
+        private readonly ISession _session;
 
-    public Task Handle(CommentPublishedEvent notification, CancellationToken cancellationToken)
-    {
-        if (notification.CommentAuthorID == notification.PostAuthorID)
+        public CommentPublishedEventHandler(ISession session)
         {
-            return Task.CompletedTask;
+            _session = session;
         }
 
-        return _session.SaveAsync(
-            Notification.PostCommented(notification.CommentAuthorID, notification.PostAuthorID, notification.PostID.Value),
-            cancellationToken);
+        public Task Handle(CommentPublishedEvent notification, CancellationToken cancellationToken)
+        {
+            if (notification.CommentAuthorID == notification.PostAuthorID)
+            {
+                return Task.CompletedTask;
+            }
+
+            return _session.SaveAsync(
+                Notification.PostCommented(notification.CommentAuthorID, notification.PostAuthorID, notification.PostID.Value),
+                cancellationToken);
+        }
     }
 }
