@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using InstaLike.Web.Accounts.Commands;
+using InstaLike.Web.Accounts.Queries;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Membership.Queries;
 using InstaLike.Web.Models;
@@ -75,10 +76,64 @@ public sealed class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        await _dispatcher.Send(new LogOutCommand(AccountId.From(User.GetIdentifier())));
+        await _dispatcher.Send(new LogOutCommand(CurrentAccountID));
 
         return RedirectToAction("Index", "Home");
     }
+
+    public async Task<IActionResult> Settings()
+    {
+        var email = await _dispatcher.Send(new AccountEmailQuery(CurrentAccountID));
+        var model = new AccountSettingsModel()
+        {
+            ChangeEmail = new ChangeEmailModel() { Email = email }
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangeEmail([Bind(Prefix = nameof(AccountSettingsModel.ChangeEmail))] ChangeEmailModel changeEmail)
+    {
+        if (ModelState.IsValid)
+        {
+            var result = await _dispatcher.Send(new ChangeEmailCommand(CurrentAccountID, changeEmail.Email));
+            if (result.IsSuccess)
+            {
+                TempData["SettingsMessage"] = "Your e-mail address has been changed.";
+                return RedirectToAction(nameof(Settings));
+            }
+
+            ModelState.AddModelErrors(result.Error);
+        }
+
+        return View(nameof(Settings), new AccountSettingsModel() { ChangeEmail = changeEmail });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangePassword([Bind(Prefix = nameof(AccountSettingsModel.ChangePassword))] ChangePasswordModel changePassword)
+    {
+        var email = await _dispatcher.Send(new AccountEmailQuery(CurrentAccountID));
+        if (ModelState.IsValid)
+        {
+            var result = await _dispatcher.Send(new ChangePasswordCommand(CurrentAccountID, changePassword.CurrentPassword, changePassword.NewPassword));
+            if (result.IsSuccess)
+            {
+                TempData["SettingsMessage"] = "Your password has been changed.";
+                return RedirectToAction(nameof(Settings));
+            }
+
+            ModelState.AddModelErrors(result.Error);
+        }
+
+        return View(nameof(Settings), new AccountSettingsModel()
+        {
+            ChangeEmail = new ChangeEmailModel() { Email = email },
+            ChangePassword = changePassword
+        });
+    }
+
+    private AccountId CurrentAccountID => AccountId.From(User.GetIdentifier());
 
     /// <summary>
     /// Builds the list of claims for the authenticated member.

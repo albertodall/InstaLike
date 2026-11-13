@@ -160,6 +160,10 @@ textarea {
         background-image: url(../img/icon_user.png);
     }
 
+    .user .btn_settings a {
+        background-image: url(../img/icon_edit.png);
+    }
+
     .user .btn_logout a {
         background-image: url(../img/icon_logout.png);
     }

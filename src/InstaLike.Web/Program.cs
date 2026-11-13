@@ -34,7 +34,8 @@ builder.Services.ConfigureImageTagging(builder.Configuration);
 builder.Services.ConfigureAuthentication();
 builder.Services.ConfigureAuthorization();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddCookieTempDataProvider(options => options.Cookie.IsEssential = true);
 
 var app = builder.Build();
 

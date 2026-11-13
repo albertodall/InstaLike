@@ -1,0 +1,54 @@
+@model AccountSettingsModel
+
+@{
+    ViewData["Title"] = "Account settings";
+}
+
+<div>
+    <h2>Account settings</h2>
+
+    @if (TempData["SettingsMessage"] is string message)
+    {
+        <p>@message</p>
+    }
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <form method="post" class="form_edit" asp-action="ChangeEmail" asp-controller="Account" asp-antiforgery="true">
+        <h3>E-Mail</h3>
+        <div>
+            <label asp-for="ChangeEmail.Email"></label>
+            <input asp-for="ChangeEmail.Email" type="email" />
+            <span asp-validation-for="ChangeEmail.Email"></span>
+        </div>
+        <div>
+            <input type="submit" value="Change e-mail" />
+        </div>
+    </form>
+
+    <form method="post" class="form_edit" asp-action="ChangePassword" asp-controller="Account" asp-antiforgery="true">
+        <h3>Password</h3>
+        <div>
+            <label asp-for="ChangePassword.CurrentPassword"></label>
+            <input asp-for="ChangePassword.CurrentPassword" />
+            <span asp-validation-for="ChangePassword.CurrentPassword"></span>
+        </div>
+        <div>
+            <label asp-for="ChangePassword.NewPassword"></label>
+            <input asp-for="ChangePassword.NewPassword" />
+            <span asp-validation-for="ChangePassword.NewPassword"></span>
+        </div>
+        <div>
+            <label asp-for="ChangePassword.ConfirmNewPassword"></label>
+            <input asp-for="ChangePassword.ConfirmNewPassword" />
+            <span asp-validation-for="ChangePassword.ConfirmNewPassword"></span>
+        </div>
+        <div>
+            <input type="submit" value="Change password" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
