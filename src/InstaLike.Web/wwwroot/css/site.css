@@ -244,8 +244,8 @@ textarea {
 }
 
 .posts .post-likes .post-liked {
-    opacity: 0.4;
     --icon: url(../lib/fontawesome/svgs/solid/heart.svg);
+    --icon-color: crimson;
 }
 
 .posts .post-likes .like-error,
@@ -427,8 +427,8 @@ textarea {
 }
 
 .post-detail .post-likes .post-liked {
-    opacity: 0.4;
     --icon: url(../lib/fontawesome/svgs/solid/heart.svg);
+    --icon-color: crimson;
 }
 
 .post-detail .post-author-comment {
@@ -1056,7 +1056,7 @@ textarea {
     width: 20px;
     height: 20px;
     margin-top: -10px;
-    background-color: currentColor;
+    background-color: var(--icon-color, currentColor);
     mask: var(--icon) center / contain no-repeat;
 }
 
