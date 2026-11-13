@@ -1,15 +1,17 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System;
+using CSharpFunctionalExtensions;
+using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Posts.Commands;
 
-public sealed class PublishCommentCommand : ICommand<Result<int>>
+public sealed class PublishCommentCommand : ICommand<Result<Guid>>
 {
-    public int PostID { get; }
+    public PostId PostID { get; }
     public string Text { get; }
-    public int UserID { get; }
+    public Guid UserID { get; }
 
-    public PublishCommentCommand(int postID, string text, int userID)
+    public PublishCommentCommand(PostId postID, string text, Guid userID)
     {
         PostID = postID;
         Text = text;

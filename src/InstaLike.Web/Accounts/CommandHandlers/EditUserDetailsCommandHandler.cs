@@ -86,7 +86,7 @@ public sealed class EditUserDetailsCommandHandler : IRequestHandler<EditUserDeta
         return Result.Success();
     }
 
-    private async Task<Result> CheckAvailabilityAsync(int userID, Nickname nickname, Email email, CancellationToken cancellationToken)
+    private async Task<Result> CheckAvailabilityAsync(UserId userID, Nickname nickname, Email email, CancellationToken cancellationToken)
     {
         var otherUsersWithNickname = _session.QueryOver<User>()
             .Where(Restrictions.Eq("Nickname", nickname.Value))

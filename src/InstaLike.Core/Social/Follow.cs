@@ -4,25 +4,25 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Social;
 
-public class Follow : AggregateRoot<int>
+public class Follow : AggregateRoot<FollowId>
 {
     protected Follow() { }
 
-    private Follow(int followerID, int followedID)
-        : this()
+    private Follow(Guid followerID, Guid followedID)
+        : base(FollowId.New())
     {
         FollowerID = followerID;
         FollowedID = followedID;
         FollowDate = DateTimeOffset.Now;
     }
 
-    public virtual int FollowerID { get; protected set; }
+    public virtual Guid FollowerID { get; protected set; }
 
-    public virtual int FollowedID { get; protected set; }
+    public virtual Guid FollowedID { get; protected set; }
 
     public virtual DateTimeOffset FollowDate { get; protected set; }
 
-    public static Result<Follow> Create(int followerID, int followedID)
+    public static Result<Follow> Create(Guid followerID, Guid followedID)
     {
         if (followerID == followedID)
         {

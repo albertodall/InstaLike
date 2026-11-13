@@ -11,7 +11,7 @@ internal sealed class UserMapping : ClassMap<User>
     {
         Table("[User]");
 
-        Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).CustomType<TypedIdType<UserId>>().GeneratedBy.Assigned();
 
         Map(p => p.Biography).AnsiString(500)
             .Not.Nullable()

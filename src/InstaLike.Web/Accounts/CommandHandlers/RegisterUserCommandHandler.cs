@@ -12,7 +12,7 @@ using Serilog;
 
 namespace InstaLike.Web.Accounts.CommandHandlers;
 
-internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<int>>
+internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<UserId>>
 {
     private const string NicknameTaken = "This nickname is already taken.";
     private const string EmailInUse = "This email is already used by another account.";
@@ -28,7 +28,7 @@ internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserC
         _pictureStore = pictureStore;
     }
 
-    public async Task<Result<int>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserId>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
         var nicknameValidationResult = Nickname.Create(request.Nickname);
         var eMailValidationResult = Email.Create(request.Email);
@@ -41,7 +41,7 @@ internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserC
             _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
                 request.Nickname,
                 validationResult.Error);
-            return Result.Failure<int>(validationResult.Error);
+            return Result.Failure<UserId>(validationResult.Error);
         }
 
         var availabilityResult = await CheckAvailabilityAsync(nicknameValidationResult.Value, eMailValidationResult.Value, cancellationToken);
@@ -50,7 +50,7 @@ internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserC
             _logger.Warning("Error during registration of user {Nickname}: Error message: {ErrorMessage}",
                 request.Nickname,
                 availabilityResult.Error);
-            return Result.Failure<int>(availabilityResult.Error);
+            return Result.Failure<UserId>(availabilityResult.Error);
         }
 
         var userToRegister = new User(
@@ -77,7 +77,7 @@ internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserC
                 request.Nickname,
                 ex.Message);
 
-            return Result.Failure<int>(ex.Message);
+            return Result.Failure<UserId>(ex.Message);
         }
 
         _logger.Information("User [{Nickname}({UserID})] has just registered.",

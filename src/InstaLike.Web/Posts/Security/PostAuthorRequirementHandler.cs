@@ -23,7 +23,7 @@ internal sealed class PostAuthorRequirementHandler : AuthorizationHandler<PostAu
         var routeData = _httpContextAccessor.HttpContext?.GetRouteData();
         if (routeData?.Values["id"] is string requestedPostId)
         {
-            if (!int.TryParse(requestedPostId, out var postId))
+            if (!PostId.TryParse(requestedPostId, null, out var postId))
             {
                 return;
             }

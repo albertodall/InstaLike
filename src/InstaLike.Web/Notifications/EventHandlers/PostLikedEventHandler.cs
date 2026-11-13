@@ -17,5 +17,5 @@ internal sealed class PostLikedEventHandler : INotificationHandler<PostLikedEven
     }
 
     public Task Handle(PostLikedEvent notification, CancellationToken cancellationToken) =>
-        _session.SaveAsync(Notification.PostLiked(notification.LikerID, notification.PostAuthorID, notification.PostID), cancellationToken);
+        _session.SaveAsync(Notification.PostLiked(notification.LikerID, notification.PostAuthorID, notification.PostID.Value), cancellationToken);
 }

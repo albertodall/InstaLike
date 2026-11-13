@@ -9,6 +9,14 @@ namespace InstaLike.Core.Tests;
 public sealed class UserFixture
 {
     [Fact]
+    public void A_New_User_Should_Be_Identified_Before_It_Is_Stored()
+    {
+        var sut = CreateTestUser();
+
+        sut.ID.Value.Should().NotBeEmpty();
+    }
+
+    [Fact]
     public void New_User_Should_Have_No_Profile_Picture()
     {
         var sut = CreateTestUser();

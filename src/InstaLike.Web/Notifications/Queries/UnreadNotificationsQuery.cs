@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
 using MediatR;
@@ -9,9 +10,9 @@ namespace InstaLike.Web.Notifications.Queries;
 
 public sealed class UnreadNotificationsQuery : IRequest<int>
 {
-    public int UserID { get; }
+    public Guid UserID { get; }
 
-    public UnreadNotificationsQuery(int userID)
+    public UnreadNotificationsQuery(Guid userID)
     {
         UserID = userID;
     }

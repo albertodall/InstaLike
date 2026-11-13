@@ -24,7 +24,7 @@ internal sealed class CommentPublishedEventHandler : INotificationHandler<Commen
         }
 
         return _session.SaveAsync(
-            Notification.PostCommented(notification.CommentAuthorID, notification.PostAuthorID, notification.PostID),
+            Notification.PostCommented(notification.CommentAuthorID, notification.PostAuthorID, notification.PostID.Value),
             cancellationToken);
     }
 }

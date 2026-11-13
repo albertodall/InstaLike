@@ -11,7 +11,7 @@ internal sealed class PostMapping : ClassMap<Post>
     {
         Table("[Post]");
 
-        Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).CustomType<TypedIdType<PostId>>().GeneratedBy.Assigned();
 
         Map(p => p.Text).AnsiString(500)
             .Access.CamelCaseField(Prefix.Underscore)

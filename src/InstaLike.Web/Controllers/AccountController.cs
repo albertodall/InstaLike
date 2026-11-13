@@ -78,7 +78,7 @@ public sealed class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        await _dispatcher.Send(new LogOutCommand(User.GetIdentifier()));
+        await _dispatcher.Send(new LogOutCommand(UserId.From(User.GetIdentifier())));
 
         return RedirectToAction("Index", "Home");
     }
@@ -95,7 +95,7 @@ public sealed class AccountController : Controller
     public async Task<IActionResult> Edit()
     {
         var currentUserID = User.GetIdentifier();
-        var query = new UserDetailsQuery(currentUserID);
+        var query = new UserDetailsQuery(UserId.From(currentUserID));
         var model = await _dispatcher.Send(query);
 
         return View(model);
@@ -107,7 +107,7 @@ public sealed class AccountController : Controller
         if (ModelState.IsValid)
         {
             var command = new EditUserDetailsCommand(
-                User.GetIdentifier(),
+                UserId.From(User.GetIdentifier()),
                 userDetails.Nickname,
                 userDetails.Name,
                 userDetails.Surname,
@@ -215,7 +215,7 @@ public sealed class AccountController : Controller
     {
         return new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(), ClaimValueTypes.Integer32),
+            new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(), ClaimValueTypes.String),
             new Claim(ClaimTypes.Name, user.Nickname, ClaimValueTypes.String),
             new Claim(ClaimTypes.GivenName, user.FullName.Name, ClaimValueTypes.String),
             new Claim(ClaimTypes.Surname, user.FullName.Surname, ClaimValueTypes.String),

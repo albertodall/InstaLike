@@ -8,6 +8,7 @@ using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
+using NHibernate.SqlCommand;
 using Serilog;
 
 namespace InstaLike.Web.Social.Queries;
@@ -47,8 +48,8 @@ internal sealed class FollowersQueryHandler : IRequestHandler<FollowersQuery, Fo
             User follower = null!;
 
             var followersQuery = _session.QueryOver(() => follow)
-                .JoinEntityAlias(() => follower, () => follower.ID == follow.FollowerID)
-                .JoinEntityAlias(() => followed, () => followed.ID == follow.FollowedID)
+                .JoinEntityAlias(() => follower, Restrictions.EqProperty(Projections.Property(() => follower.ID), Projections.Property(() => follow.FollowerID)), JoinType.InnerJoin)
+                .JoinEntityAlias(() => followed, Restrictions.EqProperty(Projections.Property(() => followed.ID), Projections.Property(() => follow.FollowedID)), JoinType.InnerJoin)
                 .Where(Restrictions.Eq(Projections.Property(() => followed.Nickname), request.Nickname))
                 .SelectList(fields => fields
                     .Select(f => follower.Nickname).WithAlias(() => model.Nickname)

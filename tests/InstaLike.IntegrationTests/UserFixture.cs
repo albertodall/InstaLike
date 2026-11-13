@@ -38,12 +38,12 @@ public sealed class UserFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(author.ID, followed.ID).Value, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(follower.ID, author.ID).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(author.ID.Value, followed.ID.Value).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(follower.ID.Value, author.ID.Value).Value, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new UserProfileQuery(follower.ID, author.Nickname, 3);
+        var query = new UserProfileQuery(follower.ID.Value, author.Nickname, 3);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new UserProfileQueryHandler(session, Log.Logger);
@@ -69,6 +69,7 @@ public sealed class UserFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(user, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var query = new UserDetailsQuery(user.ID);

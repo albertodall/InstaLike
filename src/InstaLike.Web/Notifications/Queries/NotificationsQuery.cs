@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -7,16 +8,18 @@ using InstaLike.Web.Data;
 using InstaLike.Web.Models;
 using MediatR;
 using NHibernate;
+using NHibernate.Criterion;
+using NHibernate.SqlCommand;
 using Serilog;
 
 namespace InstaLike.Web.Notifications.Queries;
 
 public sealed class NotificationsQuery : IRequest<NotificationModel[]>
 {
-    public int UserID { get; }
+    public Guid UserID { get; }
     public bool IncludeReadNotifications { get; }
 
-    public NotificationsQuery(int userID, bool includeReadNotifications)
+    public NotificationsQuery(Guid userID, bool includeReadNotifications)
     {
         UserID = userID;
         IncludeReadNotifications = includeReadNotifications;
@@ -47,7 +50,7 @@ internal sealed class NotificationsQueryHandler : IRequestHandler<NotificationsQ
             User sender = null!;
 
             var notificationsQuery = _session.QueryOver(() => notificationEntity)
-                .JoinEntityAlias(() => sender, () => sender.ID == notificationEntity.SenderID)
+                .JoinEntityAlias(() => sender, Restrictions.EqProperty(Projections.Property(() => sender.ID), Projections.Property(() => notificationEntity.SenderID)), JoinType.InnerJoin)
                 .Where(() => notificationEntity.RecipientID == request.UserID);
 
             if (!request.IncludeReadNotifications)

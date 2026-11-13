@@ -2,9 +2,9 @@
 BEGIN
 	CREATE TABLE [dbo].[Like]
 	(
-		[ID] [int] IDENTITY(1,1) NOT NULL,
-		[PostID] [int] NOT NULL,
-		[UserID] [int] NOT NULL,
+		[ID] [uniqueidentifier] NOT NULL,
+		[PostID] [uniqueidentifier] NOT NULL,
+		[UserID] [uniqueidentifier] NOT NULL,
 		[LikeDate] [datetimeoffset](7) NOT NULL
 	)
 

@@ -11,9 +11,9 @@ namespace InstaLike.Web.Accounts.Queries;
 
 internal sealed class UserDetailsQuery : IRequest<UserDetailsModel>
 {
-    public int CurrentUserId { get; }
+    public UserId CurrentUserId { get; }
 
-    public UserDetailsQuery(int currentUserId)
+    public UserDetailsQuery(UserId currentUserId)
     {
         CurrentUserId = currentUserId;
     }

@@ -9,7 +9,7 @@ internal sealed class LikeMapping : ClassMap<Like>
     {
         Table("[Like]");
 
-        Id(p => p.ID).GeneratedBy.Native();
+        Id(p => p.ID).GeneratedBy.GuidComb();
 
         Map(p => p.LikeDate)
             .Not.Nullable();

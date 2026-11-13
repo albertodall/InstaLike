@@ -1,14 +1,16 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System;
+using CSharpFunctionalExtensions;
+using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 
 namespace InstaLike.Web.Posts.Commands;
 
 public sealed class LikePostCommand : ICommand<Result>
 {
-    public int PostID { get; }
-    public int UserID { get; }
+    public PostId PostID { get; }
+    public Guid UserID { get; }
 
-    public LikePostCommand(int postID, int userID)
+    public LikePostCommand(PostId postID, Guid userID)
     {
         PostID = postID;
         UserID = userID;

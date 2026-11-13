@@ -34,6 +34,7 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
@@ -61,6 +62,7 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         using (var session = _testFixture.OpenSession(_output))
@@ -93,6 +95,7 @@ public sealed class UserAuthenticationFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         var raised = new List<IDomainEvent>();

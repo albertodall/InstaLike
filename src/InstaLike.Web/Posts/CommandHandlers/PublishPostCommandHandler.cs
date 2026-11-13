@@ -10,7 +10,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts.CommandHandlers;
 
-internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<int>>
+internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCommand, Result<PostId>>
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
@@ -23,11 +23,11 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
         _pictureStore = pictureStore;
     }
 
-    public async Task<Result<int>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PostId>> Handle(PublishPostCommand request, CancellationToken cancellationToken)
     {
         if (request.PictureRawBytes is not { Length: > 0 })
         {
-            return Result.Failure<int>("Please select a picture to share together with your post.");
+            return Result.Failure<PostId>("Please select a picture to share together with your post.");
         }
 
         var postPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
@@ -44,7 +44,7 @@ internal sealed class PublishPostCommandHandler : IRequestHandler<PublishPostCom
                 request.UserID,
                 ex.Message);
 
-            return Result.Failure<int>(ex.Message);
+            return Result.Failure<PostId>(ex.Message);
         }
 
         _logger.Information("User {UserID} has just shared post {PostID}.", request.UserID, post.ID);

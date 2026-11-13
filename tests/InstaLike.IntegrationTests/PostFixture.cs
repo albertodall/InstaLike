@@ -35,15 +35,16 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     public async Task Should_Publish_A_New_Post()
     {
         const string testUserName = "testuser1";
-        Result<int> publishCommandResult;
+        Result<PostId> publishCommandResult;
 
         var testUser = TestDataHelper.NewUser(testUserName);
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(testUser, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        var command = new PublishPostCommand(testUser.ID.Value, "test post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -69,9 +70,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new PublishPostCommand(author.ID, "post without a picture", []);
+        var command = new PublishPostCommand(author.ID.Value, "post without a picture", []);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -82,7 +84,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Should_Put_a_Comment_On_A_Post()
     {
-        Result<int> commentPostResult;
+        Result<Guid> commentPostResult;
         var author = TestDataHelper.NewUser("author1");
         var commenter = TestDataHelper.NewUser("commenter1");
         Post post;
@@ -92,9 +94,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(commenter, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new PublishCommentCommand(post.ID, "test comment", commenter.ID);
+        var command = new PublishCommentCommand(post.ID, "test comment", commenter.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -115,7 +118,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Commenting_A_Post_Should_Not_Load_Its_Existing_Comments()
     {
-        Result<int> commentPostResult;
+        Result<Guid> commentPostResult;
         var author = TestDataHelper.NewUser("author9");
         var reader = TestDataHelper.NewUser("reader9");
         Post post;
@@ -132,7 +135,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
-            commentPostResult = await sut.Send(new PublishCommentCommand(post.ID, "second comment", reader.ID), TestContext.Current.CancellationToken);
+            commentPostResult = await sut.Send(new PublishCommentCommand(post.ID, "second comment", reader.ID.Value), TestContext.Current.CancellationToken);
 
             using (new AssertionScope())
             {
@@ -160,9 +163,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new LikePostCommand(post.ID, reader.ID);
+        var command = new LikePostCommand(post.ID, reader.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -190,7 +194,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
-            post.LikeBy(reader.ID);
+            post.LikeBy(reader.ID.Value);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
@@ -198,7 +202,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
         using (var session = _testFixture.OpenSession(_output))
         {
             var storedPost = await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken);
-            storedPost!.IsLikedBy(reader.ID).Should().BeTrue();
+            storedPost!.IsLikedBy(reader.ID.Value).Should().BeTrue();
         }
     }
 
@@ -215,11 +219,11 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            post.LikeBy(reader.ID);
+            post.LikeBy(reader.ID.Value);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new DislikePostCommand(post.ID, reader.ID);
+        var command = new DislikePostCommand(post.ID, reader.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -249,9 +253,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new DislikePostCommand(post.ID, reader.ID);
+        var command = new DislikePostCommand(post.ID, reader.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -274,9 +279,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new LikePostCommand(post.ID, reader.ID);
+        var command = new LikePostCommand(post.ID, reader.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -298,9 +304,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new LikePostCommand(post.ID, author.ID);
+        var command = new LikePostCommand(post.ID, author.ID.Value);
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).Build();
@@ -321,7 +328,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            post.CommentBy(author.ID, CommentText.Create("First comment").Value);
+            post.CommentBy(author.ID.Value, CommentText.Create("First comment").Value);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
@@ -346,9 +353,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author, "Text to edit");
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new EditPostQuery(post.ID, author.ID);
+        var query = new EditPostQuery(post.ID, author.ID.Value);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new EditPostQueryHandler(session, Log.Logger);
@@ -358,7 +366,7 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
         using (new AssertionScope())
         {
             result.PostID.Should().Be(post.ID);
-            result.AuthorID.Should().Be(author.ID);
+            result.AuthorID.Should().Be(author.ID.Value);
             result.Text.Should().Be("Text to edit");
             result.Picture.Should().Be(post.Picture);
         }
@@ -377,13 +385,13 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
-            post.CommentBy(reader.ID, CommentText.Create("My comment").Value);
+            post.CommentBy(reader.ID.Value, CommentText.Create("My comment").Value);
             await session.FlushAsync(TestContext.Current.CancellationToken);
-            post.LikeBy(reader.ID);
+            post.LikeBy(reader.ID.Value);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new PostDetailQuery(post.ID, reader.ID);
+        var query = new PostDetailQuery(post.ID, reader.ID.Value);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new PostDetailQueryHandler(session, Log.Logger);
@@ -422,13 +430,13 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(post2, TestContext.Current.CancellationToken);
             post3 = TestDataHelper.NewPost(author2, "test post 3");
             await session.SaveAsync(post3, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(reader.ID, author1.ID).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(Follow.Create(reader.ID.Value, author1.ID.Value).Value, TestContext.Current.CancellationToken);
             TestDataHelper.CommentOn(post1, reader, "nice picture");
             await session.FlushAsync(TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var query = new TimelineQuery(reader.ID, 5);
+        var query = new TimelineQuery(reader.ID.Value, 5);
         using (var session = _testFixture.OpenStatelessSession())
         {
             var sut = new TimelineQueryHandler(session, Log.Logger);
@@ -459,9 +467,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author, "test post 1", picture);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        var command = new EditPostCommand(author.ID.Value, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -494,9 +503,10 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
             await session.SaveAsync(reader, TestContext.Current.CancellationToken);
             post = TestDataHelper.NewPost(author, "test post 1", picture);
             await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        var command = new EditPostCommand(reader.ID.Value, post.ID, "edited text on post 1", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -509,14 +519,15 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task Cannot_Edit_A_Post_That_Does_Not_Exist()
     {
-        const int missingPostID = int.MaxValue;
+        var missingPostID = PostId.New();
         var author = TestDataHelper.NewUser("authoruser2");
         using (var session = _testFixture.OpenSession(_output))
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
-        var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
+        var command = new EditPostCommand(author.ID.Value, missingPostID, "edited text", Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()));
         using (var session = _testFixture.OpenSession(_output))
         {
             var sut = new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build();
@@ -527,7 +538,64 @@ public sealed class PostFixture : IClassFixture<DatabaseFixture>
         }
     }
 
-    private static IPersistentCollection CommentsOf(ISession session, int postID)
+    [Fact]
+    public async Task A_New_Post_Should_Be_Stored_When_The_Session_Is_Flushed()
+    {
+        var author = TestDataHelper.NewUser("flushauthor");
+        using var session = _testFixture.OpenSession(_output);
+        await session.SaveAsync(author, TestContext.Current.CancellationToken);
+        await session.FlushAsync(TestContext.Current.CancellationToken);
+        var post = TestDataHelper.NewPost(author);
+
+        await session.SaveAsync(post, TestContext.Current.CancellationToken);
+        var storedBeforeFlush = await CountPostsAsync(post.ID);
+        await session.FlushAsync(TestContext.Current.CancellationToken);
+
+        using (new AssertionScope())
+        {
+            storedBeforeFlush.Should().Be(0);
+            (await CountPostsAsync(post.ID)).Should().Be(1);
+        }
+    }
+
+    [Fact]
+    public async Task Liking_And_Commenting_A_Post_Should_Only_Insert_The_New_Rows()
+    {
+        var author = TestDataHelper.NewUser("insertauthor");
+        var reader = TestDataHelper.NewUser("insertreader");
+        var post = TestDataHelper.NewPost(author);
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(author, TestContext.Current.CancellationToken);
+            await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+            await session.SaveAsync(post, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        var statements = new XUnitSqlStatementOutputInterceptor(_output);
+        using (var session = _testFixture.OpenSession(statements))
+        {
+            var storedPost = await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken);
+            storedPost.LikeBy(reader.ID.Value);
+            storedPost.CommentBy(reader.ID.Value, (CommentText)"test comment");
+            var statementsBeforeFlush = statements.Statements.Count;
+
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+
+            statements.Statements.Skip(statementsBeforeFlush).Should().HaveCount(2)
+                .And.OnlyContain(s => s.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    private async Task<int> CountPostsAsync(PostId postID)
+    {
+        using var session = _testFixture.OpenStatelessSession();
+        return await session.QueryOver<Post>()
+            .Where(p => p.ID == postID)
+            .RowCountAsync(TestContext.Current.CancellationToken);
+    }
+
+    private static IPersistentCollection CommentsOf(ISession session, PostId postID)
     {
         var role = $"{typeof(Post).FullName}.{nameof(Post.Comments)}";
         return session.GetSessionImplementation().PersistenceContext.CollectionEntries.Keys

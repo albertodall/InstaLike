@@ -2,9 +2,9 @@
 BEGIN
 	CREATE TABLE [dbo].[Follow]
 	(
-		[ID] [int] IDENTITY(1,1) NOT NULL,
-		[FollowerID] [int] NOT NULL,
-		[FollowedID] [int] NOT NULL,
+		[ID] [uniqueidentifier] NOT NULL,
+		[FollowerID] [uniqueidentifier] NOT NULL,
+		[FollowedID] [uniqueidentifier] NOT NULL,
 		[FollowDate] [datetimeoffset](7) NOT NULL
 	)
 

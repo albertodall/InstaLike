@@ -35,12 +35,12 @@ internal static class TestDataHelper
 
     public static Post NewPost(User author, string text, PictureId picture)
     {
-        return new Post(author.ID, picture, (PostText)text);
+        return new Post(author.ID.Value, picture, (PostText)text);
     }
 
     public static Comment CommentOn(Post post, User author, string text)
     {
-        return post.CommentBy(author.ID, (CommentText)text);
+        return post.CommentBy(author.ID.Value, (CommentText)text);
     }
 
     private static User CreateUser(string nickname, string email, string password)

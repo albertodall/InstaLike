@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
@@ -8,12 +9,20 @@ namespace InstaLike.Core.Tests;
 
 public sealed class PostFixture
 {
-    private const int PostAuthorID = 1;
+    private static readonly Guid PostAuthorID = Guid.NewGuid();
+
+    [Fact]
+    public void A_New_Post_Should_Be_Identified_Before_It_Is_Stored()
+    {
+        var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+
+        sut.ID.Value.Should().NotBeEmpty();
+    }
 
     [Fact]
     public void Should_Comment_A_Post()
     {
-        const int commentAuthorID = 42;
+        var commentAuthorID = Guid.NewGuid();
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
         var comment = sut.CommentBy(commentAuthorID, (CommentText)"test comment");
@@ -30,7 +39,7 @@ public sealed class PostFixture
     [Fact]
     public void Reader_Should_Like_A_Post()
     {
-        const int readerID = 42;
+        var readerID = Guid.NewGuid();
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
         var result = sut.LikeBy(readerID);
@@ -48,7 +57,7 @@ public sealed class PostFixture
     [Fact]
     public void Liking_A_Post_Should_Raise_An_Event()
     {
-        const int readerID = 42;
+        var readerID = Guid.NewGuid();
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
         sut.LikeBy(readerID);
@@ -60,7 +69,7 @@ public sealed class PostFixture
     [Fact]
     public void Reader_Should_Not_Like_A_Post_Twice()
     {
-        const int readerID = 42;
+        var readerID = Guid.NewGuid();
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
         sut.LikeBy(readerID);
 
@@ -77,7 +86,7 @@ public sealed class PostFixture
     [Fact]
     public void Reader_Should_Dislike_A_Liked_Post()
     {
-        const int readerID = 42;
+        var readerID = Guid.NewGuid();
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
         sut.LikeBy(readerID);
 
@@ -96,13 +105,13 @@ public sealed class PostFixture
     {
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-        sut.DislikeBy(42).IsFailure.Should().BeTrue();
+        sut.DislikeBy(Guid.NewGuid()).IsFailure.Should().BeTrue();
     }
 
     [Fact]
     public void Commenting_A_Post_Should_Raise_An_Event()
     {
-        const int commentAuthorID = 42;
+        var commentAuthorID = Guid.NewGuid();
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
         sut.CommentBy(commentAuthorID, (CommentText)"test comment");
@@ -132,7 +141,7 @@ public sealed class PostFixture
 
         using (new AssertionScope())
         {
-            sut.CanBeLikedBy(PostAuthorID + 1).Should().BeTrue();
+            sut.CanBeLikedBy(Guid.NewGuid()).Should().BeTrue();
             sut.CanBeLikedBy(PostAuthorID).Should().BeFalse();
         }
     }
@@ -150,6 +159,6 @@ public sealed class PostFixture
     {
         var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-        sut.CanBeEditedBy(PostAuthorID + 1).Should().BeFalse();
+        sut.CanBeEditedBy(Guid.NewGuid()).Should().BeFalse();
     }
 }

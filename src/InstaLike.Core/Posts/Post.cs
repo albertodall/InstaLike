@@ -6,14 +6,14 @@ using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
-public class Post : AggregateRoot<int>
+public class Post : AggregateRoot<PostId>
 {
 #pragma warning disable CS8618
     protected Post() { }
 #pragma warning restore CS8618
 
-    public Post(int authorID, PictureId picture, PostText text)
-        : this()
+    public Post(Guid authorID, PictureId picture, PostText text)
+        : base(PostId.New())
     {
         AuthorID = authorID;
         Picture = picture;
@@ -22,7 +22,7 @@ public class Post : AggregateRoot<int>
         PostDate = DateTimeOffset.Now;
     }
 
-    public virtual int AuthorID { get; protected set; }
+    public virtual Guid AuthorID { get; protected set; }
 
     public virtual PictureId Picture { get; protected set; }
 
@@ -47,7 +47,7 @@ public class Post : AggregateRoot<int>
         _text = text.Value;
     }
 
-    public virtual Result LikeBy(int userID)
+    public virtual Result LikeBy(Guid userID)
     {
         if (!CanBeLikedBy(userID))
         {
@@ -64,7 +64,7 @@ public class Post : AggregateRoot<int>
         return Result.Success();
     }
 
-    public virtual Result DislikeBy(int userID)
+    public virtual Result DislikeBy(Guid userID)
     {
         var like = _likes.SingleOrDefault(l => l.UserID == userID);
         if (like is null)
@@ -76,17 +76,17 @@ public class Post : AggregateRoot<int>
         return Result.Success();
     }
 
-    public virtual bool CanBeLikedBy(int userID)
+    public virtual bool CanBeLikedBy(Guid userID)
     {
         return AuthorID != userID;
     }
 
-    public virtual bool IsLikedBy(int userID)
+    public virtual bool IsLikedBy(Guid userID)
     {
         return _likes.Any(l => l.UserID == userID);
     }
 
-    public virtual Comment CommentBy(int authorID, CommentText text)
+    public virtual Comment CommentBy(Guid authorID, CommentText text)
     {
         var comment = new Comment(this, authorID, text);
         _comments.Add(comment);
@@ -94,7 +94,7 @@ public class Post : AggregateRoot<int>
         return comment;
     }
 
-    public virtual bool CanBeEditedBy(int userID)
+    public virtual bool CanBeEditedBy(Guid userID)
     {
         return AuthorID == userID;
     }

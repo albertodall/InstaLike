@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
@@ -9,7 +10,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts.CommandHandlers;
 
-internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishCommentCommand, Result<int>>
+internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishCommentCommand, Result<Guid>>
 {
     private readonly ISession _session;
     private readonly ILogger _logger;
@@ -20,18 +21,18 @@ internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishComm
         _logger = logger.ForContext<PublishCommentCommand>();
     }
 
-    public async Task<Result<int>> Handle(PublishCommentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(PublishCommentCommand request, CancellationToken cancellationToken)
     {
         var text = CommentText.Create(request.Text);
         if (text.IsFailure)
         {
-            return Result.Failure<int>(text.Error);
+            return Result.Failure<Guid>(text.Error);
         }
 
         var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
         if (post is null)
         {
-            return Result.Failure<int>($"Post {request.PostID} does not exist.");
+            return Result.Failure<Guid>($"Post {request.PostID} does not exist.");
         }
 
         var comment = post.CommentBy(request.UserID, text.Value);
@@ -46,7 +47,7 @@ internal sealed class PublishCommentCommandHandler : IRequestHandler<PublishComm
                 request.UserID,
                 ex.Message);
 
-            return Result.Failure<int>(ex.Message);
+            return Result.Failure<Guid>(ex.Message);
         }
 
         _logger.Information("User {UserID} wrote a new comment to post {PostID}", request.UserID, request.PostID);

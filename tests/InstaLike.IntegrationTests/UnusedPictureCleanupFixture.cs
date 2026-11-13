@@ -34,6 +34,7 @@ public sealed class UnusedPictureCleanupFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(author, TestContext.Current.CancellationToken);
             await session.SaveAsync(TestDataHelper.NewPost(author, "post with a used picture", postPicture), TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
         await CleanUpUploadedBeforeAsync(DateTimeOffset.MaxValue);

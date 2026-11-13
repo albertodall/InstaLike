@@ -7,14 +7,14 @@ namespace InstaLike.Core.Accounts;
 /// <summary>
 /// Represents a user account with profile information and authentication capabilities.
 /// </summary>
-public class User : AggregateRoot<int>
+public class User : AggregateRoot<UserId>
 {
 #pragma warning disable CS8618
     protected User() { }
 #pragma warning restore CS8618
 
     public User(Nickname nickname, FullName fullName, Password password, Email email, string biography)
-        : this()
+        : base(UserId.New())
     {
         _nickname = nickname;
         _email = email;

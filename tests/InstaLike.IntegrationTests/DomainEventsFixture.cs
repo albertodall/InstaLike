@@ -34,16 +34,16 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await new TestMediatorBuilder(session).Build().Send(new LikePostCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new LikePostCommand(post.ID, reader.ID.Value), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
-        var notifications = await GetNotificationsAsync(author.ID);
+        var notifications = await GetNotificationsAsync(author.ID.Value);
         using (new AssertionScope())
         {
             notifications.Should().ContainSingle();
             notifications[0].Kind.Should().Be(NotificationKind.PostLiked);
-            notifications[0].SenderID.Should().Be(reader.ID);
-            notifications[0].PostID.Should().Be(post.ID);
+            notifications[0].SenderID.Should().Be(reader.ID.Value);
+            notifications[0].PostID.Should().Be(post.ID.Value);
         }
     }
 
@@ -54,16 +54,16 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "nice", reader.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "nice", reader.ID.Value), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
-        var notifications = await GetNotificationsAsync(author.ID);
+        var notifications = await GetNotificationsAsync(author.ID.Value);
         using (new AssertionScope())
         {
             notifications.Should().ContainSingle();
             notifications[0].Kind.Should().Be(NotificationKind.PostCommented);
-            notifications[0].SenderID.Should().Be(reader.ID);
-            notifications[0].PostID.Should().Be(post.ID);
+            notifications[0].SenderID.Should().Be(reader.ID.Value);
+            notifications[0].PostID.Should().Be(post.ID.Value);
         }
     }
 
@@ -74,10 +74,10 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "my own post", author.ID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "my own post", author.ID.Value), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
-        (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
+        (await GetNotificationsAsync(author.ID.Value)).Should().BeEmpty();
     }
 
     [Fact]
@@ -87,15 +87,15 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
         using (var session = _testFixture.OpenSession(_output))
         {
-            (await new TestMediatorBuilder(session).Build().Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await new TestMediatorBuilder(session).Build().Send(new FollowCommand(reader.ID.Value, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
-        var notifications = await GetNotificationsAsync(author.ID);
+        var notifications = await GetNotificationsAsync(author.ID.Value);
         using (new AssertionScope())
         {
             notifications.Should().ContainSingle();
             notifications[0].Kind.Should().Be(NotificationKind.Followed);
-            notifications[0].SenderID.Should().Be(reader.ID);
+            notifications[0].SenderID.Should().Be(reader.ID.Value);
             notifications[0].PostID.Should().BeNull();
         }
     }
@@ -111,7 +111,7 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
                 .WithHandler<INotificationHandler<PostLikedEvent>, FailingHandler>()
                 .Build();
 
-            var like = () => mediator.Send(new LikePostCommand(post.ID, reader.ID));
+            var like = () => mediator.Send(new LikePostCommand(post.ID, reader.ID.Value));
             await like.Should().ThrowAsync<InvalidOperationException>();
         }
 
@@ -120,7 +120,7 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
             using (new AssertionScope())
             {
                 (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
-                (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
+                (await GetNotificationsAsync(author.ID.Value)).Should().BeEmpty();
             }
         }
     }
@@ -136,8 +136,8 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
                 .WithHandler<IRequestHandler<LikeThenFailCommand, Result>, LikeThenFailCommandHandler>()
                 .Build();
 
-            (await mediator.Send(new LikeThenFailCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
-            (await mediator.Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+            (await mediator.Send(new LikeThenFailCommand(post.ID, reader.ID.Value), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
+            (await mediator.Send(new FollowCommand(reader.ID.Value, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
         }
 
         using (var session = _testFixture.OpenSession(_output))
@@ -145,7 +145,7 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
             using (new AssertionScope())
             {
                 (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
-                (await GetNotificationsAsync(author.ID)).Should().ContainSingle()
+                (await GetNotificationsAsync(author.ID.Value)).Should().ContainSingle()
                     .Which.Kind.Should().Be(NotificationKind.Followed);
             }
         }
@@ -168,7 +168,7 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
         return (author, reader, post);
     }
 
-    private async Task<IList<Notification>> GetNotificationsAsync(int recipientID)
+    private async Task<IList<Notification>> GetNotificationsAsync(Guid recipientID)
     {
         using var session = _testFixture.OpenSession(_output);
         return await session.QueryOver<Notification>()
@@ -184,15 +184,15 @@ public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
 
     private sealed class LikeThenFailCommand : ICommand<Result>
     {
-        public LikeThenFailCommand(int postID, int userID)
+        public LikeThenFailCommand(PostId postID, Guid userID)
         {
             PostID = postID;
             UserID = userID;
         }
 
-        public int PostID { get; }
+        public PostId PostID { get; }
 
-        public int UserID { get; }
+        public Guid UserID { get; }
     }
 
     private sealed class LikeThenFailCommandHandler : IRequestHandler<LikeThenFailCommand, Result>

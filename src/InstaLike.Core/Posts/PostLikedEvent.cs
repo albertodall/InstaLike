@@ -1,4 +1,5 @@
-﻿using InstaLike.Core.SharedKernel;
+﻿using System;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts;
 
@@ -8,4 +9,4 @@ namespace InstaLike.Core.Posts;
 /// <param name="PostID">The identifier of the liked post.</param>
 /// <param name="LikerID">The identifier of the user who liked the post.</param>
 /// <param name="PostAuthorID">The identifier of the post's author.</param>
-public sealed record PostLikedEvent(int PostID, int LikerID, int PostAuthorID) : IDomainEvent;
+public sealed record PostLikedEvent(PostId PostID, Guid LikerID, Guid PostAuthorID) : IDomainEvent;
