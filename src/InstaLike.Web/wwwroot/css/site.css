@@ -114,7 +114,12 @@ textarea {
         display: inline-block;
     }
 
-    .user a {
+    .user form {
+        margin: 0;
+    }
+
+    .user a,
+    .user button {
         height: 32px;
         line-height: 32px;
         margin: 3px;
@@ -127,7 +132,10 @@ textarea {
         background-position: 10px center;
         background-size: 20px;
         font-size: 11px;
+        font-family: inherit;
         color: black;
+        background-color: transparent;
+        cursor: pointer;
     }
 
     .user .btn_home a {
@@ -164,7 +172,7 @@ textarea {
         background-image: url(../img/icon_edit.png);
     }
 
-    .user .btn_logout a {
+    .user .btn_logout button {
         background-image: url(../img/icon_logout.png);
     }
 

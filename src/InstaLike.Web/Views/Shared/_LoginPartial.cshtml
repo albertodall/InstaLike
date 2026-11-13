@@ -24,7 +24,9 @@
         <a asp-action="Settings" asp-controller="Account" title="Account settings">Account settings</a>
     </li>
     <li class="btn_logout">
-        <a asp-action="Logout" asp-controller="Account" title="Logout">Logout</a>
+        <form method="post" asp-action="Logout" asp-controller="Account">
+            <button type="submit" title="Logout">Logout</button>
+        </form>
     </li>
 </ul>
 }
