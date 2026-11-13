@@ -1,23 +1,24 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Social;
 
-namespace InstaLike.Web.Data.Mapping;
-
-internal sealed class FollowMapping : ClassMap<Follow>
+namespace InstaLike.Web.Data.Mapping
 {
-    public FollowMapping()
+    internal sealed class FollowMapping : ClassMap<Follow>
     {
-        Table("[Follow]");
+        public FollowMapping()
+        {
+            Table("[Follow]");
 
-        Id(p => p.ID).GeneratedBy.GuidComb();
+            Id(p => p.ID).GeneratedBy.GuidComb();
 
-        Map(p => p.FollowDate)
-            .Not.Nullable();
+            Map(p => p.FollowDate)
+                .Not.Nullable();
 
-        References(p => p.Follower)
-            .Column("FollowerID");
+            References(p => p.Follower)
+                .Column("FollowerID");
 
-        Map(p => p.FollowedID)
-            .Not.Nullable();
+            Map(p => p.FollowedID)
+                .Not.Nullable();
+        }
     }
 }

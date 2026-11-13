@@ -10,172 +10,173 @@ using InstaLike.Web.Notifications.Queries;
 using Serilog;
 using Xunit;
 
-namespace InstaLike.IntegrationTests;
-
-public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
+namespace InstaLike.IntegrationTests
 {
-    private readonly DatabaseFixture _testFixture;
-    private readonly ITestOutputHelper _output;
-
-    public NotificationFixture(DatabaseFixture fixture, ITestOutputHelper output)
+    public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
     {
-        _testFixture = fixture;
-        _output = output;
-    }
+        private readonly DatabaseFixture _testFixture;
+        private readonly ITestOutputHelper _output;
 
-    [Fact]
-    public async Task Should_Mark_The_Given_Notifications_Read()
-    {
-        int result;
-        var sender = TestDataHelper.NewMember("sender");
-        var recipient = TestDataHelper.NewMember("recipient");
-        var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-        var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-        var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-        using (var session = _testFixture.OpenSession(_output))
+        public NotificationFixture(DatabaseFixture fixture, ITestOutputHelper output)
         {
-            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
-            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
-            await session.FlushAsync(TestContext.Current.CancellationToken);
+            _testFixture = fixture;
+            _output = output;
         }
 
-        var command = new MarkNotificationsReadCommand(recipient.ID.Value, [not1.ID.Value, not2.ID.Value]);
-        using (var session = _testFixture.OpenSession(_output))
+        [Fact]
+        public async Task Should_Mark_The_Given_Notifications_Read()
         {
-            var sut = new TestMediatorBuilder(session).Build();
-            result = await sut.Send(command, TestContext.Current.CancellationToken);
-        }
-
-        using (new AssertionScope())
-        {
-            result.Should().Be(2);
+            int result;
+            var sender = TestDataHelper.NewMember("sender");
+            var recipient = TestDataHelper.NewMember("recipient");
+            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             using (var session = _testFixture.OpenSession(_output))
             {
-                (await session.GetAsync<Notification>(not3.ID, TestContext.Current.CancellationToken))!
-                    .HasBeenReadByRecipient.Should().BeFalse();
+                await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+                await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var command = new MarkNotificationsReadCommand(recipient.ID.Value, [not1.ID.Value, not2.ID.Value]);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new TestMediatorBuilder(session).Build();
+                result = await sut.Send(command, TestContext.Current.CancellationToken);
+            }
+
+            using (new AssertionScope())
+            {
+                result.Should().Be(2);
+                using (var session = _testFixture.OpenSession(_output))
+                {
+                    (await session.GetAsync<Notification>(not3.ID, TestContext.Current.CancellationToken))!
+                        .HasBeenReadByRecipient.Should().BeFalse();
+                }
             }
         }
-    }
 
-    [Fact]
-    public async Task Should_Not_Mark_Notifications_Of_Another_Member_Read()
-    {
-        int result;
-        var sender = TestDataHelper.NewMember("sender");
-        var recipient = TestDataHelper.NewMember("recipient");
-        var notification = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-        using (var session = _testFixture.OpenSession(_output))
+        [Fact]
+        public async Task Should_Not_Mark_Notifications_Of_Another_Member_Read()
         {
-            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
-            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            await session.SaveAsync(notification, TestContext.Current.CancellationToken);
-            await session.FlushAsync(TestContext.Current.CancellationToken);
+            int result;
+            var sender = TestDataHelper.NewMember("sender");
+            var recipient = TestDataHelper.NewMember("recipient");
+            var notification = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+                await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
+                await session.SaveAsync(notification, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var command = new MarkNotificationsReadCommand(sender.ID.Value, [notification.ID.Value]);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var sut = new TestMediatorBuilder(session).Build();
+                result = await sut.Send(command, TestContext.Current.CancellationToken);
+            }
+
+            result.Should().Be(0);
         }
 
-        var command = new MarkNotificationsReadCommand(sender.ID.Value, [notification.ID.Value]);
-        using (var session = _testFixture.OpenSession(_output))
+        [Fact]
+        public async Task Should_Count_Unread_Notifications()
         {
-            var sut = new TestMediatorBuilder(session).Build();
-            result = await sut.Send(command, TestContext.Current.CancellationToken);
+            int result;
+            var sender = TestDataHelper.NewMember("sender");
+            var recipient = TestDataHelper.NewMember("recipient");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+                await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
+                var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                not1.MarkAsRead();
+                await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var query = new UnreadNotificationsQuery(recipient.ID.Value);
+            using (var session = _testFixture.OpenStatelessSession())
+            {
+                var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            result.Should().Be(2);
         }
 
-        result.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task Should_Count_Unread_Notifications()
-    {
-        int result;
-        var sender = TestDataHelper.NewMember("sender");
-        var recipient = TestDataHelper.NewMember("recipient");
-        using (var session = _testFixture.OpenSession(_output))
+        [Fact]
+        public async Task Should_Read_All_Notifications()
         {
-            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
-            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            not1.MarkAsRead();
-            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
-            await session.FlushAsync(TestContext.Current.CancellationToken);
+            NotificationModel[] result;
+            var sender = TestDataHelper.NewMember("sender");
+            var recipient = TestDataHelper.NewMember("recipient");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+                await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
+                var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                not1.MarkAsRead();
+                await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var query = new NotificationsQuery(recipient.ID.Value, true);
+            using (var session = _testFixture.OpenStatelessSession())
+            {
+                var sut = new NotificationsQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            using (new AssertionScope())
+            {
+                result.Length.Should().Be(3);
+                result.Should().OnlyContain(n => n.SenderNickname == sender.Nickname && n.Kind == NotificationKind.Followed);
+            }
         }
 
-        var query = new UnreadNotificationsQuery(recipient.ID.Value);
-        using (var session = _testFixture.OpenStatelessSession())
+        [Fact]
+        public async Task Should_Read_Only_Unread_Notifications()
         {
-            var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            NotificationModel[] result;
+            var sender = TestDataHelper.NewMember("sender");
+            var recipient = TestDataHelper.NewMember("recipient");
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(sender, TestContext.Current.CancellationToken);
+                await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
+                var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                not1.MarkAsRead();
+                await session.SaveAsync(not1, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not2, TestContext.Current.CancellationToken);
+                await session.SaveAsync(not3, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var query = new NotificationsQuery(recipient.ID.Value, false);
+            using (var session = _testFixture.OpenStatelessSession())
+            {
+                var sut = new NotificationsQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            result.Length.Should().Be(2);
         }
-
-        result.Should().Be(2);
-    }
-
-    [Fact]
-    public async Task Should_Read_All_Notifications()
-    {
-        NotificationModel[] result;
-        var sender = TestDataHelper.NewMember("sender");
-        var recipient = TestDataHelper.NewMember("recipient");
-        using (var session = _testFixture.OpenSession(_output))
-        {
-            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
-            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            not1.MarkAsRead();
-            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
-            await session.FlushAsync(TestContext.Current.CancellationToken);
-        }
-
-        var query = new NotificationsQuery(recipient.ID.Value, true);
-        using (var session = _testFixture.OpenStatelessSession())
-        {
-            var sut = new NotificationsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, TestContext.Current.CancellationToken);
-        }
-
-        using (new AssertionScope())
-        {
-            result.Length.Should().Be(3);
-            result.Should().OnlyContain(n => n.SenderNickname == sender.Nickname && n.Kind == NotificationKind.Followed);
-        }
-    }
-
-    [Fact]
-    public async Task Should_Read_Only_Unread_Notifications()
-    {
-        NotificationModel[] result;
-        var sender = TestDataHelper.NewMember("sender");
-        var recipient = TestDataHelper.NewMember("recipient");
-        using (var session = _testFixture.OpenSession(_output))
-        {
-            await session.SaveAsync(sender, TestContext.Current.CancellationToken);
-            await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            not1.MarkAsRead();
-            await session.SaveAsync(not1, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not2, TestContext.Current.CancellationToken);
-            await session.SaveAsync(not3, TestContext.Current.CancellationToken);
-            await session.FlushAsync(TestContext.Current.CancellationToken);
-        }
-
-        var query = new NotificationsQuery(recipient.ID.Value, false);
-        using (var session = _testFixture.OpenStatelessSession())
-        {
-            var sut = new NotificationsQueryHandler(session, Log.Logger);
-            result = await sut.Handle(query, TestContext.Current.CancellationToken);
-        }
-
-        result.Length.Should().Be(2);
     }
 }

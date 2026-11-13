@@ -3,18 +3,19 @@ using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
 
-namespace InstaLike.Web.Posts.Commands;
-
-public sealed class PublishPostCommand : ICommand<Result<PostId>>
+namespace InstaLike.Web.Posts.Commands
 {
-    public Guid UserID { get; }
-    public string Text { get; }
-    public byte[] PictureRawBytes { get; }
-
-    public PublishPostCommand(Guid userID, string text, byte[] pictureRawBytes)
+    public sealed class PublishPostCommand : ICommand<Result<PostId>>
     {
-        UserID = userID;
-        Text = text;
-        PictureRawBytes = pictureRawBytes;
+        public Guid UserID { get; }
+        public string Text { get; }
+        public byte[] PictureRawBytes { get; }
+
+        public PublishPostCommand(Guid userID, string text, byte[] pictureRawBytes)
+        {
+            UserID = userID;
+            Text = text;
+            PictureRawBytes = pictureRawBytes;
+        }
     }
 }

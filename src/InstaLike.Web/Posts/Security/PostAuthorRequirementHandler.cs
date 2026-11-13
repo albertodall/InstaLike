@@ -5,38 +5,39 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace InstaLike.Web.Posts.Security;
-
-internal sealed class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorRequirement>
+namespace InstaLike.Web.Posts.Security
 {
-    private readonly NHibernate.ISession _session;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public PostAuthorRequirementHandler(NHibernate.ISession session, IHttpContextAccessor httpContextAccessor)
+    internal sealed class PostAuthorRequirementHandler : AuthorizationHandler<PostAuthorRequirement>
     {
-        _session = session;
-        _httpContextAccessor = httpContextAccessor;
-    }
+        private readonly NHibernate.ISession _session;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PostAuthorRequirement requirement)
-    {
-        var routeData = _httpContextAccessor.HttpContext?.GetRouteData();
-        if (routeData?.Values["id"] is string requestedPostId)
+        public PostAuthorRequirementHandler(NHibernate.ISession session, IHttpContextAccessor httpContextAccessor)
         {
-            if (!PostId.TryParse(requestedPostId, null, out var postId))
-            {
-                return;
-            }
+            _session = session;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
-            var post = await _session.GetAsync<Post>(postId);
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PostAuthorRequirement requirement)
+        {
+            var routeData = _httpContextAccessor.HttpContext?.GetRouteData();
+            if (routeData?.Values["id"] is string requestedPostId)
+            {
+                if (!PostId.TryParse(requestedPostId, null, out var postId))
+                {
+                    return;
+                }
 
-            if (post is not null && post.CanBeEditedBy(context.User.GetIdentifier()))
-            {
-                context.Succeed(requirement);
-            }
-            else
-            {
-                context.Fail();
+                var post = await _session.GetAsync<Post>(postId);
+
+                if (post is not null && post.CanBeEditedBy(context.User.GetIdentifier()))
+                {
+                    context.Succeed(requirement);
+                }
+                else
+                {
+                    context.Fail();
+                }
             }
         }
     }
