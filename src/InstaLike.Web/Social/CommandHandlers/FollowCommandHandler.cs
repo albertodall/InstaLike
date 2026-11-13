@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social.Commands;
@@ -30,45 +28,38 @@ internal sealed class FollowCommandHandler : IRequestHandler<FollowCommand, Resu
             .Where(Restrictions.Eq("Nickname", request.FollowedNickname))
             .Select(u => u.ID)
             .SingleOrDefaultAsync<MemberId?>(cancellationToken);
-        if (followedID?.Value is not Guid followedUserID)
+        if (followedID is null)
         {
-            return Result.Failure($"User [{request.FollowedNickname}] does not exist.");
+            return Result.Failure($"Member [{request.FollowedNickname}] does not exist.");
         }
 
-        var follow = Follow.Create(request.FollowerID, followedUserID);
-        if (follow.IsFailure)
-        {
-            return follow;
-        }
+        var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID), cancellationToken);
+        var isFirstFollow = follower is null;
+        follower ??= new Follower(request.FollowerID);
 
-        var alreadyFollowing = await _session.QueryOver<Follow>()
-            .Where(f => f.FollowerID == request.FollowerID && f.FollowedID == followedUserID)
-            .RowCountAsync(cancellationToken) > 0;
-        if (alreadyFollowing)
+        var result = follower.Follow(followedID.Value);
+        if (result.IsFailure)
         {
-            return Result.Failure($"User {request.FollowerID} is already following user [{request.FollowedNickname}].");
-        }
-
-        try
-        {
-            await _session.SaveAsync(follow.Value, cancellationToken);
-            await _session.FlushAsync(cancellationToken);
-        }
-        catch (ADOException ex)
-        {
-            _logger.Error("Error while following [{FollowedUserNickname}({FollowedUserID})] by user {UserID}. Error message: {ErrorMessage}",
-                request.FollowedNickname,
-                followedUserID,
+            _logger.Warning("Member {MemberID} could not follow [{FollowedNickname}({FollowedMemberID})]: {Error}",
                 request.FollowerID,
-                ex.Message);
+                request.FollowedNickname,
+                followedID,
+                result.Error);
 
-            return Result.Failure(ex.Message);
+            return result;
         }
 
-        _logger.Information("User {UserID} started following user [{FollowedUserNickname}({FollowedUserID})]",
+        if (isFirstFollow)
+        {
+            await _session.SaveAsync(follower, cancellationToken);
+        }
+
+        await _session.FlushAsync(cancellationToken);
+
+        _logger.Information("Member {MemberID} started following [{FollowedNickname}({FollowedMemberID})]",
             request.FollowerID,
             request.FollowedNickname,
-            followedUserID);
+            followedID);
 
         return Result.Success();
     }

@@ -51,7 +51,7 @@ public sealed class TimelineQueryHandler : IRequestHandler<TimelineQuery, PostMo
             Post post = null!;
 
             var followedUserIdsQuery = QueryOver.Of<Follow>()
-                .Where(f => f.FollowerID == request.UserID)
+                .Where(f => f.Follower.ID == FollowerId.From(request.UserID))
                 .Select(f => f.FollowedID);
 
             // Post to show in the timeline (user's own posts and posts published by followed users)

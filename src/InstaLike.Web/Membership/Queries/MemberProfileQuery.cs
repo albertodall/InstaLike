@@ -92,14 +92,14 @@ internal sealed class MemberProfileQueryHandler : IRequestHandler<MemberProfileQ
 
             // Number of followed members
             var followingCountQuery = _session.QueryOver<Follow>()
-                .Where(f => f.FollowerID == profile.MemberID.Value)
+                .Where(f => f.Follower.ID == FollowerId.From(profile.MemberID.Value))
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 
             // Is the current member following the selected member?
             var isFollowedByCurrentMemberQuery = _session.QueryOver<Follow>()
                 .Where(f => f.FollowedID == profile.MemberID.Value)
-                .And(f => f.FollowerID == request.CurrentMemberID)
+                .And(f => f.Follower.ID == FollowerId.From(request.CurrentMemberID))
                 .Select(Projections.Count<Follow>(f => f.ID))
                 .FutureValue<int>();
 

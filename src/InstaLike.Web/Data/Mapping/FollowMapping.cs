@@ -1,6 +1,5 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Social;
-using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping;
 
@@ -10,13 +9,13 @@ internal sealed class FollowMapping : ClassMap<Follow>
     {
         Table("[Follow]");
 
-        Id(p => p.ID).CustomType<TypedIdType<FollowId>>().GeneratedBy.Assigned();
+        Id(p => p.ID).GeneratedBy.GuidComb();
 
         Map(p => p.FollowDate)
             .Not.Nullable();
 
-        Map(p => p.FollowerID)
-            .Not.Nullable();
+        References(p => p.Follower)
+            .Column("FollowerID");
 
         Map(p => p.FollowedID)
             .Not.Nullable();

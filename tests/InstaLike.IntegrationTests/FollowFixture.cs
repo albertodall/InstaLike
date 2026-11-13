@@ -68,7 +68,7 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
             await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(followerUser.ID.Value, followedUser.ID.Value).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(followerUser, followedUser), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
@@ -198,7 +198,7 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
             await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(followerUser.ID.Value, followedUser.ID.Value).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(followerUser, followedUser), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
@@ -223,7 +223,7 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
         {
             await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
             await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
-            await session.SaveAsync(Follow.Create(followerUser.ID.Value, followedUser.ID.Value).Value, TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(followerUser, followedUser), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
         }
 
@@ -237,8 +237,78 @@ public sealed class FollowFixture : IClassFixture<DatabaseFixture>
         result.Length.Should().Be(1);
     }
 
+    [Fact]
+    public async Task First_Follow_Should_Make_The_Member_A_Follower()
+    {
+        var followerMember = TestDataHelper.NewMember("user15");
+        var followedMember = TestDataHelper.NewMember("user16");
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(followerMember, TestContext.Current.CancellationToken);
+            await session.SaveAsync(followedMember, TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(0);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var handler = new TestMediatorBuilder(session).Build();
+            await handler.Send(new FollowCommand(followerMember.ID.Value, followedMember.Nickname), TestContext.Current.CancellationToken);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(1);
+        }
+    }
+
+    [Fact]
+    public async Task Follower_Should_Follow_Another_Member()
+    {
+        var followerMember = TestDataHelper.NewMember("user17");
+        var firstFollowedMember = TestDataHelper.NewMember("user18");
+        var secondFollowedMember = TestDataHelper.NewMember("user19");
+        Result followResult;
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            await session.SaveAsync(followerMember, TestContext.Current.CancellationToken);
+            await session.SaveAsync(firstFollowedMember, TestContext.Current.CancellationToken);
+            await session.SaveAsync(secondFollowedMember, TestContext.Current.CancellationToken);
+            await session.SaveAsync(TestDataHelper.Following(followerMember, firstFollowedMember), TestContext.Current.CancellationToken);
+            await session.FlushAsync(TestContext.Current.CancellationToken);
+        }
+
+        using (var session = _testFixture.OpenSession(_output))
+        {
+            var handler = new TestMediatorBuilder(session).Build();
+            followResult = await handler.Send(new FollowCommand(followerMember.ID.Value, secondFollowedMember.Nickname), TestContext.Current.CancellationToken);
+        }
+
+        using (new AssertionScope())
+        {
+            followResult.IsSuccess.Should().BeTrue();
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(1);
+                (await CountFollowsAsync(session, followerMember.ID.Value, firstFollowedMember.ID.Value)).Should().Be(1);
+                (await CountFollowsAsync(session, followerMember.ID.Value, secondFollowedMember.ID.Value)).Should().Be(1);
+            }
+        }
+    }
+
     private static Task<int> CountFollowsAsync(ISession session, Guid followerID, Guid followedID) =>
         session.QueryOver<Follow>()
-            .Where(f => f.FollowerID == followerID && f.FollowedID == followedID)
+            .Where(f => f.Follower.ID == FollowerId.From(followerID) && f.FollowedID == followedID)
+            .RowCountAsync();
+
+    private static Task<int> CountFollowersAsync(ISession session, Guid memberID) =>
+        session.QueryOver<Follower>()
+            .Where(f => f.ID == FollowerId.From(memberID))
             .RowCountAsync();
 }

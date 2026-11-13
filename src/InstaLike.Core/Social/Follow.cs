@@ -1,36 +1,28 @@
 ﻿using System;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Social;
 
-public class Follow : AggregateRoot<FollowId>
+/// <summary>
+/// Represents a follower following another member.
+/// </summary>
+public class Follow : EntityBase<Guid>
 {
+#pragma warning disable CS8618
     protected Follow() { }
+#pragma warning restore CS8618
 
-    private Follow(Guid followerID, Guid followedID)
-        : base(FollowId.New())
+    internal Follow(Follower follower, Guid followedID)
+        : this()
     {
-        FollowerID = followerID;
+        Follower = follower;
         FollowedID = followedID;
         FollowDate = DateTimeOffset.Now;
     }
 
-    public virtual Guid FollowerID { get; protected set; }
+    public virtual Follower Follower { get; protected set; }
 
     public virtual Guid FollowedID { get; protected set; }
 
     public virtual DateTimeOffset FollowDate { get; protected set; }
-
-    public static Result<Follow> Create(Guid followerID, Guid followedID)
-    {
-        if (followerID == followedID)
-        {
-            return Result.Failure<Follow>("You cannot follow yourself.");
-        }
-
-        var follow = new Follow(followerID, followedID);
-        follow.RaiseDomainEvent(new FollowedUserEvent(followerID, followedID));
-        return Result.Success(follow);
-    }
 }

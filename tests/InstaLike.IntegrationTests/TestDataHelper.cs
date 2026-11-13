@@ -2,6 +2,7 @@
 using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Core.Social;
 
 namespace InstaLike.IntegrationTests;
 
@@ -53,5 +54,12 @@ internal static class TestDataHelper
     public static Comment CommentOn(Post post, Member author, string text)
     {
         return post.CommentBy(author.ID.Value, (CommentText)text);
+    }
+
+    public static Follower Following(Member member, Member followed)
+    {
+        var follower = new Follower(member.ID.Value);
+        follower.Follow(followed.ID.Value);
+        return follower;
     }
 }

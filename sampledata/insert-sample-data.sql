@@ -70,6 +70,14 @@ FROM (VALUES
 WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Comment] c WHERE c.[MemberID] = u.[ID] AND c.[PostID] = p.[ID] AND c.[CommentDate] = s.[CommentDate])
 ORDER BY s.[SampleID]
 
+INSERT INTO [dbo].[Follower] ([ID])
+SELECT DISTINCT follower.[ID]
+FROM (VALUES
+	(2)
+) s ([SampleFollowerID])
+	INNER JOIN @MemberID follower ON follower.[SampleID] = s.[SampleFollowerID]
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Follower] f WHERE f.[ID] = follower.[ID])
+
 INSERT INTO [dbo].[Follow] ([ID], [FollowerID], [FollowedID], [FollowDate])
 SELECT s.[ID], follower.[ID], followed.[ID], s.[FollowDate]
 FROM (VALUES
