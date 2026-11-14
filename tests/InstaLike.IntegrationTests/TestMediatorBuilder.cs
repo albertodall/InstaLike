@@ -1,4 +1,4 @@
-﻿using InstaLike.Web.Extensions;
+﻿using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Media;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

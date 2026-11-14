@@ -5,8 +5,7 @@ using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.Social;
-using InstaLike.Web.Membership.Queries;
-using InstaLike.Web.Models;
+using InstaLike.Web.Membership;
 using Serilog;
 using Xunit;
 
@@ -64,7 +63,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Read_User_Details_For_Editing()
         {
-            MemberDetailsModel result;
+            EditMemberProfileModel result;
 
             var user = TestDataHelper.NewMember("testuser");
             using (var session = _testFixture.OpenSession(_output))
@@ -73,10 +72,10 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new MemberDetailsQuery(user.ID);
+            var query = new EditMemberProfileQuery(user.ID);
             using (var session = _testFixture.OpenStatelessSession())
             {
-                var sut = new MemberDetailsQueryHandler(session, Log.Logger);
+                var sut = new EditMemberProfileQueryHandler(session, Log.Logger);
                 result = await sut.Handle(query, TestContext.Current.CancellationToken);
             }
 

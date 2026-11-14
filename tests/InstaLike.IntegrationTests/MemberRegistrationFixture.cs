@@ -7,7 +7,7 @@ using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Media;
-using InstaLike.Web.Membership.Commands;
+using InstaLike.Web.Membership;
 using Xunit;
 
 namespace InstaLike.IntegrationTests

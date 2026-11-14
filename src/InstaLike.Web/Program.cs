@@ -1,5 +1,5 @@
 ﻿using Azure.Storage.Blobs;
-using InstaLike.Web.Extensions;
+using InstaLike.Web.Infrastructure;
 using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

@@ -1,10 +1,10 @@
 ﻿using InstaLike.Core.SharedKernel;
-using InstaLike.Web.Controllers;
+using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Extensions
 {
-    public static class PictureUrlExtensions
+    internal static class PictureUrlExtensions
     {
         private const string PictureControllerName = "Picture";
         private const string DefaultProfilePicturePath = "~/img/default_profile_picture.jpg";
