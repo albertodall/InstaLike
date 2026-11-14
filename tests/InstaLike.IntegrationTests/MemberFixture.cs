@@ -5,8 +5,7 @@ using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.Social;
-using InstaLike.Web.Membership.Queries;
-using InstaLike.Web.Models;
+using InstaLike.Web.Membership;
 using Serilog;
 using Xunit;
 

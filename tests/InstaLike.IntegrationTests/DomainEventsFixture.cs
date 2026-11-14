@@ -10,8 +10,8 @@ using InstaLike.Core.Membership;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
 using InstaLike.Web.Data;
-using InstaLike.Web.Posts.Commands;
-using InstaLike.Web.Social.Commands;
+using InstaLike.Web.Posts;
+using InstaLike.Web.Social;
 using MediatR;
 using Xunit;
 

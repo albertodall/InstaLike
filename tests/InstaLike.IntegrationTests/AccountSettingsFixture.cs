@@ -4,7 +4,7 @@ using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
-using InstaLike.Web.Accounts.Commands;
+using InstaLike.Web.Accounts;
 using Xunit;
 
 namespace InstaLike.IntegrationTests
