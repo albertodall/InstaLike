@@ -14,7 +14,7 @@ namespace InstaLike.Web.Posts
         public DateTimeOffset PostDate { get; set; }
         public PictureId? Picture { get; set; }
         public string Text { get; set; } = string.Empty;
-        public CommentModel[] Comments { get; set; } = Array.Empty<CommentModel>();
+        public CommentModel[] Comments { get; set; } = [];
         public int LikesCount { get; set; }
         public bool IsLikedByCurrentUser { get; set; }
         public bool CanBeLikedByCurrentUser { get; set; }
