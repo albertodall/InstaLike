@@ -95,6 +95,16 @@ textarea {
     margin-top: 5px;
 }
 
+.field-validation-error,
+.form_post .tags-container > span {
+    display: block;
+    color: red;
+    font-style: italic;
+    position: relative;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
 /* User login classes */
 .user {
     padding: 1px;
@@ -590,15 +600,6 @@ textarea {
         padding-bottom: 3px;
     }
 
-    .form_reg > div span {
-        display: block;
-        color: red;
-        font-style: italic;
-        position: relative;
-        padding-left: 20px;
-        margin-top: 5px;
-    }
-
 .form_reg button[type=submit] {
     height: 32px;
     line-height: 32px;
@@ -619,15 +620,6 @@ textarea {
     margin-bottom: 10px;
 }
 
-    .form_login > div span span {
-        display: block;
-        color: red;
-        font-style: italic;
-        position: relative;
-        padding-left: 20px;
-        margin-top: 5px;
-    }
-
 .form_login button[type=submit] {
     height: 32px;
     line-height: 32px;
@@ -647,15 +639,6 @@ textarea {
 .form_post > div {
     margin-bottom: 10px;
 }
-
-    .form_post > div span {
-        display: block;
-        color: red;
-        font-style: italic;
-        position: relative;
-        padding-left: 20px;
-        margin-top: 5px;
-    }
 
 .form_post button[type=submit] {
     height: 32px;
@@ -732,15 +715,6 @@ textarea {
     .form_edit > div label {
         display: block;
         padding-bottom: 3px;
-    }
-
-    .form_edit > div span {
-        display: block;
-        color: red;
-        font-style: italic;
-        position: relative;
-        padding-left: 20px;
-        margin-top: 5px;
     }
 
     .form_edit > div img {
@@ -1071,10 +1045,8 @@ textarea {
 }
 
 .validation-summary-errors li:not(:empty)::before,
-.form_reg > div span:not(:empty)::before,
-.form_login > div span span:not(:empty)::before,
-.form_post > div span:not(:empty)::before,
-.form_edit > div span:not(:empty)::before {
+.field-validation-error::before,
+.form_post .tags-container > span::before {
     content: "";
     position: absolute;
     top: 0;
