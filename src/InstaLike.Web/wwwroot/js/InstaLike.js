@@ -9,6 +9,8 @@ function highlightHashtagsAndNicknames() {
     const hashtagPattern = new RegExp('#\\w+', 'gi');
 
     $('.post-author-comment, .post-comments > li > p')
+        .not('[data-highlighted]')
+        .attr('data-highlighted', '')
         .each(function () {
             var commentText = this.innerHTML;
 
