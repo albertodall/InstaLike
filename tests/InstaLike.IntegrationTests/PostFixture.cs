@@ -431,6 +431,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(post3, TestContext.Current.CancellationToken);
                 await session.SaveAsync(TestDataHelper.Following(reader, author1), TestContext.Current.CancellationToken);
                 TestDataHelper.CommentOn(post1, reader, "nice picture");
+                post1.LikeBy(reader.ID.Value);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
@@ -451,7 +452,12 @@ namespace InstaLike.IntegrationTests
                 commentedPost.Comments.Should().ContainSingle();
                 commentedPost.Comments[0].AuthorNickName.Should().Be(reader.Nickname);
                 commentedPost.Comments[0].Text.Should().Be("nice picture");
-                timeline.Posts.Single(p => p.PostID == post2.ID).Comments.Should().BeEmpty();
+                commentedPost.LikesCount.Should().Be(1);
+                commentedPost.IsLikedByCurrentUser.Should().BeTrue();
+                var otherPost = timeline.Posts.Single(p => p.PostID == post2.ID);
+                otherPost.Comments.Should().BeEmpty();
+                otherPost.LikesCount.Should().Be(0);
+                otherPost.IsLikedByCurrentUser.Should().BeFalse();
             }
         }
 
