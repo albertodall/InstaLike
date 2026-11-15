@@ -8,6 +8,7 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>https://localhost:5001</DockerServiceUrl>
     <DockerServiceName>instalike.web</DockerServiceName>
+    <DependencyAwareStart>true</DependencyAwareStart>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
