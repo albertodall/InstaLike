@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
@@ -103,7 +102,7 @@ namespace InstaLike.Web.Posts
         {
             if (request.PictureRawBytes is not { Length: > 0 })
             {
-                return Result.Failure<PostId>("Please select a picture to share together with your post.");
+                return Result.Failure<PostId>(PostErrors.PictureMissing);
             }
 
             var text = PostText.Create(request.Text);
@@ -116,7 +115,7 @@ namespace InstaLike.Web.Posts
 
             if (postToEdit is null)
             {
-                return Result.Failure<PostId>($"Post {request.PostID} does not exist.");
+                return Result.Failure<PostId>(PostErrors.NotFound(request.PostID));
             }
 
             if (!postToEdit.CanBeEditedBy(request.UserID))
@@ -124,7 +123,7 @@ namespace InstaLike.Web.Posts
                 _logger.Warning("User {UserID} tried to edit post {PostID} but was not allowed to.",
                     request.UserID,
                     request.PostID);
-                return Result.Failure<PostId>($"You're not allowed to edit post {postToEdit.ID}.");
+                return Result.Failure<PostId>(Error.Failure("Post.EditNotAllowed", $"You're not allowed to edit post {postToEdit.ID}."));
             }
 
             postToEdit.UpdateText(text.Value);
@@ -142,12 +141,12 @@ namespace InstaLike.Web.Posts
                     request.UserID,
                     ex.Message);
 
-                return Result.Failure<PostId>(ex.Message);
+                return Result.Failure<PostId>(DataErrors.SaveFailed(ex.Message));
             }
 
             _logger.Information("User {UserID} edited post {PostID}.", request.UserID, request.PostID);
 
-            return Result.Success(postToEdit.ID);
+            return Result.Ok(postToEdit.ID);
         }
     }
 }

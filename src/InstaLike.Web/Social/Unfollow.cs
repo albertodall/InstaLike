@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Membership;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Data;
 using MediatR;
@@ -43,18 +43,18 @@ namespace InstaLike.Web.Social
                 .SingleOrDefaultAsync<MemberId?>(cancellationToken);
             if (unfollowedID is null)
             {
-                return Result.Failure($"Member [{request.UnfollowedNickname}] does not exist.");
+                return Result.Failure(MemberErrors.NotFound(request.UnfollowedNickname));
             }
 
             var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID), cancellationToken);
-            var result = follower?.Unfollow(unfollowedID.Value) ?? Result.Failure("You are not following this member.");
+            var result = follower?.Unfollow(unfollowedID.Value) ?? Result.Failure(FollowerErrors.NotFollowing);
             if (result.IsFailure)
             {
                 _logger.Warning("Member {MemberID} could not unfollow [{UnfollowedNickname}({UnfollowedMemberID})]: {Error}",
                     request.FollowerID,
                     request.UnfollowedNickname,
                     unfollowedID,
-                    result.Error);
+                    result.Error.Description);
 
                 return result;
             }
@@ -66,7 +66,7 @@ namespace InstaLike.Web.Social
                 request.UnfollowedNickname,
                 unfollowedID);
 
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }

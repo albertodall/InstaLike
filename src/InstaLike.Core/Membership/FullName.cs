@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using CSharpFunctionalExtensions;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Membership
 {
@@ -31,15 +30,15 @@ namespace InstaLike.Core.Membership
         {
             if (string.IsNullOrEmpty(name))
             {
-                return Result.Failure<FullName>("You have to specify a proper name. An empty string is not allowed.");
+                return Result.Failure<FullName>(MemberErrors.NameEmpty);
             }
 
             if (string.IsNullOrEmpty(surname))
             {
-                return Result.Failure<FullName>("You have to specify a proper surname. An empty string is not allowed.");
+                return Result.Failure<FullName>(MemberErrors.SurnameEmpty);
             }
 
-            return Result.Success(new FullName(name, surname));
+            return Result.Ok(new FullName(name, surname));
         }
 
         public static explicit operator FullName(string fullname)
@@ -59,7 +58,7 @@ namespace InstaLike.Core.Membership
             return $"{Name} {Surname}";
         }
 
-        protected override IEnumerable<IComparable> GetEqualityComponents()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Name.ToUpperInvariant();
             yield return Surname.ToUpperInvariant();

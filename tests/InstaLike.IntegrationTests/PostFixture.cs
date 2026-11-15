@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
@@ -457,7 +456,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task User_Can_Edit_His_Own_Posts()
         {
-            Result editResult;
+            Result<PostId> editResult;
             var picture = await _pictureStore.SaveAsync(PictureContainers.Posts, Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), TestContext.Current.CancellationToken);
             var author = TestDataHelper.NewMember("authoruser1");
             Post post;
@@ -491,7 +490,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task User_Cannot_Edit_Post_Published_By_Another_User()
         {
-            Result editResult;
+            Result<PostId> editResult;
             var picture = PictureId.New();
             var author = TestDataHelper.NewMember("authoruser1");
             var reader = TestDataHelper.NewMember("readeruser");
@@ -534,7 +533,7 @@ namespace InstaLike.IntegrationTests
                 using (new AssertionScope())
                 {
                     publishResult.IsFailure.Should().BeTrue();
-                    publishResult.Error.Should().Be("Text for a post should not be longer than 500 chars");
+                    publishResult.Error.Should().Be(PostErrors.TextTooLong);
                     (await _pictureStore.ListUploadedBeforeAsync(PictureContainers.Posts, DateTimeOffset.MaxValue, TestContext.Current.CancellationToken).CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
                 }
             }
@@ -561,7 +560,7 @@ namespace InstaLike.IntegrationTests
                 using (new AssertionScope())
                 {
                     editResult.IsFailure.Should().BeTrue();
-                    editResult.Error.Should().Be("Text for a post should not be longer than 500 chars");
+                    editResult.Error.Should().Be(PostErrors.TextTooLong);
                     (await _pictureStore.ListUploadedBeforeAsync(PictureContainers.Posts, DateTimeOffset.MaxValue, TestContext.Current.CancellationToken).CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
                 }
             }
@@ -590,7 +589,7 @@ namespace InstaLike.IntegrationTests
                 var editResult = await sut.Send(command, TestContext.Current.CancellationToken);
 
                 editResult.IsFailure.Should().BeTrue();
-                editResult.Error.Should().Be($"Post {missingPostID} does not exist.");
+                editResult.Error.Should().Be(PostErrors.NotFound(missingPostID));
             }
         }
 

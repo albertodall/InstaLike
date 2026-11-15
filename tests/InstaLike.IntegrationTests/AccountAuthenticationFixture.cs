@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;

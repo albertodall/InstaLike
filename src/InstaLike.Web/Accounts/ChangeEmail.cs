@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -33,8 +33,6 @@ namespace InstaLike.Web.Accounts
 
     internal sealed class ChangeEmailCommandHandler : IRequestHandler<ChangeEmailCommand, Result>
     {
-        private const string EmailInUse = "This email is already used by another account.";
-
         private readonly ISession _session;
         private readonly ILogger _logger;
 
@@ -49,13 +47,13 @@ namespace InstaLike.Web.Accounts
             var email = Email.Create(request.Email);
             if (email.IsFailure)
             {
-                return email;
+                return Result.Failure(email.Error);
             }
 
             var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
             if (account is null)
             {
-                return Result.Failure($"Account {request.AccountID} does not exist.");
+                return Result.Failure(AccountErrors.NotFound(request.AccountID));
             }
 
             var availability = await CheckEmailAvailabilityAsync(request.AccountID, email.Value, cancellationToken);
@@ -68,7 +66,7 @@ namespace InstaLike.Web.Accounts
             await _session.FlushAsync(cancellationToken);
 
             _logger.Information("Account [{Username}({AccountID})] changed its email address.", account.Username, request.AccountID);
-            return Result.Success();
+            return Result.Ok();
         }
 
         private async Task<Result> CheckEmailAvailabilityAsync(AccountId accountID, Email email, CancellationToken cancellationToken)
@@ -78,7 +76,7 @@ namespace InstaLike.Web.Accounts
                 .And(a => a.ID != accountID)
                 .RowCountAsync(cancellationToken);
 
-            return Result.FailureIf(otherAccountsWithEmail > 0, EmailInUse);
+            return Result.FailureIf(otherAccountsWithEmail > 0, AccountErrors.EmailInUse);
         }
     }
 }

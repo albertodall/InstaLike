@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Membership
 {
@@ -6,9 +6,9 @@ namespace InstaLike.Core.Membership
     /// Represents a non-empty nickname of up to 20 characters.
     /// </summary>
     /// <remarks>Leading and trailing whitespace is removed when a nickname is created.</remarks>
-    public sealed class Nickname : SimpleValueObject<string>
+    public sealed class Nickname : ValueObject<string>
     {
-        private const int NickNameMaxLength = 20;
+        internal const int NickNameMaxLength = 20;
 
         private Nickname() : base(string.Empty) { }
 
@@ -20,20 +20,15 @@ namespace InstaLike.Core.Membership
 
             if (input.Length == 0)
             {
-                return Result.Failure<Nickname>("Nickname should not be empty");
+                return Result.Failure<Nickname>(MemberErrors.NicknameEmpty);
             }
 
             if (input.Length > NickNameMaxLength)
             {
-                return Result.Failure<Nickname>($"Nickname is too long (max {NickNameMaxLength} chars)");
+                return Result.Failure<Nickname>(MemberErrors.NicknameTooLong);
             }
 
-            return Result.Success(new Nickname(input));
-        }
-
-        public static implicit operator string(Nickname nickname)
-        {
-            return nickname.Value;
+            return Result.Ok(new Nickname(input));
         }
 
         public static explicit operator Nickname(string nickname)

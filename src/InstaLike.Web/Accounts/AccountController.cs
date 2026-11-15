@@ -43,7 +43,7 @@ namespace InstaLike.Web.Accounts
                 var authenticationResult = await _dispatcher.Send(new LogInCommand(model.Username, model.Password));
                 if (authenticationResult.IsFailure)
                 {
-                    ModelState.AddModelError("", authenticationResult.Error);
+                    ModelState.AddModelErrors(authenticationResult.Error);
                 }
                 else
                 {

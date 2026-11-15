@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using CSharpFunctionalExtensions;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts
 {
@@ -10,7 +10,7 @@ namespace InstaLike.Core.Accounts
     /// Email values are trimmed, converted to lowercase, and checked for a basic address format
     /// when created.
     /// </remarks>
-    public sealed class Email : SimpleValueObject<string>
+    public sealed class Email : ValueObject<string>
     {
         private const string EMailValidationRegEx = @"^(.+)@(.+)$";
 
@@ -24,25 +24,20 @@ namespace InstaLike.Core.Accounts
 
             if (input.Length == 0)
             {
-                return Result.Failure<Email>("Email should not be empty");
+                return Result.Failure<Email>(AccountErrors.EmailEmpty);
             }
 
             if (!Regex.IsMatch(input, EMailValidationRegEx))
             {
-                return Result.Failure<Email>("Email is invalid");
+                return Result.Failure<Email>(AccountErrors.EmailInvalid);
             }
 
-            return Result.Success(new Email(input));
+            return Result.Ok(new Email(input));
         }
 
         public static explicit operator Email(string email)
         {
             return Create(email).Value;
-        }
-
-        public static implicit operator string(Email email)
-        {
-            return email.Value;
         }
     }
 }

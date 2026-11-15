@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
-    <PackageVersion Include="CSharpFunctionalExtensions" Version="3.7.0" />
     <PackageVersion Include="dbup-sqlserver" Version="7.2.0" />
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
     <PackageVersion Include="FluentNHibernate" Version="3.5.0" />

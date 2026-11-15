@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using MediatR;
@@ -42,7 +42,7 @@ namespace InstaLike.Web.Posts
                     return RedirectToAction("Index", "Home");
                 }
 
-                ModelState.AddModelError("", commandResult.Error);
+                ModelState.AddModelErrors(commandResult.Error);
             }
             else
             {
@@ -82,7 +82,7 @@ namespace InstaLike.Web.Posts
                     return RedirectToAction("Index", "Home");
                 }
 
-                ModelState.AddModelError("", commandResult.Error);
+                ModelState.AddModelErrors(commandResult.Error);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace InstaLike.Web.Posts
             var command = new LikePostCommand(like.PostID, User.GetIdentifier());
             var commandResult = await _dispatcher.Send(command);
 
-            return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error);
+            return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error.Description);
         }
 
         [HttpPost]
@@ -134,7 +134,7 @@ namespace InstaLike.Web.Posts
             var command = new DislikePostCommand(like.PostID, User.GetIdentifier());
             var commandResult = await _dispatcher.Send(command);
 
-            return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error);
+            return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error.Description);
         }
 
         [HttpPost]
@@ -155,7 +155,7 @@ namespace InstaLike.Web.Posts
                     return Ok(taggingResult.Value);
                 }
 
-                return BadRequest(taggingResult.Error);
+                return BadRequest(taggingResult.Error.Description);
             }
 
             return BadRequest("No files selected");

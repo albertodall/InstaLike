@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using InstaLike.Web.Posts;
 using InstaLike.Web.Social;
@@ -224,7 +224,7 @@ namespace InstaLike.IntegrationTests
             {
                 var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
                 post.LikeBy(request.UserID);
-                return Result.Failure("The command failed after the post was liked.");
+                return Result.Failure(Error.Failure("Test.Failed", "The command failed after the post was liked."));
             }
         }
     }

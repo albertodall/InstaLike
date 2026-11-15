@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -41,6 +41,10 @@ namespace InstaLike.Web.Posts
 
     internal sealed class LikeOrDislikePostCommandHandler : IRequestHandler<LikePostCommand, Result>, IRequestHandler<DislikePostCommand, Result>
     {
+        private static readonly Error PostNotFound = Error.NotFound("Post.NotFound", "This post does not exist.");
+        private static readonly Error LikeNotSaved = Error.Failure("Like.NotSaved", "Your like could not be saved. Please try again.");
+        private static readonly Error LikeNotRemoved = Error.Failure("Like.NotRemoved", "Your like could not be removed. Please try again.");
+
         private readonly ISession _session;
         private readonly ILogger _logger;
 
@@ -57,7 +61,7 @@ namespace InstaLike.Web.Posts
             var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
             if (post is null)
             {
-                return Result.Failure("This post does not exist.");
+                return Result.Failure(PostNotFound);
             }
 
             var like = post.LikeBy(request.UserID);
@@ -77,12 +81,12 @@ namespace InstaLike.Web.Posts
                     request.UserID,
                     ex.Message);
 
-                return Result.Failure("Your like could not be saved. Please try again.");
+                return Result.Failure(LikeNotSaved);
             }
 
             logger.Information("User {UserID} put a 'Like' on post {PostID}", request.UserID, request.PostID);
 
-            return Result.Success();
+            return Result.Ok();
         }
 
         public async Task<Result> Handle(DislikePostCommand request, CancellationToken cancellationToken)
@@ -92,7 +96,7 @@ namespace InstaLike.Web.Posts
             var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
             if (post is null)
             {
-                return Result.Failure("This post does not exist.");
+                return Result.Failure(PostNotFound);
             }
 
             var dislike = post.DislikeBy(request.UserID);
@@ -112,12 +116,12 @@ namespace InstaLike.Web.Posts
                     request.UserID,
                     ex.Message);
 
-                return Result.Failure("Your like could not be removed. Please try again.");
+                return Result.Failure(LikeNotRemoved);
             }
 
             logger.Information("User {UserID} removed a 'Like' on post {PostID}", request.UserID, request.PostID);
 
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }

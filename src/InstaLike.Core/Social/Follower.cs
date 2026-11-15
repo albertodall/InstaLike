@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Social
@@ -28,17 +27,17 @@ namespace InstaLike.Core.Social
         {
             if (followedID == ID.Value)
             {
-                return Result.Failure("You cannot follow yourself.");
+                return Result.Failure(FollowerErrors.SelfFollow);
             }
 
             if (IsFollowing(followedID))
             {
-                return Result.Failure("You are already following this member.");
+                return Result.Failure(FollowerErrors.AlreadyFollowing);
             }
 
             _follows.Add(new Follow(this, followedID));
             RaiseDomainEvent(new MemberFollowedEvent(ID.Value, followedID));
-            return Result.Success();
+            return Result.Ok();
         }
 
         public virtual Result Unfollow(Guid followedID)
@@ -46,11 +45,11 @@ namespace InstaLike.Core.Social
             var follow = _follows.SingleOrDefault(f => f.FollowedID == followedID);
             if (follow is null)
             {
-                return Result.Failure("You are not following this member.");
+                return Result.Failure(FollowerErrors.NotFollowing);
             }
 
             _follows.Remove(follow);
-            return Result.Success();
+            return Result.Ok();
         }
 
         public virtual bool IsFollowing(Guid followedID)

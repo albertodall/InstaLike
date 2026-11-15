@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+using InstaLike.Core.SharedKernel;
 using Microsoft.Extensions.AI;
 
 namespace InstaLike.Web.Media
@@ -43,10 +43,10 @@ namespace InstaLike.Web.Media
                 var response = await _chatClient.GetResponseAsync<TagSuggestions>(request);
                 if (!response.TryGetResult(out var suggestions) || suggestions?.Tags is null)
                 {
-                    return Result.Failure<string[]>("The picture could not be tagged.");
+                    return Result.Failure<string[]>(Error.Failure("Tagging.Failed", "The picture could not be tagged."));
                 }
 
-                return Result.Success(
+                return Result.Ok(
                     suggestions.Tags
                         .Select(tag => $"#{tag.TrimStart('#')}".Replace(" ", string.Empty))
                         .Distinct()
@@ -55,11 +55,11 @@ namespace InstaLike.Web.Media
             }
             catch (ClientResultException ex)
             {
-                return Result.Failure<string[]>(ex.Message);
+                return Result.Failure<string[]>(Error.Failure("Tagging.Failed", ex.Message));
             }
             catch (Exception ex) when (ex is HttpRequestException or AggregateException)
             {
-                return Result.Failure<string[]>("The tagging service is not reachable.");
+                return Result.Failure<string[]>(Error.Failure("Tagging.Unavailable", "The tagging service is not reachable."));
             }
         }
     }

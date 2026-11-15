@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Accounts;
 using Xunit;
 
@@ -44,7 +44,7 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                result.Error.Should().Be("This email is already used by another account.");
+                result.Error.Should().Be(AccountErrors.EmailInUse);
                 (await LoadAsync(second.ID)).Email.Should().Be(second.Email);
             }
         }
@@ -87,7 +87,7 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                result.Error.Should().Be("The current password is not valid.");
+                result.Error.Should().Be(AccountErrors.WrongCurrentPassword);
                 (await LoadAsync(account.ID)).Password.HashMatches("password").Should().BeTrue();
             }
         }
