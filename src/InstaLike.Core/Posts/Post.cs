@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts
@@ -51,17 +50,17 @@ namespace InstaLike.Core.Posts
         {
             if (!CanBeLikedBy(memberID))
             {
-                return Result.Failure("You cannot like your own posts.");
+                return Result.Failure(PostErrors.OwnPostLiked);
             }
 
             if (IsLikedBy(memberID))
             {
-                return Result.Failure("You have already liked this post.");
+                return Result.Failure(PostErrors.AlreadyLiked);
             }
 
             _likes.Add(new Like(this, memberID));
             RaiseDomainEvent(new PostLikedEvent(ID, memberID, AuthorID));
-            return Result.Success();
+            return Result.Ok();
         }
 
         public virtual Result DislikeBy(Guid memberID)
@@ -69,11 +68,11 @@ namespace InstaLike.Core.Posts
             var like = _likes.SingleOrDefault(l => l.MemberID == memberID);
             if (like is null)
             {
-                return Result.Failure("You have not liked this post.");
+                return Result.Failure(PostErrors.NotLiked);
             }
 
             _likes.Remove(like);
-            return Result.Success();
+            return Result.Ok();
         }
 
         public virtual bool CanBeLikedBy(Guid memberID)

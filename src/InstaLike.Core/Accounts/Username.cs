@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts
 {
@@ -6,9 +6,9 @@ namespace InstaLike.Core.Accounts
     /// Represents the non-empty name, of up to 20 characters, that an account logs in with.
     /// </summary>
     /// <remarks>Leading and trailing whitespace is removed when a username is created.</remarks>
-    public sealed class Username : SimpleValueObject<string>
+    public sealed class Username : ValueObject<string>
     {
-        private const int UsernameMaxLength = 20;
+        internal const int UsernameMaxLength = 20;
 
         private Username() : base(string.Empty) { }
 
@@ -20,20 +20,15 @@ namespace InstaLike.Core.Accounts
 
             if (input.Length == 0)
             {
-                return Result.Failure<Username>("Username should not be empty");
+                return Result.Failure<Username>(AccountErrors.UsernameEmpty);
             }
 
             if (input.Length > UsernameMaxLength)
             {
-                return Result.Failure<Username>($"Username is too long (max {UsernameMaxLength} chars)");
+                return Result.Failure<Username>(AccountErrors.UsernameTooLong);
             }
 
-            return Result.Success(new Username(input));
-        }
-
-        public static implicit operator string(Username username)
-        {
-            return username.Value;
+            return Result.Ok(new Username(input));
         }
 
         public static explicit operator Username(string username)

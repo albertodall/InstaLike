@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
@@ -94,8 +92,6 @@ namespace InstaLike.Web.Membership
 
     public sealed class EditMemberProfileCommandHandler : IRequestHandler<EditMemberProfileCommand, Result>
     {
-        private const string NicknameTaken = "This nickname is already taken.";
-
         private readonly ISession _session;
         private readonly ILogger _logger;
         private readonly IPictureStore _pictureStore;
@@ -112,13 +108,13 @@ namespace InstaLike.Web.Membership
             var nicknameValidationResult = Nickname.Create(request.Nickname);
             var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-            var validationResult = Result.Combine(Environment.NewLine, nicknameValidationResult, fullNameValidationResult);
+            var validationResult = Result.Combine(nicknameValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
                 _logger.Warning("Tried to update the profile of member [{Nickname}({MemberID})] but some data were not valid: {WarningMessage}",
                     request.Nickname,
                     request.MemberID,
-                    validationResult.Error);
+                    validationResult.Error.Description);
                 return Result.Failure(validationResult.Error);
             }
 
@@ -128,7 +124,7 @@ namespace InstaLike.Web.Membership
                 _logger.Warning("Tried to update the profile of member [{Nickname}({MemberID})] but some data were already in use: {WarningMessage}",
                     request.Nickname,
                     request.MemberID,
-                    availabilityResult.Error);
+                    availabilityResult.Error.Description);
                 return availabilityResult;
             }
 
@@ -153,14 +149,14 @@ namespace InstaLike.Web.Membership
                     request.MemberID,
                     ex.Message);
 
-                return Result.Failure(ex.Message);
+                return Result.Failure(DataErrors.SaveFailed(ex.Message));
             }
 
             _logger.Information("Successfully updated the profile of member [{Nickname}({MemberID})]",
                 request.Nickname,
                 request.MemberID);
 
-            return Result.Success();
+            return Result.Ok();
         }
 
         private async Task<Result> CheckNicknameAvailabilityAsync(MemberId memberID, Nickname nickname, CancellationToken cancellationToken)
@@ -170,7 +166,7 @@ namespace InstaLike.Web.Membership
                 .And(m => m.ID != memberID)
                 .RowCountAsync(cancellationToken);
 
-            return Result.FailureIf(otherMembersWithNickname > 0, NicknameTaken);
+            return Result.FailureIf(otherMembersWithNickname > 0, MemberErrors.NicknameTaken);
         }
     }
 }

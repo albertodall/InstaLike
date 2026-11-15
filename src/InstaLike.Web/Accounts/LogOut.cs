@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -33,11 +33,11 @@ namespace InstaLike.Web.Accounts
             var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
             if (account is null)
             {
-                return Result.Failure($"Account {request.AccountID} does not exist.");
+                return Result.Failure(AccountErrors.NotFound(request.AccountID));
             }
 
             account.LogOut();
-            return Result.Success();
+            return Result.Ok();
         }
     }
 

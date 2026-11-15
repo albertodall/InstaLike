@@ -1,10 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using MediatR;
@@ -74,9 +73,6 @@ namespace InstaLike.Web.Membership
 
     internal sealed class RegisterMemberCommandHandler : IRequestHandler<RegisterMemberCommand, Result<MemberId>>
     {
-        private const string NicknameTaken = "This nickname is already taken.";
-        private const string EmailInUse = "This email is already used by another account.";
-
         private readonly ISession _session;
         private readonly ILogger _logger;
         private readonly IPictureStore _pictureStore;
@@ -96,12 +92,12 @@ namespace InstaLike.Web.Membership
             var passwordValidationResult = Password.Create(request.Password);
             var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-            var validationResult = Result.Combine(Environment.NewLine, nicknameValidationResult, usernameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
+            var validationResult = Result.Combine(nicknameValidationResult, usernameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
                 _logger.Warning("Error during registration of member {Nickname}: Error message: {ErrorMessage}",
                     request.Nickname,
-                    validationResult.Error);
+                    validationResult.Error.Description);
                 return Result.Failure<MemberId>(validationResult.Error);
             }
 
@@ -110,7 +106,7 @@ namespace InstaLike.Web.Membership
             {
                 _logger.Warning("Error during registration of member {Nickname}: Error message: {ErrorMessage}",
                     request.Nickname,
-                    availabilityResult.Error);
+                    availabilityResult.Error.Description);
                 return Result.Failure<MemberId>(availabilityResult.Error);
             }
 
@@ -139,14 +135,14 @@ namespace InstaLike.Web.Membership
                     request.Nickname,
                     ex.Message);
 
-                return Result.Failure<MemberId>(ex.Message);
+                return Result.Failure<MemberId>(DataErrors.SaveFailed(ex.Message));
             }
 
             _logger.Information("Member [{Nickname}({MemberID})] has just registered.",
                 request.Nickname,
                 memberToRegister.ID);
 
-            return Result.Success(memberToRegister.ID);
+            return Result.Ok(memberToRegister.ID);
         }
 
         /// <remarks>
@@ -172,9 +168,8 @@ namespace InstaLike.Web.Membership
             var emailInUse = await accountsWithEmail.GetValueAsync(cancellationToken) > 0;
 
             return Result.Combine(
-                Environment.NewLine,
-                Result.FailureIf(nicknameInUse, NicknameTaken),
-                Result.FailureIf(emailInUse, EmailInUse));
+                Result.FailureIf(nicknameInUse, MemberErrors.NicknameTaken),
+                Result.FailureIf(emailInUse, AccountErrors.EmailInUse));
         }
     }
 }

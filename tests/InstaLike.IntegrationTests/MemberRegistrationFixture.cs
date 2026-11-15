@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
@@ -92,7 +91,7 @@ namespace InstaLike.IntegrationTests
             using (var session = _testFixture.OpenSession(_output))
             {
                 var result = await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken);
-                result.Error.Should().Be("This email is already used by another account.");
+                result.Error.Should().Be(AccountErrors.EmailInUse);
             }
 
             (await CountMembersAsync("emailthief")).Should().Be(0);
@@ -108,7 +107,7 @@ namespace InstaLike.IntegrationTests
             using (var session = _testFixture.OpenSession(_output))
             {
                 var result = await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken);
-                result.Error.Should().Be("This nickname is already taken.");
+                result.Error.Should().Be(MemberErrors.NicknameTaken);
             }
         }
 
@@ -127,7 +126,7 @@ namespace InstaLike.IntegrationTests
             using (var session = _testFixture.OpenSession(_output))
             {
                 var result = await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken);
-                result.Error.Should().Be("This nickname is already taken.");
+                result.Error.Should().Be(MemberErrors.NicknameTaken);
             }
 
             (await CountMembersAsync("oldname")).Should().Be(0);

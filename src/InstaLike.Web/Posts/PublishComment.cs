@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -52,7 +52,7 @@ namespace InstaLike.Web.Posts
             var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
             if (post is null)
             {
-                return Result.Failure<Guid>($"Post {request.PostID} does not exist.");
+                return Result.Failure<Guid>(PostErrors.NotFound(request.PostID));
             }
 
             var comment = post.CommentBy(request.UserID, text.Value);
@@ -67,12 +67,12 @@ namespace InstaLike.Web.Posts
                     request.UserID,
                     ex.Message);
 
-                return Result.Failure<Guid>(ex.Message);
+                return Result.Failure<Guid>(DataErrors.SaveFailed(ex.Message));
             }
 
             _logger.Information("User {UserID} wrote a new comment to post {PostID}", request.UserID, request.PostID);
 
-            return Result.Success(comment.ID);
+            return Result.Ok(comment.ID);
         }
     }
 }

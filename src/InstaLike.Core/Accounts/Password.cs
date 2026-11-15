@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using CSharpFunctionalExtensions;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts
 {
@@ -15,7 +15,7 @@ namespace InstaLike.Core.Accounts
     /// </remarks>
     public sealed class Password : ValueObject
     {
-        private const byte MinimumPasswordLength = 6;
+        internal const byte MinimumPasswordLength = 6;
         private const byte SaltSize = 16;
         private const byte HashSize = 20;
         private const int HashIterations = 10000;
@@ -44,15 +44,15 @@ namespace InstaLike.Core.Accounts
         {
             if (string.IsNullOrEmpty(password))
             {
-                return Result.Failure<Password>("Password cannot be empty.");
+                return Result.Failure<Password>(AccountErrors.PasswordEmpty);
             }
 
             if (password.Length < MinimumPasswordLength)
             {
-                return Result.Failure<Password>($"Password is too short. Minimum allowed length is {MinimumPasswordLength} characters. ");
+                return Result.Failure<Password>(AccountErrors.PasswordTooShort);
             }
 
-            return Result.Success(new Password(HashPassword(password)));
+            return Result.Ok(new Password(HashPassword(password)));
         }
 
         public bool HashMatches(string password)
@@ -88,7 +88,7 @@ namespace InstaLike.Core.Accounts
             return HashedValue;
         }
 
-        protected override IEnumerable<IComparable> GetEqualityComponents()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return HashedValue;
         }

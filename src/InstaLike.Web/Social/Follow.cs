@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Membership;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Data;
 using MediatR;
@@ -43,7 +43,7 @@ namespace InstaLike.Web.Social
                 .SingleOrDefaultAsync<MemberId?>(cancellationToken);
             if (followedID is null)
             {
-                return Result.Failure($"Member [{request.FollowedNickname}] does not exist.");
+                return Result.Failure(MemberErrors.NotFound(request.FollowedNickname));
             }
 
             var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID), cancellationToken);
@@ -57,7 +57,7 @@ namespace InstaLike.Web.Social
                     request.FollowerID,
                     request.FollowedNickname,
                     followedID,
-                    result.Error);
+                    result.Error.Description);
 
                 return result;
             }
@@ -74,7 +74,7 @@ namespace InstaLike.Web.Social
                 request.FollowedNickname,
                 followedID);
 
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }

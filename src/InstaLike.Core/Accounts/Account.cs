@@ -1,5 +1,4 @@
 ﻿using System;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Accounts
@@ -37,11 +36,11 @@ namespace InstaLike.Core.Accounts
         {
             if (!Password.HashMatches(password))
             {
-                return Result.Failure("Username or password are not valid.");
+                return Result.Failure(AccountErrors.InvalidCredentials);
             }
 
             RaiseDomainEvent(new AccountLoggedInEvent(ID));
-            return Result.Success();
+            return Result.Ok();
         }
 
         public virtual void LogOut()
@@ -53,11 +52,11 @@ namespace InstaLike.Core.Accounts
         {
             if (!Password.HashMatches(currentPassword))
             {
-                return Result.Failure("The current password is not valid.");
+                return Result.Failure(AccountErrors.WrongCurrentPassword);
             }
 
             _password = newPassword;
-            return Result.Success();
+            return Result.Ok();
         }
 
         public virtual void ChangeEmailAddress(Email email)

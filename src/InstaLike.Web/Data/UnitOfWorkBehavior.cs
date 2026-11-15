@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+using InstaLike.Core.SharedKernel;
 using MediatR;
 
 namespace InstaLike.Web.Data

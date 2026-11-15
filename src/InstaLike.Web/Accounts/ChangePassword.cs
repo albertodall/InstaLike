@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -60,26 +60,26 @@ namespace InstaLike.Web.Accounts
             var newPassword = Password.Create(request.NewPassword);
             if (newPassword.IsFailure)
             {
-                return newPassword;
+                return Result.Failure(newPassword.Error);
             }
 
             var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
             if (account is null)
             {
-                return Result.Failure($"Account {request.AccountID} does not exist.");
+                return Result.Failure(AccountErrors.NotFound(request.AccountID));
             }
 
             var change = account.ChangePassword(request.CurrentPassword, newPassword.Value);
             if (change.IsFailure)
             {
-                _logger.Warning("Account [{Username}({AccountID})] could not change its password: {Reason}", account.Username, request.AccountID, change.Error);
+                _logger.Warning("Account [{Username}({AccountID})] could not change its password: {Reason}", account.Username, request.AccountID, change.Error.Description);
                 return change;
             }
 
             await _session.FlushAsync(cancellationToken);
 
             _logger.Information("Account [{Username}({AccountID})] changed its password.", account.Username, request.AccountID);
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }

@@ -2,8 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -46,8 +46,6 @@ namespace InstaLike.Web.Accounts
 
     internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Guid>>
     {
-        private const string InvalidCredentials = "Username or password are not valid.";
-
         private readonly ISession _session;
         private readonly ILogger _logger;
 
@@ -65,7 +63,7 @@ namespace InstaLike.Web.Accounts
             if (account is null)
             {
                 _logger.Debug("Account {Username} does not exist.", request.Username);
-                return Result.Failure<Guid>(InvalidCredentials);
+                return Result.Failure<Guid>(AccountErrors.InvalidCredentials);
             }
 
             var logIn = account.LogIn(request.Password);
@@ -75,7 +73,7 @@ namespace InstaLike.Web.Accounts
                 return Result.Failure<Guid>(logIn.Error);
             }
 
-            return Result.Success(account.ID.Value);
+            return Result.Ok(account.ID.Value);
         }
     }
 

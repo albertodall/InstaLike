@@ -1,12 +1,14 @@
-﻿using CSharpFunctionalExtensions;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts
 {
     /// <summary>
     /// Represents non-empty, trimmed text for a post, limited to 500 characters.
     /// </summary>
-    public sealed class PostText : SimpleValueObject<string>
+    public sealed class PostText : ValueObject<string>
     {
+        internal const int PostTextMaxLength = 500;
+
         private PostText() : base(string.Empty) { }
 
         private PostText(string text) : base(text) { }
@@ -17,20 +19,15 @@ namespace InstaLike.Core.Posts
 
             if (trimmedText.Length == 0)
             {
-                return Result.Failure<PostText>("Text for a post should not be empty");
+                return Result.Failure<PostText>(PostErrors.TextEmpty);
             }
 
-            if (trimmedText.Length > 500)
+            if (trimmedText.Length > PostTextMaxLength)
             {
-                return Result.Failure<PostText>("Text for a post should not be longer than 500 chars");
+                return Result.Failure<PostText>(PostErrors.TextTooLong);
             }
 
-            return Result.Success(new PostText(trimmedText));
-        }
-
-        public static implicit operator string(PostText text)
-        {
-            return text.Value;
+            return Result.Ok(new PostText(trimmedText));
         }
 
         public static explicit operator PostText(string text)

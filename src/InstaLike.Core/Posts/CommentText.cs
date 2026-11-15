@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Core.Posts
 {
@@ -8,9 +8,9 @@ namespace InstaLike.Core.Posts
     /// <remarks>
     /// Comment text is trimmed and must contain at most 200 characters.
     /// </remarks>
-    public sealed class CommentText : SimpleValueObject<string>
+    public sealed class CommentText : ValueObject<string>
     {
-        private const int CommentTextMaxLength = 200;
+        internal const int CommentTextMaxLength = 200;
 
         private CommentText() : base(string.Empty) { }
 
@@ -22,30 +22,20 @@ namespace InstaLike.Core.Posts
 
             if (trimmedText.Length == 0)
             {
-                return Result.Failure<CommentText>("Text for a comment should not be empty.");
+                return Result.Failure<CommentText>(PostErrors.CommentTextEmpty);
             }
 
             if (trimmedText.Length > CommentTextMaxLength)
             {
-                return Result.Failure<CommentText>($"Text for a comment should not be longer than {CommentTextMaxLength} chars.");
+                return Result.Failure<CommentText>(PostErrors.CommentTextTooLong);
             }
 
-            return Result.Success(new CommentText(trimmedText));
-        }
-
-        public static implicit operator string(CommentText text)
-        {
-            return text.Value;
+            return Result.Ok(new CommentText(trimmedText));
         }
 
         public static explicit operator CommentText(string text)
         {
             return Create(text).Value;
-        }
-
-        public override string ToString()
-        {
-            return Value;
         }
     }
 }

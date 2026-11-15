@@ -2,8 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using MediatR;
@@ -53,7 +53,7 @@ namespace InstaLike.Web.Posts
         {
             if (request.PictureRawBytes is not { Length: > 0 })
             {
-                return Result.Failure<PostId>("Please select a picture to share together with your post.");
+                return Result.Failure<PostId>(PostErrors.PictureMissing);
             }
 
             var text = PostText.Create(request.Text);
@@ -76,12 +76,12 @@ namespace InstaLike.Web.Posts
                     request.UserID,
                     ex.Message);
 
-                return Result.Failure<PostId>(ex.Message);
+                return Result.Failure<PostId>(DataErrors.SaveFailed(ex.Message));
             }
 
             _logger.Information("User {UserID} has just shared post {PostID}.", request.UserID, post.ID);
 
-            return Result.Success(post.ID);
+            return Result.Ok(post.ID);
         }
     }
 }
