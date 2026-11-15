@@ -13,13 +13,16 @@ using Serilog;
 
 namespace InstaLike.Web.Posts
 {
-    [Bind("AuthorID, Text")]
+    [Bind("AuthorID, Text, PictureFile")]
     public sealed class PublishPostModel
     {
         public Guid AuthorID { get; set; }
 
         [Required(ErrorMessage = "Please, write a text for the picture you're publishing.")]
         public string Text { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Please select a picture to share together with your post.")]
+        public Microsoft.AspNetCore.Http.IFormFile? PictureFile { get; set; }
     }
 
     public sealed class PublishPostCommand : ICommand<Result<PostId>>

@@ -5,7 +5,6 @@ using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -31,11 +30,11 @@ namespace InstaLike.Web.Posts
         }
 
         [HttpPost]
-        public async Task<IActionResult> Publish(PublishPostModel newPost, IFormFile pictureFile)
+        public async Task<IActionResult> Publish(PublishPostModel newPost)
         {
             if (ModelState.IsValid)
             {
-                var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, await pictureFile.ToByteArrayAsync());
+                var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, await newPost.PictureFile!.ToByteArrayAsync());
                 var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {
@@ -43,10 +42,6 @@ namespace InstaLike.Web.Posts
                 }
 
                 ModelState.AddModelErrors(commandResult.Error);
-            }
-            else
-            {
-                ModelState.AddModelError("Picture", "Please select a picture to share together with your post.");
             }
 
             return View(newPost);
@@ -71,11 +66,11 @@ namespace InstaLike.Web.Posts
 
         [HttpPost]
         [Authorize(Policy = "IsPostAuthor")]
-        public async Task<IActionResult> Edit(EditPostModel editedPost, IFormFile pictureFile)
+        public async Task<IActionResult> Edit(EditPostModel editedPost)
         {
             if (ModelState.IsValid)
             {
-                var command = new EditPostCommand(User.GetIdentifier(), editedPost.PostID, editedPost.Text, await pictureFile.ToByteArrayAsync());
+                var command = new EditPostCommand(User.GetIdentifier(), editedPost.PostID, editedPost.Text, await editedPost.PictureFile!.ToByteArrayAsync());
                 var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {
@@ -83,10 +78,6 @@ namespace InstaLike.Web.Posts
                 }
 
                 ModelState.AddModelErrors(commandResult.Error);
-            }
-            else
-            {
-                ModelState.AddModelError("Picture", "Please select a picture to share together with your post.");
             }
 
             return View(editedPost);
