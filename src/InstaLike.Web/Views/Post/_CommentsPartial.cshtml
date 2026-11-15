@@ -2,13 +2,18 @@
 
 @model IEnumerable<CommentModel>
 
-@if (Model != null && Model.Any())
+@{
+    const int visibleComments = 5;
+    var comments = Model?.ToList() ?? new List<CommentModel>();
+}
+
+@if (comments.Count > 0)
 {
     <ol class="post-comments">
-        @* Shows only the first five comments *@
-        @foreach (var comment in Model.Take(5))
+        @for (var i = 0; i < comments.Count; i++)
         {
-            <li>
+            var comment = comments[i];
+            <li class="@(i >= visibleComments ? "comment-hidden" : null)">
                 <strong>
                     <a class="comment-author-nickname" asp-action="Profile" asp-controller="Member" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
                 </strong>
@@ -20,21 +25,10 @@
                 </span>
             </li>
         }
-
-        @* Hides other comments *@
-        @foreach (var comment in Model.Skip(5))
-        {
-            <li class="comment-hidden">
-                <strong>
-                    <a asp-action="Profile" asp-controller="Member" asp-route-id="@comment.AuthorNickName">@comment.AuthorNickName</a>
-                </strong>
-                <p>
-                    &nbsp;@comment.Text
-                </p>
-                <span>
-                    &nbsp;<time title="@comment.CommentDate.DateTime" datetime="@comment.CommentDate.DateTime">@comment.CommentDate.UtcDateTime.AsPastDays()</time>
-                </span>
-            </li>
-        }
     </ol>
+
+    @if (comments.Count > visibleComments)
+    {
+        <button type="button" class="show-all-comments" aria-expanded="false" data-show-label="Show all @comments.Count comments" data-hide-label="Show fewer comments">Show all @comments.Count comments</button>
+    }
 }

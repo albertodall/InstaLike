@@ -437,10 +437,14 @@ textarea {
     }
 
 .show-all-comments {
-    margin: 3px;
     display: block;
-    float: right;
+    margin: 0 0 10px auto;
+    color: black;
     --icon: url(../lib/fontawesome/svgs/solid/eye.svg);
+}
+
+.post-detail .show-all-comments {
+    display: none;
 }
 
 /* Alerts */
@@ -889,7 +893,6 @@ textarea {
     }
 
     .post-likes button,
-    .show-all-comments,
     .user [class*="btn_"]:not(.btn_register, .btn_login) :is(a, button) {
         font-size: 0;
         padding-right: 0;
