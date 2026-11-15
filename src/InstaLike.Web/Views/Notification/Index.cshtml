@@ -28,7 +28,7 @@
                 <a href="@Url.Action("Profile", "Member", new { @id = notification.SenderNickname})">
                     @notification.SenderNickname
                 </a>
-                <time title="@notification.NotificationDate.DateTime" datetime="@notification.NotificationDate.DateTime">@notification.NotificationDate.UtcDateTime.AsPastDays()</time>
+                <content-date value="@notification.NotificationDate" />
 
                 <p>
                     @switch (notification.Kind)

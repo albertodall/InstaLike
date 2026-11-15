@@ -17,7 +17,7 @@ namespace InstaLike.Core.Posts
         {
             Post = post;
             MemberID = memberID;
-            LikeDate = DateTimeOffset.Now;
+            LikeDate = DateTimeOffset.UtcNow;
         }
 
         public virtual Post Post { get; protected set; }

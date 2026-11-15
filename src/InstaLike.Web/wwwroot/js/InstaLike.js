@@ -29,9 +29,29 @@ function highlightHashtagsAndNicknames() {
         });
 }
 
+// Shows the dates in the viewer's time zone
+function showDatesInLocalTime() {
+    const weekday = new Intl.DateTimeFormat(document.documentElement.lang || undefined, { weekday: 'long' });
+    const twoDigits = number => String(number).padStart(2, '0');
+    const day = date => `${twoDigits(date.getDate())}/${twoDigits(date.getMonth() + 1)}/${date.getFullYear()}`;
+
+    $('time[datetime]').each(function () {
+        const date = new Date(this.getAttribute('datetime'));
+        if (isNaN(date)) {
+            return;
+        }
+
+        this.title = `${day(date)} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}`;
+        if (this.dataset.format === 'day') {
+            this.textContent = `${weekday.format(date)} ${day(date)}`;
+        }
+    });
+}
+
 // On load
 $(function () {
     highlightHashtagsAndNicknames();
+    showDatesInLocalTime();
 });
 
 // Displays user's profile picture after choosing it
@@ -89,6 +109,7 @@ $('.form_comment').submit(function (e) {
         comment.val('');
 
         highlightHashtagsAndNicknames();
+        showDatesInLocalTime();
     });
 });
 

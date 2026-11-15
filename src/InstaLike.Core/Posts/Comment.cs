@@ -18,7 +18,7 @@ namespace InstaLike.Core.Posts
             Post = post;
             AuthorID = authorID;
             _text = text;
-            CommentDate = DateTimeOffset.Now;
+            CommentDate = DateTimeOffset.UtcNow;
         }
 
         public virtual Post Post { get; protected set; }

@@ -19,7 +19,7 @@ namespace InstaLike.Core.Membership
             _nickname = nickname;
             _fullName = fullName;
             Biography = biography;
-            RegistrationDate = DateTimeOffset.Now;
+            RegistrationDate = DateTimeOffset.UtcNow;
         }
 
         private string _nickname;
