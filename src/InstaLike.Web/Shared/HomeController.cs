@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using InstaLike.Core.Posts;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Posts;
 using MediatR;
@@ -11,7 +12,7 @@ namespace InstaLike.Web.Shared
     [Authorize]
     public sealed class HomeController : Controller
     {
-        private const int MaxNumberOfPosts = 10;
+        private const int PostsPerBatch = 10;
 
         private readonly ISender _dispatcher;
 
@@ -22,10 +23,23 @@ namespace InstaLike.Web.Shared
 
         public async Task<IActionResult> Index()
         {
-            var query = new TimelineQuery(User.GetIdentifier(), MaxNumberOfPosts);
+            var query = new TimelineQuery(User.GetIdentifier(), PostsPerBatch);
             var model = await _dispatcher.Send(query);
 
             return View(model);
+        }
+
+        public async Task<IActionResult> OlderPosts(PostId id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var query = new OlderTimelinePostsQuery(User.GetIdentifier(), id, PostsPerBatch);
+            var model = await _dispatcher.Send(query);
+
+            return PartialView("_TimelinePostsPartial", model);
         }
 
         public IActionResult Privacy()

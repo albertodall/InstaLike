@@ -292,6 +292,12 @@ textarea {
     margin-bottom: 40px;
 }
 
+.older-posts {
+    min-height: 1lh;
+    text-align: center;
+    color: var(--color-muted);
+}
+
 :is(.posts, .post-detail) .author {
     margin: 5px 0;
     position: relative;
