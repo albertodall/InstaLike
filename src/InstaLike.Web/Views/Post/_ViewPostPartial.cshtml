@@ -47,7 +47,7 @@
         </div>
 
         <p class="post-author-comment">
-            @Html.Raw(Model.Text)
+            @Model.Text
         </p>
 
         <partial name="~/Views/Post/_CommentsPartial.cshtml" model="Model.Comments" />
