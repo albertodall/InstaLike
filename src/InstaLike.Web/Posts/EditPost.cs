@@ -13,7 +13,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts
 {
-    [Bind("PostID, AuthorID, Text")]
+    [Bind("PostID, AuthorID, Text, PictureFile")]
     public sealed class EditPostModel
     {
         public required PostId PostID { get; set; }
@@ -24,6 +24,9 @@ namespace InstaLike.Web.Posts
         public string Text { get; set; } = string.Empty;
 
         public PictureId? Picture { get; set; }
+
+        [Required(ErrorMessage = "Please select a picture to share together with your post.")]
+        public Microsoft.AspNetCore.Http.IFormFile? PictureFile { get; set; }
     }
 
     public sealed class EditPostQuery : IRequest<EditPostModel>
