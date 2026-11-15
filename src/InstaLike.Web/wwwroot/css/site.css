@@ -105,6 +105,58 @@ textarea {
     margin-top: 5px;
 }
 
+.validation-summary-errors li:not(:empty)::before,
+.field-validation-error::before,
+.form_post .tags-container > span::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    background-color: currentColor;
+    mask: url(../lib/fontawesome/svgs/solid/circle-exclamation.svg) center / contain no-repeat;
+}
+
+/* Icon buttons */
+:where(.user a, .user button,
+       .post-likes button, .show-all-comments,
+       .alerts button, .autotag-button,
+       .user-profile-info a, .user-profile-info button,
+       :is(.form_reg, .form_login, .form_post, .form_comment, .form_edit) button[type=submit]) {
+    height: 32px;
+    line-height: 32px;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    text-decoration: none;
+    padding: 0 10px 0 40px;
+    position: relative;
+    font-size: 11px;
+    background-color: white;
+}
+
+    :where(.user a, .user button,
+           .post-likes button, .show-all-comments,
+           .alerts button, .autotag-button,
+           .user-profile-info a, .user-profile-info button,
+           :is(.form_reg, .form_login, .form_post, .form_comment, .form_edit) button[type=submit])::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        width: 20px;
+        height: 20px;
+        margin-top: -10px;
+        background-color: var(--icon-color, currentColor);
+        mask: var(--icon) center / contain no-repeat;
+    }
+
+@keyframes icon-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* User login classes */
 .user {
     padding: 1px;
@@ -127,19 +179,10 @@ textarea {
 
     .user a,
     .user button {
-        height: 32px;
-        line-height: 32px;
         margin: 3px;
-        border-radius: 3px;
-        border: 1px solid #CCC;
         display: block;
-        text-decoration: none;
-        padding: 0 10px 0 40px;
-        position: relative;
-        font-size: 11px;
         font-family: inherit;
         color: black;
-        background-color: transparent;
         cursor: pointer;
     }
 
@@ -158,8 +201,6 @@ textarea {
     .user .btn_alert .alerts_count {
         background: red;
         border-radius: 0.8em;
-        -moz-border-radius: 0.8em;
-        -webkit-border-radius: 0.8em;
         color: white;
         display: inline-block;
         font-weight: bold;
@@ -196,21 +237,12 @@ textarea {
     color: darkblue;
 }
 
-/* Post timeline classes */
+/* Posts: timeline and detail */
 .posts > div {
     margin-bottom: 40px;
 }
 
-.posts .image-timeline {
-    box-sizing: border-box;
-    display: block;
-    width: 100%;
-    border: 10px solid white;
-    box-shadow: 0 0 15px 0 rgba(0,0,0,0.35);
-    margin: 10px 0;
-}
-
-.posts .author {
+:is(.posts, .post-detail) .author {
     margin: 5px 0;
     position: relative;
     padding-left: 40px;
@@ -218,7 +250,7 @@ textarea {
     color: #AAA;
 }
 
-    .posts .author img {
+    :is(.posts, .post-detail) .author img {
         width: 30px;
         height: 30px;
         position: absolute;
@@ -227,187 +259,14 @@ textarea {
         border-radius: 50%;
     }
 
-    .posts .author a {
+    :is(.posts, .post-detail) .author a {
         display: block;
         text-decoration: none;
         font-weight: bold;
         color: black;
     }
 
-.posts .post-likes button {
-    border: 1px solid #CCC;
-    background-color: white;
-    height: 32px;
-    line-height: 32px;
-    border-radius: 3px;
-    padding: 0 10px 0 40px;
-    position: relative;
-    --icon: url(../lib/fontawesome/svgs/regular/heart.svg);
-    font-size: 11px;
-    color: black;
-}
-
-.posts .post-likes strong {
-    padding: 0 10px;
-    font-weight: normal;
-    font-size: 11px;
-}
-
-.posts .post-likes .post-liked {
-    --icon: url(../lib/fontawesome/svgs/solid/heart.svg);
-    --icon-color: crimson;
-}
-
-.posts .post-likes .like-error,
-.post-detail .post-likes .like-error {
-    display: block;
-    padding-top: 5px;
-    color: red;
-    font-style: italic;
-    font-size: 11px;
-}
-
-.posts .post-author-comment {
-    padding: 10px;
-    background-color: #d8ecff;
-    margin-bottom: 20px;
-    font-style: italic;
-    margin-right: 40px;
-    border-radius: 10px;
-    position: relative;
-}
-
-.posts .post-author-comment::before {
-    position: absolute;
-    left: -6px;
-    top: -6px;
-    content: "";
-    width: 0;
-    height: 0;
-    border-top: 6px solid transparent;
-    border-right: 12px solid #d8ecff;
-    border-bottom: 6px solid transparent;
-    transform: rotate(45deg);
-}
-
-.post-author-comment span.hashtag {
-    font-size: 12px;
-    font-style: italic;
-    font-weight: bold;
-    color: firebrick;
-}
-
-.post-comments p > span.hashtag {
-    font-size: 12px;
-    font-style: italic;
-    font-weight: bold;
-    color: firebrick;
-}
-
-.posts .post-comments {
-    padding: 0;
-    padding-left: 40px;
-    margin: 0;
-    list-style-type: none;
-}
-
-    .posts .post-comments li {
-        display: block;
-        background-color: #e6f1fb;
-        border-radius: 10px;
-        margin: 10px 0 15px 0;
-        padding: 10px;
-        position: relative;
-    }
-
-        .posts .post-comments li::before {
-            position: absolute;
-            right: -6px;
-            bottom: -6px;
-            content: "";
-            width: 0;
-            height: 0;
-            border-top: 6px solid transparent;
-            border-left: 12px solid #e6f1fb;
-            border-bottom: 6px solid transparent;
-            transform: rotate(45deg);
-        }
-
-    .posts .post-comments a.comment-author-nickname {
-        background-color: #e6f1fb;
-        display: block;
-        text-decoration: none;
-        color: black;
-        padding: 5px 10px 0 10px;
-        position: absolute;
-        border-radius: 5px;
-        top: -10px;
-        left: 0;
-    }
-
-    .posts .post-comments span {
-        font-size: 11px;
-        opacity: 0.6;
-    }
-
-    .posts .post-comments li.comment-hidden {
-        display: none;
-    }
-
-        .posts .post-comments li.comment-hidden.show-all {
-            display: block;
-        }
-
-.posts .show-all-comments {
-    height: 32px;
-    line-height: 32px;
-    margin: 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
-    display: block;
-    text-decoration: none;
-    background-color: #FFF;
-    float: right;
-    padding: 0 10px 0 40px;
-    position: relative;
-    --icon: url(../lib/fontawesome/svgs/solid/eye.svg);
-    font-size: 11px;
-}
-
-.posts input[type=text] {
-    height: 32px;
-    line-height: 32px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
-    box-sizing: border-box;
-    padding: 0 10px;
-}
-
-/* Post details */
-.post-detail .author {
-    margin: 5px 0;
-    position: relative;
-    padding-left: 40px;
-    min-height: 30px;
-    color: #AAA;
-}
-
-    .post-detail .author img {
-        width: 30px;
-        height: 30px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        border-radius: 50%;
-    }
-
-    .post-detail .author a {
-        display: block;
-        text-decoration: none;
-        font-weight: bold;
-        color: black;
-    }
-
+.posts .image-timeline,
 .post-detail .post-picture {
     box-sizing: border-box;
     display: block;
@@ -417,31 +276,31 @@ textarea {
     margin: 10px 0;
 }
 
-.post-detail .post-likes button {
-    border: 1px solid #CCC;
-    background-color: white;
-    height: 32px;
-    line-height: 32px;
-    border-radius: 3px;
-    padding: 0 10px 0 40px;
-    position: relative;
+.post-likes button {
     --icon: url(../lib/fontawesome/svgs/regular/heart.svg);
-    font-size: 11px;
     color: black;
 }
 
-.post-detail .post-likes strong {
+.post-likes strong {
     padding: 0 10px;
     font-weight: normal;
     font-size: 11px;
 }
 
-.post-detail .post-likes .post-liked {
+.post-likes .post-liked {
     --icon: url(../lib/fontawesome/svgs/solid/heart.svg);
     --icon-color: crimson;
 }
 
-.post-detail .post-author-comment {
+.post-likes .like-error {
+    display: block;
+    padding-top: 5px;
+    color: red;
+    font-style: italic;
+    font-size: 11px;
+}
+
+.post-author-comment {
     padding: 10px;
     background-color: #d8ecff;
     margin-bottom: 20px;
@@ -451,7 +310,7 @@ textarea {
     position: relative;
 }
 
-    .post-detail .post-author-comment::before {
+    .post-author-comment::before {
         position: absolute;
         left: -6px;
         top: -6px;
@@ -464,14 +323,22 @@ textarea {
         transform: rotate(45deg);
     }
 
-.post-detail .post-comments {
+.post-author-comment span.hashtag,
+.post-comments p > span.hashtag {
+    font-size: 12px;
+    font-style: italic;
+    font-weight: bold;
+    color: firebrick;
+}
+
+.post-comments {
     padding: 0;
     padding-left: 40px;
     margin: 0;
     list-style-type: none;
 }
 
-    .post-detail .post-comments li {
+    .post-comments li {
         display: block;
         background-color: #e6f1fb;
         border-radius: 10px;
@@ -480,7 +347,7 @@ textarea {
         position: relative;
     }
 
-        .post-detail .post-comments li::before {
+        .post-comments li::before {
             position: absolute;
             right: -6px;
             bottom: -6px;
@@ -493,7 +360,7 @@ textarea {
             transform: rotate(45deg);
         }
 
-    .post-detail .post-comments a.comment-author-nickname {
+    .post-comments a.comment-author-nickname {
         background-color: #e6f1fb;
         display: block;
         text-decoration: none;
@@ -505,33 +372,24 @@ textarea {
         left: 0;
     }
 
-    .post-detail .post-comments span {
+    .post-comments span {
         font-size: 11px;
         opacity: 0.6;
     }
 
-    .post-detail .post-comments li.hidden {
-        display: none;
+.posts .post-comments li.comment-hidden {
+    display: none;
+}
+
+    .posts .post-comments li.comment-hidden.show-all {
+        display: block;
     }
 
-        .post-detail .post-comments li.hidden.show-all {
-            display: block;
-        }
-
-.post-detail .show-all-comments {
-    height: 32px;
-    line-height: 32px;
+.show-all-comments {
     margin: 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
     display: block;
-    text-decoration: none;
-    background-color: white;
     float: right;
-    padding: 0 10px 0 40px;
-    position: relative;
     --icon: url(../lib/fontawesome/svgs/solid/eye.svg);
-    font-size: 11px;
 }
 
 /* Alerts */
@@ -541,16 +399,8 @@ textarea {
 }
 
     .alerts form button[type=submit] {
-        height: 32px;
-        line-height: 32px;
-        border-radius: 3px;
-        border: 1px solid #CCC;
         float: right;
-        padding: 0 10px 0 40px;
-        background-color: white;
         --icon: url(../lib/fontawesome/svgs/solid/bell.svg);
-        position: relative;
-        font-size: 11px;
         font-family: inherit;
         cursor: pointer;
     }
@@ -590,89 +440,48 @@ textarea {
         padding: 0;
     }
 
-/* User registration form */
-.form_reg > div {
+/* Forms */
+:is(.form_reg, .form_login, .form_post, .form_edit) > div {
     margin-bottom: 10px;
 }
 
-    .form_reg > div label {
+    :is(.form_reg, .form_edit) > div label {
         display: block;
         padding-bottom: 3px;
     }
 
-.form_reg button[type=submit] {
-    height: 32px;
-    line-height: 32px;
+:is(.form_reg, .form_login, .form_post, .form_edit) button[type=submit],
+.form_post .autotag-button {
     margin: 20px 3px 3px 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
     display: block;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
-    background-color: white;
+}
+
+.form_reg button[type=submit],
+.form_edit button[type=submit] {
     --icon: url(../lib/fontawesome/svgs/regular/floppy-disk.svg);
 }
 
-/* Login form */
-.form_login > div {
-    margin-bottom: 10px;
-}
-
 .form_login button[type=submit] {
-    height: 32px;
-    line-height: 32px;
-    margin: 20px 3px 3px 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
-    display: block;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
-    background-color: white;
     --icon: url(../lib/fontawesome/svgs/solid/right-to-bracket.svg);
 }
 
-/* Publish post */
-.form_post > div {
-    margin-bottom: 10px;
-}
-
-.form_post button[type=submit] {
-    height: 32px;
-    line-height: 32px;
-    margin: 20px 3px 3px 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
-    display: block;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
-    background-color: white;
+.form_post button[type=submit],
+.form_comment button[type=submit] {
     --icon: url(../lib/fontawesome/svgs/solid/paper-plane.svg);
 }
 
+/* Publish post */
 .form_post .autotag-button {
-    height: 32px;
-    line-height: 32px;
-    margin: 20px 3px 3px 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
-    display: block;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
-    background-color: white;
     --icon: url(../lib/fontawesome/svgs/solid/hashtag.svg);
 }
 
 .form_post .button-progress {
     --icon: url(../lib/fontawesome/svgs/solid/spinner.svg);
 }
+
+    .form_post .button-progress::before {
+        animation: icon-spin 1s steps(8) infinite;
+    }
 
 .form_post .picture-placeholder {
     border: 10px solid white;
@@ -693,53 +502,19 @@ textarea {
 
 /* Post comments */
 .form_comment button[type=submit] {
-    height: 32px;
-    line-height: 32px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
     display: block;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
     float: right;
-    background-color: white;
-    --icon: url(../lib/fontawesome/svgs/solid/paper-plane.svg);
 }
 
 /* Edit user details */
-.form_edit > div {
-    margin-bottom: 10px;
-}
-
-    .form_edit > div label {
-        display: block;
-        padding-bottom: 3px;
-    }
-
-    .form_edit > div img {
-        width: 150px;
-        height: 150px;
-        display: block;
-        float: left;
-        border-radius: 5%;
-        margin-right: 20px;
-        box-shadow: rgba(0,0,0,0.5) 0 0 10px;
-    }
-
-.form_edit button[type=submit] {
-    height: 32px;
-    line-height: 32px;
-    margin: 20px 3px 3px 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
+.form_edit > div img {
+    width: 150px;
+    height: 150px;
     display: block;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
-    background-color: white;
-    --icon: url(../lib/fontawesome/svgs/regular/floppy-disk.svg);
+    float: left;
+    border-radius: 5%;
+    margin-right: 20px;
+    box-shadow: rgba(0,0,0,0.5) 0 0 10px;
 }
 
 .user-details-profile-picture > label > img {
@@ -757,7 +532,6 @@ textarea {
     left: 0;
     right: 0;
     bottom: 0;
-    background: black;
     background: rgba(0,0,0,.70);
     display: none;
 }
@@ -796,7 +570,6 @@ textarea {
         color: #4685c2;
         font-size: 2em;
     }
-
 
 /* User list */
 .user_list {
@@ -919,20 +692,11 @@ textarea {
 
 .user-profile-info a,
 .user-profile-info button {
-    height: 32px;
-    line-height: 32px;
     margin: 3px;
-    border-radius: 3px;
-    border: 1px solid #CCC;
     display: block;
     float: left;
-    text-decoration: none;
-    padding: 0 10px 0 40px;
-    position: relative;
-    font-size: 11px;
     font-family: inherit;
     color: black;
-    background-color: transparent;
     cursor: pointer;
 }
 
@@ -972,7 +736,7 @@ textarea {
     position: relative;
     margin: 0 10px 10px 0;
     text-decoration: none;
-    -webkit-transition: color 0.2s;
+    transition: color 0.2s;
 }
 
     .tag::before {
@@ -1007,56 +771,6 @@ textarea {
             border-left-color: crimson;
         }
 
-/* Icons */
-.user a::before,
-.user button::before,
-.posts .post-likes button::before,
-.posts .show-all-comments::before,
-.post-detail .post-likes button::before,
-.post-detail .show-all-comments::before,
-.alerts form button[type=submit]::before,
-.form_reg button[type=submit]::before,
-.form_login button[type=submit]::before,
-.form_post button[type=submit]::before,
-.form_post .autotag-button::before,
-.form_comment button[type=submit]::before,
-.form_edit button[type=submit]::before,
-.user-profile-info a::before,
-.user-profile-info button::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    width: 20px;
-    height: 20px;
-    margin-top: -10px;
-    background-color: var(--icon-color, currentColor);
-    mask: var(--icon) center / contain no-repeat;
-}
-
-.form_post .button-progress::before {
-    animation: icon-spin 1s steps(8) infinite;
-}
-
-@keyframes icon-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.validation-summary-errors li:not(:empty)::before,
-.field-validation-error::before,
-.form_post .tags-container > span::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 14px;
-    height: 14px;
-    background-color: currentColor;
-    mask: url(../lib/fontawesome/svgs/solid/circle-exclamation.svg) center / contain no-repeat;
-}
-
 @media (max-width: 640px) {
     body {
         margin: 0;
@@ -1069,24 +783,14 @@ textarea {
         border-radius: 0;
     }
 
-    .posts .post-likes button,
-    .posts .show-all-comments,
-    .post-detail .post-likes button,
-    .post-detail .show-all-comments,
+    .post-likes button,
+    .show-all-comments,
     .user *[class*="btn_"] a {
         font-size: 0;
         padding-right: 0;
     }
 
-    .form_reg input[type=text],
-    .form_reg input[type=password],
-    .form_reg input[type=email],
-    .form_login input[type=text],
-    .form_login input[type=password],
-    .form_login input[type=email],
-    .form_edit input[type=text],
-    .form_edit input[type=password],
-    .form_edit input[type=email] {
+    :is(.form_reg, .form_login, .form_edit) :is(input[type=text], input[type=password], input[type=email]) {
         display: block;
         box-sizing: border-box;
         width: 100%;
