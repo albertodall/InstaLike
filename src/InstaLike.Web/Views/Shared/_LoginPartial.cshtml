@@ -1,6 +1,4 @@
-﻿@using InstaLike.Web.Extensions
-
-@if (User.Identity != null && User.Identity.IsAuthenticated)
+﻿@if (User.Identity != null && User.Identity.IsAuthenticated)
 {
 <ul>
     <li class="btn_home">
@@ -12,7 +10,7 @@
     <li class="btn_alert">
         <a asp-action="Index" asp-controller="Notification">
             Notifications
-            @await Component.InvokeAsync("UnreadNotificationsCount", User.GetIdentifier())
+            <vc:unread-notifications-count />
         </a>
     </li>
     <li class="btn_user">

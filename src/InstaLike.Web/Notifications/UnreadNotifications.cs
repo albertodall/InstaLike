@@ -45,10 +45,7 @@ namespace InstaLike.Web.Notifications
                 await tx.CommitAsync(cancellationToken);
             }
 
-            if (unreadNotifications > 0)
-            {
-                _logger.Information("User {UserID} has {UnreadNotifications} unread notifications", request.UserID, unreadNotifications);
-            }
+            _logger.Debug("User {UserID} has {UnreadNotifications} unread notifications", request.UserID, unreadNotifications);
 
             return unreadNotifications;
         }
