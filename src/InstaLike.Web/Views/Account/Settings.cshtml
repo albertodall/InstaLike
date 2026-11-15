@@ -9,7 +9,7 @@
 
     @if (TempData["SettingsMessage"] is string message)
     {
-        <p>@message</p>
+        <div class="msg">@message</div>
     }
 
     <div asp-validation-summary="ModelOnly"></div>

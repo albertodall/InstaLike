@@ -4,7 +4,7 @@
     ViewData["Title"] = "Register on InstaLike";
 }
 
-<h1>Register</h1>
+<h2>Register</h2>
 
 @{
     var profilePicture = Url.ProfilePicture(null);
@@ -57,7 +57,7 @@
         <div>
             <label asp-for="Biography"></label>
             <div>
-                <input asp-for="Biography" />
+                <textarea asp-for="Biography" rows="3"></textarea>
                 <span asp-validation-for="Biography"></span>
             </div>
         </div>
