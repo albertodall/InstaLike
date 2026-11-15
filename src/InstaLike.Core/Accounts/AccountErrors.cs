@@ -11,7 +11,7 @@ namespace InstaLike.Core.Accounts
             Error.Failure("Account.InvalidCredentials", "Username or password are not valid.");
 
         public static readonly Error WrongCurrentPassword =
-            Error.Failure("Account.WrongCurrentPassword", "The current password is not valid.");
+            Error.Failure("CurrentPassword.Invalid", "The current password is not valid.");
 
         public static readonly Error UsernameEmpty =
             Error.Validation("Username.Empty", "Username should not be empty");

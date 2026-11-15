@@ -112,6 +112,17 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
+        public async Task Should_Report_A_Nickname_Too_Long_Only_Once()
+        {
+            var command = new RegisterMemberCommand(new string('n', 21), "long", "nick", "password", "longnick@acme.com", "bio", null);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                var result = await new TestMediatorBuilder(session).WithPictureStore(_pictureStore).Build().Send(command, TestContext.Current.CancellationToken);
+                result.Error.Should().Be(MemberErrors.NicknameTooLong);
+            }
+        }
+
+        [Fact]
         public async Task Should_Not_Register_A_Member_Whose_Nickname_Is_Still_Another_Account_Username()
         {
             var existingMember = TestDataHelper.NewMember("oldname");

@@ -87,18 +87,26 @@ namespace InstaLike.Web.Membership
         public async Task<Result<MemberId>> Handle(RegisterMemberCommand request, CancellationToken cancellationToken)
         {
             var nicknameValidationResult = Nickname.Create(request.Nickname);
-            var usernameValidationResult = Username.Create(request.Nickname);
             var eMailValidationResult = Email.Create(request.Email);
             var passwordValidationResult = Password.Create(request.Password);
             var fullNameValidationResult = FullName.Create(request.Name, request.Surname);
 
-            var validationResult = Result.Combine(nicknameValidationResult, usernameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
+            var validationResult = Result.Combine(nicknameValidationResult, eMailValidationResult, passwordValidationResult, fullNameValidationResult);
             if (validationResult.IsFailure)
             {
                 _logger.Warning("Error during registration of member {Nickname}: Error message: {ErrorMessage}",
                     request.Nickname,
                     validationResult.Error.Description);
                 return Result.Failure<MemberId>(validationResult.Error);
+            }
+
+            var usernameValidationResult = Username.Create(nicknameValidationResult.Value);
+            if (usernameValidationResult.IsFailure)
+            {
+                _logger.Warning("Error during registration of member {Nickname}: Error message: {ErrorMessage}",
+                    request.Nickname,
+                    usernameValidationResult.Error.Description);
+                return Result.Failure<MemberId>(usernameValidationResult.Error);
             }
 
             var availabilityResult = await CheckAvailabilityAsync(nicknameValidationResult.Value, usernameValidationResult.Value, eMailValidationResult.Value, cancellationToken);
