@@ -13,7 +13,7 @@ namespace InstaLike.Web.Media
     [Route("pictures")]
     public sealed class PictureController : Controller
     {
-        private const string MissingPicturePath = "~/img/no_image_available.png";
+        private const string MissingPicturePath = "~/img/no_image_available.svg";
         private const string PictureContentType = "image/jpeg";
         private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(365);
 
@@ -38,7 +38,7 @@ namespace InstaLike.Web.Media
             if (picture is null)
             {
                 Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue { NoCache = true };
-                return File(MissingPicturePath, "image/png");
+                return File(MissingPicturePath, "image/svg+xml");
             }
 
             Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue

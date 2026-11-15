@@ -8,7 +8,7 @@ namespace InstaLike.Web.Extensions
     {
         private const string PictureControllerName = "Picture";
         private const string DefaultProfilePicturePath = "~/img/default_profile_picture.jpg";
-        private const string PicturePlaceholderPath = "~/img/picture_placeholder.png";
+        private const string PicturePlaceholderPath = "~/img/picture_placeholder.svg";
 
         /// <returns>
         /// The default profile picture when <paramref name="picture"/> is <see langword="null"/>.
