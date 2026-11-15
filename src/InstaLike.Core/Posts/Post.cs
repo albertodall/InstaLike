@@ -18,7 +18,7 @@ namespace InstaLike.Core.Posts
             Picture = picture;
             _text = text;
 
-            PostDate = DateTimeOffset.Now;
+            PostDate = DateTimeOffset.UtcNow;
         }
 
         public virtual Guid AuthorID { get; protected set; }

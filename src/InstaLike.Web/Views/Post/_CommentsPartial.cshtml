@@ -21,7 +21,7 @@
                     &nbsp;@comment.Text
                 </p>
                 <span>
-                    &nbsp;<time title="@comment.CommentDate.DateTime" datetime="@comment.CommentDate.DateTime">@comment.CommentDate.UtcDateTime.AsPastDays()</time>
+                    &nbsp;<content-date value="@comment.CommentDate" />
                 </span>
             </li>
         }

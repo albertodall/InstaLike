@@ -19,7 +19,7 @@ namespace InstaLike.Core.Notifications
             RecipientID = recipientID;
             PostID = postID;
             HasBeenReadByRecipient = false;
-            NotificationDate = DateTimeOffset.Now;
+            NotificationDate = DateTimeOffset.UtcNow;
         }
 
         public virtual NotificationKind Kind { get; protected set; }

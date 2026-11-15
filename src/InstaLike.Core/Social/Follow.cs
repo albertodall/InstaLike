@@ -17,7 +17,7 @@ namespace InstaLike.Core.Social
         {
             Follower = follower;
             FollowedID = followedID;
-            FollowDate = DateTimeOffset.Now;
+            FollowDate = DateTimeOffset.UtcNow;
         }
 
         public virtual Follower Follower { get; protected set; }
