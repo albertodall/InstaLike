@@ -180,7 +180,7 @@ $('.form_post .autotag-button').click(function (e) {
 
                     var tagSeparator = '';
                     const selectedTag = $(e.target);
-                    const textInput = $('.form_post > div > input[type="text"]');
+                    const textInput = $('.form_post > div > textarea');
                     const currentText = textInput.val().trim();
 
                     selectedTag.toggleClass('tag-selected');
