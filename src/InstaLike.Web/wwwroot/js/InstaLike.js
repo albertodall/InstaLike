@@ -92,11 +92,14 @@ $('.form_comment').submit(function (e) {
     });
 });
 
-// Shows all comments
-$('.show-all-comments').click(function (e) {
-    e.preventDefault();
+// Shows or hides the comments after the first five
+$(document).on('click', '.show-all-comments', function () {
+    const button = $(this);
+    const expanded = button.attr('aria-expanded') !== 'true';
 
-    $(this).siblings('.post-comments').find('li.hidden').toggleClass('show-all');
+    button.siblings('.post-comments').find('li.comment-hidden').toggleClass('show-all', expanded);
+    button.attr('aria-expanded', expanded);
+    button.text(button.data(expanded ? 'hide-label' : 'show-label'));
 });
 
 // Sets o removes a "Like" on a post.
