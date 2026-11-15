@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -410,7 +411,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Read_Posts_Created_By_Followed_Users()
         {
-            PostModel[] timeline;
+            TimelineModel timeline;
             var author1 = TestDataHelper.NewMember("authoruser1");
             var author2 = TestDataHelper.NewMember("authoruser2");
             var reader = TestDataHelper.NewMember("readeruser");
@@ -443,13 +444,59 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                timeline.Length.Should().Be(2);
-                timeline.Should().OnlyContain(p => p.AuthorNickName == author1.Nickname);
-                var commentedPost = timeline.Single(p => p.PostID == post1.ID);
+                timeline.Posts.Length.Should().Be(2);
+                timeline.HasOlderPosts.Should().BeFalse();
+                timeline.Posts.Should().OnlyContain(p => p.AuthorNickName == author1.Nickname);
+                var commentedPost = timeline.Posts.Single(p => p.PostID == post1.ID);
                 commentedPost.Comments.Should().ContainSingle();
                 commentedPost.Comments[0].AuthorNickName.Should().Be(reader.Nickname);
                 commentedPost.Comments[0].Text.Should().Be("nice picture");
-                timeline.Single(p => p.PostID == post2.ID).Comments.Should().BeEmpty();
+                timeline.Posts.Single(p => p.PostID == post2.ID).Comments.Should().BeEmpty();
+            }
+        }
+
+        [Fact]
+        public async Task Timeline_Reads_Older_Posts_In_Batches_Without_Repeating_Any()
+        {
+            var author = TestDataHelper.NewMember("batchauthor");
+            var reader = TestDataHelper.NewMember("batchreader");
+            var posts = Enumerable.Range(1, 5).Select(i => TestDataHelper.NewPost(author, $"batch post {i}")).ToArray();
+            await SaveTimeline(author, reader, posts);
+
+            var batches = await ReadTimelineInBatchesOfTwo(reader);
+
+            using (new AssertionScope())
+            {
+                batches.Select(b => b.Posts.Length).Should().Equal(2, 2, 1);
+                batches.Select(b => b.HasOlderPosts).Should().Equal(true, true, false);
+                var timeline = batches.SelectMany(b => b.Posts).ToArray();
+                timeline.Select(p => p.PostID).Should().BeEquivalentTo(posts.Select(p => p.ID));
+                timeline.Select(p => p.PostDate).Should().BeInDescendingOrder();
+            }
+        }
+
+        [Fact]
+        public async Task Timeline_Reads_Posts_Published_At_The_Same_Time_In_Batches_Without_Repeating_Any()
+        {
+            var author = TestDataHelper.NewMember("sametimeauthor");
+            var reader = TestDataHelper.NewMember("sametimereader");
+            var posts = Enumerable.Range(1, 4).Select(i => TestDataHelper.NewPost(author, $"same time post {i}")).ToArray();
+            await SaveTimeline(author, reader, posts);
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.CreateQuery("update Post set PostDate = :date where AuthorID = :author")
+                    .SetParameter("date", new DateTimeOffset(2026, 11, 15, 10, 0, 0, TimeSpan.Zero))
+                    .SetParameter("author", author.ID.Value)
+                    .ExecuteUpdateAsync(TestContext.Current.CancellationToken);
+            }
+
+            var batches = await ReadTimelineInBatchesOfTwo(reader);
+
+            using (new AssertionScope())
+            {
+                batches.Select(b => b.Posts.Length).Should().Equal(2, 2);
+                batches.Select(b => b.HasOlderPosts).Should().Equal(true, false);
+                batches.SelectMany(b => b.Posts).Select(p => p.PostID).Should().BeEquivalentTo(posts.Select(p => p.ID));
             }
         }
 
@@ -662,6 +709,55 @@ namespace InstaLike.IntegrationTests
             return session.GetSessionImplementation().PersistenceContext.CollectionEntries.Keys
                 .OfType<IPersistentCollection>()
                 .Single(c => c.Role == role && Equals(c.Key, postID));
+        }
+
+        /// <summary>
+        /// Saves the author's posts and makes the reader follow the author, so the posts are on the reader's timeline.
+        /// </summary>
+        private async Task SaveTimeline(Member author, Member reader, Post[] posts)
+        {
+            using (var session = _testFixture.OpenSession(_output))
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+                foreach (var post in posts)
+                {
+                    await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                }
+                await session.SaveAsync(TestDataHelper.Following(reader, author), TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Reads the reader's whole timeline as the page scrolls it: a first batch, then older posts until there are none.
+        /// </summary>
+        private async Task<TimelineModel[]> ReadTimelineInBatchesOfTwo(Member reader)
+        {
+            const int BatchSize = 2;
+            var batches = new List<TimelineModel>
+            {
+                await ReadWithTimelineHandler(sut => sut.Handle(new TimelineQuery(reader.ID.Value, BatchSize), TestContext.Current.CancellationToken))
+            };
+
+            while (batches[^1].HasOlderPosts)
+            {
+                var lastPostShownID = batches[^1].Posts[^1].PostID;
+                batches.Add(await ReadWithTimelineHandler(sut => sut.Handle(new OlderTimelinePostsQuery(reader.ID.Value, lastPostShownID, BatchSize), TestContext.Current.CancellationToken)));
+            }
+
+            return batches.ToArray();
+        }
+
+        /// <summary>
+        /// Runs a timeline query on a new stateless session, as the application does.
+        /// </summary>
+        private async Task<TimelineModel> ReadWithTimelineHandler(Func<TimelineQueryHandler, Task<TimelineModel>> read)
+        {
+            using (var session = _testFixture.OpenStatelessSession())
+            {
+                return await read(new TimelineQueryHandler(session, Log.Logger));
+            }
         }
     }
 }

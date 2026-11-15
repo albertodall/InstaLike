@@ -1,0 +1,13 @@
+﻿@using InstaLike.Web.Posts
+
+@model TimelineModel
+
+@foreach (var post in Model.Posts)
+{
+    <partial name="~/Views/Post/_ViewPostPartial.cshtml" model="post" />
+}
+
+@if (Model.HasOlderPosts)
+{
+    <p class="older-posts" role="status" data-url="@Url.Action("OlderPosts", "Home", new { id = Model.Posts[^1].PostID })"></p>
+}

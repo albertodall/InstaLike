@@ -85,7 +85,7 @@ $(".form_post .picture-placeholder .posted-picture > input").change(function (e)
 });
 
 // Adds a comment to a post
-$('.form_comment').submit(function (e) {
+$(document).on('submit', '.form_comment', function (e) {
     e.preventDefault();
 
     var form = $(this),
@@ -125,8 +125,33 @@ $(document).on('click', '.show-all-comments', function () {
     button.text(button.data(expanded ? 'hide-label' : 'show-label'));
 });
 
+// Loads older posts when the end of the timeline comes into view.
+// The server renders the .older-posts line only when there are older posts, with the address of the next ones.
+const olderPostsObserver = new IntersectionObserver(function (entries) {
+    entries.filter(entry => entry.isIntersecting).forEach(function (entry) {
+        const olderPosts = entry.target;
+        olderPostsObserver.unobserve(olderPosts);
+        olderPosts.textContent = 'Loading older posts…';
+
+        $.get(olderPosts.dataset.url, function (response) {
+            $(olderPosts).replaceWith(response);
+            highlightHashtagsAndNicknames();
+            showDatesInLocalTime();
+            $('.older-posts').each(function () {
+                olderPostsObserver.observe(this);
+            });
+        }).fail(function () {
+            olderPosts.textContent = 'The older posts could not be loaded. Reload the page to try again.';
+        });
+    });
+}, { rootMargin: '0px 0px 600px 0px' });
+
+$('.older-posts').each(function () {
+    olderPostsObserver.observe(this);
+});
+
 // Sets o removes a "Like" on a post.
-$('.like-button').click(function (e) {
+$(document).on('click', '.like-button', function (e) {
     e.preventDefault();
 
     var likeButton = $(this),

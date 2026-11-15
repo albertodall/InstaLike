@@ -1,14 +1,11 @@
 ﻿@using InstaLike.Web.Posts
 
-@model IEnumerable<PostModel>
+@model TimelineModel
 
 @{
     ViewBag.Title = "Timeline";
 }
 
 <div class="posts">
-    @foreach (var post in Model)
-    {
-        <partial name="~/Views/Post/_ViewPostPartial.cshtml" model="post" />
-    }
+    <partial name="_TimelinePostsPartial" model="Model" />
 </div>
