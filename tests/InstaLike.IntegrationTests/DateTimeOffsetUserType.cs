@@ -2,39 +2,36 @@
 using System.Data.Common;
 using NHibernate;
 using NHibernate.Engine;
-using NHibernate.Type;
+using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
 namespace InstaLike.IntegrationTests
 {
     /// <summary>
     /// User Type for managing DateTimeOffset fields.
-    /// SQLite doesn't have a DateTimeOffset type, so, to address that, this user type splits the original DateTimeOffset value
-    /// into two fields:
-    ///     - Ticks: to store the datetime part.
-    ///     - Offset: to store the original offset.
+    /// SQLite doesn't have a DateTimeOffset type, so, to address that, this user type stores the instant as UTC ticks
+    /// in a single column. Comparing and sorting that column works like SQL Server's datetimeoffset, which compares instants.
+    /// The original offset is not kept: dates are read back in UTC.
     /// </summary>
     /// <remarks>
     /// This type has to be injected into the NHibernate configuration by convention, because we don't want
     /// to change the types defined in the original mappings (<see cref="DateTimeOffsetTypeConvention"/>).
     /// </remarks>
-    internal sealed class DateTimeOffsetUserType : ICompositeUserType
+    internal sealed class DateTimeOffsetUserType : IUserType
     {
-        public string[] PropertyNames => new[] { "Ticks", "Offset" };
+        public SqlType[] SqlTypes => new[] { SqlTypeFactory.Int64 };
 
-        public IType[] PropertyTypes => new IType[] { NHibernateUtil.Ticks, NHibernateUtil.TimeSpan };
-
-        public Type ReturnedClass => typeof(DateTimeOffset);
+        public Type ReturnedType => typeof(DateTimeOffset);
 
         public bool IsMutable => false;
 
-        public object Assemble(object cached, ISessionImplementor session, object owner) => cached;
+        public object Assemble(object cached, object owner) => cached;
 
         public object DeepCopy(object value) => value;
 
-        public object Disassemble(object value, ISessionImplementor session) => value;
+        public object Disassemble(object value) => value;
 
-        public object Replace(object original, object target, ISessionImplementor session, object owner) => original;
+        public object Replace(object original, object target, object owner) => original;
 
         public new bool Equals(object x, object y)
         {
@@ -56,49 +53,26 @@ namespace InstaLike.IntegrationTests
             return x.GetHashCode();
         }
 
-        public object GetPropertyValue(object component, int property)
+        public object? NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
         {
-            var dateTimeOffset = (DateTimeOffset)component;
-
-            return property switch
-            {
-                0 => dateTimeOffset.UtcTicks,
-                1 => dateTimeOffset.Offset,
-                _ => throw new InvalidOperationException("Property is invalid.")
-            };
-        }
-
-        public void SetPropertyValue(object component, int property, object value)
-        {
-            throw new InvalidOperationException($"{nameof(DateTimeOffset)} is an immutable object. SetPropertyValue is not supported.");
-        }
-
-        public object? NullSafeGet(DbDataReader dr, string[] names, ISessionImplementor session, object owner)
-        {
-            if (dr.IsDBNull(dr.GetOrdinal(names[0])))
+            var utcTicks = NHibernateUtil.Int64.NullSafeGet(rs, names[0], session);
+            if (utcTicks is null)
             {
                 return null;
             }
 
-            var dateTime = (DateTime)NHibernateUtil.Ticks.NullSafeGet(dr, names[0], session, owner);
-            var offset = (TimeSpan)NHibernateUtil.TimeSpan.NullSafeGet(dr, names[1], session, owner);
-
-            return new DateTimeOffset(dateTime, offset);
+            return new DateTimeOffset((long)utcTicks, TimeSpan.Zero);
         }
 
-        public void NullSafeSet(DbCommand cmd, object value, int index, bool[] settable, ISessionImplementor session)
+        public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor session)
         {
             object? utcTicks = null;
-            object? offset = null;
-
             if (value != null)
             {
-                utcTicks = ((DateTimeOffset)value).DateTime;
-                offset = ((DateTimeOffset)value).Offset;
+                utcTicks = ((DateTimeOffset)value).UtcTicks;
             }
 
-            NHibernateUtil.Ticks.NullSafeSet(cmd, utcTicks, index++, session);
-            NHibernateUtil.TimeSpan.NullSafeSet(cmd, offset, index, session);
+            NHibernateUtil.Int64.NullSafeSet(cmd, utcTicks, index, session);
         }
     }
 }
