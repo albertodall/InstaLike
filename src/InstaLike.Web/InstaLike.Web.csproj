@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="InstaLike.IntegrationTests" />
+    <InternalsVisibleTo Include="InstaLike.Web.Tests" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\lib\" />

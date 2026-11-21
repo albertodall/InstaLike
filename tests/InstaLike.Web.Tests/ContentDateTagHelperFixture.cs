@@ -8,7 +8,7 @@ using InstaLike.Web.Shared;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Xunit;
 
-namespace InstaLike.IntegrationTests
+namespace InstaLike.Web.Tests
 {
     public sealed class ContentDateTagHelperFixture
     {
@@ -56,13 +56,16 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         private static TagHelperOutput Render(DateTimeOffset value)
         {
-            var context = new TagHelperContext(new TagHelperAttributeList(), new Dictionary<object, object>(), "test");
+            var context = new TagHelperContext([], new Dictionary<object, object>(), "test");
             var output = new TagHelperOutput(
                 "content-date",
-                new TagHelperAttributeList(),
+                [],
                 (_, _) => Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
 
-            new ContentDateTagHelper { Value = value }.Process(context, output);
+            new ContentDateTagHelper()
+            {
+                Value = value
+            }.Process(context, output);
 
             return output;
         }
