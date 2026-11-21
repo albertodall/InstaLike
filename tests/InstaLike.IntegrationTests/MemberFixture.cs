@@ -1,10 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
-using InstaLike.Core.Social;
 using InstaLike.Web.Membership;
 using Serilog;
 using Xunit;

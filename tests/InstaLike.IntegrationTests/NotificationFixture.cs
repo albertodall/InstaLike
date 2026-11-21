@@ -1,8 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
 using InstaLike.Core.Notifications;
 using InstaLike.Web.Notifications;
 using Serilog;

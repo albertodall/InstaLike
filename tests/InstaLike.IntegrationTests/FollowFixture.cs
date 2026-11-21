@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social;
