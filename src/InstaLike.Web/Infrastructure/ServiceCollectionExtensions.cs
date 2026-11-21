@@ -80,6 +80,7 @@ namespace InstaLike.Web.Infrastructure
                     opt.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                     opt.Cookie.HttpOnly = true;
                     opt.LoginPath = new PathString("/Account/Login");
+                    opt.AccessDeniedPath = new PathString("/Account/AccessDenied");
                 });
 
             return services;
