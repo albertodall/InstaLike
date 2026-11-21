@@ -16,4 +16,7 @@
     <ProjectReference Include="..\..\src\InstaLike.Database.Migrator\InstaLike.Database.Migrator.csproj" />
     <ProjectReference Include="..\..\src\InstaLike.Web\InstaLike.Web.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\InstaLike.IntegrationTests\assets\grumpy_cat.jpg" LogicalName="grumpy_cat.jpg" />
+  </ItemGroup>
 </Project>

@@ -14,6 +14,8 @@ namespace InstaLike.Web.EndToEndTests
     public abstract class EndToEndTestFixture : IAsyncLifetime
     {
         protected const string DefaultPassword = "password";
+        protected const string PostDetailUrl = "/Post/Detail/";
+        protected const string PostEditUrl = "/Post/Edit/";
 
         protected EndToEndTestFixture(InstaLikeApplicationFactory application)
         {
@@ -78,6 +80,28 @@ namespace InstaLike.Web.EndToEndTests
                     ["Username"] = username,
                     ["Password"] = password
                 });
+        }
+
+        /// <summary>
+        /// Publishes a post with the test picture and returns its ID, read from the timeline.
+        /// </summary>
+        protected static async Task<string> PublishPostAsync(Browser browser, string text)
+        {
+            var publish = await browser.OpenAsync("/Post/Publish");
+            var response = await browser.SubmitWithPictureAsync(
+                Form(publish, "form[action='/Post/Publish']"),
+                new Dictionary<string, string>
+                {
+                    ["Text"] = text
+                },
+                "PictureFile");
+            response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+
+            var timeline = await browser.FollowRedirectAsync(response);
+            var newestPost = timeline.QuerySelector<IHtmlAnchorElement>($".posts a[href^='{PostDetailUrl}']")
+                ?? throw new InvalidOperationException("The published post is not on the timeline.");
+
+            return newestPost.PathName[PostDetailUrl.Length..];
         }
 
         /// <summary>

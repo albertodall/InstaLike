@@ -13,7 +13,8 @@ namespace InstaLike.Web.EndToEndTests
 {
     /// <summary>
     /// Navigates the application like a browser without JavaScript: it keeps the cookies and submits the forms of the pages,
-    /// antiforgery token included. Redirects are not followed automatically, so that tests can check where they lead.
+    /// antiforgery token included, and posts the requests of its scripts with the token they read from the page.
+    /// Redirects are not followed automatically, so that tests can check where they lead.
     /// </summary>
     public sealed class Browser : IDisposable
     {
@@ -79,6 +80,37 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         /// <summary>
+        /// Submits a form, replacing the values of the given fields and choosing the test picture in its picture field.
+        /// </summary>
+        public Task<HttpResponseMessage> SubmitWithPictureAsync(IHtmlFormElement form, IReadOnlyDictionary<string, string> fields, string pictureField)
+        {
+            var content = MultipartContent(SubmittedValues(form, fields));
+            AddTestPicture(content, pictureField);
+
+            return _client.PostAsync(form.Action, content, TestContext.Current.CancellationToken);
+        }
+
+        /// <summary>
+        /// Posts fields as a script of the page does, with the antiforgery token in the request header.
+        /// </summary>
+        public Task<HttpResponseMessage> PostFromScriptAsync(IHtmlDocument page, string url, IReadOnlyDictionary<string, string> fields)
+        {
+            return PostFromScriptAsync(page, url, new FormUrlEncodedContent(fields));
+        }
+
+        /// <summary>
+        /// Uploads the test picture as a script of the page does: the picture field is named after the file,
+        /// and the antiforgery token travels in the request header.
+        /// </summary>
+        public Task<HttpResponseMessage> UploadPictureFromScriptAsync(IHtmlDocument page, string url)
+        {
+            var content = new MultipartFormDataContent();
+            AddTestPicture(content, TestPicture.FileName);
+
+            return PostFromScriptAsync(page, url, content);
+        }
+
+        /// <summary>
         /// Parses the HTML of a response, so that relative links and form actions resolve against its URL.
         /// </summary>
         public static async Task<IHtmlDocument> ReadPageAsync(HttpResponseMessage response)
@@ -94,6 +126,19 @@ namespace InstaLike.Web.EndToEndTests
         public void Dispose()
         {
             _client.Dispose();
+        }
+
+        /// <summary>
+        /// Reads the token the layout renders for scripts and sends it in the header they use.
+        /// </summary>
+        private Task<HttpResponseMessage> PostFromScriptAsync(IHtmlDocument page, string url, HttpContent content)
+        {
+            var token = page.QuerySelector("meta[name='request-verification-token']")?.GetAttribute("content")
+                ?? throw new InvalidOperationException("The page has no antiforgery token for its scripts.");
+            var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+            request.Headers.Add("RequestVerificationToken", token);
+
+            return _client.SendAsync(request, TestContext.Current.CancellationToken);
         }
 
         /// <summary>
@@ -154,6 +199,13 @@ namespace InstaLike.Web.EndToEndTests
             }
 
             return content;
+        }
+
+        private static void AddTestPicture(MultipartFormDataContent content, string fieldName)
+        {
+            var picture = new ByteArrayContent(TestPicture.Content);
+            picture.Headers.ContentType = new MediaTypeHeaderValue(TestPicture.MediaType);
+            content.Add(picture, fieldName, TestPicture.FileName);
         }
     }
 }
