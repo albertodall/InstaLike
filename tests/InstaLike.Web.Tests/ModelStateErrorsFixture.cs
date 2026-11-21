@@ -6,7 +6,7 @@ using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Xunit;
 
-namespace InstaLike.IntegrationTests
+namespace InstaLike.Web.Tests
 {
     public sealed class ModelStateErrorsFixture
     {

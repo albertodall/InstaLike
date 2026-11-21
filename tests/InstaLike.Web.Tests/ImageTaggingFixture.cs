@@ -10,20 +10,23 @@ using InstaLike.Web.Media;
 using Microsoft.Extensions.AI;
 using Xunit;
 
-namespace InstaLike.IntegrationTests
+namespace InstaLike.Web.Tests
 {
     public sealed class ImageTaggingFixture
     {
         [Fact]
         public async Task Suggested_Tags_Should_Be_Formatted_As_Sorted_Unique_Hashtags()
         {
-            var chatClient = new FakeChatClient("""{ "tags": ["sunset", "golden hour", "#beach", "sunset"] }""");
+            var chatClient = new FakeChatClient(
+                """
+                { "tags": ["tag1", "tag2", "#tag3", "tag4"] }
+                """);
             var tagging = new ChatClientImageTagging(chatClient);
 
-            var result = await tagging.AutoTagImage(new MemoryStream(new byte[] { 1, 2, 3 }), "image/jpeg");
+            var result = await tagging.AutoTagImage(new MemoryStream([1, 2, 3]), "image/jpeg");
 
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().Equal("#beach", "#goldenhour", "#sunset");
+            result.Value.Should().Equal("#tag1", "#tag2", "#tag3", "#tag4");
         }
 
         [Fact]

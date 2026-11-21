@@ -4,7 +4,7 @@ using FluentAssertions;
 using InstaLike.Web.Extensions;
 using Xunit;
 
-namespace InstaLike.IntegrationTests
+namespace InstaLike.Web.Tests
 {
     public sealed class RelativeDateFixture
     {
