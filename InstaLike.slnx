@@ -15,6 +15,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/InstaLike.Core.Tests/InstaLike.Core.Tests.csproj" />
     <Project Path="tests/InstaLike.IntegrationTests/InstaLike.IntegrationTests.csproj" />
+    <Project Path="tests/InstaLike.Web.EndToEndTests/InstaLike.Web.EndToEndTests.csproj" />
   </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />

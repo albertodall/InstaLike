@@ -103,6 +103,8 @@ dotnet test
 ```
 Integration tests send the use cases to their handlers and run on SQL Server, migrated by the migrator's scripts, and on [Azurite](https://github.com/Azure/Azurite) for the pictures. [Testcontainers](https://dotnet.testcontainers.org/) starts both for the test run, so Docker must be running; the containers of `docker compose` are not used.
 
+End-to-end tests drive the whole application over HTTP, the way a browser without JavaScript would: they submit the forms of the pages and the requests of their scripts, antiforgery tokens and cookies included. The application runs in memory on SQL Server and [Azurite](https://github.com/Azure/Azurite) containers; only picture tagging is replaced by a fake.
+
 ## Deploy to Azure
 Terraform (`infra/tf`) provisions the Azure resources, named after the [Azure naming conventions](https://azurenamingconventions.com/blog/azure-naming-conventions-complete-guide/) (`{type}-instalike-prd-weu`). The Azure DevOps pipeline (`azure-pipelines.yml`) builds, migrates the database and deploys the web application.
 
@@ -125,6 +127,7 @@ This project has been built using these awesome Open Source projects:
 - [FluentAssertions](https://fluentassertions.com)
 - [Testcontainers](https://dotnet.testcontainers.org)
 - [Respawn](https://github.com/jbogard/Respawn)
+- [AngleSharp](https://anglesharp.github.io)
 - [Serilog](https://serilog.net)
 - [Humanizer](https://github.com/Humanizr/Humanizer)
 
