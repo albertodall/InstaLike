@@ -28,5 +28,5 @@ infra
 LICENSE
 README.md
 sonar.token
-sonarcloud.cmd
+sonarcloud.ps1
 tests
