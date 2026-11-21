@@ -20,7 +20,7 @@ namespace InstaLike.Core.Accounts
             _email = email;
         }
 
-        private string _username;
+        private readonly string _username;
         public virtual Username Username => (Username)_username;
 
         private string _password;
