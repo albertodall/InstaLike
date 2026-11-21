@@ -173,7 +173,7 @@ namespace InstaLike.IntegrationTests
             using (var session = Infrastructure.OpenSession())
             {
                 var storedPost = await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken);
-                storedPost!.IsLikedBy(reader.ID.Value).Should().BeTrue();
+                storedPost.IsLikedBy(reader.ID.Value).Should().BeTrue();
             }
         }
 
