@@ -112,6 +112,16 @@ textarea {
     border-radius: 10px;
 }
 
+.access-denied::before {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    background-color: var(--color-primary);
+    mask: url(../lib/fontawesome/svgs/solid/lock.svg) center / contain no-repeat;
+}
+
 .validation-summary-errors ul {
     list-style-type: none;
     margin: 10px 0;
