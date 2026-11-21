@@ -96,6 +96,46 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         [Fact]
+        public async Task Other_Members_Should_Not_Edit_The_Post_Through_Their_Own_Edit_Form()
+        {
+            string postID;
+            using (var author = await RegisterAndLogInAsync("victim"))
+            {
+                postID = await PublishPostAsync(author, "Original text");
+            }
+
+            using var tamperer = await RegisterAndLogInAsync("intruder");
+            var ownPostID = await PublishPostAsync(tamperer, "My post");
+            var ownEdit = await tamperer.OpenAsync(PostEditUrl + ownPostID);
+
+            var response = await tamperer.SubmitWithPictureAsync(
+                Form(ownEdit, $"form[action^='{PostEditUrl}']"),
+                new Dictionary<string, string>
+                {
+                    ["PostID"] = postID,
+                    ["Text"] = "Tampered text"
+                },
+                "PictureFile");
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                response.Headers.Location?.OriginalString.Should().StartWith("http://localhost/Account/AccessDenied");
+                (await tamperer.OpenAsync(PostDetailUrl + postID)).QuerySelector(".post-author-comment")?.TextContent.Should().Be("Original text");
+            }
+        }
+
+        [Fact]
+        public async Task Editing_A_Missing_Post_Should_Not_Be_Found()
+        {
+            using var browser = await RegisterAndLogInAsync("missingpostuser");
+
+            var response = await browser.GetAsync(PostEditUrl + Guid.NewGuid());
+
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
         public async Task Comment_Should_Be_Shown_Under_The_Post()
         {
             using var browser = await RegisterAndLogInAsync("nick10");

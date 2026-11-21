@@ -23,7 +23,6 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.MinimumSameSitePolicy = SameSiteMode.None;
 });
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureTelemetry(builder.Configuration);
 builder.Services.ConfigureOpenTelemetry(builder.Configuration);
 

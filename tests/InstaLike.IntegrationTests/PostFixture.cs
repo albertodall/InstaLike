@@ -301,7 +301,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Read_A_Post_For_Editing()
         {
-            EditPostModel result;
+            Result<EditPostModel> result;
             var author = TestDataHelper.NewMember("editingauthor");
             Post post;
             using (var session = Infrastructure.OpenSession())
@@ -321,11 +321,54 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                result.PostID.Should().Be(post.ID);
-                result.AuthorID.Should().Be(author.ID.Value);
-                result.Text.Should().Be("Text to edit");
-                result.Picture.Should().Be(post.Picture);
+                result.IsSuccess.Should().BeTrue();
+                result.Value.PostID.Should().Be(post.ID);
+                result.Value.AuthorID.Should().Be(author.ID.Value);
+                result.Value.Text.Should().Be("Text to edit");
+                result.Value.Picture.Should().Be(post.Picture);
             }
+        }
+
+        [Fact]
+        public async Task Should_Not_Read_For_Editing_A_Post_Published_By_Another_User()
+        {
+            Result<EditPostModel> result;
+            var author = TestDataHelper.NewMember("editingauthor2");
+            var reader = TestDataHelper.NewMember("editingreader");
+            Post post;
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+                post = TestDataHelper.NewPost(author, "Not yours");
+                await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var query = new EditPostQuery(post.ID, reader.ID.Value);
+            using (var session = Infrastructure.OpenStatelessSession())
+            {
+                var sut = new EditPostQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            result.Error.Should().Be(PostErrors.EditNotAllowed);
+        }
+
+        [Fact]
+        public async Task Should_Not_Read_For_Editing_A_Missing_Post()
+        {
+            Result<EditPostModel> result;
+            var missingPostID = PostId.New();
+
+            var query = new EditPostQuery(missingPostID, Guid.NewGuid());
+            using (var session = Infrastructure.OpenStatelessSession())
+            {
+                var sut = new EditPostQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            result.Error.Should().Be(PostErrors.NotFound(missingPostID));
         }
 
         [Fact]
@@ -511,7 +554,7 @@ namespace InstaLike.IntegrationTests
             var command = new EditPostCommand(reader.ID.Value, post.ID, "edited text on post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var editResult = await SendAsync(command);
 
-            editResult.IsSuccess.Should().BeFalse($"You're not allowed to edit post {post.ID}.");
+            editResult.Error.Should().Be(PostErrors.EditNotAllowed);
         }
 
         [Fact]

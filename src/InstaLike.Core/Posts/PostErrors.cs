@@ -7,6 +7,9 @@ namespace InstaLike.Core.Posts
         public static Error NotFound(PostId postID) =>
             Error.NotFound("Post.NotFound", $"Post {postID} does not exist.");
 
+        public static readonly Error EditNotAllowed =
+            Error.Forbidden("Post.EditNotAllowed", "You're not allowed to edit this post.");
+
         public static readonly Error PictureMissing =
             Error.Validation("Picture.Missing", "Please select a picture to share together with your post.");
 

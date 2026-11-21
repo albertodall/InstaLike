@@ -29,6 +29,9 @@ namespace InstaLike.Core.SharedKernel
 
         public static Error Conflict(string code, string description) =>
             new(code, description, ErrorType.Conflict);
+
+        public static Error Forbidden(string code, string description) =>
+            new(code, description, ErrorType.Forbidden);
     }
 
     public enum ErrorType
@@ -37,6 +40,7 @@ namespace InstaLike.Core.SharedKernel
         Failure,
         Validation,
         NotFound,
-        Conflict
+        Conflict,
+        Forbidden
     }
 }

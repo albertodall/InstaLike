@@ -7,9 +7,7 @@ using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
-using InstaLike.Web.Posts.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -88,10 +86,7 @@ namespace InstaLike.Web.Infrastructure
 
         public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
         {
-            services.AddTransient<IAuthorizationHandler, PostAuthorRequirementHandler>();
-            services.AddAuthorizationBuilder()
-                .AddPolicy("IsPostAuthor", policy =>
-                    policy.AddRequirements(new PostAuthorRequirement()));
+            services.AddAuthorization();
 
             return services;
         }

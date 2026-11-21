@@ -55,17 +55,20 @@ namespace InstaLike.Web.Posts
             return View(model);
         }
 
-        [Authorize(Policy = "IsPostAuthor")]
         public async Task<IActionResult> Edit(PostId id)
         {
             var editPostQuery = new EditPostQuery(id, User.GetIdentifier());
-            var model = await _dispatcher.Send(editPostQuery);
+            var queryResult = await _dispatcher.Send(editPostQuery);
 
-            return View(model);
+            if (queryResult.IsSuccess)
+            {
+                return View(queryResult.Value);
+            }
+
+            return queryResult.Error.Type == ErrorType.Forbidden ? Forbid() : NotFound();
         }
 
         [HttpPost]
-        [Authorize(Policy = "IsPostAuthor")]
         public async Task<IActionResult> Edit(EditPostModel editedPost)
         {
             if (ModelState.IsValid)
@@ -75,6 +78,16 @@ namespace InstaLike.Web.Posts
                 if (commandResult.IsSuccess)
                 {
                     return RedirectToAction("Index", "Home");
+                }
+
+                if (commandResult.Error.Type == ErrorType.Forbidden)
+                {
+                    return Forbid();
+                }
+
+                if (commandResult.Error.Type == ErrorType.NotFound)
+                {
+                    return NotFound();
                 }
 
                 ModelState.AddModelErrors(commandResult.Error);

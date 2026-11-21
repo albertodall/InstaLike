@@ -29,7 +29,7 @@ namespace InstaLike.Web.Posts
         public Microsoft.AspNetCore.Http.IFormFile? PictureFile { get; set; }
     }
 
-    public sealed class EditPostQuery : IRequest<EditPostModel>
+    public sealed class EditPostQuery : IRequest<Result<EditPostModel>>
     {
         public PostId PostID { get; }
 
@@ -42,7 +42,7 @@ namespace InstaLike.Web.Posts
         }
     }
 
-    internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, EditPostModel>
+    internal sealed class EditPostQueryHandler : IRequestHandler<EditPostQuery, Result<EditPostModel>>
     {
         private readonly IStatelessSession _session;
         private readonly ILogger _logger;
@@ -53,21 +53,30 @@ namespace InstaLike.Web.Posts
             _logger = logger.ForContext<EditPostQuery>();
         }
 
-        public async Task<EditPostModel> Handle(EditPostQuery request, CancellationToken cancellationToken)
+        public async Task<Result<EditPostModel>> Handle(EditPostQuery request, CancellationToken cancellationToken)
         {
             _logger.Debug("User {UserID} requested to edit post {PostID} with parameters {@Request}", request.CurrentUserID, request.PostID, request);
 
             using (_session.BeginTransaction())
             {
                 var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
+                if (post is null)
+                {
+                    return Result.Failure<EditPostModel>(PostErrors.NotFound(request.PostID));
+                }
 
-                return new EditPostModel()
+                if (!post.CanBeEditedBy(request.CurrentUserID))
+                {
+                    return Result.Failure<EditPostModel>(PostErrors.EditNotAllowed);
+                }
+
+                return Result.Ok(new EditPostModel()
                 {
                     PostID = post.ID,
                     AuthorID = post.AuthorID,
                     Picture = post.Picture,
                     Text = post.Text
-                };
+                });
             }
         }
     }
@@ -126,7 +135,7 @@ namespace InstaLike.Web.Posts
                 _logger.Warning("User {UserID} tried to edit post {PostID} but was not allowed to.",
                     request.UserID,
                     request.PostID);
-                return Result.Failure<PostId>(Error.Failure("Post.EditNotAllowed", $"You're not allowed to edit post {postToEdit.ID}."));
+                return Result.Failure<PostId>(PostErrors.EditNotAllowed);
             }
 
             postToEdit.UpdateText(text.Value);
