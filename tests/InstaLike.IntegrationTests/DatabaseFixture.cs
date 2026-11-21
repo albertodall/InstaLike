@@ -56,6 +56,9 @@ namespace InstaLike.IntegrationTests
 
         public ISessionFactory SessionFactory { get; }
 
+        /// <summary>
+        /// A session that writes its SQL statements to the test output.
+        /// </summary>
         public ISession OpenSession(ITestOutputHelper output)
         {
             return OpenSession(new XUnitSqlStatementOutputInterceptor(output));
@@ -77,6 +80,9 @@ namespace InstaLike.IntegrationTests
             return SessionFactory.OpenStatelessSession();
         }
 
+        /// <summary>
+        /// The test picture embedded in the test assembly, encoded in Base64.
+        /// </summary>
         public static string GetTestPictureBase64()
         {
             return Convert.ToBase64String(Resources.GrumpyCat);

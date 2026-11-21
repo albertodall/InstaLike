@@ -73,6 +73,9 @@ namespace InstaLike.Core.Tests
 
             public TestEntity() : base(default) { }
 
+            /// <summary>
+            /// An entity with the given ID, as if it had been saved.
+            /// </summary>
             public static TestEntity Create(int id)
             {
                 return new TestEntity(id);
@@ -88,6 +91,9 @@ namespace InstaLike.Core.Tests
 
             public OtherTestEntity() : base(default) { }
 
+            /// <summary>
+            /// An entity with the given ID, as if it had been saved.
+            /// </summary>
             public static OtherTestEntity Create(int id)
             {
                 return new OtherTestEntity(id);
