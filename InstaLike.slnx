@@ -5,7 +5,7 @@
     <File Path="azure-pipelines.yml" />
     <File Path="docker-compose.yml" />
     <File Path="README.md" />
-    <File Path="sonarcloud.cmd" />
+    <File Path="sonarcloud.ps1" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/InstaLike.Core/InstaLike.Core.csproj" />
