@@ -79,6 +79,11 @@ namespace InstaLike.Web.Accounts
             return RedirectToAction("Index", "Home");
         }
 
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Settings()
         {
             var email = await _dispatcher.Send(new AccountEmailQuery(CurrentAccountID));
