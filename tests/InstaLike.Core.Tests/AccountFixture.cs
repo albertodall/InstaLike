@@ -66,6 +66,7 @@ namespace InstaLike.Core.Tests
                 sut.ChangePassword("password1", Password.Create("password2").Value).IsSuccess.Should().BeTrue();
                 sut.Password.HashMatches("password2").Should().BeTrue();
                 sut.Password.HashMatches("password1").Should().BeFalse();
+                sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new AccountPasswordChangedEvent(sut.ID));
             }
         }
 
@@ -91,6 +92,7 @@ namespace InstaLike.Core.Tests
                 sut.ChangePassword("wrong", Password.Create("password2").Value).IsFailure.Should().BeTrue();
                 sut.Password.HashMatches("password1").Should().BeTrue();
                 sut.SecurityStamp.Should().Be(securityStamp);
+                sut.DomainEvents.Should().BeEmpty();
             }
         }
 

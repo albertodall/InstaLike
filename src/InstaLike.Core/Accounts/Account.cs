@@ -60,6 +60,7 @@ namespace InstaLike.Core.Accounts
 
             _password = newPassword;
             SecurityStamp = Guid.NewGuid();
+            RaiseDomainEvent(new AccountPasswordChangedEvent(ID));
             return Result.Ok();
         }
 

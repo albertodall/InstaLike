@@ -82,8 +82,25 @@ namespace InstaLike.Web.Accounts
 
             await _session.FlushAsync(cancellationToken);
 
-            _logger.Information("Account [{Username}({AccountID})] changed its password.", account.Username, request.AccountID);
             return Result.Ok(account.SecurityStamp);
+        }
+    }
+
+    internal sealed class AccountPasswordChangedEventHandler : INotificationHandler<AccountPasswordChangedEvent>
+    {
+        private readonly ISession _session;
+        private readonly ILogger _logger;
+
+        public AccountPasswordChangedEventHandler(ISession session, ILogger logger)
+        {
+            _session = session;
+            _logger = logger.ForContext<AccountPasswordChangedEvent>();
+        }
+
+        public async Task Handle(AccountPasswordChangedEvent notification, CancellationToken cancellationToken)
+        {
+            var account = await _session.GetAsync<Account>(notification.AccountID, cancellationToken);
+            _logger.Information("Account [{Username}({AccountID})] changed its password.", account?.Username, notification.AccountID);
         }
     }
 }
