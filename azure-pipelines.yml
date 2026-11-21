@@ -36,6 +36,11 @@ stages:
               organization: $(SonarCloudOrganizationName)
               scannerMode: 'MSBuild'
               projectKey: $(sonarCloudProjectKey)
+              extraProperties: |
+                sonar.exclusions=**/bin/**/*,**/obj/**/*,**/wwwroot/lib/**
+                sonar.coverage.exclusions=tests/**,**/*Fixture.cs
+                sonar.cs.vscoveragexml.reportsPaths=$(Agent.TempDirectory)/TestResults/**/*.xml
+                sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/TestResults/**/*.trx
 
           - task: UseDotNet@2
             displayName: 'Install .NET SDK'
@@ -60,6 +65,7 @@ stages:
           - script: >-
               dotnet test --solution InstaLike.slnx --no-build --configuration $(buildConfiguration)
               --report-xunit-trx --results-directory $(Agent.TempDirectory)/TestResults
+              --coverage --coverage-output-format xml
             displayName: 'Run all tests'
 
           - task: PublishTestResults@2
