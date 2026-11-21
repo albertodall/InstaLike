@@ -2,14 +2,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.SharedKernel;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 
 namespace InstaLike.Web.Media
 {
-    [Authorize]
     [Route("pictures")]
     public sealed class PictureController : Controller
     {

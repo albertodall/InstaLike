@@ -16,18 +16,37 @@ namespace InstaLike.Web.EndToEndTests
             : base(application)
         { }
 
-        [Fact]
-        public async Task Anonymous_Visitor_Should_Be_Sent_To_The_Login_Page()
+        [Theory]
+        [InlineData("/")]
+        [InlineData("/Account/Settings")]
+        [InlineData("/Member/Edit")]
+        [InlineData("/Notification")]
+        [InlineData("/Post/Publish")]
+        [InlineData("/pictures/posts/00000000-0000-0000-0000-000000000001")]
+        public async Task Anonymous_Visitor_Should_Be_Sent_To_The_Login_Page(string url)
         {
             using var browser = Application.OpenBrowser();
 
-            var response = await browser.GetAsync("/");
+            var response = await browser.GetAsync(url);
 
             using (new AssertionScope())
             {
                 response.StatusCode.Should().Be(HttpStatusCode.Redirect);
                 response.Headers.Location?.OriginalString.Should().StartWith("http://localhost/Account/Login");
             }
+        }
+
+        [Theory]
+        [InlineData("/Account/Login")]
+        [InlineData("/Member/Register")]
+        [InlineData("/Home/Error")]
+        public async Task Anonymous_Visitor_Should_Open_The_Public_Pages(string url)
+        {
+            using var browser = Application.OpenBrowser();
+
+            var response = await browser.GetAsync(url);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]

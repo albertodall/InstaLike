@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Accounts
 {
-    [Authorize]
     public sealed class AccountController : Controller
     {
         private readonly ISender _dispatcher;

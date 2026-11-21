@@ -4,13 +4,11 @@ using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Media;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace InstaLike.Web.Posts
 {
-    [Authorize]
     public sealed class PostController : Controller
     {
         private const string MissingPost = "This post does not exist.";

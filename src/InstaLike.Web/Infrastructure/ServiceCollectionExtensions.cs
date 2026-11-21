@@ -9,6 +9,7 @@ using InstaLike.Web.Accounts;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -89,7 +90,8 @@ namespace InstaLike.Web.Infrastructure
 
         public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
         {
-            services.AddAuthorization();
+            services.AddAuthorizationBuilder()
+                .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
             return services;
         }

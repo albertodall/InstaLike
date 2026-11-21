@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Shared
 {
-    [Authorize]
     public sealed class HomeController : Controller
     {
         private const int PostsPerBatch = 10;

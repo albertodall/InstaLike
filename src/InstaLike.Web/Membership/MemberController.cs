@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Membership
 {
-    [Authorize]
     public sealed class MemberController : Controller
     {
         private const int MaxThumbnailsInMemberProfile = 20;

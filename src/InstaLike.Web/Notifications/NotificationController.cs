@@ -2,12 +2,10 @@
 using System.Threading.Tasks;
 using InstaLike.Web.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstaLike.Web.Notifications
 {
-    [Authorize]
     public sealed class NotificationController : Controller
     {
         private readonly ISender _dispatcher;
