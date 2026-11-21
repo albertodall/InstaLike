@@ -9,28 +9,17 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class AccountAuthenticationFixture : IClassFixture<DatabaseFixture>
+    public sealed class AccountAuthenticationFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-
-        public AccountAuthenticationFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public AccountAuthenticationFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task Registered_Member_Should_Be_Able_To_Log_In_With_The_Username()
         {
             var member = await SaveMemberWithAccountAsync("testuser2", "password");
-            Result<Guid> authenticationResult;
-
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var sut = new TestMediatorBuilder(session).Build();
-                authenticationResult = await sut.Send(new LogInCommand("testuser2", "password"), TestContext.Current.CancellationToken);
-            }
+            var authenticationResult = await SendAsync(new LogInCommand("testuser2", "password"));
 
             using (new AssertionScope())
             {
@@ -43,22 +32,17 @@ namespace InstaLike.IntegrationTests
         public async Task Member_Should_Still_Log_In_With_The_Username_After_Changing_The_Nickname()
         {
             var member = await SaveMemberWithAccountAsync("testuser5", "password5");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 var storedMember = await session.GetAsync<Member>(member.ID, TestContext.Current.CancellationToken);
                 storedMember.ChangeNickname((Nickname)"renamed5");
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (new AssertionScope())
             {
-                var sut = new TestMediatorBuilder(session).Build();
-
-                using (new AssertionScope())
-                {
-                    (await sut.Send(new LogInCommand("testuser5", "password5"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-                    (await sut.Send(new LogInCommand("renamed5", "password5"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
-                }
+                (await SendAsync(new LogInCommand("testuser5", "password5"))).IsSuccess.Should().BeTrue();
+                (await SendAsync(new LogInCommand("renamed5", "password5"))).IsSuccess.Should().BeFalse();
             }
         }
 
@@ -66,13 +50,7 @@ namespace InstaLike.IntegrationTests
         public async Task Registered_Member_Should_Not_Be_Able_To_Log_In_With_Wrong_Password()
         {
             await SaveMemberWithAccountAsync("testuser3", "password3");
-            Result<Guid> authenticationResult;
-
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var sut = new TestMediatorBuilder(session).Build();
-                authenticationResult = await sut.Send(new LogInCommand("testuser3", "xxx42"), TestContext.Current.CancellationToken);
-            }
+            var authenticationResult = await SendAsync(new LogInCommand("testuser3", "xxx42"));
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }
@@ -80,13 +58,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Unknown_Username_Should_Not_Be_Able_To_Log_In()
         {
-            Result<Guid> authenticationResult;
-
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var sut = new TestMediatorBuilder(session).Build();
-                authenticationResult = await sut.Send(new LogInCommand("not_existing_user", "xxx42"), TestContext.Current.CancellationToken);
-            }
+            var authenticationResult = await SendAsync(new LogInCommand("not_existing_user", "xxx42"));
 
             authenticationResult.IsSuccess.Should().BeFalse();
         }
@@ -97,7 +69,7 @@ namespace InstaLike.IntegrationTests
         private async Task<Member> SaveMemberWithAccountAsync(string nickname, string password)
         {
             var member = TestDataHelper.NewMember(nickname);
-            using var session = _testFixture.OpenSession(_output);
+            using var session = Infrastructure.OpenSession();
             await session.SaveAsync(member, TestContext.Current.CancellationToken);
             await session.SaveAsync(TestDataHelper.NewAccountWithPassword(member, password), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);

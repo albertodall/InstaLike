@@ -8,16 +8,11 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class NotificationFixture : IClassFixture<DatabaseFixture>
+    public sealed class NotificationFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-
-        public NotificationFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public NotificationFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task Should_Mark_The_Given_Notifications_Read()
@@ -28,7 +23,7 @@ namespace InstaLike.IntegrationTests
             var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
             var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
@@ -39,16 +34,12 @@ namespace InstaLike.IntegrationTests
             }
 
             var command = new MarkNotificationsReadCommand(recipient.ID.Value, [not1.ID.Value, not2.ID.Value]);
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var sut = new TestMediatorBuilder(session).Build();
-                result = await sut.Send(command, TestContext.Current.CancellationToken);
-            }
+            result = await SendAsync(command);
 
             using (new AssertionScope())
             {
                 result.Should().Be(2);
-                using (var session = _testFixture.OpenSession(_output))
+                using (var session = Infrastructure.OpenSession())
                 {
                     (await session.GetAsync<Notification>(not3.ID, TestContext.Current.CancellationToken))!
                         .HasBeenReadByRecipient.Should().BeFalse();
@@ -63,7 +54,7 @@ namespace InstaLike.IntegrationTests
             var sender = TestDataHelper.NewMember("sender");
             var recipient = TestDataHelper.NewMember("recipient");
             var notification = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
@@ -72,11 +63,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var command = new MarkNotificationsReadCommand(sender.ID.Value, [notification.ID.Value]);
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var sut = new TestMediatorBuilder(session).Build();
-                result = await sut.Send(command, TestContext.Current.CancellationToken);
-            }
+            result = await SendAsync(command);
 
             result.Should().Be(0);
         }
@@ -87,7 +74,7 @@ namespace InstaLike.IntegrationTests
             int result;
             var sender = TestDataHelper.NewMember("sender");
             var recipient = TestDataHelper.NewMember("recipient");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
@@ -102,7 +89,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var query = new UnreadNotificationsQuery(recipient.ID.Value);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
                 result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -117,7 +104,7 @@ namespace InstaLike.IntegrationTests
             NotificationModel[] result;
             var sender = TestDataHelper.NewMember("sender");
             var recipient = TestDataHelper.NewMember("recipient");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
@@ -132,7 +119,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var query = new NotificationsQuery(recipient.ID.Value, true);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new NotificationsQueryHandler(session, Log.Logger);
                 result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -151,7 +138,7 @@ namespace InstaLike.IntegrationTests
             NotificationModel[] result;
             var sender = TestDataHelper.NewMember("sender");
             var recipient = TestDataHelper.NewMember("recipient");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
@@ -166,7 +153,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var query = new NotificationsQuery(recipient.ID.Value, false);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new NotificationsQueryHandler(session, Log.Logger);
                 result = await sut.Handle(query, TestContext.Current.CancellationToken);

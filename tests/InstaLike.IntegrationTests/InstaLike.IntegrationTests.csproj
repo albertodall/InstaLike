@@ -5,14 +5,16 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="FluentNHibernate" />
     <PackageReference Include="nhibernate" />
+    <PackageReference Include="Respawn" />
     <PackageReference Include="Serilog" />
-    <PackageReference Include="System.Data.SQLite.Core" />
+    <PackageReference Include="Testcontainers.Azurite" />
+    <PackageReference Include="Testcontainers.MsSql" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\InstaLike.Core\InstaLike.Core.csproj" />
+    <ProjectReference Include="..\..\src\InstaLike.Database.Migrator\InstaLike.Database.Migrator.csproj" />
     <ProjectReference Include="..\..\src\InstaLike.Web\InstaLike.Web.csproj" />
   </ItemGroup>
   <ItemGroup>

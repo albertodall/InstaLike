@@ -8,16 +8,11 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class MemberFixture : IClassFixture<DatabaseFixture>
+    public sealed class MemberFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-
-        public MemberFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public MemberFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task Should_Load_User_Profile()
@@ -28,7 +23,7 @@ namespace InstaLike.IntegrationTests
             var followed = TestDataHelper.NewMember("followeduser");
             var follower = TestDataHelper.NewMember("followeruser");
             Post post;
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followed, TestContext.Current.CancellationToken);
                 await session.SaveAsync(follower, TestContext.Current.CancellationToken);
@@ -41,7 +36,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var query = new MemberProfileQuery(follower.ID.Value, author.Nickname, 3);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new MemberProfileQueryHandler(session, Log.Logger);
                 result = await sut.Handle(query, TestContext.Current.CancellationToken);
@@ -63,14 +58,14 @@ namespace InstaLike.IntegrationTests
             EditMemberProfileModel result;
 
             var user = TestDataHelper.NewMember("testuser");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(user, TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
             var query = new EditMemberProfileQuery(user.ID);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new EditMemberProfileQueryHandler(session, Log.Logger);
                 result = await sut.Handle(query, TestContext.Current.CancellationToken);
