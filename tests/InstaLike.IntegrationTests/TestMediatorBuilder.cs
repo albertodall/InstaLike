@@ -7,6 +7,10 @@ using Serilog;
 
 namespace InstaLike.IntegrationTests
 {
+    /// <summary>
+    /// Builds the application's MediatR pipeline, with its handlers and behaviors such as the unit of work,
+    /// on the test's session, so tests can send requests as the application does without starting it.
+    /// </summary>
     internal sealed class TestMediatorBuilder
     {
         private readonly IServiceCollection _services = new ServiceCollection();
