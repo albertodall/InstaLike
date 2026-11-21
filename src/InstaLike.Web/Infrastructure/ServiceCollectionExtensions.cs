@@ -5,6 +5,7 @@ using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
+using InstaLike.Web.Accounts;
 using InstaLike.Web.Data;
 using InstaLike.Web.Media;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -72,6 +73,7 @@ namespace InstaLike.Web.Infrastructure
 
         public static IServiceCollection ConfigureAuthentication(this IServiceCollection services)
         {
+            services.AddScoped<SecurityStampValidator>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(opt =>
                 {
@@ -79,6 +81,7 @@ namespace InstaLike.Web.Infrastructure
                     opt.Cookie.HttpOnly = true;
                     opt.LoginPath = new PathString("/Account/Login");
                     opt.AccessDeniedPath = new PathString("/Account/AccessDenied");
+                    opt.EventsType = typeof(SecurityStampValidator);
                 });
 
             return services;

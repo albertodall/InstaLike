@@ -70,14 +70,27 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
+        public void Should_Change_The_Security_Stamp_With_The_Password()
+        {
+            var sut = CreateAccountWithPassword("password1");
+            var securityStamp = sut.SecurityStamp;
+
+            sut.ChangePassword("password1", Password.Create("password2").Value);
+
+            sut.SecurityStamp.Should().NotBe(securityStamp);
+        }
+
+        [Fact]
         public void Should_Not_Change_The_Password_When_The_Current_One_Does_Not_Match()
         {
             var sut = CreateAccountWithPassword("password1");
+            var securityStamp = sut.SecurityStamp;
 
             using (new AssertionScope())
             {
                 sut.ChangePassword("wrong", Password.Create("password2").Value).IsFailure.Should().BeTrue();
                 sut.Password.HashMatches("password1").Should().BeTrue();
+                sut.SecurityStamp.Should().Be(securityStamp);
             }
         }
 

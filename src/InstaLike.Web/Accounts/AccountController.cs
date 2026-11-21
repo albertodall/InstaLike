@@ -47,19 +47,8 @@ namespace InstaLike.Web.Accounts
                 }
                 else
                 {
-                    var memberID = authenticationResult.Value;
-                    var nickname = await _dispatcher.Send(new MemberNicknameQuery(memberID));
-                    var memberIdentity = new ClaimsIdentity(
-                        GetMemberClaims(memberID, nickname),
-                        CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(memberIdentity),
-                        new AuthenticationProperties()
-                        {
-                            IsPersistent = model.RememberMe
-                        });
+                    var (memberID, securityStamp) = authenticationResult.Value;
+                    await SignInMemberAsync(memberID, securityStamp, model.RememberMe);
 
                     return Url.IsLocalUrl(model.ReturnUrl)
                         ? LocalRedirect(model.ReturnUrl)
@@ -122,6 +111,9 @@ namespace InstaLike.Web.Accounts
                 var result = await _dispatcher.Send(new ChangePasswordCommand(CurrentAccountID, changePassword.CurrentPassword, changePassword.NewPassword));
                 if (result.IsSuccess)
                 {
+                    var currentLogin = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await SignInMemberAsync(User.GetIdentifier(), result.Value, currentLogin.Properties?.IsPersistent ?? false);
+
                     TempData["SettingsMessage"] = "Your password has been changed.";
                     return RedirectToAction(nameof(Settings));
                 }
@@ -139,17 +131,31 @@ namespace InstaLike.Web.Accounts
         private AccountId CurrentAccountID => AccountId.From(User.GetIdentifier());
 
         /// <summary>
-        /// Builds the list of claims for the authenticated member.
+        /// Issues the login cookie of the member, with the security stamp their account has now.
         /// </summary>
-        /// <param name="memberID">Identifier of the authenticated member.</param>
-        /// <param name="nickname">Nickname of the authenticated member.</param>
-        /// <returns>The list of claims.</returns>
-        private static IEnumerable<Claim> GetMemberClaims(Guid memberID, string nickname)
+        private async Task SignInMemberAsync(Guid memberID, Guid securityStamp, bool isPersistent)
+        {
+            var nickname = await _dispatcher.Send(new MemberNicknameQuery(memberID));
+            var memberIdentity = new ClaimsIdentity(
+                GetMemberClaims(memberID, nickname, securityStamp),
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(memberIdentity),
+                new AuthenticationProperties()
+                {
+                    IsPersistent = isPersistent
+                });
+        }
+
+        private static IEnumerable<Claim> GetMemberClaims(Guid memberID, string nickname, Guid securityStamp)
         {
             return new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, memberID.ToString(), ClaimValueTypes.String),
-                new Claim(ClaimTypes.Name, nickname, ClaimValueTypes.String)
+                new Claim(ClaimTypes.Name, nickname, ClaimValueTypes.String),
+                new Claim(SecurityStampValidator.ClaimType, securityStamp.ToString(), ClaimValueTypes.String)
             };
         }
     }

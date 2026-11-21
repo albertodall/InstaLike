@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
@@ -30,7 +31,10 @@ namespace InstaLike.Web.Accounts
         public string ConfirmNewPassword { get; set; } = string.Empty;
     }
 
-    public sealed class ChangePasswordCommand : ICommand<Result>
+    /// <summary>
+    /// Changes the password of an account; the result is the new security stamp of the account.
+    /// </summary>
+    public sealed class ChangePasswordCommand : ICommand<Result<Guid>>
     {
         public AccountId AccountID { get; }
         public string CurrentPassword { get; }
@@ -44,7 +48,7 @@ namespace InstaLike.Web.Accounts
         }
     }
 
-    internal sealed class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, Result>
+    internal sealed class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, Result<Guid>>
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
@@ -55,31 +59,31 @@ namespace InstaLike.Web.Accounts
             _logger = logger.ForContext<ChangePasswordCommand>();
         }
 
-        public async Task<Result> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
         {
             var newPassword = Password.Create(request.NewPassword);
             if (newPassword.IsFailure)
             {
-                return Result.Failure(newPassword.Error);
+                return Result.Failure<Guid>(newPassword.Error);
             }
 
             var account = await _session.GetAsync<Account>(request.AccountID, cancellationToken);
             if (account is null)
             {
-                return Result.Failure(AccountErrors.NotFound(request.AccountID));
+                return Result.Failure<Guid>(AccountErrors.NotFound(request.AccountID));
             }
 
             var change = account.ChangePassword(request.CurrentPassword, newPassword.Value);
             if (change.IsFailure)
             {
                 _logger.Warning("Account [{Username}({AccountID})] could not change its password: {Reason}", account.Username, request.AccountID, change.Error.Description);
-                return change;
+                return Result.Failure<Guid>(change.Error);
             }
 
             await _session.FlushAsync(cancellationToken);
 
             _logger.Information("Account [{Username}({AccountID})] changed its password.", account.Username, request.AccountID);
-            return Result.Ok();
+            return Result.Ok(account.SecurityStamp);
         }
     }
 }

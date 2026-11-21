@@ -30,9 +30,9 @@ namespace InstaLike.Web.Accounts
     }
 
     /// <summary>
-    /// Logs an account in; the result is the identifier of the member the account belongs to.
+    /// Logs an account in; the result is the member the account belongs to and the security stamp of the account.
     /// </summary>
-    public sealed class LogInCommand : ICommand<Result<Guid>>
+    public sealed class LogInCommand : ICommand<Result<(Guid MemberID, Guid SecurityStamp)>>
     {
         public string Username { get; }
         public string Password { get; }
@@ -44,7 +44,7 @@ namespace InstaLike.Web.Accounts
         }
     }
 
-    internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<Guid>>
+    internal sealed class LogInCommandHandler : IRequestHandler<LogInCommand, Result<(Guid MemberID, Guid SecurityStamp)>>
     {
         private readonly ISession _session;
         private readonly ILogger _logger;
@@ -55,7 +55,7 @@ namespace InstaLike.Web.Accounts
             _logger = logger.ForContext<LogInCommand>();
         }
 
-        public async Task<Result<Guid>> Handle(LogInCommand request, CancellationToken cancellationToken)
+        public async Task<Result<(Guid MemberID, Guid SecurityStamp)>> Handle(LogInCommand request, CancellationToken cancellationToken)
         {
             var account = await _session.QueryOver<Account>()
                 .Where(Restrictions.Eq("Username", request.Username))
@@ -63,17 +63,17 @@ namespace InstaLike.Web.Accounts
             if (account is null)
             {
                 _logger.Debug("Account {Username} does not exist.", request.Username);
-                return Result.Failure<Guid>(AccountErrors.InvalidCredentials);
+                return Result.Failure<(Guid MemberID, Guid SecurityStamp)>(AccountErrors.InvalidCredentials);
             }
 
             var logIn = account.LogIn(request.Password);
             if (logIn.IsFailure)
             {
                 _logger.Debug("Account {Username} did not authenticate correctly.", request.Username);
-                return Result.Failure<Guid>(logIn.Error);
+                return Result.Failure<(Guid MemberID, Guid SecurityStamp)>(logIn.Error);
             }
 
-            return Result.Ok(account.ID.Value);
+            return Result.Ok((account.ID.Value, account.SecurityStamp));
         }
     }
 

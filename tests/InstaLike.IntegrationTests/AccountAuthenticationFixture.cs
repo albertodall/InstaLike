@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Accounts;
 using Xunit;
 
@@ -24,7 +24,8 @@ namespace InstaLike.IntegrationTests
             using (new AssertionScope())
             {
                 authenticationResult.IsSuccess.Should().BeTrue();
-                authenticationResult.Value.Should().Be(member.ID.Value);
+                authenticationResult.Value.MemberID.Should().Be(member.ID.Value);
+                authenticationResult.Value.SecurityStamp.Should().Be((await LoadAccountAsync(member.ID.Value)).SecurityStamp);
             }
         }
 
@@ -74,6 +75,12 @@ namespace InstaLike.IntegrationTests
             await session.SaveAsync(TestDataHelper.NewAccountWithPassword(member, password), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
             return member;
+        }
+
+        private async Task<Account> LoadAccountAsync(Guid memberID)
+        {
+            using var session = Infrastructure.OpenSession();
+            return await session.GetAsync<Account>(AccountId.From(memberID), TestContext.Current.CancellationToken);
         }
     }
 }

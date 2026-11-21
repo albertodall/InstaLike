@@ -68,6 +68,8 @@ namespace InstaLike.IntegrationTests
                 result.IsSuccess.Should().BeTrue();
                 (await SendAsync(new LogInCommand("passwordchanger", "newpassword"))).IsSuccess.Should().BeTrue();
                 (await SendAsync(new LogInCommand("passwordchanger", "password"))).IsSuccess.Should().BeFalse();
+                result.Value.Should().NotBe(account.SecurityStamp);
+                (await LoadAsync(account.ID)).SecurityStamp.Should().Be(result.Value);
             }
         }
 
@@ -82,6 +84,7 @@ namespace InstaLike.IntegrationTests
             {
                 result.Error.Should().Be(AccountErrors.WrongCurrentPassword);
                 (await LoadAsync(account.ID)).Password.HashMatches("password").Should().BeTrue();
+                (await LoadAsync(account.ID)).SecurityStamp.Should().Be(account.SecurityStamp);
             }
         }
 

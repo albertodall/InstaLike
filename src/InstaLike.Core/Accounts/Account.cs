@@ -18,6 +18,7 @@ namespace InstaLike.Core.Accounts
             _username = username;
             _password = password;
             _email = email;
+            SecurityStamp = Guid.NewGuid();
         }
 
         private readonly string _username;
@@ -28,6 +29,8 @@ namespace InstaLike.Core.Accounts
 
         private string _email;
         public virtual Email Email => (Email)_email;
+
+        public virtual Guid SecurityStamp { get; protected set; }
 
         public static Account Create(Guid memberID, Username username, Password password, Email email) =>
             new(memberID, username, password, email);
@@ -56,6 +59,7 @@ namespace InstaLike.Core.Accounts
             }
 
             _password = newPassword;
+            SecurityStamp = Guid.NewGuid();
             return Result.Ok();
         }
 

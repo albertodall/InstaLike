@@ -21,6 +21,8 @@ namespace InstaLike.Web.Data.Mapping
             Map(p => p.Email).AnsiString(50)
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable();
+            Map(p => p.SecurityStamp)
+                .Not.Nullable();
         }
     }
 }

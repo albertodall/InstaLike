@@ -93,6 +93,35 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         [Fact]
+        public async Task Password_Change_Should_Log_Out_The_Other_Sessions_Only()
+        {
+            using var browser = await RegisterAndLogInAsync("twodevices");
+            using var otherDevice = Application.OpenBrowser();
+            (await LogInAsync(otherDevice, "twodevices", DefaultPassword)).StatusCode
+                .Should()
+                .Be(HttpStatusCode.Redirect);
+            var settings = await browser.OpenAsync("/Account/Settings");
+
+            var passwordChange = await browser.SubmitAsync(
+                Form(settings, "form[action='/Account/ChangePassword']"),
+                new Dictionary<string, string>
+                {
+                    ["ChangePassword.CurrentPassword"] = DefaultPassword,
+                    ["ChangePassword.NewPassword"] = "newpassword",
+                    ["ChangePassword.ConfirmNewPassword"] = "newpassword"
+                });
+            var otherDeviceTimeline = await otherDevice.GetAsync("/");
+
+            using (new AssertionScope())
+            {
+                passwordChange.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                (await browser.GetAsync("/")).StatusCode.Should().Be(HttpStatusCode.OK);
+                otherDeviceTimeline.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                otherDeviceTimeline.Headers.Location?.OriginalString.Should().StartWith("http://localhost/Account/Login");
+            }
+        }
+
+        [Fact]
         public async Task Form_Without_A_Valid_Antiforgery_Token_Should_Be_Rejected()
         {
             using var browser = await RegisterAndLogInAsync("nick_forged");
