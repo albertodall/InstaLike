@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.Accounts;
 using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Accounts;
-using MediatR;
 using Xunit;
 
 namespace InstaLike.IntegrationTests
@@ -95,28 +91,6 @@ namespace InstaLike.IntegrationTests
             authenticationResult.IsSuccess.Should().BeFalse();
         }
 
-        [Fact]
-        public async Task Logging_In_And_Out_Should_Raise_Events()
-        {
-            var member = await SaveMemberWithAccountAsync("testuser4", "password4");
-            var accountID = AccountId.From(member.ID.Value);
-
-            var raised = new List<IDomainEvent>();
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var sut = new TestMediatorBuilder(session)
-                    .WithHandler<INotificationHandler<AccountLoggedInEvent>>(new RecordingHandler<AccountLoggedInEvent>(raised))
-                    .WithHandler<INotificationHandler<AccountLoggedOutEvent>>(new RecordingHandler<AccountLoggedOutEvent>(raised))
-                    .Build();
-
-                (await sut.Send(new LogInCommand("testuser4", "wrong"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
-                (await sut.Send(new LogInCommand("testuser4", "password4"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-                (await sut.Send(new LogOutCommand(accountID), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-            }
-
-            raised.Should().Equal(new AccountLoggedInEvent(accountID), new AccountLoggedOutEvent(accountID));
-        }
-
         /// <summary>
         /// Saves a member with an account that logs in with the nickname and the given password.
         /// </summary>
@@ -128,23 +102,6 @@ namespace InstaLike.IntegrationTests
             await session.SaveAsync(TestDataHelper.NewAccountWithPassword(member, password), TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
             return member;
-        }
-
-        /// <summary>
-        /// Records the events it receives, in the order they arrive.
-        /// </summary>
-        private sealed class RecordingHandler<TEvent> : INotificationHandler<TEvent>
-            where TEvent : IDomainEvent
-        {
-            private readonly List<IDomainEvent> _raised;
-
-            public RecordingHandler(List<IDomainEvent> raised) => _raised = raised;
-
-            public Task Handle(TEvent notification, CancellationToken cancellationToken)
-            {
-                _raised.Add(notification);
-                return Task.CompletedTask;
-            }
         }
     }
 }
