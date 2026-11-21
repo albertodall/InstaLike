@@ -52,7 +52,9 @@ namespace InstaLike.IntegrationTests
         public ISender Build()
         {
             _services.AddSingleton(_pictureStore);
-            return _services.BuildServiceProvider().CreateScope().ServiceProvider.GetRequiredService<ISender>();
+            return _services.BuildServiceProvider()
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<ISender>();
         }
     }
 }
