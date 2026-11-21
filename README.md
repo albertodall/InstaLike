@@ -118,12 +118,13 @@ Before the first deployment:
 This project has been built using these awesome Open Source projects:
 
 - [ASP.NET Core](https://dotnet.microsoft.com/download/dotnet-core)
-- [CSharpFunctionalExtensions](https://github.com/vkhorikov/CSharpFunctionalExtensions)
 - [MediatR](https://github.com/jbogard/MediatR)
 - [NHibernate](https://github.com/nhibernate/nhibernate-core)
 - [FluentNHibernate](https://github.com/FluentNHibernate/fluent-nhibernate)
 - [DbUp](https://dbup.readthedocs.io)
-- [Xunit](https://xunit.net)
+- [UUIDNext](https://github.com/mareek/UUIDNext)
+- [OpenTelemetry](https://opentelemetry.io/docs/languages/dotnet/)
+- [xUnit.net](https://xunit.net)
 - [FluentAssertions](https://fluentassertions.com)
 - [Testcontainers](https://dotnet.testcontainers.org)
 - [Respawn](https://github.com/jbogard/Respawn)
