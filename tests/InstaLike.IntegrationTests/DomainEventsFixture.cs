@@ -16,26 +16,18 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class DomainEventsFixture : IClassFixture<DatabaseFixture>
+    public sealed class DomainEventsFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-
-        public DomainEventsFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public DomainEventsFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task Liking_A_Post_Should_Notify_Its_Author()
         {
             var (author, reader, post) = await CreatePostAsync("eventauthor1", "eventreader1");
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                (await new TestMediatorBuilder(session).Build().Send(new LikePostCommand(post.ID, reader.ID.Value), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-            }
+            (await SendAsync(new LikePostCommand(post.ID, reader.ID.Value))).IsSuccess.Should().BeTrue();
 
             var notifications = await GetNotificationsAsync(author.ID.Value);
             using (new AssertionScope())
@@ -52,10 +44,7 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, post) = await CreatePostAsync("eventauthor2", "eventreader2");
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "nice", reader.ID.Value), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-            }
+            (await SendAsync(new PublishCommentCommand(post.ID, "nice", reader.ID.Value))).IsSuccess.Should().BeTrue();
 
             var notifications = await GetNotificationsAsync(author.ID.Value);
             using (new AssertionScope())
@@ -72,10 +61,7 @@ namespace InstaLike.IntegrationTests
         {
             var (author, _, post) = await CreatePostAsync("eventauthor3", "eventreader3");
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                (await new TestMediatorBuilder(session).Build().Send(new PublishCommentCommand(post.ID, "my own post", author.ID.Value), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-            }
+            (await SendAsync(new PublishCommentCommand(post.ID, "my own post", author.ID.Value))).IsSuccess.Should().BeTrue();
 
             (await GetNotificationsAsync(author.ID.Value)).Should().BeEmpty();
         }
@@ -85,10 +71,7 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, _) = await CreatePostAsync("eventauthor4", "eventreader4");
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                (await new TestMediatorBuilder(session).Build().Send(new FollowCommand(reader.ID.Value, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
-            }
+            (await SendAsync(new FollowCommand(reader.ID.Value, author.Nickname))).IsSuccess.Should().BeTrue();
 
             var notifications = await GetNotificationsAsync(author.ID.Value);
             using (new AssertionScope())
@@ -105,9 +88,9 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, post) = await CreatePostAsync("eventauthor5", "eventreader5");
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
-                var mediator = new TestMediatorBuilder(session)
+                var mediator = new TestMediatorBuilder(session, Infrastructure.PictureStore)
                     .WithHandler<INotificationHandler<PostLikedEvent>, FailingHandler>()
                     .Build();
 
@@ -115,7 +98,7 @@ namespace InstaLike.IntegrationTests
                 await like.Should().ThrowAsync<InvalidOperationException>();
             }
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 using (new AssertionScope())
                 {
@@ -130,9 +113,9 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, post) = await CreatePostAsync("eventauthor6", "eventreader6");
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
-                var mediator = new TestMediatorBuilder(session)
+                var mediator = new TestMediatorBuilder(session, Infrastructure.PictureStore)
                     .WithHandler<IRequestHandler<LikeThenFailCommand, Result>, LikeThenFailCommandHandler>()
                     .Build();
 
@@ -140,7 +123,7 @@ namespace InstaLike.IntegrationTests
                 (await mediator.Send(new FollowCommand(reader.ID.Value, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
             }
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 using (new AssertionScope())
                 {
@@ -159,7 +142,7 @@ namespace InstaLike.IntegrationTests
             var author = TestDataHelper.NewMember(authorNickname);
             var reader = TestDataHelper.NewMember(readerNickname);
             Post post;
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(author);
                 await session.SaveAsync(reader);
@@ -176,7 +159,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         private async Task<IList<Notification>> GetNotificationsAsync(Guid recipientID)
         {
-            using var session = _testFixture.OpenSession(_output);
+            using var session = Infrastructure.OpenSession();
             return await session.QueryOver<Notification>()
                 .Where(n => n.RecipientID == recipientID)
                 .ListAsync();

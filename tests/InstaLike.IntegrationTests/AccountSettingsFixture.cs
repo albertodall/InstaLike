@@ -1,24 +1,17 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Accounts;
 using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class AccountSettingsFixture : IClassFixture<DatabaseFixture>
+    public sealed class AccountSettingsFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-
-        public AccountSettingsFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public AccountSettingsFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task Should_Change_The_Email_Address()
@@ -99,7 +92,7 @@ namespace InstaLike.IntegrationTests
         {
             var member = TestDataHelper.NewMember(nickname);
             var account = TestDataHelper.NewAccount(member);
-            using var session = _testFixture.OpenSession(_output);
+            using var session = Infrastructure.OpenSession();
             await session.SaveAsync(member, TestContext.Current.CancellationToken);
             await session.SaveAsync(account, TestContext.Current.CancellationToken);
             await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -107,38 +100,11 @@ namespace InstaLike.IntegrationTests
         }
 
         /// <summary>
-        /// Sends the command in a session of its own, like a single request.
-        /// </summary>
-        private async Task<Result> SendAsync(ChangeEmailCommand command)
-        {
-            using var session = _testFixture.OpenSession(_output);
-            return await new TestMediatorBuilder(session).Build().Send(command, TestContext.Current.CancellationToken);
-        }
-
-        /// <summary>
-        /// Sends the command in a session of its own, like a single request.
-        /// </summary>
-        private async Task<Result> SendAsync(ChangePasswordCommand command)
-        {
-            using var session = _testFixture.OpenSession(_output);
-            return await new TestMediatorBuilder(session).Build().Send(command, TestContext.Current.CancellationToken);
-        }
-
-        /// <summary>
-        /// Sends the command in a session of its own, like a single request.
-        /// </summary>
-        private async Task<Result<Guid>> SendAsync(LogInCommand command)
-        {
-            using var session = _testFixture.OpenSession(_output);
-            return await new TestMediatorBuilder(session).Build().Send(command, TestContext.Current.CancellationToken);
-        }
-
-        /// <summary>
         /// Loads the account in a new session, to see what was saved.
         /// </summary>
         private async Task<Account> LoadAsync(AccountId accountID)
         {
-            using var session = _testFixture.OpenSession(_output);
+            using var session = Infrastructure.OpenSession();
             return await session.GetAsync<Account>(accountID, TestContext.Current.CancellationToken);
         }
     }

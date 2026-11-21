@@ -101,7 +101,7 @@ The script skips the rows that already exist, so it can run again.
 ```shell
 dotnet test
 ```
-Integration tests run on SQLite with an in-memory picture store, so they do not need any container.
+Integration tests send the use cases to their handlers and run on SQL Server, migrated by the migrator's scripts, and on [Azurite](https://github.com/Azure/Azurite) for the pictures. [Testcontainers](https://dotnet.testcontainers.org/) starts both for the test run, so Docker must be running; the containers of `docker compose` are not used.
 
 ## Deploy to Azure
 Terraform (`infra/tf`) provisions the Azure resources, named after the [Azure naming conventions](https://azurenamingconventions.com/blog/azure-naming-conventions-complete-guide/) (`{type}-instalike-prd-weu`). The Azure DevOps pipeline (`azure-pipelines.yml`) builds, migrates the database and deploys the web application.
@@ -123,6 +123,8 @@ This project has been built using these awesome Open Source projects:
 - [DbUp](https://dbup.readthedocs.io)
 - [Xunit](https://xunit.net)
 - [FluentAssertions](https://fluentassertions.com)
+- [Testcontainers](https://dotnet.testcontainers.org)
+- [Respawn](https://github.com/jbogard/Respawn)
 - [Serilog](https://serilog.net)
 - [Humanizer](https://github.com/Humanizr/Humanizer)
 

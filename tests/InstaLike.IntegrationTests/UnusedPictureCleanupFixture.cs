@@ -9,17 +9,11 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class UnusedPictureCleanupFixture : IClassFixture<DatabaseFixture>
+    public sealed class UnusedPictureCleanupFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-        private readonly InMemoryPictureStore _pictureStore = new();
-
-        public UnusedPictureCleanupFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public UnusedPictureCleanupFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task Should_Delete_Pictures_No_Entity_References()
@@ -30,7 +24,7 @@ namespace InstaLike.IntegrationTests
             var unusedProfilePicture = await UploadAsync(PictureContainers.Profiles);
             var author = TestDataHelper.NewMember("cleanupuser1");
             author.SetProfilePicture(profilePicture);
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(author, TestContext.Current.CancellationToken);
                 await session.SaveAsync(TestDataHelper.NewPost(author, "post with a used picture", postPicture), TestContext.Current.CancellationToken);
@@ -41,36 +35,36 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                _pictureStore.GetContent(PictureContainers.Posts, postPicture).Should().NotBeNull();
-                _pictureStore.GetContent(PictureContainers.Profiles, profilePicture).Should().NotBeNull();
-                _pictureStore.GetContent(PictureContainers.Posts, unusedPostPicture).Should().BeNull();
-                _pictureStore.GetContent(PictureContainers.Profiles, unusedProfilePicture).Should().BeNull();
+                (await Infrastructure.ReadPictureAsync(PictureContainers.Posts, postPicture)).Should().NotBeNull();
+                (await Infrastructure.ReadPictureAsync(PictureContainers.Profiles, profilePicture)).Should().NotBeNull();
+                (await Infrastructure.ReadPictureAsync(PictureContainers.Posts, unusedPostPicture)).Should().BeNull();
+                (await Infrastructure.ReadPictureAsync(PictureContainers.Profiles, unusedProfilePicture)).Should().BeNull();
             }
         }
 
         [Fact]
         public async Task Should_Keep_Pictures_Uploaded_After_The_Cutoff()
         {
-            var cutoff = DateTimeOffset.UtcNow;
+            var cutoff = DateTimeOffset.UtcNow.AddMinutes(-1);
             var recentPicture = await UploadAsync(PictureContainers.Posts);
 
             await CleanUpUploadedBeforeAsync(cutoff);
 
-            _pictureStore.GetContent(PictureContainers.Posts, recentPicture).Should().NotBeNull("its transaction may still be running");
+            (await Infrastructure.ReadPictureAsync(PictureContainers.Posts, recentPicture)).Should().NotBeNull("its transaction may still be running");
         }
 
         /// <summary>
         /// Uploads the test picture to the container, with no post or member referencing it.
         /// </summary>
         private Task<PictureId> UploadAsync(string container) =>
-            _pictureStore.SaveAsync(container, Convert.FromBase64String(DatabaseFixture.GetTestPictureBase64()), TestContext.Current.CancellationToken);
+            Infrastructure.PictureStore.SaveAsync(container, Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()), TestContext.Current.CancellationToken);
 
         /// <summary>
         /// Runs the cleanup on the pictures uploaded before the given time.
         /// </summary>
         private async Task CleanUpUploadedBeforeAsync(DateTimeOffset uploadedBefore)
         {
-            var sut = new UnusedPictureCleanupService(_testFixture.SessionFactory, _pictureStore, Log.Logger);
+            var sut = new UnusedPictureCleanupService(Infrastructure.SessionFactory, Infrastructure.PictureStore, Log.Logger);
             await sut.CleanUpUploadedBeforeAsync(uploadedBefore, TestContext.Current.CancellationToken);
         }
     }

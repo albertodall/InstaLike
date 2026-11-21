@@ -161,18 +161,32 @@ namespace InstaLike.Web.Infrastructure
 
         private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString, IHostEnvironment environment)
         {
-            var database = MsSqlConfiguration.MsSql2012
-                .Driver<MicrosoftDataSqlClientDriver>()
-                .ConnectionString(connectionString)
-                .DefaultSchema("dbo")
-                .AdoNetBatchSize(20)
-                .UseReflectionOptimizer();
-
+            var database = GetDatabaseConfiguration(connectionString);
             if (environment.IsDevelopment())
             {
                 database.ShowSql().FormatSql();
             }
 
+            return GetFluentConfigurationForDatabase(database);
+        }
+
+        internal static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
+        {
+            return GetFluentConfigurationForDatabase(GetDatabaseConfiguration(connectionString));
+        }
+
+        private static MsSqlConfiguration GetDatabaseConfiguration(string connectionString)
+        {
+            return MsSqlConfiguration.MsSql2012
+                .Driver<MicrosoftDataSqlClientDriver>()
+                .ConnectionString(connectionString)
+                .DefaultSchema("dbo")
+                .AdoNetBatchSize(20)
+                .UseReflectionOptimizer();
+        }
+
+        private static FluentConfiguration GetFluentConfigurationForDatabase(MsSqlConfiguration database)
+        {
             return Fluently.Configure()
                 .Database(database)
                 .Mappings(m =>

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social;
 using NHibernate;
@@ -11,25 +10,19 @@ using Xunit;
 
 namespace InstaLike.IntegrationTests
 {
-    public sealed class FollowFixture : IClassFixture<DatabaseFixture>
+    public sealed class FollowFixture : IntegrationTestFixture
     {
-        private readonly DatabaseFixture _testFixture;
-        private readonly ITestOutputHelper _output;
-
-        public FollowFixture(DatabaseFixture fixture, ITestOutputHelper output)
-        {
-            _testFixture = fixture;
-            _output = output;
-        }
+        public FollowFixture(TestInfrastructureFactory infrastructure)
+            : base(infrastructure)
+        { }
 
         [Fact]
         public async Task User_Should_Follow_Another_User()
         {
             var followerUser = TestDataHelper.NewMember("user1");
             var followedUser = TestDataHelper.NewMember("user2");
-            Result followResult;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
@@ -37,16 +30,12 @@ namespace InstaLike.IntegrationTests
             }
 
             var followCommand = new FollowCommand(followerUser.ID.Value, followedUser.Nickname);
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                followResult = await handler.Send(followCommand, TestContext.Current.CancellationToken);
-            }
+            var followResult = await SendAsync(followCommand);
 
             using (new AssertionScope())
             {
                 followResult.IsSuccess.Should().BeTrue();
-                using (var session = _testFixture.OpenSession(_output))
+                using (var session = Infrastructure.OpenSession())
                 {
                     (await CountFollowsAsync(session, followerUser.ID.Value, followedUser.ID.Value)).Should().Be(1);
                 }
@@ -58,9 +47,8 @@ namespace InstaLike.IntegrationTests
         {
             var followerUser = TestDataHelper.NewMember("user3");
             var followedUser = TestDataHelper.NewMember("user4");
-            Result unfollowResult;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
@@ -69,16 +57,12 @@ namespace InstaLike.IntegrationTests
             }
 
             var unfollowCommand = new UnfollowCommand(followerUser.ID.Value, followedUser.Nickname);
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                unfollowResult = await handler.Send(unfollowCommand, TestContext.Current.CancellationToken);
-            }
+            var unfollowResult = await SendAsync(unfollowCommand);
 
             using (new AssertionScope())
             {
                 unfollowResult.IsSuccess.Should().BeTrue();
-                using (var session = _testFixture.OpenSession(_output))
+                using (var session = Infrastructure.OpenSession())
                 {
                     (await CountFollowsAsync(session, followerUser.ID.Value, followedUser.ID.Value)).Should().Be(0);
                 }
@@ -90,9 +74,8 @@ namespace InstaLike.IntegrationTests
         {
             var followerUser = TestDataHelper.NewMember("user5");
             var followedUser = TestDataHelper.NewMember("user6");
-            Result followResult;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
@@ -100,23 +83,15 @@ namespace InstaLike.IntegrationTests
             }
 
             var followCommand = new FollowCommand(followerUser.ID.Value, followedUser.Nickname);
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                await handler.Send(followCommand, TestContext.Current.CancellationToken);
-            }
+            await SendAsync(followCommand);
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                followResult = await handler.Send(followCommand, TestContext.Current.CancellationToken);
-            }
+            var followResult = await SendAsync(followCommand);
 
             using (new AssertionScope())
             {
                 followResult.IsSuccess.Should()
                     .BeFalse($"User [{followedUser.Nickname}] is already followed by user [{followerUser.Nickname}].");
-                using (var session = _testFixture.OpenSession(_output))
+                using (var session = Infrastructure.OpenSession())
                 {
                     (await CountFollowsAsync(session, followerUser.ID.Value, followedUser.ID.Value)).Should().Be(1);
                 }
@@ -128,9 +103,8 @@ namespace InstaLike.IntegrationTests
         {
             var followerUser = TestDataHelper.NewMember("user7");
             var followedUser = TestDataHelper.NewMember("user8");
-            Result unfollowResult;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
@@ -138,11 +112,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var unfollowCommand = new UnfollowCommand(followerUser.ID.Value, followedUser.Nickname);
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                unfollowResult = await handler.Send(unfollowCommand, TestContext.Current.CancellationToken);
-            }
+            var unfollowResult = await SendAsync(unfollowCommand);
 
             unfollowResult.IsSuccess.Should()
                 .BeFalse($"User [{followerUser.Nickname}] is not following user [{followedUser.Nickname}].");
@@ -152,32 +122,28 @@ namespace InstaLike.IntegrationTests
         public async Task Should_Not_Follow_A_User_That_Does_Not_Exist()
         {
             var followerUser = TestDataHelper.NewMember("user13");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                (await handler.Send(new FollowCommand(followerUser.ID.Value, "nobody"), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
-            }
+            (await SendAsync(new FollowCommand(followerUser.ID.Value, "nobody"))).IsSuccess.Should().BeFalse();
         }
 
         [Fact]
         public async Task User_Should_Not_Follow_Themselves()
         {
             var user = TestDataHelper.NewMember("user14");
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(user, TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
-                var handler = new TestMediatorBuilder(session).Build();
+                var handler = new TestMediatorBuilder(session, Infrastructure.PictureStore).Build();
                 (await handler.Send(new FollowCommand(user.ID.Value, user.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
                 (await CountFollowsAsync(session, user.ID.Value, user.ID.Value)).Should().Be(0);
             }
@@ -190,7 +156,7 @@ namespace InstaLike.IntegrationTests
             var followedUser = TestDataHelper.NewMember("user10");
             FollowModel[] result;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
@@ -199,7 +165,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var followersQuery = new FollowersQuery(followedUser.Nickname);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new FollowersQueryHandler(session, Log.Logger);
                 result = await sut.Handle(followersQuery, TestContext.Current.CancellationToken);
@@ -215,7 +181,7 @@ namespace InstaLike.IntegrationTests
             var followedUser = TestDataHelper.NewMember("user12");
             FollowModel[] result;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followedUser, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followerUser, TestContext.Current.CancellationToken);
@@ -224,7 +190,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var followingQuery = new FollowingQuery(followerUser.Nickname);
-            using (var session = _testFixture.OpenStatelessSession())
+            using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new FollowingQueryHandler(session, Log.Logger);
                 result = await sut.Handle(followingQuery, TestContext.Current.CancellationToken);
@@ -239,25 +205,21 @@ namespace InstaLike.IntegrationTests
             var followerMember = TestDataHelper.NewMember("user15");
             var followedMember = TestDataHelper.NewMember("user16");
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerMember, TestContext.Current.CancellationToken);
                 await session.SaveAsync(followedMember, TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(0);
             }
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                await handler.Send(new FollowCommand(followerMember.ID.Value, followedMember.Nickname), TestContext.Current.CancellationToken);
-            }
+            await SendAsync(new FollowCommand(followerMember.ID.Value, followedMember.Nickname));
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(1);
             }
@@ -269,9 +231,8 @@ namespace InstaLike.IntegrationTests
             var followerMember = TestDataHelper.NewMember("user17");
             var firstFollowedMember = TestDataHelper.NewMember("user18");
             var secondFollowedMember = TestDataHelper.NewMember("user19");
-            Result followResult;
 
-            using (var session = _testFixture.OpenSession(_output))
+            using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(followerMember, TestContext.Current.CancellationToken);
                 await session.SaveAsync(firstFollowedMember, TestContext.Current.CancellationToken);
@@ -280,16 +241,12 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            using (var session = _testFixture.OpenSession(_output))
-            {
-                var handler = new TestMediatorBuilder(session).Build();
-                followResult = await handler.Send(new FollowCommand(followerMember.ID.Value, secondFollowedMember.Nickname), TestContext.Current.CancellationToken);
-            }
+            var followResult = await SendAsync(new FollowCommand(followerMember.ID.Value, secondFollowedMember.Nickname));
 
             using (new AssertionScope())
             {
                 followResult.IsSuccess.Should().BeTrue();
-                using (var session = _testFixture.OpenSession(_output))
+                using (var session = Infrastructure.OpenSession())
                 {
                     (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(1);
                     (await CountFollowsAsync(session, followerMember.ID.Value, firstFollowedMember.ID.Value)).Should().Be(1);

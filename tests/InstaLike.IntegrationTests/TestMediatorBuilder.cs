@@ -14,19 +14,16 @@ namespace InstaLike.IntegrationTests
     internal sealed class TestMediatorBuilder
     {
         private readonly IServiceCollection _services = new ServiceCollection();
-        private IPictureStore _pictureStore = new InMemoryPictureStore();
 
-        public TestMediatorBuilder(ISession session)
+        /// <summary>
+        /// Registers the application's handlers, working on the given session and picture store.
+        /// </summary>
+        public TestMediatorBuilder(ISession session, IPictureStore pictureStore)
         {
             _services.AddSingleton(session);
+            _services.AddSingleton(pictureStore);
             _services.AddSingleton(Log.Logger);
             _services.ConfigureMediator();
-        }
-
-        public TestMediatorBuilder WithPictureStore(IPictureStore pictureStore)
-        {
-            _pictureStore = pictureStore;
-            return this;
         }
 
         /// <summary>
@@ -45,7 +42,6 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         public ISender Build()
         {
-            _services.AddSingleton(_pictureStore);
             return _services.BuildServiceProvider()
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<ISender>();
