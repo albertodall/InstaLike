@@ -1,6 +1,8 @@
 using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -10,18 +12,14 @@ namespace InstaLike.Web.Tests
 {
     public sealed class ModelStateErrorsFixture
     {
-        private static readonly Error NicknameTaken = Error.Conflict("Nickname.Taken", "This nickname is already taken.");
-        private static readonly Error EmailInUse = Error.Conflict("Email.InUse", "This email is already in use.");
-        private static readonly Error InvalidCredentials = Error.Failure("Account.InvalidCredentials", "Username or password are not valid.");
-
         [Fact]
         public void Should_Add_An_Error_To_The_Field_Its_Code_Is_About()
         {
             var sut = FormWith("Nickname", "Email");
 
-            sut.AddModelErrors(NicknameTaken);
+            sut.AddModelErrors(MemberErrors.NicknameTaken);
 
-            ErrorsOf(sut, "Nickname").Should().Equal("This nickname is already taken.");
+            ErrorsOf(sut, "Nickname").Should().Equal(MemberErrors.NicknameTaken.Description);
         }
 
         [Fact]
@@ -29,9 +27,9 @@ namespace InstaLike.Web.Tests
         {
             var sut = FormWith("ChangeEmail.Email");
 
-            sut.AddModelErrors(EmailInUse);
+            sut.AddModelErrors(AccountErrors.EmailInUse);
 
-            ErrorsOf(sut, "ChangeEmail.Email").Should().Equal("This email is already in use.");
+            ErrorsOf(sut, "ChangeEmail.Email").Should().Equal(AccountErrors.EmailInUse.Description);
         }
 
         [Fact]
@@ -39,9 +37,9 @@ namespace InstaLike.Web.Tests
         {
             var sut = FormWith("Username", "Password");
 
-            sut.AddModelErrors(InvalidCredentials);
+            sut.AddModelErrors(AccountErrors.InvalidCredentials);
 
-            ErrorsOf(sut, string.Empty).Should().Equal("Username or password are not valid.");
+            ErrorsOf(sut, string.Empty).Should().Equal(AccountErrors.InvalidCredentials.Description);
         }
 
         [Fact]
@@ -49,12 +47,12 @@ namespace InstaLike.Web.Tests
         {
             var sut = FormWith("Nickname", "Email");
 
-            sut.AddModelErrors(Result.Combine(Result.Failure(NicknameTaken), Result.Failure(EmailInUse)).Error);
+            sut.AddModelErrors(Result.Combine(Result.Failure(MemberErrors.NicknameTaken), Result.Failure(AccountErrors.EmailInUse)).Error);
 
             using (new AssertionScope())
             {
-                ErrorsOf(sut, "Nickname").Should().Equal("This nickname is already taken.");
-                ErrorsOf(sut, "Email").Should().Equal("This email is already in use.");
+                ErrorsOf(sut, "Nickname").Should().Equal(MemberErrors.NicknameTaken.Description);
+                ErrorsOf(sut, "Email").Should().Equal(AccountErrors.EmailInUse.Description);
                 ErrorsOf(sut, string.Empty).Should().BeEmpty();
             }
         }
