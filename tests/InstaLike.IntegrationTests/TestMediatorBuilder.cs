@@ -41,16 +41,6 @@ namespace InstaLike.IntegrationTests
         }
 
         /// <summary>
-        /// Adds a handler instance, such as one that records the events it receives.
-        /// </summary>
-        public TestMediatorBuilder WithHandler<THandler>(THandler handler)
-            where THandler : class
-        {
-            _services.AddSingleton(handler);
-            return this;
-        }
-
-        /// <summary>
         /// The sender that dispatches requests to the registered handlers.
         /// </summary>
         public ISender Build()
