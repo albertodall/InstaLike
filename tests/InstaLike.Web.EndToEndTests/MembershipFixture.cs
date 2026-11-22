@@ -34,7 +34,7 @@ namespace InstaLike.Web.EndToEndTests
             using (new AssertionScope())
             {
                 response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-                response.Headers.Location?.OriginalString.Should().StartWith("http://localhost/Account/Login");
+                response.Headers.Location?.OriginalString.Should().StartWith("https://localhost/Account/Login");
             }
         }
 
@@ -59,6 +59,18 @@ namespace InstaLike.Web.EndToEndTests
             var timeline = await browser.OpenAsync("/");
 
             (await OpenOwnProfileAsync(browser, timeline)).Should().Be("/Member/Profile/newmember");
+        }
+
+        [Fact]
+        public async Task Login_Cookie_Should_Be_Secure_Even_When_Logging_In_Over_HTTP()
+        {
+            await RegisterMemberAsync("cookiemember");
+            using var browser = Application.OpenBrowserOverHttp();
+
+            var response = await LogInAsync(browser, "cookiemember", DefaultPassword);
+
+            var loginCookie = response.Headers.GetValues("Set-Cookie").Single(cookie => cookie.StartsWith(".AspNetCore.Cookies="));
+            loginCookie.Split(';', StringSplitOptions.TrimEntries).Should().Contain("secure");
         }
 
         [Fact]
@@ -166,7 +178,7 @@ namespace InstaLike.Web.EndToEndTests
                 logout.StatusCode.Should().Be(HttpStatusCode.Redirect);
                 (await browser.GetAsync("/")).Headers.Location?.OriginalString
                     .Should()
-                    .StartWith("http://localhost/Account/Login");
+                    .StartWith("https://localhost/Account/Login");
             }
         }
 
@@ -195,7 +207,7 @@ namespace InstaLike.Web.EndToEndTests
                 passwordChange.StatusCode.Should().Be(HttpStatusCode.Redirect);
                 (await browser.GetAsync("/")).StatusCode.Should().Be(HttpStatusCode.OK);
                 otherDeviceTimeline.StatusCode.Should().Be(HttpStatusCode.Redirect);
-                otherDeviceTimeline.Headers.Location?.OriginalString.Should().StartWith("http://localhost/Account/Login");
+                otherDeviceTimeline.Headers.Location?.OriginalString.Should().StartWith("https://localhost/Account/Login");
             }
         }
 

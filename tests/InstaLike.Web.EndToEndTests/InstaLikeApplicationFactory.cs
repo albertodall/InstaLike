@@ -71,13 +71,28 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         /// <summary>
-        /// A new browser with its own cookies, which does not follow redirects.
+        /// A new browser with its own cookies, which browses over HTTPS and does not follow redirects.
         /// </summary>
         public Browser OpenBrowser()
         {
             return new Browser(
                 CreateClient(new WebApplicationFactoryClientOptions
                 {
+                    BaseAddress = new Uri("https://localhost/"),
+                    AllowAutoRedirect = false
+                })
+            );
+        }
+
+        /// <summary>
+        /// A new browser with its own cookies, which browses over HTTP and does not follow redirects.
+        /// </summary>
+        public Browser OpenBrowserOverHttp()
+        {
+            return new Browser(
+                CreateClient(new WebApplicationFactoryClientOptions
+                {
+                    BaseAddress = new Uri("http://localhost/"),
                     AllowAutoRedirect = false
                 })
             );

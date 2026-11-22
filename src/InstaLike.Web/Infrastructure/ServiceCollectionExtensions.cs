@@ -79,7 +79,8 @@ namespace InstaLike.Web.Infrastructure
                 .AddCookie(opt =>
                 {
                     opt.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-                    opt.Cookie.HttpOnly = true;
+                    opt.SlidingExpiration = true;
+                    opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     opt.LoginPath = new PathString("/Account/Login");
                     opt.AccessDeniedPath = new PathString("/Account/AccessDenied");
                     opt.EventsType = typeof(SecurityStampValidator);

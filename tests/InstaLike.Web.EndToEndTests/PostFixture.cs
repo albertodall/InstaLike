@@ -120,7 +120,7 @@ namespace InstaLike.Web.EndToEndTests
             using (new AssertionScope())
             {
                 response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-                response.Headers.Location?.OriginalString.Should().StartWith("http://localhost/Account/AccessDenied");
+                response.Headers.Location?.OriginalString.Should().StartWith("https://localhost/Account/AccessDenied");
                 (await tamperer.OpenAsync(PostDetailUrl + postID)).QuerySelector(".post-author-comment")?.TextContent.Should().Be("Original text");
             }
         }

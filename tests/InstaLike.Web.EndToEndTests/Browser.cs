@@ -116,7 +116,7 @@ namespace InstaLike.Web.EndToEndTests
         public static async Task<IHtmlDocument> ReadPageAsync(HttpResponseMessage response)
         {
             var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-            var address = response.RequestMessage?.RequestUri?.ToString() ?? "http://localhost/";
+            var address = response.RequestMessage?.RequestUri?.ToString() ?? "https://localhost/";
             var context = BrowsingContext.New(Configuration.Default);
             var document = await context.OpenAsync(request => request.Content(html).Address(address), TestContext.Current.CancellationToken);
 
