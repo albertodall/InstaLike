@@ -13,6 +13,9 @@ namespace InstaLike.Core.Posts
         public static readonly Error PictureMissing =
             Error.Validation("Picture.Missing", "Please select a picture to share together with your post.");
 
+        public static readonly Error PictureNotFound =
+            Error.NotFound("Picture.NotFound", "The picture of this post could not be found.");
+
         public static readonly Error TextEmpty =
             Error.Validation("PostText.Empty", "Text for a post should not be empty");
 

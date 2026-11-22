@@ -115,13 +115,13 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         /// <summary>
-        /// Uploads the test picture as a script of the page does: the picture field is named after the file,
-        /// and the antiforgery token travels in the request header.
+        /// Uploads the test picture in the given field as a script of the page does,
+        /// with the antiforgery token in the request header.
         /// </summary>
-        public Task<HttpResponseMessage> UploadPictureFromScriptAsync(IHtmlDocument page, string url)
+        public Task<HttpResponseMessage> UploadPictureFromScriptAsync(IHtmlDocument page, string url, string pictureField)
         {
             var content = new MultipartFormDataContent();
-            AddTestPicture(content, TestPicture.FileName);
+            AddTestPicture(content, pictureField);
 
             return PostFromScriptAsync(page, url, content);
         }

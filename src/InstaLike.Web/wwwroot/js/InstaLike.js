@@ -200,61 +200,74 @@ $('.popup-close').click(function (e) {
     }
 });
 
-// Pictures auto tagging
+// Pictures auto tagging: the chosen picture, or else the one of the post being edited
 $('.form_post .autotag-button').click(function (e) {
     e.preventDefault();
 
-    var formData = new FormData();
-    var pictureFileSelector = $(".posted-picture > input")[0];
-    if (pictureFileSelector.files && pictureFileSelector.files[0]) {
-        formData.append(pictureFileSelector.files[0].name, pictureFileSelector.files[0]);
+    const formData = new FormData();
+    const chosenPicture = $('.posted-picture > input')[0].files[0];
+    const editedPostID = $('.form_post input[name="PostID"]').val();
+    if (chosenPicture) {
+        formData.append('PictureFile', chosenPicture);
+    } else if (editedPostID) {
+        formData.append('PostID', editedPostID);
+    } else {
+        return;
+    }
 
-        var tagList = $('.form_post ul');
-        $.ajax({
-            type: 'POST',
-            url: '/Post/Autotag',
-            data: formData,
-            contentType: false,
-            processData: false,
-            cache: false,
-            beforeSend: function () {
-                $('.form_post .autotag-button').addClass('button-progress');
-            },
-            success: function (response) {
-                response.forEach(function (tag) {
-                    tagList.append(`<li><a href="#" class="tag">${tag}</a></li>`);
-                });
+    suggestTags(formData);
+});
 
-                // Add or remove a tag from a picture comment
-                $('.form_post .tag').click(function (e) {
-                    e.preventDefault();
+// Add or remove a suggested tag from the post text.
+// Delegated to the list, so tags added by later suggestions get a single handler too.
+$('.form_post .tags').on('click', '.tag', function (e) {
+    e.preventDefault();
 
-                    var tagSeparator = '';
-                    const selectedTag = $(e.target);
-                    const textInput = $('.form_post > div > textarea');
-                    const currentText = textInput.val().trim();
+    const selectedTag = $(this);
+    const tag = selectedTag.text();
+    const textInput = $('.form_post textarea');
+    const currentText = textInput.val().trim();
 
-                    selectedTag.toggleClass('tag-selected');
-                    if (selectedTag.hasClass('tag-selected')) {
-                        if (currentText.length > 0) {
-                            // If there's any text, adds a trailing space to the tag.
-                            tagSeparator = ' ';
-                        }
-                        textInput.val(currentText.concat(tagSeparator, selectedTag.text()));
-                    } else {
-                        // Replaces tag even if it has a trailing space (separator)
-                        textInput.val(currentText.replace(` ${selectedTag.text()}`, ''));
-                        textInput.val(currentText.replace(selectedTag.text(), ''));
-                    }
-                });
-
-                $('.form_post .autotag-button').removeClass('button-progress');
-            },
-            error: function (response) {
-                // Reports tagging error
-                $('.form_post .tags-container').append(`<span>Tagging error: ${response.responseText}</span>`);
-                $('.form_post .autotag-button').removeClass('button-progress');
-            }
-        });
+    selectedTag.toggleClass('tag-selected');
+    if (selectedTag.hasClass('tag-selected')) {
+        textInput.val(currentText.length > 0 ? `${currentText} ${tag}` : tag);
+    } else {
+        textInput.val(withoutTag(currentText, tag));
     }
 });
+
+// Removes the tag only as a whole word, together with the space before it: '#cat' leaves '#category' alone.
+function withoutTag(text, tag) {
+    const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(^|\\s+)${escapedTag}(?=\\s|$)`), '').trim();
+}
+
+function suggestTags(formData) {
+    var tagList = $('.form_post ul');
+    $.ajax({
+        type: 'POST',
+        url: '/Post/Autotag',
+        data: formData,
+        contentType: false,
+        processData: false,
+        cache: false,
+        beforeSend: function () {
+            tagList.empty();
+            $('.form_post .tags-container > span').remove();
+            $('.form_post .autotag-button').addClass('button-progress').prop('disabled', true);
+        },
+        success: function (response) {
+            response.forEach(function (tag) {
+                const tagLink = $('<a href="#" class="tag"></a>').text(tag);
+                tagList.append($('<li></li>').append(tagLink));
+            });
+        },
+        error: function (response) {
+            // Reports tagging error
+            $('.form_post .tags-container').append($('<span></span>').text(`Tagging error: ${response.responseText}`));
+        },
+        complete: function () {
+            $('.form_post .autotag-button').removeClass('button-progress').prop('disabled', false);
+        }
+    });
+}

@@ -2,8 +2,8 @@
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Media;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -14,12 +14,10 @@ namespace InstaLike.Web.Posts
         private const string MissingPost = "This post does not exist.";
 
         private readonly ISender _dispatcher;
-        private readonly IImageRecognitionService _imageRecognition;
 
-        public PostController(ISender dispatcher, IImageRecognitionService imageRecognition)
+        public PostController(ISender dispatcher)
         {
             _dispatcher = dispatcher;
-            _imageRecognition = imageRecognition;
         }
 
         public IActionResult Publish()
@@ -141,27 +139,13 @@ namespace InstaLike.Web.Posts
         }
 
         [HttpPost]
-        public async Task<IActionResult> Autotag()
+        public async Task<IActionResult> Autotag(IFormFile? pictureFile, PostId? postID)
         {
-            var formFiles = Request.Form.Files;
-            if (formFiles.Count > 0)
-            {
-                Result<string[]> taggingResult;
+            var newPictureRawBytes = pictureFile is null ? null : await pictureFile.ToByteArrayAsync();
+            var query = new SuggestPictureTagsQuery(User.GetIdentifier(), postID, newPictureRawBytes);
+            var queryResult = await _dispatcher.Send(query);
 
-                await using (var pictureStream = await formFiles[0].ToStreamAsync())
-                {
-                    taggingResult = await _imageRecognition.AutoTagImage(pictureStream);
-                }
-
-                if (taggingResult.IsSuccess)
-                {
-                    return Ok(taggingResult.Value);
-                }
-
-                return BadRequest(taggingResult.Error.Description);
-            }
-
-            return BadRequest("No files selected");
+            return queryResult.IsSuccess ? Ok(queryResult.Value) : BadRequest(queryResult.Error.Description);
         }
     }
 }

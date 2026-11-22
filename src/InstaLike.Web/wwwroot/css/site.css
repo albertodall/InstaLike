@@ -526,6 +526,10 @@ textarea {
     display: block;
 }
 
+    .form_post .autotag-button:disabled {
+        cursor: progress;
+    }
+
 :is(.form_reg, .form_login, .form_post, .form_edit) button[type=submit] {
     border-color: var(--color-primary);
     background-color: var(--color-primary);

@@ -14,6 +14,8 @@ namespace InstaLike.Web.EndToEndTests
 {
     public sealed class PostFixture : EndToEndTestFixture
     {
+        private const string AutotagUrl = "/Post/Autotag";
+
         public PostFixture(InstaLikeApplicationFactory application)
             : base(application)
         { }
@@ -50,12 +52,57 @@ namespace InstaLike.Web.EndToEndTests
             using var browser = await RegisterAndLogInAsync("nick2");
             var publish = await browser.OpenAsync("/Post/Publish");
 
-            var response = await browser.UploadPictureFromScriptAsync(publish, "/Post/Autotag");
+            var response = await browser.UploadPictureFromScriptAsync(publish, AutotagUrl, "PictureFile");
 
             using (new AssertionScope())
             {
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
                 (await response.Content.ReadFromJsonAsync<string[]>(TestContext.Current.CancellationToken)).Should().Equal(FakeImageRecognitionService.ImageTags);
+            }
+        }
+
+        [Fact]
+        public async Task Picture_Of_The_Edited_Post_Should_Get_Suggested_Tags()
+        {
+            using var browser = await RegisterAndLogInAsync("tagger");
+            var postID = await PublishPostAsync(browser, "Tag me");
+            var edit = await browser.OpenAsync(PostEditUrl + postID);
+
+            var response = await browser.PostFromScriptAsync(edit, AutotagUrl,
+                new Dictionary<string, string>
+                {
+                    ["PostID"] = postID
+                });
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.OK);
+                (await response.Content.ReadFromJsonAsync<string[]>(TestContext.Current.CancellationToken)).Should().Equal(FakeImageRecognitionService.ImageTags);
+            }
+        }
+
+        [Fact]
+        public async Task Other_Members_Should_Not_Get_Suggested_Tags_For_The_Picture_Of_The_Post()
+        {
+            string postID;
+            using (var author = await RegisterAndLogInAsync("tagauthor"))
+            {
+                postID = await PublishPostAsync(author, "Not for you");
+            }
+
+            using var reader = await RegisterAndLogInAsync("tagreader");
+            var publish = await reader.OpenAsync("/Post/Publish");
+
+            var response = await reader.PostFromScriptAsync(publish, AutotagUrl,
+                new Dictionary<string, string>
+                {
+                    ["PostID"] = postID
+                });
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+                (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Be("You're not allowed to edit this post.");
             }
         }
 

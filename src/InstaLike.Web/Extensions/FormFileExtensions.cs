@@ -22,18 +22,5 @@ namespace InstaLike.Web.Extensions
 
             return result;
         }
-
-        public static Task<Stream> ToStreamAsync(this IFormFile formFile)
-        {
-            return formFile.ToStreamInternalAsync();
-        }
-
-        private static async Task<Stream> ToStreamInternalAsync(this IFormFile formFile)
-        {
-            var stream = new MemoryStream();
-            await formFile.CopyToAsync(stream);
-            stream.Position = 0;
-            return stream;
-        }
     }
 }

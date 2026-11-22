@@ -371,6 +371,109 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
+        public async Task Should_Suggest_Tags_For_A_New_Picture()
+        {
+            var newPicture = Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64());
+            var imageRecognition = new FakeImageRecognitionService();
+
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), null, newPicture), imageRecognition);
+
+            using (new AssertionScope())
+            {
+                result.IsSuccess.Should().BeTrue();
+                result.Value.Should().Equal(FakeImageRecognitionService.ImageTags);
+                imageRecognition.TaggedPicture.Should().Equal(newPicture);
+            }
+        }
+
+        [Fact]
+        public async Task Should_Suggest_Tags_For_The_Picture_Of_The_Edited_Post()
+        {
+            var storedPicture = Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64());
+            var picture = await Infrastructure.PictureStore.SaveAsync(PictureContainers.Posts, storedPicture, TestContext.Current.CancellationToken);
+            var author = TestDataHelper.NewMember("taggingauthor");
+            Post post;
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                post = TestDataHelper.NewPost(author, "Tag my picture", picture);
+                await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var imageRecognition = new FakeImageRecognitionService();
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(author.ID.Value, post.ID, null), imageRecognition);
+
+            using (new AssertionScope())
+            {
+                result.IsSuccess.Should().BeTrue();
+                result.Value.Should().Equal(FakeImageRecognitionService.ImageTags);
+                imageRecognition.TaggedPicture.Should().Equal(storedPicture);
+            }
+        }
+
+        [Fact]
+        public async Task Should_Not_Suggest_Tags_For_The_Picture_Of_A_Post_Published_By_Another_User()
+        {
+            var author = TestDataHelper.NewMember("taggingauthor2");
+            var reader = TestDataHelper.NewMember("taggingreader");
+            Post post;
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+                post = TestDataHelper.NewPost(author, "Not yours to tag");
+                await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(reader.ID.Value, post.ID, null), new FakeImageRecognitionService());
+
+            result.Error.Should().Be(PostErrors.EditNotAllowed);
+        }
+
+        [Fact]
+        public async Task Should_Not_Suggest_Tags_For_The_Picture_Of_A_Missing_Post()
+        {
+            var missingPostID = PostId.New();
+
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), missingPostID, null), new FakeImageRecognitionService());
+
+            result.Error.Should().Be(PostErrors.NotFound(missingPostID));
+        }
+
+        [Fact]
+        public async Task Should_Not_Suggest_Tags_When_The_Picture_Of_The_Post_Is_Not_Stored()
+        {
+            var author = TestDataHelper.NewMember("taggingauthor3");
+            Post post;
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                post = TestDataHelper.NewPost(author, "Lost picture");
+                await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(author.ID.Value, post.ID, null), new FakeImageRecognitionService());
+
+            result.Error.Should().Be(PostErrors.PictureNotFound);
+        }
+
+        [Fact]
+        public async Task Should_Not_Suggest_Tags_Without_A_Picture()
+        {
+            var withoutPicture = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), null, null), new FakeImageRecognitionService());
+            var withEmptyPicture = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), PostId.New(), []), new FakeImageRecognitionService());
+
+            using (new AssertionScope())
+            {
+                withoutPicture.Error.Should().Be(PostErrors.PictureMissing);
+                withEmptyPicture.Error.Should().Be(PostErrors.PictureMissing);
+            }
+        }
+
+        [Fact]
         public async Task Should_Load_All_Details_For_A_Post()
         {
             PostModel result;
@@ -771,6 +874,18 @@ namespace InstaLike.IntegrationTests
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 return await read(new TimelineQueryHandler(session, Log.Logger));
+            }
+        }
+
+        /// <summary>
+        /// Runs a tag suggestion query on a new stateless session, as the application does.
+        /// </summary>
+        private async Task<Result<string[]>> SuggestPictureTagsAsync(SuggestPictureTagsQuery query, FakeImageRecognitionService imageRecognition)
+        {
+            using (var session = Infrastructure.OpenStatelessSession())
+            {
+                var sut = new SuggestPictureTagsQueryHandler(session, Infrastructure.PictureStore, imageRecognition, Log.Logger);
+                return await sut.Handle(query, TestContext.Current.CancellationToken);
             }
         }
     }
