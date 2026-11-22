@@ -13,12 +13,10 @@ using Serilog;
 
 namespace InstaLike.Web.Posts
 {
-    [Bind("PostID, AuthorID, Text, PictureFile")]
+    [Bind("PostID, Text, PictureFile")]
     public sealed class EditPostModel
     {
         public required PostId PostID { get; set; }
-
-        public Guid AuthorID { get; set; }
 
         [Required(ErrorMessage = "Please, write a text for the picture you're publishing.")]
         public string Text { get; set; } = string.Empty;
@@ -73,7 +71,6 @@ namespace InstaLike.Web.Posts
                 return Result.Ok(new EditPostModel()
                 {
                     PostID = post.ID,
-                    AuthorID = post.AuthorID,
                     Picture = post.Picture,
                     Text = post.Text
                 });

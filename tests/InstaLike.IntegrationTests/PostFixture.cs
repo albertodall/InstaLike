@@ -323,7 +323,6 @@ namespace InstaLike.IntegrationTests
             {
                 result.IsSuccess.Should().BeTrue();
                 result.Value.PostID.Should().Be(post.ID);
-                result.Value.AuthorID.Should().Be(author.ID.Value);
                 result.Value.Text.Should().Be("Text to edit");
                 result.Value.Picture.Should().Be(post.Picture);
             }

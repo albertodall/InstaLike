@@ -14,7 +14,6 @@
     <form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Post" asp-antiforgery="true">
         <div class="form_post">
             <div asp-validation-summary="ModelOnly"></div>
-            <input type="hidden" asp-for="AuthorID" value="@User.GetIdentifier()" />
             <input type="hidden" asp-for="PostID" value="@Model.PostID" />
             <div class="picture-placeholder">
                 <div class="posted-picture">

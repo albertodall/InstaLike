@@ -13,11 +13,9 @@ using Serilog;
 
 namespace InstaLike.Web.Posts
 {
-    [Bind("AuthorID, Text, PictureFile")]
+    [Bind("Text, PictureFile")]
     public sealed class PublishPostModel
     {
-        public Guid AuthorID { get; set; }
-
         [Required(ErrorMessage = "Please, write a text for the picture you're publishing.")]
         public string Text { get; set; } = string.Empty;
 
