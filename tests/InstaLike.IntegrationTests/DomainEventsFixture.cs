@@ -134,6 +134,31 @@ namespace InstaLike.IntegrationTests
             }
         }
 
+        [Fact]
+        public async Task A_Failed_Command_That_Commits_On_Failure_Should_Keep_Its_Changes_And_Events()
+        {
+            var (author, reader, post) = await CreatePostAsync("eventauthor7", "eventreader7");
+
+            using (var session = Infrastructure.OpenSession())
+            {
+                var mediator = new TestMediatorBuilder(session, Infrastructure.PictureStore)
+                    .WithHandler<IRequestHandler<LikeThenFailCommittedCommand, Result>, LikeThenFailCommittedCommandHandler>()
+                    .Build();
+
+                (await mediator.Send(new LikeThenFailCommittedCommand(post.ID, reader.ID.Value), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
+            }
+
+            using (var session = Infrastructure.OpenSession())
+            {
+                using (new AssertionScope())
+                {
+                    (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+                    (await GetNotificationsAsync(author.ID.Value)).Should().ContainSingle()
+                        .Which.Kind.Should().Be(NotificationKind.PostLiked);
+                }
+            }
+        }
+
         /// <summary>
         /// Saves an author, a reader and a post by the author.
         /// </summary>
@@ -191,7 +216,8 @@ namespace InstaLike.IntegrationTests
         }
 
         /// <summary>
-        /// Likes the post, raising its event, and then returns a failure, so the command is rolled back.
+        /// Likes the post, raising its event, and then returns a failure,
+        /// so the command is rolled back.
         /// </summary>
         private sealed class LikeThenFailCommandHandler : IRequestHandler<LikeThenFailCommand, Result>
         {
@@ -202,12 +228,51 @@ namespace InstaLike.IntegrationTests
                 _session = session;
             }
 
-            public async Task<Result> Handle(LikeThenFailCommand request, CancellationToken cancellationToken)
+            public Task<Result> Handle(LikeThenFailCommand request, CancellationToken cancellationToken) =>
+                LikeThenFailAsync(_session, request.PostID, request.UserID, cancellationToken);
+        }
+
+        /// <summary>
+        /// A command that likes a post and then fails, but commits its failures.
+        /// </summary>
+        [CommitOnFailure]
+        private sealed class LikeThenFailCommittedCommand : ICommand<Result>
+        {
+            public LikeThenFailCommittedCommand(PostId postID, Guid userID)
             {
-                var post = await _session.GetAsync<Post>(request.PostID, cancellationToken);
-                post.LikeBy(request.UserID);
-                return Result.Failure(Error.Failure("Test.Failed", "The command failed after the post was liked."));
+                PostID = postID;
+                UserID = userID;
             }
+
+            public PostId PostID { get; }
+
+            public Guid UserID { get; }
+        }
+
+        /// <summary>
+        /// Likes the post, raising its event, and then returns a failure, which is committed anyway.
+        /// </summary>
+        private sealed class LikeThenFailCommittedCommandHandler : IRequestHandler<LikeThenFailCommittedCommand, Result>
+        {
+            private readonly NHibernate.ISession _session;
+
+            public LikeThenFailCommittedCommandHandler(NHibernate.ISession session)
+            {
+                _session = session;
+            }
+
+            public Task<Result> Handle(LikeThenFailCommittedCommand request, CancellationToken cancellationToken) =>
+                LikeThenFailAsync(_session, request.PostID, request.UserID, cancellationToken);
+        }
+
+        /// <summary>
+        /// Likes the post, raising its event, and then fails.
+        /// </summary>
+        private static async Task<Result> LikeThenFailAsync(NHibernate.ISession session, PostId postID, Guid userID, CancellationToken cancellationToken)
+        {
+            var post = await session.GetAsync<Post>(postID, cancellationToken);
+            post.LikeBy(userID);
+            return Result.Failure(Error.Failure("Test.Failed", "The command failed after the post was liked."));
         }
     }
 }
