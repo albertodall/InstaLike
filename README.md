@@ -95,7 +95,7 @@ With the containers running, upload the pictures to Azurite first (the script ne
 pwsh sampledata/upload-sample-pictures.ps1
 sqlcmd -S localhost,1433 -U sa -P Pa55w0rd -d InstaLike -i sampledata/insert-sample-data.sql
 ```
-The script skips the rows that already exist, so it can run again.
+The script skips the rows that already exist, so it can run again. Every sample member logs in with their nickname (`batman`, `joker`, ...) and the password `password`.
 
 ## Tests
 ```shell
