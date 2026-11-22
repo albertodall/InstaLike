@@ -29,6 +29,7 @@ The project looked interesting, so I decided to use it as my preferred playgroun
  
 ## Features
  - Member registration. 
+ - Account settings: change e-mail and password; accounts locked for 15 minutes after five failed logins.
  - Sharing of pictures. 
  - Put "Likes" on shared pictures. 
  - Comments on shared pictures. 
@@ -53,6 +54,7 @@ Locally, SQL Server and [Azurite](https://github.com/Azure/Azurite) (the Azure S
 | SQL Server 2022 | `instalike-db-mssql` | `localhost,1433` (user `sa`, password `Pa55w0rd`) |
 | Azurite (Blob Storage) | `instalike-storage-azurite` | http://localhost:10000 |
 | Aspire Dashboard (logs, traces, metrics) | `instalike-dashboard` | http://localhost:18888 (OTLP on `localhost:4317`) |
+| Ollama (pictures auto-tagging) | `instalike-ai-ollama` | http://localhost:11434 |
 | Database migrator (runs once) | `instalike-db-migrator` | - |
 
 ## Run everything in containers
@@ -99,7 +101,7 @@ The script skips the rows that already exist, so it can run again. Every sample 
 
 ## Tests
 ```shell
-dotnet test
+dotnet test --solution InstaLike.slnx
 ```
 Integration tests send the use cases to their handlers and run on SQL Server, migrated by the migrator's scripts, and on [Azurite](https://github.com/Azure/Azurite) for the pictures. [Testcontainers](https://dotnet.testcontainers.org/) starts both for the test run, so Docker must be running; the containers of `docker compose` are not used.
 
