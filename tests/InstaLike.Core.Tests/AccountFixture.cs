@@ -47,6 +47,68 @@ namespace InstaLike.Core.Tests
         }
 
         [Fact]
+        public void Five_Failed_Logins_Should_Lock_The_Account()
+        {
+            var sut = CreateAccountWithPassword("password");
+
+            LogInWithWrongPassword(sut, 5);
+
+            using (new AssertionScope())
+            {
+                sut.LockedOutUntil.Should().BeAfter(DateTimeOffset.UtcNow);
+                sut.FailedLogInAttempts.Should().Be(0);
+                sut.DomainEvents.Should().ContainSingle().Which.Should().Be(new AccountLockedOutEvent(sut.ID));
+            }
+        }
+
+        [Fact]
+        public void Four_Failed_Logins_Should_Not_Lock_The_Account()
+        {
+            var sut = CreateAccountWithPassword("password");
+
+            LogInWithWrongPassword(sut, 4);
+
+            using (new AssertionScope())
+            {
+                sut.LockedOutUntil.Should().BeNull();
+                sut.FailedLogInAttempts.Should().Be(4);
+                sut.DomainEvents.Should().BeEmpty();
+            }
+        }
+
+        [Fact]
+        public void Locked_Out_Account_Should_Refuse_Even_The_Right_Password()
+        {
+            var sut = CreateAccountWithPassword("password");
+            LogInWithWrongPassword(sut, 5);
+            var lockedOutUntil = sut.LockedOutUntil;
+
+            using (new AssertionScope())
+            {
+                sut.LogIn("password").Error.Should().Be(AccountErrors.LockedOut);
+                sut.LogIn("wrong").Error.Should().Be(AccountErrors.LockedOut);
+                sut.FailedLogInAttempts.Should().Be(0);
+                sut.LockedOutUntil.Should().Be(lockedOutUntil);
+            }
+        }
+
+        [Fact]
+        public void Successful_Login_Should_Reset_The_Failed_Logins()
+        {
+            var sut = CreateAccountWithPassword("password");
+            LogInWithWrongPassword(sut, 4);
+
+            sut.LogIn("password");
+            LogInWithWrongPassword(sut, 4);
+
+            using (new AssertionScope())
+            {
+                sut.LockedOutUntil.Should().BeNull();
+                sut.FailedLogInAttempts.Should().Be(4);
+            }
+        }
+
+        [Fact]
         public void Logging_Out_Should_Raise_An_Event()
         {
             var sut = CreateAccountWithPassword("password");
@@ -104,6 +166,14 @@ namespace InstaLike.Core.Tests
             sut.ChangeEmailAddress((Email)"user1@newdomain.com");
 
             sut.Email.Value.Should().Be("user1@newdomain.com");
+        }
+
+        private static void LogInWithWrongPassword(Account account, int times)
+        {
+            for (var attempt = 0; attempt < times; attempt++)
+            {
+                account.LogIn("wrong");
+            }
         }
 
         /// <summary>

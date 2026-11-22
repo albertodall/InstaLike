@@ -32,6 +32,7 @@ namespace InstaLike.Web.Accounts
     /// <summary>
     /// Logs an account in; the result is the member the account belongs to and the security stamp of the account.
     /// </summary>
+    [CommitOnFailure]
     public sealed class LogInCommand : ICommand<Result<(Guid MemberID, Guid SecurityStamp)>>
     {
         public string Username { get; }
@@ -92,6 +93,24 @@ namespace InstaLike.Web.Accounts
         {
             var account = await _session.GetAsync<Account>(notification.AccountID, cancellationToken);
             _logger.Information("Account [{Username}({AccountID})] has just logged in.", account?.Username, notification.AccountID);
+        }
+    }
+
+    internal sealed class AccountLockedOutEventHandler : INotificationHandler<AccountLockedOutEvent>
+    {
+        private readonly ISession _session;
+        private readonly ILogger _logger;
+
+        public AccountLockedOutEventHandler(ISession session, ILogger logger)
+        {
+            _session = session;
+            _logger = logger.ForContext<AccountLockedOutEvent>();
+        }
+
+        public async Task Handle(AccountLockedOutEvent notification, CancellationToken cancellationToken)
+        {
+            var account = await _session.GetAsync<Account>(notification.AccountID, cancellationToken);
+            _logger.Warning("Account [{Username}({AccountID})] has been locked out after too many failed logins.", account?.Username, notification.AccountID);
         }
     }
 }

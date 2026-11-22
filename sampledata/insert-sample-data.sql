@@ -29,8 +29,8 @@ DECLARE @MemberID TABLE ([SampleID] int PRIMARY KEY, [ID] uniqueidentifier)
 INSERT INTO @MemberID
 SELECT s.[SampleID], u.[ID] FROM @SampleMember s INNER JOIN [dbo].[Member] u ON u.[Nickname] = s.[Nickname]
 
-INSERT INTO [dbo].[Account] ([ID], [Username], [Password], [Email], [SecurityStamp])
-SELECT u.[ID], s.[Nickname], s.[Password], s.[Email], NEWID()
+INSERT INTO [dbo].[Account] ([ID], [Username], [Password], [Email], [SecurityStamp], [FailedLogInAttempts], [LockedOutUntil])
+SELECT u.[ID], s.[Nickname], s.[Password], s.[Email], NEWID(), 0, NULL
 FROM @SampleMember s
 	INNER JOIN @MemberID u ON u.[SampleID] = s.[SampleID]
 WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Account] a WHERE a.[ID] = u.[ID] OR a.[Username] = s.[Nickname] OR a.[Email] = s.[Email])

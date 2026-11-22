@@ -19,4 +19,10 @@ namespace InstaLike.Core.Accounts
     /// </summary>
     /// <param name="AccountID">The identifier of the account that changed its password.</param>
     public sealed record AccountPasswordChangedEvent(AccountId AccountID) : IDomainEvent;
+
+    /// <summary>
+    /// Occurs when an account is locked out after too many failed logins.
+    /// </summary>
+    /// <param name="AccountID">The identifier of the account that was locked out.</param>
+    public sealed record AccountLockedOutEvent(AccountId AccountID) : IDomainEvent;
 }

@@ -10,6 +10,9 @@ namespace InstaLike.Core.Accounts
         public static readonly Error InvalidCredentials =
             Error.Failure("Account.InvalidCredentials", "Username or password are not valid.");
 
+        public static readonly Error LockedOut =
+            Error.Failure("Account.LockedOut", "Too many failed logins. Please try again later.");
+
         public static readonly Error WrongCurrentPassword =
             Error.Failure("CurrentPassword.Invalid", "The current password is not valid.");
 

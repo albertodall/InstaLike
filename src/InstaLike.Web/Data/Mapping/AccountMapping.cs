@@ -23,6 +23,9 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
             Map(p => p.SecurityStamp)
                 .Not.Nullable();
+            Map(p => p.FailedLogInAttempts)
+                .Not.Nullable();
+            Map(p => p.LockedOutUntil);
         }
     }
 }

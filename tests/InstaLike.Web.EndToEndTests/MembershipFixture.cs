@@ -6,6 +6,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using InstaLike.Core.Accounts;
 using Xunit;
 
 namespace InstaLike.Web.EndToEndTests
@@ -91,6 +92,27 @@ namespace InstaLike.Web.EndToEndTests
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
                 ValidationErrors(await Browser.ReadPageAsync(response)).Should().NotBeEmpty();
                 (await browser.GetAsync("/")).StatusCode.Should().Be(HttpStatusCode.Redirect);
+            }
+        }
+
+        [Fact]
+        public async Task Repeated_Wrong_Passwords_Should_Lock_The_Account()
+        {
+            using (await RegisterAndLogInAsync("nick_locked"))
+            { }
+
+            using var browser = Application.OpenBrowser();
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                (await LogInAsync(browser, "nick_locked", "wrong password")).StatusCode.Should().Be(HttpStatusCode.OK);
+            }
+
+            var response = await LogInAsync(browser, "nick_locked", DefaultPassword);
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.OK);
+                ValidationErrors(await Browser.ReadPageAsync(response)).Should().Contain(AccountErrors.LockedOut.Description);
             }
         }
 
