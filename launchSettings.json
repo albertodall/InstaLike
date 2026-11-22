@@ -11,8 +11,7 @@
         "instalike.db.migrator": "StartWithoutDebugging",
         "instalike.db.mssql": "StartWithoutDebugging",
         "instalike.storage.azureblob": "StartWithoutDebugging",
-        "instalike.dashboard": "StartWithoutDebugging",
-        "instalike.ai.ollama": "StartWithoutDebugging"
+        "instalike.dashboard": "StartWithoutDebugging"
       }
     }
   }

@@ -54,7 +54,7 @@ Locally, SQL Server and [Azurite](https://github.com/Azure/Azurite) (the Azure S
 | SQL Server 2022 | `instalike-db-mssql` | `localhost,1433` (user `sa`, password `Pa55w0rd`) |
 | Azurite (Blob Storage) | `instalike-storage-azurite` | http://localhost:10000 |
 | Aspire Dashboard (logs, traces, metrics) | `instalike-dashboard` | http://localhost:18888 (OTLP on `localhost:4317`) |
-| Ollama (pictures auto-tagging) | `instalike-ai-ollama` | http://localhost:11434 |
+| Ollama (optional pictures auto-tagging, see below) | `instalike-ai-ollama` | http://localhost:11434 |
 | Database migrator (runs once) | `instalike-db-migrator` | - |
 
 ## Run everything in containers
@@ -78,12 +78,33 @@ In Visual Studio, set the `docker-compose` project as the startup project to deb
 ## Run the web application from your IDE
 1. Start the infrastructure only:
 ```shell
-docker compose up -d instalike.db.mssql instalike.storage.azureblob instalike.db.migrator instalike.dashboard instalike.ai.ollama
+docker compose up -d instalike.db.mssql instalike.storage.azureblob instalike.db.migrator instalike.dashboard
 ```
 2. Run the `InstaLike.Web` project with the `Development` environment: `appsettings.Development.json` points to the containerized SQL Server and to Azurite (`UseDevelopmentStorage=true`).
 
 ### Pictures auto-tagging
-In Azure, pictures are tagged by GPT-4.1 nano on Azure OpenAI. Locally, a small open vision model ([Qwen2.5-VL 3B](https://ollama.com/library/qwen2.5vl)) runs for free in [Ollama](https://ollama.com), through the same OpenAI-compatible API. It starts with the rest of the stack. The first start downloads the ~3 GB model into `.containers/ollama`, and the model runs on the CPU unless Docker has GPU access.
+Pictures are tagged by GPT-4.1 nano on Azure OpenAI.
+
+In development, the web application calls a model of its own, provisioned once by `infra/tf/dev-ai` (state kept locally): `appsettings.Development.json` already points to it, and only its API key goes into the user secrets. The secrets folder is mounted into the web container, so the same key works when debugging the `docker-compose` project in Visual Studio and when running the project from the IDE:
+```shell
+az login
+terraform -chdir=infra/tf/dev-ai init
+terraform -chdir=infra/tf/dev-ai apply
+dotnet user-secrets --project src/InstaLike.Web set "ImageAnalysis:ApiKey" "$(terraform -chdir=infra/tf/dev-ai output -raw image_analysis_api_key)"
+```
+The model is paid per token and costs nothing while idle; `terraform -chdir=infra/tf/dev-ai destroy` removes it. API keys are accepted only by the development model: in Azure, the web application uses its managed identity.
+
+To tag pictures for free and offline instead, run a small open vision model ([Qwen2.5-VL 3B](https://ollama.com/library/qwen2.5vl)) in [Ollama](https://ollama.com), through the same OpenAI-compatible API. `docker-compose.ollama.yml` adds its container and points the web container to it; the first start downloads the ~3 GB model into `.containers/ollama`, and the model runs on the CPU unless Docker has GPU access, so tagging is slow:
+```shell
+docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.ollama.yml up --build
+```
+When running the project from the IDE, start the `instalike.ai.ollama` service with the same files and point the user secrets to it:
+```shell
+dotnet user-secrets --project src/InstaLike.Web set "ImageAnalysis:Endpoint" "http://localhost:11434/v1/"
+dotnet user-secrets --project src/InstaLike.Web set "ImageAnalysis:ApiKey" "ollama"
+dotnet user-secrets --project src/InstaLike.Web set "ImageAnalysis:Model" "qwen2.5vl:3b"
+```
+These secrets also reach the web container, so set the key of the development model again and remove the other two with `dotnet user-secrets --project src/InstaLike.Web remove <key>` to go back to Azure OpenAI.
 
 To apply new database scripts without containers:
 ```shell

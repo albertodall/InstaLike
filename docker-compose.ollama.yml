@@ -1,0 +1,32 @@
+services:
+  instalike.web:
+    environment:
+      ImageAnalysis__Endpoint: "http://ollama:11434/v1/"
+      ImageAnalysis__ApiKey: "ollama"
+      ImageAnalysis__Model: "qwen2.5vl:3b"
+
+  instalike.ai.ollama:
+    container_name: instalike-ai-ollama
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: ollama/ollama:0.40.15
+    # Downloads the model on first start, then keeps serving it.
+    entrypoint: ["/bin/sh", "-c", "ollama serve & pid=$$!; trap 'kill $$pid; wait $$pid; exit 0' INT TERM; until ollama list > /dev/null 2>&1; do sleep 1; done; ollama show qwen2.5vl:3b > /dev/null 2>&1 || ollama pull qwen2.5vl:3b; wait $$pid"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - "./.containers/ollama:/root/.ollama"
+    healthcheck:
+      test: ["CMD", "ollama", "show", "qwen2.5vl:3b"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30m
+      start_interval: 2s
+    networks:
+      instalike.network:
+        aliases:
+          - ollama
