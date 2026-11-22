@@ -8,7 +8,8 @@ using InstaLike.Core.SharedKernel;
 namespace InstaLike.Core.Accounts
 {
     /// <summary>
-    /// Represents a password stored as a Base64-encoded salted hash and supports verification of plain-text passwords.
+    /// Represents a password stored as a Base64-encoded salted hash and supports
+    /// verification of plain-text passwords.
     /// </summary>
     /// <remarks>
     /// Passwords created through this type must contain at least six characters.
@@ -17,8 +18,8 @@ namespace InstaLike.Core.Accounts
     {
         internal const byte MinimumPasswordLength = 6;
         private const byte SaltSize = 16;
-        private const byte HashSize = 20;
-        private const int HashIterations = 10000;
+        private const byte HashSize = 32;
+        private const int HashIterations = 100000;
 
         private string HashedValue { get; }
 
@@ -103,12 +104,9 @@ namespace InstaLike.Core.Accounts
             return Convert.ToBase64String(hashBytes);
         }
 
-        /// <remarks>
-        /// SHA1 and the iteration count must not change: they are needed to verify the already stored passwords.
-        /// </remarks>
         private static byte[] DeriveHash(string password, byte[] salt)
         {
-            return Rfc2898DeriveBytes.Pbkdf2(password, salt, HashIterations, HashAlgorithmName.SHA1, HashSize);
+            return Rfc2898DeriveBytes.Pbkdf2(password, salt, HashIterations, HashAlgorithmName.SHA256, HashSize);
         }
 
         private static bool IsBase64String(string s)
