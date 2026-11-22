@@ -535,6 +535,36 @@ namespace InstaLike.IntegrationTests
         }
 
         [Fact]
+        public async Task Editing_Without_A_New_Picture_Should_Keep_The_Current_One()
+        {
+            var picture = await Infrastructure.PictureStore.SaveAsync(PictureContainers.Posts, Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()), TestContext.Current.CancellationToken);
+            var author = TestDataHelper.NewMember("keeppictureauthor");
+            Post post;
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                post = TestDataHelper.NewPost(author, "original text", picture);
+                await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var command = new EditPostCommand(author.ID.Value, post.ID, "edited text", null);
+            var editResult = await SendAsync(command);
+
+            using (var session = Infrastructure.OpenSession())
+            {
+                using (new AssertionScope())
+                {
+                    var editedPost = session.Load<Post>(post.ID);
+                    editResult.IsSuccess.Should().BeTrue();
+                    editedPost.Text.Value.Should().Be("edited text");
+                    editedPost.Picture.Should().Be(picture);
+                    (await Infrastructure.PictureStore.ListUploadedBeforeAsync(PictureContainers.Posts, DateTimeOffset.MaxValue, TestContext.Current.CancellationToken).CountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+                }
+            }
+        }
+
+        [Fact]
         public async Task User_Cannot_Edit_Post_Published_By_Another_User()
         {
             var picture = PictureId.New();

@@ -52,8 +52,11 @@ namespace InstaLike.Web.EndToEndTests
         /// </summary>
         public Task<IHtmlDocument> FollowRedirectAsync(HttpResponseMessage response)
         {
-            var location = response.Headers.Location
-                ?? throw new InvalidOperationException($"The response is {(int)response.StatusCode}, not a redirect.");
+            var location = response.Headers.Location;
+            if (location is null)
+            {
+                throw new InvalidOperationException($"The response is {(int)response.StatusCode}, not a redirect.");
+            }
 
             return OpenAsync(location.OriginalString);
         }
@@ -72,11 +75,21 @@ namespace InstaLike.Web.EndToEndTests
         public Task<HttpResponseMessage> SubmitAsync(IHtmlFormElement form, IReadOnlyDictionary<string, string> fields)
         {
             var values = SubmittedValues(form, fields);
-            HttpContent content = form.Enctype == "multipart/form-data"
-                ? MultipartContent(values)
-                : new FormUrlEncodedContent(values);
+            if (form.Enctype != "multipart/form-data")
+            {
+                return _client.PostAsync(
+                    form.Action,
+                    new FormUrlEncodedContent(values),
+                    TestContext.Current.CancellationToken);
+            }
 
-            return _client.PostAsync(form.Action, content, TestContext.Current.CancellationToken);
+            var content = MultipartContent(values);
+            AddEmptyFileInputs(content, form);
+
+            return _client.PostAsync(
+                form.Action,
+                content,
+                TestContext.Current.CancellationToken);
         }
 
         /// <summary>
@@ -87,7 +100,10 @@ namespace InstaLike.Web.EndToEndTests
             var content = MultipartContent(SubmittedValues(form, fields));
             AddTestPicture(content, pictureField);
 
-            return _client.PostAsync(form.Action, content, TestContext.Current.CancellationToken);
+            return _client.PostAsync(
+                form.Action,
+                content,
+                TestContext.Current.CancellationToken);
         }
 
         /// <summary>
@@ -118,7 +134,9 @@ namespace InstaLike.Web.EndToEndTests
             var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
             var address = response.RequestMessage?.RequestUri?.ToString() ?? "https://localhost/";
             var context = BrowsingContext.New(Configuration.Default);
-            var document = await context.OpenAsync(request => request.Content(html).Address(address), TestContext.Current.CancellationToken);
+            var document = await context.OpenAsync(
+                request => request.Content(html).Address(address),
+                TestContext.Current.CancellationToken);
 
             return (IHtmlDocument)document;
         }
@@ -133,9 +151,16 @@ namespace InstaLike.Web.EndToEndTests
         /// </summary>
         private Task<HttpResponseMessage> PostFromScriptAsync(IHtmlDocument page, string url, HttpContent content)
         {
-            var token = page.QuerySelector("meta[name='request-verification-token']")?.GetAttribute("content")
-                ?? throw new InvalidOperationException("The page has no antiforgery token for its scripts.");
-            var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+            var token = page.QuerySelector("meta[name='request-verification-token']")?.GetAttribute("content");
+            if (token is null)
+            {
+                throw new InvalidOperationException("The page has no antiforgery token for its scripts.");
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = content
+            };
             request.Headers.Add("RequestVerificationToken", token);
 
             return _client.SendAsync(request, TestContext.Current.CancellationToken);
@@ -199,6 +224,27 @@ namespace InstaLike.Web.EndToEndTests
             }
 
             return content;
+        }
+
+        /// <summary>
+        /// Adds what a browser sends for file inputs left without a file:
+        /// an empty part with an empty file name.
+        /// </summary>
+        private static void AddEmptyFileInputs(MultipartFormDataContent content, IHtmlFormElement form)
+        {
+            var fileInputs = form.Elements.OfType<IHtmlInputElement>()
+                .Where(input => input.Type == "file" && !string.IsNullOrEmpty(input.Name));
+            foreach (var input in fileInputs)
+            {
+                var noFile = new ByteArrayContent([]);
+                noFile.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                noFile.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                {
+                    Name = $"\"{input.Name}\"",
+                    FileName = "\"\""
+                };
+                content.Add(noFile);
+            }
         }
 
         private static void AddTestPicture(MultipartFormDataContent content, string fieldName)

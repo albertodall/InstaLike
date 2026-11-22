@@ -13,7 +13,7 @@ using Serilog;
 
 namespace InstaLike.Web.Posts
 {
-    [Bind("PostID, Text, PictureFile")]
+    [Bind("PostID, Text, Picture, PictureFile")]
     public sealed class EditPostModel
     {
         public required PostId PostID { get; set; }
@@ -23,7 +23,6 @@ namespace InstaLike.Web.Posts
 
         public PictureId? Picture { get; set; }
 
-        [Required(ErrorMessage = "Please select a picture to share together with your post.")]
         public Microsoft.AspNetCore.Http.IFormFile? PictureFile { get; set; }
     }
 
@@ -83,14 +82,14 @@ namespace InstaLike.Web.Posts
         public Guid UserID { get; }
         public PostId PostID { get; }
         public string Text { get; }
-        public byte[] PictureRawBytes { get; }
+        public byte[]? NewPictureRawBytes { get; }
 
-        public EditPostCommand(Guid userID, PostId postID, string text, byte[] pictureRawBytes)
+        public EditPostCommand(Guid userID, PostId postID, string text, byte[]? newPictureRawBytes)
         {
             UserID = userID;
             PostID = postID;
             Text = text;
-            PictureRawBytes = pictureRawBytes;
+            NewPictureRawBytes = newPictureRawBytes;
         }
     }
 
@@ -109,7 +108,7 @@ namespace InstaLike.Web.Posts
 
         public async Task<Result<PostId>> Handle(EditPostCommand request, CancellationToken cancellationToken)
         {
-            if (request.PictureRawBytes is not { Length: > 0 })
+            if (request.NewPictureRawBytes is { Length: 0 })
             {
                 return Result.Failure<PostId>(PostErrors.PictureMissing);
             }
@@ -136,8 +135,11 @@ namespace InstaLike.Web.Posts
             }
 
             postToEdit.UpdateText(text.Value);
-            var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.PictureRawBytes, cancellationToken);
-            postToEdit.UpdatePicture(uploadedPicture);
+            if (request.NewPictureRawBytes is not null)
+            {
+                var uploadedPicture = await _pictureStore.SaveAsync(PictureContainers.Posts, request.NewPictureRawBytes, cancellationToken);
+                postToEdit.UpdatePicture(uploadedPicture);
+            }
 
             try
             {

@@ -71,7 +71,8 @@ namespace InstaLike.Web.Posts
         {
             if (ModelState.IsValid)
             {
-                var command = new EditPostCommand(User.GetIdentifier(), editedPost.PostID, editedPost.Text, await editedPost.PictureFile!.ToByteArrayAsync());
+                var newPictureRawBytes = editedPost.PictureFile is null ? null : await editedPost.PictureFile.ToByteArrayAsync();
+                var command = new EditPostCommand(User.GetIdentifier(), editedPost.PostID, editedPost.Text, newPictureRawBytes);
                 var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {

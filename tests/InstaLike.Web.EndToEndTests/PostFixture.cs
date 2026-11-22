@@ -26,8 +26,12 @@ namespace InstaLike.Web.EndToEndTests
             await PublishPostAsync(browser, "Test picture");
 
             var timeline = await browser.OpenAsync("/");
-            var pictureUrl = timeline.QuerySelector<IHtmlImageElement>(".posts img.image-timeline")?.Source
-                ?? throw new InvalidOperationException("The timeline shows no post picture.");
+            var pictureUrl = timeline.QuerySelector<IHtmlImageElement>(".posts img.image-timeline")?.Source;
+            if (pictureUrl is null)
+            {
+                throw new InvalidOperationException("The timeline shows no post picture.");
+            }
+
             var picture = await browser.GetAsync(pictureUrl);
             using (new AssertionScope())
             {
@@ -74,6 +78,30 @@ namespace InstaLike.Web.EndToEndTests
             {
                 response.StatusCode.Should().Be(HttpStatusCode.Redirect);
                 (await browser.OpenAsync(PostDetailUrl + postID)).QuerySelector(".post-author-comment")?.TextContent.Should().Be("Final text");
+            }
+        }
+
+        [Fact]
+        public async Task Author_Should_Edit_The_Post_Text_And_Keep_The_Picture()
+        {
+            using var browser = await RegisterAndLogInAsync("textonlyeditor");
+            var postID = await PublishPostAsync(browser, "Draft");
+            var pictureBeforeEditing = PostPictureUrl(await browser.OpenAsync(PostDetailUrl + postID));
+            var edit = await browser.OpenAsync(PostEditUrl + postID);
+
+            var response = await browser.SubmitAsync(
+                Form(edit, $"form[action^='{PostEditUrl}']"),
+                new Dictionary<string, string>
+                {
+                    ["Text"] = "Final text"
+                });
+
+            var detail = await browser.OpenAsync(PostDetailUrl + postID);
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                detail.QuerySelector(".post-author-comment")?.TextContent.Should().Be("Final text");
+                PostPictureUrl(detail).Should().Be(pictureBeforeEditing);
             }
         }
 
@@ -205,6 +233,17 @@ namespace InstaLike.Web.EndToEndTests
         private static string? LikesCount(IHtmlDocument post)
         {
             return post.QuerySelector(".likes-count")?.TextContent;
+        }
+
+        private static string PostPictureUrl(IHtmlDocument post)
+        {
+            var pictureUrl = post.QuerySelector<IHtmlImageElement>("img.post-picture")?.Source;
+            if (pictureUrl is null)
+            {
+                throw new InvalidOperationException("The post page shows no picture.");
+            }
+
+            return pictureUrl;
         }
     }
 }
