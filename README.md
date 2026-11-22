@@ -108,9 +108,9 @@ Integration tests send the use cases to their handlers and run on SQL Server, mi
 End-to-end tests drive the whole application over HTTP, the way a browser without JavaScript would: they submit the forms of the pages and the requests of their scripts, antiforgery tokens and cookies included. The application runs in memory on SQL Server and [Azurite](https://github.com/Azure/Azurite) containers; only picture tagging is replaced by a fake.
 
 ## Deploy to Azure
-Terraform (`infra/tf`) provisions the Azure resources, named after the [Azure naming conventions](https://azurenamingconventions.com/blog/azure-naming-conventions-complete-guide/) (`{type}-instalike-prd-weu`). The Azure DevOps pipeline (`azure-pipelines.yml`) builds, migrates the database and deploys the web application.
+Terraform (`infra/tf`) provisions the Azure resources, named after the [Azure naming conventions](https://azurenamingconventions.com/blog/azure-naming-conventions-complete-guide/) (`{type}-instalike-prd-we`). The Azure DevOps pipeline (`azure-pipelines.yml`) builds, migrates the database and deploys the web application.
 
-There are no passwords or keys: the web application authenticates with its managed identity (`id-instalike-prd-weu`) to Azure SQL, Blob Storage, Azure OpenAI and Application Insights.
+There are no passwords or keys: the web application authenticates with its managed identity (`id-instalike-prd-we`) to Azure SQL, Blob Storage, Azure OpenAI and Application Insights.
 
 Before the first deployment:
 1. Create an Entra ID security group for the Azure SQL administrators, add yourself and the pipeline service connection's principal, and set the `sql_administrators_group` Terraform variable to its name.

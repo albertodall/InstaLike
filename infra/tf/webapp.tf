@@ -25,8 +25,8 @@ resource "azurerm_linux_web_app" "instalike_app" {
     AZURE_TOKEN_CREDENTIALS                       = "ManagedIdentityCredential"
     ConnectionStrings__InstalikeDatabase          = "Server=tcp:${azurerm_mssql_server.instalike_sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.instalike_database.name};Authentication=Active Directory Default;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
     ExternalStorage__AzureBlobStorage__ServiceUri = azurerm_storage_account.instalike_storage_account.primary_blob_endpoint
-    ImageAnalysis__Endpoint                       = "${azurerm_cognitive_account.instalike_autotag_service.endpoint}openai/v1/"
-    ImageAnalysis__Model                          = azurerm_cognitive_deployment.instalike_autotag_model.name
+    ImageAnalysis__Endpoint                       = module.autotag.endpoint
+    ImageAnalysis__Model                          = module.autotag.model
     ApplicationInsights__ConnectionString         = azurerm_application_insights.instalike_appinsights.connection_string
   }
 
@@ -41,7 +41,7 @@ resource "azurerm_linux_web_app" "instalike_app" {
     azurerm_role_assignment.instalike_app_blob_access,
     azurerm_role_assignment.instalike_app_openai_access,
     azurerm_role_assignment.instalike_app_telemetry_access,
-    azurerm_cognitive_deployment.instalike_autotag_model,
+    module.autotag,
     azurerm_application_insights.instalike_appinsights
   ]
 }

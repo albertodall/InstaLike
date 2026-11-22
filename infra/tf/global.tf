@@ -2,7 +2,7 @@ locals {
   # Azure naming convention: {type}-{workload}-{environment}-{region}
   workload    = "instalike"
   environment = "prd"
-  region      = "weu"
+  region      = "we"
   name_suffix = "${local.workload}-${local.environment}-${local.region}"
 
   common_tags = {
