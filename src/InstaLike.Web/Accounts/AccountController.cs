@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using InstaLike.Core.Accounts;
 using InstaLike.Web.Extensions;
-using InstaLike.Web.Membership;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -134,9 +133,8 @@ namespace InstaLike.Web.Accounts
         /// </summary>
         private async Task SignInMemberAsync(Guid memberID, Guid securityStamp, bool isPersistent)
         {
-            var nickname = await _dispatcher.Send(new MemberNicknameQuery(memberID));
             var memberIdentity = new ClaimsIdentity(
-                GetMemberClaims(memberID, nickname, securityStamp),
+                GetMemberClaims(memberID, securityStamp),
                 CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(
@@ -148,12 +146,11 @@ namespace InstaLike.Web.Accounts
                 });
         }
 
-        private static IEnumerable<Claim> GetMemberClaims(Guid memberID, string nickname, Guid securityStamp)
+        private static IEnumerable<Claim> GetMemberClaims(Guid memberID, Guid securityStamp)
         {
             return new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, memberID.ToString(), ClaimValueTypes.String),
-                new Claim(ClaimTypes.Name, nickname, ClaimValueTypes.String),
                 new Claim(SecurityStampValidator.ClaimType, securityStamp.ToString(), ClaimValueTypes.String)
             };
         }

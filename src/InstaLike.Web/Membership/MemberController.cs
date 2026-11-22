@@ -53,6 +53,13 @@ namespace InstaLike.Web.Membership
             return View(newMember);
         }
 
+        public async Task<IActionResult> MyProfile()
+        {
+            var nickname = await _dispatcher.Send(new MemberNicknameQuery(User.GetIdentifier()));
+
+            return RedirectToAction(nameof(Profile), new { id = nickname });
+        }
+
         public async Task<IActionResult> Profile(string id)
         {
             var query = new MemberProfileQuery(User.GetIdentifier(), id, MaxThumbnailsInMemberProfile);

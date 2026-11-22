@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -57,9 +58,38 @@ namespace InstaLike.Web.EndToEndTests
 
             var timeline = await browser.OpenAsync("/");
 
-            timeline.QuerySelector<IHtmlAnchorElement>("a[title='User profile']")?.PathName
-                .Should()
-                .Be("/Member/Profile/newmember");
+            (await OpenOwnProfileAsync(browser, timeline)).Should().Be("/Member/Profile/newmember");
+        }
+
+        [Fact]
+        public async Task Profile_Link_Should_Follow_A_Nickname_Change()
+        {
+            using var browser = await RegisterAndLogInAsync("oldnick");
+            var edit = await browser.OpenAsync("/Member/Edit");
+
+            var response = await browser.SubmitAsync(
+                Form(edit, "form[action='/Member/Edit']"),
+                new Dictionary<string, string>
+                {
+                    ["Nickname"] = "newnick"
+                });
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                (await OpenOwnProfileAsync(browser, await browser.OpenAsync("/"))).Should().Be("/Member/Profile/newnick");
+            }
+        }
+
+        [Fact]
+        public async Task Profile_Link_Should_Lead_To_The_Own_Profile_From_Another_Profile()
+        {
+            await RegisterMemberAsync("someoneelse");
+
+            using var browser = await RegisterAndLogInAsync("myself");
+            var otherProfile = await browser.OpenAsync("/Member/Profile/someoneelse");
+
+            (await OpenOwnProfileAsync(browser, otherProfile)).Should().Be("/Member/Profile/myself");
         }
 
         [Fact]
@@ -177,6 +207,19 @@ namespace InstaLike.Web.EndToEndTests
                 logout.StatusCode.Should().Be(HttpStatusCode.BadRequest);
                 (await browser.GetAsync("/")).StatusCode.Should().Be(HttpStatusCode.OK);
             }
+        }
+
+        /// <summary>
+        /// Follows the page's link to the member's own profile and returns where it redirects.
+        /// </summary>
+        private static async Task<string?> OpenOwnProfileAsync(Browser browser, IHtmlDocument page)
+        {
+            var profileLink = page.QuerySelector<IHtmlAnchorElement>("a[title='User profile']")
+                ?? throw new InvalidOperationException("The page has no link to the member's own profile.");
+            var response = await browser.GetAsync(profileLink.PathName);
+            response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+
+            return response.Headers.Location?.OriginalString;
         }
 
         /// <summary>
