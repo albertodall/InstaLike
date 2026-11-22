@@ -38,7 +38,7 @@ namespace InstaLike.Web.Accounts
 
         private async Task<bool> HasCurrentSecurityStampAsync(ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var currentSecurityStamp = await ReadSecurityStampAsync(AccountId.From(principal.GetIdentifier()), cancellationToken);
+            var currentSecurityStamp = await ReadSecurityStampAsync(principal.GetAccountID(), cancellationToken);
 
             return currentSecurityStamp is not null
                 && principal.FindFirst(ClaimType)?.Value == currentSecurityStamp.Value.ToString();

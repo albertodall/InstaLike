@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
+using InstaLike.Core.Accounts;
+using InstaLike.Core.Membership;
 
 namespace InstaLike.Web.Extensions
 {
@@ -14,6 +16,16 @@ namespace InstaLike.Web.Extensions
             }
 
             return Guid.Parse(claimValue);
+        }
+
+        public static MemberId GetMemberID(this ClaimsPrincipal principal)
+        {
+            return MemberId.From(principal.GetIdentifier());
+        }
+
+        public static AccountId GetAccountID(this ClaimsPrincipal principal)
+        {
+            return AccountId.From(principal.GetIdentifier());
         }
     }
 }

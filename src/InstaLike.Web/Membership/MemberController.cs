@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using InstaLike.Core.Membership;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Social;
 using MediatR;
@@ -74,7 +73,7 @@ namespace InstaLike.Web.Membership
 
         public async Task<IActionResult> Edit()
         {
-            var query = new EditMemberProfileQuery(MemberId.From(User.GetIdentifier()));
+            var query = new EditMemberProfileQuery(User.GetMemberID());
             var model = await _dispatcher.Send(query);
 
             return View(model);
@@ -86,7 +85,7 @@ namespace InstaLike.Web.Membership
             if (ModelState.IsValid)
             {
                 var command = new EditMemberProfileCommand(
-                    MemberId.From(User.GetIdentifier()),
+                    User.GetMemberID(),
                     memberDetails.Nickname,
                     memberDetails.Name,
                     memberDetails.Surname,

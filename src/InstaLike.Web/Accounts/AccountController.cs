@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using InstaLike.Core.Accounts;
 using InstaLike.Web.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -61,7 +60,7 @@ namespace InstaLike.Web.Accounts
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            await _dispatcher.Send(new LogOutCommand(CurrentAccountID));
+            await _dispatcher.Send(new LogOutCommand(User.GetAccountID()));
 
             return RedirectToAction("Index", "Home");
         }
@@ -73,7 +72,7 @@ namespace InstaLike.Web.Accounts
 
         public async Task<IActionResult> Settings()
         {
-            var email = await _dispatcher.Send(new AccountEmailQuery(CurrentAccountID));
+            var email = await _dispatcher.Send(new AccountEmailQuery(User.GetAccountID()));
             var model = new AccountSettingsModel()
             {
                 ChangeEmail = new ChangeEmailModel() { Email = email }
@@ -87,7 +86,7 @@ namespace InstaLike.Web.Accounts
         {
             if (ModelState.IsValid)
             {
-                var result = await _dispatcher.Send(new ChangeEmailCommand(CurrentAccountID, changeEmail.Email));
+                var result = await _dispatcher.Send(new ChangeEmailCommand(User.GetAccountID(), changeEmail.Email));
                 if (result.IsSuccess)
                 {
                     TempData["SettingsMessage"] = "Your e-mail address has been changed.";
@@ -103,10 +102,10 @@ namespace InstaLike.Web.Accounts
         [HttpPost]
         public async Task<IActionResult> ChangePassword([Bind(Prefix = nameof(AccountSettingsModel.ChangePassword))] ChangePasswordModel changePassword)
         {
-            var email = await _dispatcher.Send(new AccountEmailQuery(CurrentAccountID));
+            var email = await _dispatcher.Send(new AccountEmailQuery(User.GetAccountID()));
             if (ModelState.IsValid)
             {
-                var result = await _dispatcher.Send(new ChangePasswordCommand(CurrentAccountID, changePassword.CurrentPassword, changePassword.NewPassword));
+                var result = await _dispatcher.Send(new ChangePasswordCommand(User.GetAccountID(), changePassword.CurrentPassword, changePassword.NewPassword));
                 if (result.IsSuccess)
                 {
                     var currentLogin = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -125,8 +124,6 @@ namespace InstaLike.Web.Accounts
                 ChangePassword = changePassword
             });
         }
-
-        private AccountId CurrentAccountID => AccountId.From(User.GetIdentifier());
 
         /// <summary>
         /// Issues the login cookie of the member, with the security stamp their account has now.
