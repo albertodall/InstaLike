@@ -37,7 +37,7 @@ namespace InstaLike.Web.Membership
         public PictureId? Picture { get; set; }
     }
 
-    public sealed class MemberProfileQuery : IRequest<MemberProfileModel>
+    public sealed class MemberProfileQuery : IRequest<Result<MemberProfileModel>>
     {
         public Guid CurrentMemberID { get; }
         public string Nickname { get; }
@@ -51,7 +51,7 @@ namespace InstaLike.Web.Membership
         }
     }
 
-    internal sealed class MemberProfileQueryHandler : IRequestHandler<MemberProfileQuery, MemberProfileModel>
+    internal sealed class MemberProfileQueryHandler : IRequestHandler<MemberProfileQuery, Result<MemberProfileModel>>
     {
         private readonly IStatelessSession _session;
         private readonly ILogger _logger;
@@ -62,7 +62,7 @@ namespace InstaLike.Web.Membership
             _logger = logger.ForContext<MemberProfileModel>();
         }
 
-        public async Task<MemberProfileModel> Handle(MemberProfileQuery request, CancellationToken cancellationToken)
+        public async Task<Result<MemberProfileModel>> Handle(MemberProfileQuery request, CancellationToken cancellationToken)
         {
             MemberProfileModel profile = null!;
 
@@ -84,6 +84,10 @@ namespace InstaLike.Web.Membership
 
                 // Load the member's information
                 profile = await memberProfileQuery.SingleOrDefaultAsync<MemberProfileModel>(cancellationToken);
+                if (profile is null)
+                {
+                    return Result.Failure<MemberProfileModel>(MemberErrors.NotFound(request.Nickname));
+                }
 
                 // Number of posts published by this author. 
                 var postCountQuery = _session.QueryOver<Post>()
@@ -138,7 +142,7 @@ namespace InstaLike.Web.Membership
                 await tx.CommitAsync(cancellationToken);
             }
 
-            return profile;
+            return Result.Ok(profile);
         }
     }
 }

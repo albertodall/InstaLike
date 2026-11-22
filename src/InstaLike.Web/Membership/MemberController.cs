@@ -63,9 +63,13 @@ namespace InstaLike.Web.Membership
         public async Task<IActionResult> Profile(string id)
         {
             var query = new MemberProfileQuery(User.GetIdentifier(), id, MaxThumbnailsInMemberProfile);
-            var model = await _dispatcher.Send(query);
+            var queryResult = await _dispatcher.Send(query);
+            if (queryResult.IsSuccess)
+            {
+                return View(queryResult.Value);
+            }
 
-            return View(model);
+            return NotFound();
         }
 
         public async Task<IActionResult> Edit()

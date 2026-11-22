@@ -93,6 +93,16 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         [Fact]
+        public async Task Profile_Of_A_Missing_Member_Should_Not_Be_Found()
+        {
+            using var browser = await RegisterAndLogInAsync("profilevisitor");
+
+            var response = await browser.GetAsync("/Member/Profile/nobody");
+
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
         public async Task Nickname_Already_Taken_Should_Be_Shown_On_The_Registration_Form()
         {
             await RegisterMemberAsync("nick1");

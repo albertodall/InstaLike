@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Membership;
 using Serilog;
 using Xunit;
@@ -17,7 +20,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Load_User_Profile()
         {
-            MemberProfileModel result;
+            Result<MemberProfileModel> result;
 
             var author = TestDataHelper.NewMember("authoruser");
             var followed = TestDataHelper.NewMember("followeduser");
@@ -44,12 +47,28 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                result.IsCurrentMemberProfile.Should().BeFalse();
-                result.NumberOfFollowers.Should().Be(1);
-                result.NumberOfFollows.Should().Be(1);
-                result.NumberOfPosts.Should().Be(1);
-                result.RecentPosts.Length.Should().Be(1);
+                result.IsSuccess.Should().BeTrue();
+                result.Value.IsCurrentMemberProfile.Should().BeFalse();
+                result.Value.NumberOfFollowers.Should().Be(1);
+                result.Value.NumberOfFollows.Should().Be(1);
+                result.Value.NumberOfPosts.Should().Be(1);
+                result.Value.RecentPosts.Length.Should().Be(1);
             }
+        }
+
+        [Fact]
+        public async Task Should_Not_Find_The_Profile_Of_A_Missing_Member()
+        {
+            Result<MemberProfileModel> result;
+
+            var query = new MemberProfileQuery(Guid.NewGuid(), "nobody", 3);
+            using (var session = Infrastructure.OpenStatelessSession())
+            {
+                var sut = new MemberProfileQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            result.Error.Should().Be(MemberErrors.NotFound("nobody"));
         }
 
         [Fact]
