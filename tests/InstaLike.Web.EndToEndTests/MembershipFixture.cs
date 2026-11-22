@@ -65,8 +65,7 @@ namespace InstaLike.Web.EndToEndTests
         [Fact]
         public async Task Nickname_Already_Taken_Should_Be_Shown_On_The_Registration_Form()
         {
-            using (await RegisterAndLogInAsync("nick1"))
-            { }
+            await RegisterMemberAsync("nick1");
 
             using var browser = Application.OpenBrowser();
             var response = await RegisterAsync(browser, "nick1");
@@ -81,8 +80,7 @@ namespace InstaLike.Web.EndToEndTests
         [Fact]
         public async Task Wrong_Password_Should_Be_Shown_On_The_Login_Form()
         {
-            using (await RegisterAndLogInAsync("nick2"))
-            { }
+            await RegisterMemberAsync("nick2");
 
             using var browser = Application.OpenBrowser();
             var response = await LogInAsync(browser, "nick2", "wrong password");
@@ -98,8 +96,7 @@ namespace InstaLike.Web.EndToEndTests
         [Fact]
         public async Task Repeated_Wrong_Passwords_Should_Lock_The_Account()
         {
-            using (await RegisterAndLogInAsync("nick_locked"))
-            { }
+            await RegisterMemberAsync("nick_locked");
 
             using var browser = Application.OpenBrowser();
             for (var attempt = 0; attempt < 5; attempt++)

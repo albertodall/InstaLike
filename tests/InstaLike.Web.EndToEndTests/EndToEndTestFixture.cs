@@ -48,6 +48,17 @@ namespace InstaLike.Web.EndToEndTests
         }
 
         /// <summary>
+        /// Registers a member with the nickname, from a browser that is closed right away.
+        /// </summary>
+        protected async Task RegisterMemberAsync(string nickname)
+        {
+            using var browser = Application.OpenBrowser();
+            (await RegisterAsync(browser, nickname)).StatusCode
+                .Should()
+                .Be(HttpStatusCode.Redirect);
+        }
+
+        /// <summary>
         /// Submits the registration form, with the default password and an email address made from the nickname.
         /// </summary>
         protected static async Task<HttpResponseMessage> RegisterAsync(Browser browser, string nickname)
