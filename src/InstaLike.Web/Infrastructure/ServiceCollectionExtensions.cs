@@ -2,6 +2,7 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Reflection;
+using Azure.Storage.Blobs;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions.Helpers;
@@ -35,7 +36,13 @@ namespace InstaLike.Web.Infrastructure
         {
             var databaseConnectionString = configuration.GetConnectionString("InstalikeDatabase")
                 ?? throw new InvalidOperationException("Connection string 'InstalikeDatabase' has not been configured.");
-            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString, environment);
+            var nhConfig = GetFluentConfigurationForDatabase(databaseConnectionString);
+            if (environment.IsDevelopment())
+            {
+                nhConfig.ExposeConfiguration(cfg => cfg
+                    .SetProperty(NHibernate.Cfg.Environment.ShowSql, "true")
+                    .SetProperty(NHibernate.Cfg.Environment.FormatSql, "true"));
+            }
 
             services.AddSingleton(nhConfig.BuildSessionFactory());
             services.AddScoped(sp =>
@@ -64,8 +71,16 @@ namespace InstaLike.Web.Infrastructure
 
         public static IServiceCollection ConfigurePictureStorage(this IServiceCollection services, IConfiguration configuration)
         {
-            var storageSettings = AzureBlobStorageSettings.FromConfiguration(configuration);
-            services.AddSingleton(storageSettings.CreateClient());
+            var connectionString = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ConnectionString");
+            var serviceUri = configuration.GetValue<string>("ExternalStorage:AzureBlobStorage:ServiceUri");
+
+            // A connection string for Azurite;
+            // in Azure, the service URI with the application's Azure identity.
+            var blobServiceClient = string.IsNullOrEmpty(connectionString)
+                ? new BlobServiceClient(new Uri(serviceUri!), AzureIdentity.Credential)
+                : new BlobServiceClient(connectionString);
+
+            services.AddSingleton(blobServiceClient);
             services.AddSingleton<IPictureStore, AzureBlobPictureStore>();
             services.AddHostedService<UnusedPictureCleanupService>();
 
@@ -92,7 +107,11 @@ namespace InstaLike.Web.Infrastructure
         public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)
         {
             services.AddAuthorizationBuilder()
-                .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+                .SetFallbackPolicy(
+                    new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build()
+                );
 
             return services;
         }
@@ -145,9 +164,11 @@ namespace InstaLike.Web.Infrastructure
             // Any OpenAI-compatible API: the Azure OpenAI v1 endpoint (where the model is the deployment name) or a local Ollama server.
             // Without an API key, Azure OpenAI is called with the application's Azure identity.
             var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
+#pragma warning disable OPENAI001 // Token authentication is the documented way to call the Azure OpenAI v1 endpoint with Entra ID.
             var chatClient = string.IsNullOrEmpty(apiKey)
-                ? CreateEntraIdChatClient(model, options)
+                ? new ChatClient(model, new BearerTokenPolicy(AzureIdentity.Credential, AzureOpenAIScope), options)
                 : new ChatClient(model, new ApiKeyCredential(apiKey), options);
+#pragma warning restore OPENAI001
 
             services.AddChatClient(chatClient.AsIChatClient());
             services.AddSingleton<IImageRecognitionService, ChatClientImageTagging>();
@@ -155,41 +176,15 @@ namespace InstaLike.Web.Infrastructure
             return services;
         }
 
-#pragma warning disable OPENAI001 // Token authentication is the documented way to call the Azure OpenAI v1 endpoint with Entra ID.
-        private static ChatClient CreateEntraIdChatClient(string model, OpenAIClientOptions options) =>
-            new(model, new BearerTokenPolicy(AzureIdentity.Credential, AzureOpenAIScope), options);
-#pragma warning restore OPENAI001
-
-        private static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString, IHostEnvironment environment)
-        {
-            var database = GetDatabaseConfiguration(connectionString);
-            if (environment.IsDevelopment())
-            {
-                database.ShowSql().FormatSql();
-            }
-
-            return GetFluentConfigurationForDatabase(database);
-        }
-
         internal static FluentConfiguration GetFluentConfigurationForDatabase(string connectionString)
         {
-            return GetFluentConfigurationForDatabase(GetDatabaseConfiguration(connectionString));
-        }
-
-        private static MsSqlConfiguration GetDatabaseConfiguration(string connectionString)
-        {
-            return MsSqlConfiguration.MsSql2012
-                .Driver<MicrosoftDataSqlClientDriver>()
-                .ConnectionString(connectionString)
-                .DefaultSchema("dbo")
-                .AdoNetBatchSize(20)
-                .UseReflectionOptimizer();
-        }
-
-        private static FluentConfiguration GetFluentConfigurationForDatabase(MsSqlConfiguration database)
-        {
             return Fluently.Configure()
-                .Database(database)
+                .Database(MsSqlConfiguration.MsSql2012
+                    .Driver<MicrosoftDataSqlClientDriver>()
+                    .ConnectionString(connectionString)
+                    .DefaultSchema("dbo")
+                    .AdoNetBatchSize(20)
+                    .UseReflectionOptimizer())
                 .Mappings(m =>
                     m.FluentMappings
                         .Conventions.Add(

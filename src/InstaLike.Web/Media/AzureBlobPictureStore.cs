@@ -36,7 +36,13 @@ namespace InstaLike.Web.Media
             var picture = PictureId.New();
             await GetBlob(container, picture).UploadAsync(
                 BinaryData.FromBytes(content),
-                new BlobUploadOptions { Conditions = new BlobRequestConditions { IfNoneMatch = ETag.All } },
+                new BlobUploadOptions()
+                {
+                    Conditions = new BlobRequestConditions()
+                    {
+                        IfNoneMatch = ETag.All
+                    }
+                },
                 cancellationToken);
 
             return picture;
