@@ -8,7 +8,7 @@ namespace InstaLike.Web.Data
     internal sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : notnull
     {
-        private static readonly bool CommitsFailures = typeof(TRequest).IsDefined(typeof(CommitOnFailureAttribute), false);
+        private static readonly bool CommitRequestFailure = typeof(TRequest).IsDefined(typeof(CommitOnFailureAttribute), false);
 
         private readonly UnitOfWork _unitOfWork;
 
@@ -28,7 +28,7 @@ namespace InstaLike.Web.Data
             try
             {
                 var response = await next(cancellationToken);
-                if (!CommitsFailures && response is IResult { IsFailure: true })
+                if (!CommitRequestFailure && response is IResult { IsFailure: true })
                 {
                     await _unitOfWork.RollbackAsync();
                 }
