@@ -12,7 +12,7 @@ namespace InstaLike.Web.EndToEndTests
     {
         internal static readonly string[] ImageTags = ["#cat", "#grumpy"];
 
-        public Task<Result<string[]>> AutoTagImage(Stream imageStream, string mediaType)
+        public Task<Result<string[]>> AutoTagImage(Stream imageStream)
         {
             return Task.FromResult(Result.Ok(ImageTags));
         }

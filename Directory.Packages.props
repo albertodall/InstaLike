@@ -37,6 +37,8 @@
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageVersion Include="Serilog.Exceptions" Version="8.4.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageVersion Include="SkiaSharp" Version="4.157.0" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.157.0" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.15" />
     <PackageVersion Include="Testcontainers.Azurite" Version="4.17.0" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.17.0" />

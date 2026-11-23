@@ -83,7 +83,7 @@ docker compose up -d instalike.db.mssql instalike.storage.azureblob instalike.db
 2. Run the `InstaLike.Web` project with the `Development` environment: `appsettings.Development.json` points to the containerized SQL Server and to Azurite (`UseDevelopmentStorage=true`).
 
 ### Pictures auto-tagging
-Pictures are tagged by GPT-4.1 nano on Azure OpenAI.
+Pictures are tagged by GPT-4.1 nano on Azure OpenAI. Before tagging, each picture is shrunk to at most 768 pixels and converted to JPEG with [SkiaSharp](https://github.com/mono/SkiaSharp), which saves tokens and upload time.
 
 In development, the web application calls a model of its own, provisioned once by `infra/tf/dev-ai` (state kept locally): `appsettings.Development.json` already points to it, and only its API key goes into the user secrets. The secrets folder is mounted into the web container, so the same key works when debugging the `docker-compose` project in Visual Studio and when running the project from the IDE:
 ```shell

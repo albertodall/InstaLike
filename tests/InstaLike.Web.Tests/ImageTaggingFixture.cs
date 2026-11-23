@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using InstaLike.Web.Media;
 using Microsoft.Extensions.AI;
+using SkiaSharp;
 using Xunit;
 
 namespace InstaLike.Web.Tests
@@ -19,27 +20,40 @@ namespace InstaLike.Web.Tests
         {
             var chatClient = new FakeChatClient(
                 """
-                { "tags": ["tag1", "tag2", "#tag3", "tag4"] }
+                { "data": ["tag1", "tag2", "#tag3", "tag4"] }
                 """);
             var tagging = new ChatClientImageTagging(chatClient);
 
-            var result = await tagging.AutoTagImage(new MemoryStream([1, 2, 3]), "image/jpeg");
+            var result = await tagging.AutoTagImage(TestPicture.OpenRead());
 
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().Equal("#tag1", "#tag2", "#tag3", "#tag4");
         }
 
         [Fact]
-        public async Task Picture_Should_Be_Sent_To_The_Model_With_Its_Media_Type()
+        public async Task Picture_Should_Be_Sent_To_The_Model_As_A_Jpeg_Fitting_In_768_Pixels()
         {
-            var chatClient = new FakeChatClient("""{ "tags": ["cat"] }""");
+            var chatClient = new FakeChatClient("""{ "data": ["cat"] }""");
             var tagging = new ChatClientImageTagging(chatClient);
 
-            await tagging.AutoTagImage(new MemoryStream(new byte[] { 1, 2, 3 }), "image/png");
+            await tagging.AutoTagImage(TestPicture.OpenRead());
 
             var picture = chatClient.ReceivedMessages.SelectMany(m => m.Contents).OfType<DataContent>().Single();
-            picture.MediaType.Should().Be("image/png");
-            picture.Data.ToArray().Should().Equal(1, 2, 3);
+            using var sentPicture = SKBitmap.Decode(picture.Data.ToArray());
+            picture.MediaType.Should().Be("image/jpeg");
+            (sentPicture.Width, sentPicture.Height).Should().Be((576, 768));
+        }
+
+        [Fact]
+        public async Task Unsupported_Picture_Should_Return_A_Failure_Without_Calling_The_Model()
+        {
+            var chatClient = new FakeChatClient("""{ "data": ["cat"] }""");
+            var tagging = new ChatClientImageTagging(chatClient);
+
+            var result = await tagging.AutoTagImage(new MemoryStream([1, 2, 3]));
+
+            result.IsFailure.Should().BeTrue();
+            chatClient.ReceivedMessages.Should().BeEmpty();
         }
 
         [Fact]
@@ -47,7 +61,7 @@ namespace InstaLike.Web.Tests
         {
             var tagging = new ChatClientImageTagging(new FakeChatClient("I cannot see any picture."));
 
-            var result = await tagging.AutoTagImage(new MemoryStream(new byte[] { 1, 2, 3 }), "image/jpeg");
+            var result = await tagging.AutoTagImage(TestPicture.OpenRead());
 
             result.IsFailure.Should().BeTrue();
         }
@@ -58,7 +72,7 @@ namespace InstaLike.Web.Tests
             var unreachable = new AggregateException(new HttpRequestException("Connection refused"));
             var tagging = new ChatClientImageTagging(new FakeChatClient(unreachable));
 
-            var result = await tagging.AutoTagImage(new MemoryStream(new byte[] { 1, 2, 3 }), "image/jpeg");
+            var result = await tagging.AutoTagImage(TestPicture.OpenRead());
 
             result.IsFailure.Should().BeTrue();
         }

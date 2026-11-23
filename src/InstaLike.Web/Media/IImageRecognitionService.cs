@@ -6,6 +6,6 @@ namespace InstaLike.Web.Media
 {
     public interface IImageRecognitionService
     {
-        Task<Result<string[]>> AutoTagImage(Stream imageStream, string mediaType);
+        Task<Result<string[]>> AutoTagImage(Stream imageStream);
     }
 }

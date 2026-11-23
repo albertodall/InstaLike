@@ -149,7 +149,7 @@ namespace InstaLike.Web.Posts
 
                 await using (var pictureStream = await formFiles[0].ToStreamAsync())
                 {
-                    taggingResult = await _imageRecognition.AutoTagImage(pictureStream, formFiles[0].ContentType);
+                    taggingResult = await _imageRecognition.AutoTagImage(pictureStream);
                 }
 
                 if (taggingResult.IsSuccess)
