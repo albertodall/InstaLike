@@ -183,7 +183,7 @@ namespace InstaLike.Web.Posts
                         Picture = p.Picture,
                         PostDate = p.PostDate,
                         Text = p.Text,
-                        Comments = commentsByPostID[p.ID].OrderByDescending(c => c.CommentDate).ToArray(),
+                        Comments = commentsByPostID[p.ID].OrderBy(c => c.CommentDate).ToArray(),
                         LikesCount = likesCountByPostID.GetValueOrDefault(p.ID),
                         IsLikedByCurrentUser = postIDsLikedByCurrentUser.Contains(p.ID),
                         CanBeLikedByCurrentUser = p.CanBeLikedBy(userID),
