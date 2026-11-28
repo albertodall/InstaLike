@@ -478,7 +478,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Load_All_Details_For_A_Post()
         {
-            Result<PostModel> result;
+            Result<PostDetailModel> result;
             var author = TestDataHelper.NewMember("author7");
             var reader = TestDataHelper.NewMember("reader1");
             Post post;
@@ -515,7 +515,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Details_Of_A_Missing_Post_Should_Not_Be_Found()
         {
-            Result<PostModel> result;
+            Result<PostDetailModel> result;
             var missingPostID = PostId.New();
 
             var query = new PostDetailQuery(missingPostID, MemberId.New());

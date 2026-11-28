@@ -17,7 +17,7 @@ namespace InstaLike.Web.Posts
 {
     public sealed class TimelineModel
     {
-        public PostModel[] Posts { get; set; } = [];
+        public PostDetailModel[] Posts { get; set; } = [];
         public bool HasOlderPosts { get; set; }
     }
 
@@ -175,7 +175,7 @@ namespace InstaLike.Web.Posts
 
                 timeline = new TimelineModel
                 {
-                    Posts = posts.Take(numberOfPosts).Select(p => new PostModel
+                    Posts = posts.Take(numberOfPosts).Select(p => new PostDetailModel
                     {
                         PostID = p.ID,
                         AuthorNickName = authorsByID[p.AuthorID].Nickname,
