@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.SqlCommand;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Posts
@@ -69,17 +69,16 @@ namespace InstaLike.Web.Posts
                 // Comments for this post
                 Comment commentEntity = null!;
                 Member commentAuthor = null!;
-                CommentModel comment = null!;
                 var postCommentsQuery = _session.QueryOver(() => commentEntity)
                     .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                     .Where(() => commentEntity.Post.ID == request.PostID)
                     .OrderBy(() => commentEntity.CommentDate).Asc
-                    .SelectList(list => list
-                        .Select(() => commentEntity.Text).WithAlias(() => comment.Text)
-                        .Select(() => commentEntity.CommentDate).WithAlias(() => comment.CommentDate)
-                        .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
-                    )
-                    .TransformUsing(Transformers.AliasToBean<CommentModel>())
+                    .SelectInto(() => new CommentModel
+                    {
+                        Text = commentEntity.Text,
+                        CommentDate = commentEntity.CommentDate,
+                        AuthorNickName = commentAuthor.Nickname
+                    })
                     .Future<CommentModel>();
 
                 // Is this post liked by the current user?
@@ -96,14 +95,20 @@ namespace InstaLike.Web.Posts
 
                 Post postEntity = null!;
                 Member postAuthor = null!;
-                var authorQuery = _session.QueryOver(() => postEntity)
-                    .JoinEntityAlias(() => postAuthor, Restrictions.EqProperty(Projections.Property(() => postAuthor.ID), Projections.Property(() => postEntity.AuthorID)), JoinType.InnerJoin)
+                var postModelQuery = _session.QueryOver(() => postEntity)
+                    .JoinEntityAlias(() => postAuthor,
+                        Restrictions.EqProperty(
+                            Projections.Property(() => postAuthor.ID),
+                            Projections.Property(() => postEntity.AuthorID)),
+                        JoinType.InnerJoin)
                     .Where(() => postEntity.ID == request.PostID)
-                    .SelectList(list => list
-                        .Select(() => postAuthor.Nickname)
-                        .Select(() => postAuthor.ProfilePicture)
-                    )
-                    .FutureValue<object[]>();
+                    .SelectInto(() => new PostDetailModel
+                    {
+                        PostID = postEntity.ID,
+                        AuthorNickName = postAuthor.Nickname,
+                        AuthorProfilePicture = postAuthor.ProfilePicture
+                    })
+                    .FutureValue<PostDetailModel>();
 
                 var post = await postQuery.GetValueAsync(cancellationToken);
                 if (post is null)
@@ -111,22 +116,17 @@ namespace InstaLike.Web.Posts
                     return Result.Failure<PostDetailModel>(PostErrors.NotFound(request.PostID));
                 }
 
-                var author = await authorQuery.GetValueAsync(cancellationToken);
+                var model = await postModelQuery.GetValueAsync(cancellationToken);
+                model.Picture = post.Picture;
+                model.PostDate = post.PostDate;
+                model.Text = post.Text;
+                model.Comments = postCommentsQuery.ToArray();
+                model.LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken);
+                model.IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0;
+                model.CanBeLikedByCurrentUser = post.CanBeLikedBy(request.CurrentUserID);
+                model.CanBeEditedByCurrentUser = post.CanBeEditedBy(request.CurrentUserID);
 
-                return Result.Ok(new PostDetailModel
-                {
-                    PostID = post.ID,
-                    AuthorNickName = (string)author[0],
-                    AuthorProfilePicture = (PictureId?)author[1],
-                    Picture = post.Picture,
-                    PostDate = post.PostDate,
-                    Text = post.Text,
-                    Comments = postCommentsQuery.ToArray(),
-                    LikesCount = await postLikesCountQuery.GetValueAsync(cancellationToken),
-                    IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0,
-                    CanBeLikedByCurrentUser = post.CanBeLikedBy(request.CurrentUserID),
-                    CanBeEditedByCurrentUser = post.CanBeEditedBy(request.CurrentUserID)
-                });
+                return Result.Ok(model);
             }
         }
     }

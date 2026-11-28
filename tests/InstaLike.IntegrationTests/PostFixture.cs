@@ -507,6 +507,8 @@ namespace InstaLike.IntegrationTests
                 result.Value.AuthorNickName.Should().Be(author.Nickname);
                 result.Value.LikesCount.Should().Be(1);
                 result.Value.Comments.Length.Should().Be(1);
+                result.Value.Comments[0].Text.Should().Be("My comment");
+                result.Value.Comments[0].AuthorNickName.Should().Be(reader.Nickname);
                 result.Value.IsLikedByCurrentUser.Should().BeTrue();
                 result.Value.CanBeLikedByCurrentUser.Should().BeTrue();
             }
