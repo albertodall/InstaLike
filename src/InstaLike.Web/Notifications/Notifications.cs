@@ -56,30 +56,33 @@ namespace InstaLike.Web.Notifications
 
             using (var tx = _session.BeginTransaction())
             {
-                NotificationModel notification = null!;
-                Notification notificationEntity = null!;
+                Notification notification = null!;
                 Member sender = null!;
 
-                var notificationsQuery = _session.QueryOver(() => notificationEntity)
-                    .JoinEntityAlias(() => sender, Restrictions.EqProperty(Projections.Property(() => sender.ID), Projections.Property(() => notificationEntity.SenderID)), JoinType.InnerJoin)
-                    .Where(() => notificationEntity.RecipientID == request.UserID);
+                var notificationsQuery = _session.QueryOver(() => notification)
+                    .JoinEntityAlias(() => sender,
+                        Restrictions.EqProperty(
+                            Projections.Property(() => sender.ID),
+                            Projections.Property(() => notification.SenderID)),
+                        JoinType.InnerJoin)
+                    .Where(() => notification.RecipientID == request.UserID);
 
                 if (!request.IncludeReadNotifications)
                 {
-                    notificationsQuery.And(() => !notificationEntity.HasBeenReadByRecipient);
+                    notificationsQuery.And(() => !notification.HasBeenReadByRecipient);
                 }
 
                 notificationsQuery
-                    .OrderBy(() => notificationEntity.NotificationDate).Desc
-                    .SelectList(fields => fields
-                        .Select(() => notificationEntity.ID).WithAlias(() => notification.ID)
-                        .Select(() => sender.Nickname).WithAlias(() => notification.SenderNickname)
-                        .Select(() => sender.ProfilePicture).WithAlias(() => notification.SenderProfilePicture)
-                        .Select(() => notificationEntity.Kind).WithAlias(() => notification.Kind)
-                        .Select(() => notificationEntity.PostID).WithAlias(() => notification.PostID)
-                        .Select(() => notificationEntity.NotificationDate).WithAlias(() => notification.NotificationDate)
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<NotificationModel>());
+                    .OrderBy(() => notification.NotificationDate).Desc
+                    .SelectInto(() => new NotificationModel
+                    {
+                        ID = notification.ID,
+                        SenderNickname = sender.Nickname,
+                        SenderProfilePicture = sender.ProfilePicture,
+                        Kind = notification.Kind,
+                        PostID = notification.PostID,
+                        NotificationDate = notification.NotificationDate
+                    });
 
                 notifications = (await notificationsQuery.ListAsync<NotificationModel>(cancellationToken)).ToArray();
             }
