@@ -7,6 +7,11 @@ using NHibernate;
 
 namespace InstaLike.Web.Membership
 {
+    /// <summary>
+    /// Reads the current nickname of a member, so that the own profile can redirect
+    /// to its nickname URL. The nickname is not kept in the authentication cookie
+    /// because the member can change it while logged in.
+    /// </summary>
     public sealed class MemberNicknameQuery : IRequest<string>
     {
         public MemberId MemberID { get; }
