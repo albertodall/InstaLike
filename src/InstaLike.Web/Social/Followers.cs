@@ -41,7 +41,6 @@ namespace InstaLike.Web.Social
 
             using (var tx = _session.BeginTransaction())
             {
-                FollowModel model = null!;
                 Follow follow = null!;
                 Member followed = null!;
                 Member follower = null!;
@@ -50,11 +49,11 @@ namespace InstaLike.Web.Social
                     .JoinEntityAlias(() => follower, Restrictions.EqProperty(Projections.Property(() => follower.ID), Projections.Property(() => follow.Follower.ID)), JoinType.InnerJoin)
                     .JoinEntityAlias(() => followed, Restrictions.EqProperty(Projections.Property(() => followed.ID), Projections.Property(() => follow.FollowedID)), JoinType.InnerJoin)
                     .Where(Restrictions.Eq(Projections.Property(() => followed.Nickname), request.Nickname))
-                    .SelectList(fields => fields
-                        .Select(f => follower.Nickname).WithAlias(() => model.Nickname)
-                        .Select(f => follower.ProfilePicture).WithAlias(() => model.ProfilePicture)
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<FollowModel>());
+                    .SelectInto(() => new FollowModel
+                    {
+                        Nickname = follower.Nickname,
+                        ProfilePicture = follower.ProfilePicture
+                    });
 
                 result = (await followersQuery.ListAsync<FollowModel>(cancellationToken)).ToArray();
             }

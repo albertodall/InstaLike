@@ -171,7 +171,7 @@ namespace InstaLike.IntegrationTests
                 result = await sut.Handle(followersQuery, TestContext.Current.CancellationToken);
             }
 
-            result.Length.Should().Be(1);
+            result.Should().ContainSingle().Which.Nickname.Should().Be(followerUser.Nickname);
         }
 
         [Fact]
