@@ -196,7 +196,7 @@ namespace InstaLike.IntegrationTests
                 result = await sut.Handle(followingQuery, TestContext.Current.CancellationToken);
             }
 
-            result.Length.Should().Be(1);
+            result.Should().ContainSingle().Which.Nickname.Should().Be(followedUser.Nickname);
         }
 
         [Fact]
