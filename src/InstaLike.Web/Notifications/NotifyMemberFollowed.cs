@@ -16,7 +16,13 @@ namespace InstaLike.Web.Notifications
             _session = session;
         }
 
-        public Task Handle(MemberFollowedEvent notification, CancellationToken cancellationToken) =>
-            _session.SaveAsync(Notification.Followed(notification.FollowerID, notification.FollowedID), cancellationToken);
+        public Task Handle(MemberFollowedEvent notification, CancellationToken cancellationToken)
+        {
+            return _session.SaveAsync(
+                Notification.Followed(
+                    notification.FollowerID,
+                    notification.FollowedID),
+                cancellationToken);
+        }
     }
 }
