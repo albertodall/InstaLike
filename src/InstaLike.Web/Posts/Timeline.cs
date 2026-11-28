@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,10 +23,10 @@ namespace InstaLike.Web.Posts
 
     public sealed class TimelineQuery : IRequest<TimelineModel>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
         public int NumberOfPosts { get; }
 
-        public TimelineQuery(Guid userID, int numberOfPosts)
+        public TimelineQuery(MemberId userID, int numberOfPosts)
         {
             UserID = userID;
             NumberOfPosts = numberOfPosts;
@@ -36,11 +35,11 @@ namespace InstaLike.Web.Posts
 
     public sealed class OlderTimelinePostsQuery : IRequest<TimelineModel>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
         public PostId LastPostShownID { get; }
         public int NumberOfPosts { get; }
 
-        public OlderTimelinePostsQuery(Guid userID, PostId lastPostShownID, int numberOfPosts)
+        public OlderTimelinePostsQuery(MemberId userID, PostId lastPostShownID, int numberOfPosts)
         {
             UserID = userID;
             LastPostShownID = lastPostShownID;
@@ -73,7 +72,7 @@ namespace InstaLike.Web.Posts
             return ReadTimeline(request.UserID, request.LastPostShownID, request.NumberOfPosts, cancellationToken);
         }
 
-        private async Task<TimelineModel> ReadTimeline(Guid userID, PostId? lastPostShownID, int numberOfPosts, CancellationToken cancellationToken)
+        private async Task<TimelineModel> ReadTimeline(MemberId userID, PostId? lastPostShownID, int numberOfPosts, CancellationToken cancellationToken)
         {
             TimelineModel timeline;
 
@@ -82,7 +81,7 @@ namespace InstaLike.Web.Posts
                 Post post = null!;
 
                 var followedUserIdsQuery = QueryOver.Of<Follow>()
-                    .Where(f => f.Follower.ID == FollowerId.From(userID))
+                    .Where(f => f.Follower.ID == FollowerId.From(userID.Value))
                     .Select(f => f.FollowedID);
 
                 // Post to show in the timeline (user's own posts and posts published by followed users)
@@ -166,7 +165,7 @@ namespace InstaLike.Web.Posts
                 var posts = (await timelineQuery.GetEnumerableAsync(cancellationToken)).ToArray();
 
                 // Each query above reads the rows of all the posts at once: index them by post to map each post.
-                var authorsByID = authorsQuery.ToDictionary(a => a.ID.Value);
+                var authorsByID = authorsQuery.ToDictionary(a => a.ID);
                 var likesCountByPostID = postLikesCountQuery.ToDictionary(l => l.PostID, l => l.Count);
                 var postIDsLikedByCurrentUser = postsLikedByCurrentUserQuery.ToHashSet();
                 var commentsByPostID = commentsQuery.ToLookup(c => c.PostID);

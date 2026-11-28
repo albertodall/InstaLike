@@ -1,5 +1,7 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping
 {
@@ -18,6 +20,7 @@ namespace InstaLike.Web.Data.Mapping
                 .Column("PostID");
 
             Map(p => p.MemberID)
+                .CustomType<TypedIdType<MemberId>>()
                 .Not.Nullable();
         }
     }

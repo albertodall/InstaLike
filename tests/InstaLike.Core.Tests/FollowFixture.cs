@@ -1,15 +1,15 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Social;
+using InstaLike.Core.SharedKernel;
 using Xunit;
 
 namespace InstaLike.Core.Tests
 {
     public sealed class FollowFixture
     {
-        private static readonly Guid MemberID = Guid.NewGuid();
-        private static readonly Guid FollowedID = Guid.NewGuid();
+        private static readonly MemberId MemberID = MemberId.New();
+        private static readonly MemberId FollowedID = MemberId.New();
 
         [Fact]
         public void Member_Should_Follow_Another_Member()
@@ -21,7 +21,7 @@ namespace InstaLike.Core.Tests
             using (new AssertionScope())
             {
                 result.IsSuccess.Should().BeTrue();
-                follower.ID.Should().Be(FollowerId.From(MemberID));
+                follower.ID.Should().Be(FollowerId.From(MemberID.Value));
                 follower.IsFollowing(FollowedID).Should().BeTrue();
                 follower.Follows.Should().ContainSingle()
                     .Which.Follower.Should().BeSameAs(follower);

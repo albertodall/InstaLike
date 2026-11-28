@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
@@ -12,10 +11,10 @@ namespace InstaLike.Web.Posts
 {
     public sealed class DeletePostCommand : ICommand<Result>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
         public PostId PostID { get; }
 
-        public DeletePostCommand(Guid userID, PostId postID)
+        public DeletePostCommand(MemberId userID, PostId postID)
         {
             UserID = userID;
             PostID = postID;

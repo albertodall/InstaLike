@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
@@ -30,9 +29,9 @@ namespace InstaLike.Web.Posts
     {
         public PostId PostID { get; }
 
-        public Guid CurrentUserID { get; }
+        public MemberId CurrentUserID { get; }
 
-        public EditPostQuery(PostId postID, Guid currentUserID)
+        public EditPostQuery(PostId postID, MemberId currentUserID)
         {
             PostID = postID;
             CurrentUserID = currentUserID;
@@ -79,12 +78,12 @@ namespace InstaLike.Web.Posts
 
     public sealed class EditPostCommand : ICommand<Result<PostId>>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
         public PostId PostID { get; }
         public string Text { get; }
         public byte[]? NewPictureRawBytes { get; }
 
-        public EditPostCommand(Guid userID, PostId postID, string text, byte[]? newPictureRawBytes)
+        public EditPostCommand(MemberId userID, PostId postID, string text, byte[]? newPictureRawBytes)
         {
             UserID = userID;
             PostID = postID;

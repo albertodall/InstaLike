@@ -17,7 +17,7 @@ namespace InstaLike.Web.Notifications
 
         public async Task<IActionResult> Index()
         {
-            var query = new NotificationsQuery(User.GetIdentifier(), false);
+            var query = new NotificationsQuery(User.GetMemberID(), false);
             var notifications = await _dispatcher.Send(query);
 
             return View(notifications);
@@ -26,7 +26,7 @@ namespace InstaLike.Web.Notifications
         [HttpPost]
         public async Task<IActionResult> MarkRead(Guid[] notificationIDs)
         {
-            var command = new MarkNotificationsReadCommand(User.GetIdentifier(), notificationIDs);
+            var command = new MarkNotificationsReadCommand(User.GetMemberID(), notificationIDs);
             await _dispatcher.Send(command);
 
             return RedirectToAction(nameof(Index));

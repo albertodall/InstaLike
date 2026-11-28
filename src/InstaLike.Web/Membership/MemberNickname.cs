@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Membership;
+using InstaLike.Core.SharedKernel;
 using MediatR;
 using NHibernate;
 
@@ -9,9 +9,9 @@ namespace InstaLike.Web.Membership
 {
     public sealed class MemberNicknameQuery : IRequest<string>
     {
-        public Guid MemberID { get; }
+        public MemberId MemberID { get; }
 
-        public MemberNicknameQuery(Guid memberID)
+        public MemberNicknameQuery(MemberId memberID)
         {
             MemberID = memberID;
         }
@@ -28,11 +28,10 @@ namespace InstaLike.Web.Membership
 
         public async Task<string> Handle(MemberNicknameQuery request, CancellationToken cancellationToken)
         {
-            var memberID = MemberId.From(request.MemberID);
             using var tx = _session.BeginTransaction();
 
             var nickname = await _session.QueryOver<Member>()
-                .Where(m => m.ID == memberID)
+                .Where(m => m.ID == request.MemberID)
                 .Select(m => m.Nickname)
                 .SingleOrDefaultAsync<string>(cancellationToken);
 

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using InstaLike.Core.SharedKernel;
 using UUIDNext;
 
-namespace InstaLike.Core.Membership
+namespace InstaLike.Core.SharedKernel
 {
     /// <summary>
     /// Identifies a member.

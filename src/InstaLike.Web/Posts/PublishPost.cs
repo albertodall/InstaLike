@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
@@ -25,11 +24,11 @@ namespace InstaLike.Web.Posts
 
     public sealed class PublishPostCommand : ICommand<Result<PostId>>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
         public string Text { get; }
         public byte[] PictureRawBytes { get; }
 
-        public PublishPostCommand(Guid userID, string text, byte[] pictureRawBytes)
+        public PublishPostCommand(MemberId userID, string text, byte[] pictureRawBytes)
         {
             UserID = userID;
             Text = text;

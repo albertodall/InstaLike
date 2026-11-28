@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;

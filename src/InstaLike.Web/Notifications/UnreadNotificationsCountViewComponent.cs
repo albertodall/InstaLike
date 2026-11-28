@@ -16,7 +16,7 @@ namespace InstaLike.Web.Notifications
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var query = new UnreadNotificationsQuery(UserClaimsPrincipal.GetIdentifier());
+            var query = new UnreadNotificationsQuery(UserClaimsPrincipal.GetMemberID());
             var count = await _dispatcher.Send(query);
 
             return View(count);

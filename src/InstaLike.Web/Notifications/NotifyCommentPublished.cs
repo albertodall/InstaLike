@@ -24,7 +24,7 @@ namespace InstaLike.Web.Notifications
             }
 
             return _session.SaveAsync(
-                Notification.PostCommented(notification.CommentAuthorID, notification.PostAuthorID, notification.PostID.Value),
+                Notification.PostCommented(notification.CommentAuthorID, notification.PostAuthorID, notification.PostID),
                 cancellationToken);
         }
     }

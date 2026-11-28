@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using InstaLike.Core.SharedKernel;
 
@@ -15,17 +14,17 @@ namespace InstaLike.Core.Social
     {
         protected Follower() { }
 
-        public Follower(Guid memberID)
-            : base(FollowerId.From(memberID))
+        public Follower(MemberId memberID)
+            : base(FollowerId.From(memberID.Value))
         {
         }
 
         private readonly IList<Follow> _follows = [];
         public virtual IReadOnlyCollection<Follow> Follows => _follows.AsReadOnly();
 
-        public virtual Result Follow(Guid followedID)
+        public virtual Result Follow(MemberId followedID)
         {
-            if (followedID == ID.Value)
+            if (followedID.Value == ID.Value)
             {
                 return Result.Failure(FollowerErrors.SelfFollow);
             }
@@ -36,11 +35,11 @@ namespace InstaLike.Core.Social
             }
 
             _follows.Add(new Follow(this, followedID));
-            RaiseDomainEvent(new MemberFollowedEvent(ID.Value, followedID));
+            RaiseDomainEvent(new MemberFollowedEvent(MemberId.From(ID.Value), followedID));
             return Result.Ok();
         }
 
-        public virtual Result Unfollow(Guid followedID)
+        public virtual Result Unfollow(MemberId followedID)
         {
             var follow = _follows.SingleOrDefault(f => f.FollowedID == followedID);
             if (follow is null)
@@ -52,7 +51,7 @@ namespace InstaLike.Core.Social
             return Result.Ok();
         }
 
-        public virtual bool IsFollowing(Guid followedID)
+        public virtual bool IsFollowing(MemberId followedID)
         {
             return _follows.Any(f => f.FollowedID == followedID);
         }

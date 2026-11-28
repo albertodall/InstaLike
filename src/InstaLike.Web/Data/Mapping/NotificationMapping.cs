@@ -1,5 +1,6 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Notifications;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping
@@ -23,12 +24,15 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             Map(p => p.RecipientID)
+                .CustomType<TypedIdType<MemberId>>()
                 .Not.Nullable();
 
             Map(p => p.SenderID)
+                .CustomType<TypedIdType<MemberId>>()
                 .Not.Nullable();
 
             Map(p => p.PostID)
+                .CustomType<TypedIdType<PostId>>()
                 .Nullable();
         }
     }

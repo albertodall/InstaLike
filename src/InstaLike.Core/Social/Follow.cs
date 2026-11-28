@@ -12,7 +12,7 @@ namespace InstaLike.Core.Social
         protected Follow() { }
 #pragma warning restore CS8618
 
-        internal Follow(Follower follower, Guid followedID)
+        internal Follow(Follower follower, MemberId followedID)
             : this()
         {
             Follower = follower;
@@ -22,7 +22,7 @@ namespace InstaLike.Core.Social
 
         public virtual Follower Follower { get; protected set; }
 
-        public virtual Guid FollowedID { get; protected set; }
+        public virtual MemberId FollowedID { get; protected set; }
 
         public virtual DateTimeOffset FollowDate { get; protected set; }
     }

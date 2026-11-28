@@ -27,15 +27,15 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, post) = await CreatePostAsync("eventauthor1", "eventreader1");
 
-            (await SendAsync(new LikePostCommand(post.ID, reader.ID.Value))).IsSuccess.Should().BeTrue();
+            (await SendAsync(new LikePostCommand(post.ID, reader.ID))).IsSuccess.Should().BeTrue();
 
-            var notifications = await GetNotificationsAsync(author.ID.Value);
+            var notifications = await GetNotificationsAsync(author.ID);
             using (new AssertionScope())
             {
                 notifications.Should().ContainSingle();
                 notifications[0].Kind.Should().Be(NotificationKind.PostLiked);
-                notifications[0].SenderID.Should().Be(reader.ID.Value);
-                notifications[0].PostID.Should().Be(post.ID.Value);
+                notifications[0].SenderID.Should().Be(reader.ID);
+                notifications[0].PostID.Should().Be(post.ID);
             }
         }
 
@@ -44,15 +44,15 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, post) = await CreatePostAsync("eventauthor2", "eventreader2");
 
-            (await SendAsync(new PublishCommentCommand(post.ID, "nice", reader.ID.Value))).IsSuccess.Should().BeTrue();
+            (await SendAsync(new PublishCommentCommand(post.ID, "nice", reader.ID))).IsSuccess.Should().BeTrue();
 
-            var notifications = await GetNotificationsAsync(author.ID.Value);
+            var notifications = await GetNotificationsAsync(author.ID);
             using (new AssertionScope())
             {
                 notifications.Should().ContainSingle();
                 notifications[0].Kind.Should().Be(NotificationKind.PostCommented);
-                notifications[0].SenderID.Should().Be(reader.ID.Value);
-                notifications[0].PostID.Should().Be(post.ID.Value);
+                notifications[0].SenderID.Should().Be(reader.ID);
+                notifications[0].PostID.Should().Be(post.ID);
             }
         }
 
@@ -61,9 +61,9 @@ namespace InstaLike.IntegrationTests
         {
             var (author, _, post) = await CreatePostAsync("eventauthor3", "eventreader3");
 
-            (await SendAsync(new PublishCommentCommand(post.ID, "my own post", author.ID.Value))).IsSuccess.Should().BeTrue();
+            (await SendAsync(new PublishCommentCommand(post.ID, "my own post", author.ID))).IsSuccess.Should().BeTrue();
 
-            (await GetNotificationsAsync(author.ID.Value)).Should().BeEmpty();
+            (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
         }
 
         [Fact]
@@ -71,14 +71,14 @@ namespace InstaLike.IntegrationTests
         {
             var (author, reader, _) = await CreatePostAsync("eventauthor4", "eventreader4");
 
-            (await SendAsync(new FollowCommand(reader.ID.Value, author.Nickname))).IsSuccess.Should().BeTrue();
+            (await SendAsync(new FollowCommand(reader.ID, author.Nickname))).IsSuccess.Should().BeTrue();
 
-            var notifications = await GetNotificationsAsync(author.ID.Value);
+            var notifications = await GetNotificationsAsync(author.ID);
             using (new AssertionScope())
             {
                 notifications.Should().ContainSingle();
                 notifications[0].Kind.Should().Be(NotificationKind.Followed);
-                notifications[0].SenderID.Should().Be(reader.ID.Value);
+                notifications[0].SenderID.Should().Be(reader.ID);
                 notifications[0].PostID.Should().BeNull();
             }
         }
@@ -94,7 +94,7 @@ namespace InstaLike.IntegrationTests
                     .WithHandler<INotificationHandler<PostLikedEvent>, FailingHandler>()
                     .Build();
 
-                var like = () => mediator.Send(new LikePostCommand(post.ID, reader.ID.Value));
+                var like = () => mediator.Send(new LikePostCommand(post.ID, reader.ID));
                 await like.Should().ThrowAsync<InvalidOperationException>();
             }
 
@@ -103,7 +103,7 @@ namespace InstaLike.IntegrationTests
                 using (new AssertionScope())
                 {
                     (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
-                    (await GetNotificationsAsync(author.ID.Value)).Should().BeEmpty();
+                    (await GetNotificationsAsync(author.ID)).Should().BeEmpty();
                 }
             }
         }
@@ -119,8 +119,8 @@ namespace InstaLike.IntegrationTests
                     .WithHandler<IRequestHandler<LikeThenFailCommand, Result>, LikeThenFailCommandHandler>()
                     .Build();
 
-                (await mediator.Send(new LikeThenFailCommand(post.ID, reader.ID.Value), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
-                (await mediator.Send(new FollowCommand(reader.ID.Value, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
+                (await mediator.Send(new LikeThenFailCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
+                (await mediator.Send(new FollowCommand(reader.ID, author.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeTrue();
             }
 
             using (var session = Infrastructure.OpenSession())
@@ -128,7 +128,7 @@ namespace InstaLike.IntegrationTests
                 using (new AssertionScope())
                 {
                     (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
-                    (await GetNotificationsAsync(author.ID.Value)).Should().ContainSingle()
+                    (await GetNotificationsAsync(author.ID)).Should().ContainSingle()
                         .Which.Kind.Should().Be(NotificationKind.Followed);
                 }
             }
@@ -145,7 +145,7 @@ namespace InstaLike.IntegrationTests
                     .WithHandler<IRequestHandler<LikeThenFailCommittedCommand, Result>, LikeThenFailCommittedCommandHandler>()
                     .Build();
 
-                (await mediator.Send(new LikeThenFailCommittedCommand(post.ID, reader.ID.Value), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
+                (await mediator.Send(new LikeThenFailCommittedCommand(post.ID, reader.ID), TestContext.Current.CancellationToken)).IsFailure.Should().BeTrue();
             }
 
             using (var session = Infrastructure.OpenSession())
@@ -153,7 +153,7 @@ namespace InstaLike.IntegrationTests
                 using (new AssertionScope())
                 {
                     (await session.QueryOver<Like>().Where(l => l.Post.ID == post.ID).RowCountAsync(TestContext.Current.CancellationToken)).Should().Be(1);
-                    (await GetNotificationsAsync(author.ID.Value)).Should().ContainSingle()
+                    (await GetNotificationsAsync(author.ID)).Should().ContainSingle()
                         .Which.Kind.Should().Be(NotificationKind.PostLiked);
                 }
             }
@@ -182,7 +182,7 @@ namespace InstaLike.IntegrationTests
         /// <summary>
         /// The notifications saved for the recipient.
         /// </summary>
-        private async Task<IList<Notification>> GetNotificationsAsync(Guid recipientID)
+        private async Task<IList<Notification>> GetNotificationsAsync(MemberId recipientID)
         {
             using var session = Infrastructure.OpenSession();
             return await session.QueryOver<Notification>()
@@ -204,7 +204,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         private sealed class LikeThenFailCommand : ICommand<Result>
         {
-            public LikeThenFailCommand(PostId postID, Guid userID)
+            public LikeThenFailCommand(PostId postID, MemberId userID)
             {
                 PostID = postID;
                 UserID = userID;
@@ -212,7 +212,7 @@ namespace InstaLike.IntegrationTests
 
             public PostId PostID { get; }
 
-            public Guid UserID { get; }
+            public MemberId UserID { get; }
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace InstaLike.IntegrationTests
         [CommitOnFailure]
         private sealed class LikeThenFailCommittedCommand : ICommand<Result>
         {
-            public LikeThenFailCommittedCommand(PostId postID, Guid userID)
+            public LikeThenFailCommittedCommand(PostId postID, MemberId userID)
             {
                 PostID = postID;
                 UserID = userID;
@@ -246,7 +246,7 @@ namespace InstaLike.IntegrationTests
 
             public PostId PostID { get; }
 
-            public Guid UserID { get; }
+            public MemberId UserID { get; }
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace InstaLike.IntegrationTests
         /// <summary>
         /// Likes the post, raising its event, and then fails.
         /// </summary>
-        private static async Task<Result> LikeThenFailAsync(NHibernate.ISession session, PostId postID, Guid userID, CancellationToken cancellationToken)
+        private static async Task<Result> LikeThenFailAsync(NHibernate.ISession session, PostId postID, MemberId userID, CancellationToken cancellationToken)
         {
             var post = await session.GetAsync<Post>(postID, cancellationToken);
             post.LikeBy(userID);

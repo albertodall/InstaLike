@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
-using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using InstaLike.Web.Posts;
 using MediatR;
@@ -22,7 +22,7 @@ namespace InstaLike.Web.Shared
 
         public async Task<IActionResult> Index()
         {
-            var query = new TimelineQuery(User.GetIdentifier(), PostsPerBatch);
+            var query = new TimelineQuery(User.GetMemberID(), PostsPerBatch);
             var model = await _dispatcher.Send(query);
 
             return View(model);
@@ -35,7 +35,7 @@ namespace InstaLike.Web.Shared
                 return BadRequest();
             }
 
-            var query = new OlderTimelinePostsQuery(User.GetIdentifier(), id, PostsPerBatch);
+            var query = new OlderTimelinePostsQuery(User.GetMemberID(), id, PostsPerBatch);
             var model = await _dispatcher.Send(query);
 
             return PartialView("_TimelinePostsPartial", model);

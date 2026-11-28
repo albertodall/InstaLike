@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
 using InstaLike.Web.Social;
 using NHibernate;
@@ -29,7 +29,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var followCommand = new FollowCommand(followerUser.ID.Value, followedUser.Nickname);
+            var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
             var followResult = await SendAsync(followCommand);
 
             using (new AssertionScope())
@@ -37,7 +37,7 @@ namespace InstaLike.IntegrationTests
                 followResult.IsSuccess.Should().BeTrue();
                 using (var session = Infrastructure.OpenSession())
                 {
-                    (await CountFollowsAsync(session, followerUser.ID.Value, followedUser.ID.Value)).Should().Be(1);
+                    (await CountFollowsAsync(session, followerUser.ID, followedUser.ID)).Should().Be(1);
                 }
             }
         }
@@ -56,7 +56,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var unfollowCommand = new UnfollowCommand(followerUser.ID.Value, followedUser.Nickname);
+            var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
             var unfollowResult = await SendAsync(unfollowCommand);
 
             using (new AssertionScope())
@@ -64,7 +64,7 @@ namespace InstaLike.IntegrationTests
                 unfollowResult.IsSuccess.Should().BeTrue();
                 using (var session = Infrastructure.OpenSession())
                 {
-                    (await CountFollowsAsync(session, followerUser.ID.Value, followedUser.ID.Value)).Should().Be(0);
+                    (await CountFollowsAsync(session, followerUser.ID, followedUser.ID)).Should().Be(0);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var followCommand = new FollowCommand(followerUser.ID.Value, followedUser.Nickname);
+            var followCommand = new FollowCommand(followerUser.ID, followedUser.Nickname);
             await SendAsync(followCommand);
 
             var followResult = await SendAsync(followCommand);
@@ -93,7 +93,7 @@ namespace InstaLike.IntegrationTests
                     .BeFalse($"User [{followedUser.Nickname}] is already followed by user [{followerUser.Nickname}].");
                 using (var session = Infrastructure.OpenSession())
                 {
-                    (await CountFollowsAsync(session, followerUser.ID.Value, followedUser.ID.Value)).Should().Be(1);
+                    (await CountFollowsAsync(session, followerUser.ID, followedUser.ID)).Should().Be(1);
                 }
             }
         }
@@ -111,7 +111,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var unfollowCommand = new UnfollowCommand(followerUser.ID.Value, followedUser.Nickname);
+            var unfollowCommand = new UnfollowCommand(followerUser.ID, followedUser.Nickname);
             var unfollowResult = await SendAsync(unfollowCommand);
 
             unfollowResult.IsSuccess.Should()
@@ -128,7 +128,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            (await SendAsync(new FollowCommand(followerUser.ID.Value, "nobody"))).IsSuccess.Should().BeFalse();
+            (await SendAsync(new FollowCommand(followerUser.ID, "nobody"))).IsSuccess.Should().BeFalse();
         }
 
         [Fact]
@@ -144,8 +144,8 @@ namespace InstaLike.IntegrationTests
             using (var session = Infrastructure.OpenSession())
             {
                 var handler = new TestMediatorBuilder(session, Infrastructure.PictureStore).Build();
-                (await handler.Send(new FollowCommand(user.ID.Value, user.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
-                (await CountFollowsAsync(session, user.ID.Value, user.ID.Value)).Should().Be(0);
+                (await handler.Send(new FollowCommand(user.ID, user.Nickname), TestContext.Current.CancellationToken)).IsSuccess.Should().BeFalse();
+                (await CountFollowsAsync(session, user.ID, user.ID)).Should().Be(0);
             }
         }
 
@@ -214,14 +214,14 @@ namespace InstaLike.IntegrationTests
 
             using (var session = Infrastructure.OpenSession())
             {
-                (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(0);
+                (await CountFollowersAsync(session, followerMember.ID)).Should().Be(0);
             }
 
-            await SendAsync(new FollowCommand(followerMember.ID.Value, followedMember.Nickname));
+            await SendAsync(new FollowCommand(followerMember.ID, followedMember.Nickname));
 
             using (var session = Infrastructure.OpenSession())
             {
-                (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(1);
+                (await CountFollowersAsync(session, followerMember.ID)).Should().Be(1);
             }
         }
 
@@ -241,16 +241,16 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var followResult = await SendAsync(new FollowCommand(followerMember.ID.Value, secondFollowedMember.Nickname));
+            var followResult = await SendAsync(new FollowCommand(followerMember.ID, secondFollowedMember.Nickname));
 
             using (new AssertionScope())
             {
                 followResult.IsSuccess.Should().BeTrue();
                 using (var session = Infrastructure.OpenSession())
                 {
-                    (await CountFollowersAsync(session, followerMember.ID.Value)).Should().Be(1);
-                    (await CountFollowsAsync(session, followerMember.ID.Value, firstFollowedMember.ID.Value)).Should().Be(1);
-                    (await CountFollowsAsync(session, followerMember.ID.Value, secondFollowedMember.ID.Value)).Should().Be(1);
+                    (await CountFollowersAsync(session, followerMember.ID)).Should().Be(1);
+                    (await CountFollowsAsync(session, followerMember.ID, firstFollowedMember.ID)).Should().Be(1);
+                    (await CountFollowsAsync(session, followerMember.ID, secondFollowedMember.ID)).Should().Be(1);
                 }
             }
         }
@@ -258,17 +258,17 @@ namespace InstaLike.IntegrationTests
         /// <summary>
         /// How many times the follower follows the followed member.
         /// </summary>
-        private static Task<int> CountFollowsAsync(ISession session, Guid followerID, Guid followedID) =>
+        private static Task<int> CountFollowsAsync(ISession session, MemberId followerID, MemberId followedID) =>
             session.QueryOver<Follow>()
-                .Where(f => f.Follower.ID == FollowerId.From(followerID) && f.FollowedID == followedID)
+                .Where(f => f.Follower.ID == FollowerId.From(followerID.Value) && f.FollowedID == followedID)
                 .RowCountAsync();
 
         /// <summary>
         /// 1 when the member has a follower record, created on their first follow, otherwise 0.
         /// </summary>
-        private static Task<int> CountFollowersAsync(ISession session, Guid memberID) =>
+        private static Task<int> CountFollowersAsync(ISession session, MemberId memberID) =>
             session.QueryOver<Follower>()
-                .Where(f => f.ID == FollowerId.From(memberID))
+                .Where(f => f.ID == FollowerId.From(memberID.Value))
                 .RowCountAsync();
     }
 }

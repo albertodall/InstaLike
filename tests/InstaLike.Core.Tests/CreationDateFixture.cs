@@ -12,8 +12,8 @@ namespace InstaLike.Core.Tests
 {
     public sealed class CreationDateFixture
     {
-        private static readonly Guid AuthorID = Guid.NewGuid();
-        private static readonly Guid ReaderID = Guid.NewGuid();
+        private static readonly MemberId AuthorID = MemberId.New();
+        private static readonly MemberId ReaderID = MemberId.New();
 
         [Fact]
         public void A_Member_Registers_In_Utc()

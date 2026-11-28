@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
+using InstaLike.Core.SharedKernel;
 using MediatR;
 using NHibernate;
 using Serilog;
@@ -10,9 +10,9 @@ namespace InstaLike.Web.Notifications
 {
     public sealed class UnreadNotificationsQuery : IRequest<int>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
 
-        public UnreadNotificationsQuery(Guid userID)
+        public UnreadNotificationsQuery(MemberId userID)
         {
             UserID = userID;
         }

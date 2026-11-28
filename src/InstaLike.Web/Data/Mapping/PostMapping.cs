@@ -26,6 +26,7 @@ namespace InstaLike.Web.Data.Mapping
                 .Not.Nullable();
 
             Map(p => p.AuthorID)
+                .CustomType<TypedIdType<MemberId>>()
                 .Column("MemberID")
                 .Not.Nullable();
 

@@ -21,7 +21,7 @@ namespace InstaLike.Web.Accounts
 
         public Task Handle(MemberRegisteredEvent notification, CancellationToken cancellationToken) =>
             _session.SaveAsync(
-                Account.Create(notification.MemberID.Value, notification.Username, notification.Password, notification.Email),
+                Account.Create(notification.MemberID, notification.Username, notification.Password, notification.Email),
                 cancellationToken);
     }
 }

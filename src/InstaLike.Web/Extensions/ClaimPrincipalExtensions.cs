@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using InstaLike.Core.Accounts;
-using InstaLike.Core.Membership;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Extensions
 {

@@ -54,14 +54,14 @@ namespace InstaLike.Web.Membership
 
         public async Task<IActionResult> MyProfile()
         {
-            var nickname = await _dispatcher.Send(new MemberNicknameQuery(User.GetIdentifier()));
+            var nickname = await _dispatcher.Send(new MemberNicknameQuery(User.GetMemberID()));
 
             return RedirectToAction(nameof(Profile), new { id = nickname });
         }
 
         public async Task<IActionResult> Profile(string id)
         {
-            var query = new MemberProfileQuery(User.GetIdentifier(), id, MaxThumbnailsInMemberProfile);
+            var query = new MemberProfileQuery(User.GetMemberID(), id, MaxThumbnailsInMemberProfile);
             var queryResult = await _dispatcher.Send(query);
             if (queryResult.IsSuccess)
             {
@@ -125,7 +125,7 @@ namespace InstaLike.Web.Membership
         [HttpPost]
         public async Task<IActionResult> Follow(string id)
         {
-            var command = new FollowCommand(User.GetIdentifier(), id);
+            var command = new FollowCommand(User.GetMemberID(), id);
             var processCommandResult = await _dispatcher.Send(command);
 
             if (processCommandResult.IsSuccess)
@@ -139,7 +139,7 @@ namespace InstaLike.Web.Membership
         [HttpPost]
         public async Task<IActionResult> Unfollow(string id)
         {
-            var command = new UnfollowCommand(User.GetIdentifier(), id);
+            var command = new UnfollowCommand(User.GetMemberID(), id);
             var processCommandResult = await _dispatcher.Send(command);
 
             if (processCommandResult.IsSuccess)

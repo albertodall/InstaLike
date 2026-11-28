@@ -20,9 +20,9 @@ namespace InstaLike.Web.Posts
     {
         public PostId PostID { get; }
         public string Text { get; }
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
 
-        public PublishCommentCommand(PostId postID, string text, Guid userID)
+        public PublishCommentCommand(PostId postID, string text, MemberId userID)
         {
             PostID = postID;
             Text = text;

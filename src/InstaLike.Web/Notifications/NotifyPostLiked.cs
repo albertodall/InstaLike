@@ -17,6 +17,6 @@ namespace InstaLike.Web.Notifications
         }
 
         public Task Handle(PostLikedEvent notification, CancellationToken cancellationToken) =>
-            _session.SaveAsync(Notification.PostLiked(notification.LikerID, notification.PostAuthorID, notification.PostID.Value), cancellationToken);
+            _session.SaveAsync(Notification.PostLiked(notification.LikerID, notification.PostAuthorID, notification.PostID), cancellationToken);
     }
 }

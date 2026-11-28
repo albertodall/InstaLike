@@ -21,16 +21,16 @@ namespace InstaLike.Web.Notifications
         public string SenderNickname { get; set; } = string.Empty;
         public PictureId? SenderProfilePicture { get; set; }
         public NotificationKind Kind { get; set; }
-        public Guid? PostID { get; set; }
+        public PostId? PostID { get; set; }
         public DateTimeOffset NotificationDate { get; set; }
     }
 
     public sealed class NotificationsQuery : IRequest<NotificationModel[]>
     {
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
         public bool IncludeReadNotifications { get; }
 
-        public NotificationsQuery(Guid userID, bool includeReadNotifications)
+        public NotificationsQuery(MemberId userID, bool includeReadNotifications)
         {
             UserID = userID;
             IncludeReadNotifications = includeReadNotifications;

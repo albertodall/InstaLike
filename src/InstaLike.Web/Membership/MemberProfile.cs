@@ -39,11 +39,11 @@ namespace InstaLike.Web.Membership
 
     public sealed class MemberProfileQuery : IRequest<Result<MemberProfileModel>>
     {
-        public Guid CurrentMemberID { get; }
+        public MemberId CurrentMemberID { get; }
         public string Nickname { get; }
         public int NumberOfThumbnails { get; }
 
-        public MemberProfileQuery(Guid currentMemberID, string nickname, int numberOfThumbnails)
+        public MemberProfileQuery(MemberId currentMemberID, string nickname, int numberOfThumbnails)
         {
             CurrentMemberID = currentMemberID;
             Nickname = nickname;
@@ -91,14 +91,14 @@ namespace InstaLike.Web.Membership
 
                 // Number of posts published by this author. 
                 var postCountQuery = _session.QueryOver<Post>()
-                    .Where(p => p.AuthorID == profile.MemberID.Value)
+                    .Where(p => p.AuthorID == profile.MemberID)
                     .Select(Projections.Count<Post>(p => p.ID))
                     .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
                 PostThumbnailModel thumbnailModel = null!;
                 var thumbnailsQuery = _session.QueryOver<Post>()
-                    .Where(p => p.AuthorID == profile.MemberID.Value)
+                    .Where(p => p.AuthorID == profile.MemberID)
                     .OrderBy(p => p.PostDate).Desc()
                     .Select(Projections.ProjectionList()
                         .Add(Projections.Property<Post>(p => p.ID)
@@ -112,7 +112,7 @@ namespace InstaLike.Web.Membership
 
                 // Number of followers
                 var followersCountQuery = _session.QueryOver<Follow>()
-                    .Where(f => f.FollowedID == profile.MemberID.Value)
+                    .Where(f => f.FollowedID == profile.MemberID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
@@ -124,8 +124,8 @@ namespace InstaLike.Web.Membership
 
                 // Is the current member following the selected member?
                 var isFollowedByCurrentMemberQuery = _session.QueryOver<Follow>()
-                    .Where(f => f.FollowedID == profile.MemberID.Value)
-                    .And(f => f.Follower.ID == FollowerId.From(request.CurrentMemberID))
+                    .Where(f => f.FollowedID == profile.MemberID)
+                    .And(f => f.Follower.ID == FollowerId.From(request.CurrentMemberID.Value))
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
@@ -133,7 +133,7 @@ namespace InstaLike.Web.Membership
                 profile.RecentPosts = (await thumbnailsQuery.GetEnumerableAsync(cancellationToken)).ToArray();
                 profile.NumberOfFollowers = await followersCountQuery.GetValueAsync(cancellationToken);
                 profile.NumberOfFollows = await followingCountQuery.GetValueAsync(cancellationToken);
-                profile.IsCurrentMemberProfile = profile.MemberID.Value == request.CurrentMemberID;
+                profile.IsCurrentMemberProfile = profile.MemberID == request.CurrentMemberID;
 
                 profile.Following =
                     await isFollowedByCurrentMemberQuery.GetValueAsync(cancellationToken) == 1

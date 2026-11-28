@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Notifications;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
@@ -14,10 +15,10 @@ namespace InstaLike.Web.Notifications
 {
     public sealed class MarkNotificationsReadCommand : ICommand<int>
     {
-        public Guid RecipientID { get; }
+        public MemberId RecipientID { get; }
         public IReadOnlyCollection<Guid> NotificationIDs { get; }
 
-        public MarkNotificationsReadCommand(Guid recipientID, IReadOnlyCollection<Guid> notificationIDs)
+        public MarkNotificationsReadCommand(MemberId recipientID, IReadOnlyCollection<Guid> notificationIDs)
         {
             RecipientID = recipientID;
             NotificationIDs = notificationIDs;

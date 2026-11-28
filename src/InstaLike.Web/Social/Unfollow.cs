@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
@@ -14,10 +13,10 @@ namespace InstaLike.Web.Social
 {
     public sealed class UnfollowCommand : ICommand<Result>
     {
-        public Guid FollowerID { get; }
+        public MemberId FollowerID { get; }
         public string UnfollowedNickname { get; }
 
-        public UnfollowCommand(Guid followerID, string unfollowedNickname)
+        public UnfollowCommand(MemberId followerID, string unfollowedNickname)
         {
             FollowerID = followerID;
             UnfollowedNickname = unfollowedNickname;
@@ -46,8 +45,8 @@ namespace InstaLike.Web.Social
                 return Result.Failure(MemberErrors.NotFound(request.UnfollowedNickname));
             }
 
-            var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID), cancellationToken);
-            var result = follower?.Unfollow(unfollowedID.Value) ?? Result.Failure(FollowerErrors.NotFollowing);
+            var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID.Value), cancellationToken);
+            var result = follower?.Unfollow(unfollowedID) ?? Result.Failure(FollowerErrors.NotFollowing);
             if (result.IsFailure)
             {
                 _logger.Warning("Member {MemberID} could not unfollow [{UnfollowedNickname}({UnfollowedMemberID})]: {Error}",

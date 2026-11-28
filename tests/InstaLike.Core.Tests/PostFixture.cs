@@ -1,5 +1,4 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
@@ -9,7 +8,7 @@ namespace InstaLike.Core.Tests
 {
     public sealed class PostFixture
     {
-        private static readonly Guid PostAuthorID = Guid.NewGuid();
+        private static readonly MemberId PostAuthorID = MemberId.New();
 
         [Fact]
         public void A_New_Post_Should_Be_Identified_Before_It_Is_Stored()
@@ -22,7 +21,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Should_Comment_A_Post()
         {
-            var commentAuthorID = Guid.NewGuid();
+            var commentAuthorID = MemberId.New();
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
             var comment = sut.CommentBy(commentAuthorID, (CommentText)"test comment");
@@ -39,7 +38,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Reader_Should_Like_A_Post()
         {
-            var readerID = Guid.NewGuid();
+            var readerID = MemberId.New();
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
             var result = sut.LikeBy(readerID);
@@ -57,7 +56,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Liking_A_Post_Should_Raise_An_Event()
         {
-            var readerID = Guid.NewGuid();
+            var readerID = MemberId.New();
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
             sut.LikeBy(readerID);
@@ -69,7 +68,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Reader_Should_Not_Like_A_Post_Twice()
         {
-            var readerID = Guid.NewGuid();
+            var readerID = MemberId.New();
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
             sut.LikeBy(readerID);
 
@@ -86,7 +85,7 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void Reader_Should_Dislike_A_Liked_Post()
         {
-            var readerID = Guid.NewGuid();
+            var readerID = MemberId.New();
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
             sut.LikeBy(readerID);
 
@@ -105,13 +104,13 @@ namespace InstaLike.Core.Tests
         {
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-            sut.DislikeBy(Guid.NewGuid()).IsFailure.Should().BeTrue();
+            sut.DislikeBy(MemberId.New()).IsFailure.Should().BeTrue();
         }
 
         [Fact]
         public void Commenting_A_Post_Should_Raise_An_Event()
         {
-            var commentAuthorID = Guid.NewGuid();
+            var commentAuthorID = MemberId.New();
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
             sut.CommentBy(commentAuthorID, (CommentText)"test comment");
@@ -141,7 +140,7 @@ namespace InstaLike.Core.Tests
 
             using (new AssertionScope())
             {
-                sut.CanBeLikedBy(Guid.NewGuid()).Should().BeTrue();
+                sut.CanBeLikedBy(MemberId.New()).Should().BeTrue();
                 sut.CanBeLikedBy(PostAuthorID).Should().BeFalse();
             }
         }
@@ -159,7 +158,7 @@ namespace InstaLike.Core.Tests
         {
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-            sut.CanBeEditedBy(Guid.NewGuid()).Should().BeFalse();
+            sut.CanBeEditedBy(MemberId.New()).Should().BeFalse();
         }
 
         [Fact]
@@ -182,7 +181,7 @@ namespace InstaLike.Core.Tests
         {
             var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
 
-            var result = sut.DeleteBy(Guid.NewGuid());
+            var result = sut.DeleteBy(MemberId.New());
 
             using (new AssertionScope())
             {

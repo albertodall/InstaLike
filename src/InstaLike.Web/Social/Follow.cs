@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Membership;
 using InstaLike.Core.SharedKernel;
@@ -14,10 +13,10 @@ namespace InstaLike.Web.Social
 {
     public sealed class FollowCommand : ICommand<Result>
     {
-        public Guid FollowerID { get; }
+        public MemberId FollowerID { get; }
         public string FollowedNickname { get; }
 
-        public FollowCommand(Guid followerID, string followedNickname)
+        public FollowCommand(MemberId followerID, string followedNickname)
         {
             FollowerID = followerID;
             FollowedNickname = followedNickname;
@@ -46,11 +45,11 @@ namespace InstaLike.Web.Social
                 return Result.Failure(MemberErrors.NotFound(request.FollowedNickname));
             }
 
-            var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID), cancellationToken);
+            var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID.Value), cancellationToken);
             var isFirstFollow = follower is null;
             follower ??= new Follower(request.FollowerID);
 
-            var result = follower.Follow(followedID.Value);
+            var result = follower.Follow(followedID);
             if (result.IsFailure)
             {
                 _logger.Warning("Member {MemberID} could not follow [{FollowedNickname}({FollowedMemberID})]: {Error}",

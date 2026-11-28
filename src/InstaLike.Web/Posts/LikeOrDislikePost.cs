@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
@@ -18,9 +17,9 @@ namespace InstaLike.Web.Posts
     public sealed class LikePostCommand : ICommand<Result>
     {
         public PostId PostID { get; }
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
 
-        public LikePostCommand(PostId postID, Guid userID)
+        public LikePostCommand(PostId postID, MemberId userID)
         {
             PostID = postID;
             UserID = userID;
@@ -30,9 +29,9 @@ namespace InstaLike.Web.Posts
     public sealed class DislikePostCommand : ICommand<Result>
     {
         public PostId PostID { get; }
-        public Guid UserID { get; }
+        public MemberId UserID { get; }
 
-        public DislikePostCommand(PostId postID, Guid userID)
+        public DislikePostCommand(PostId postID, MemberId userID)
         {
             PostID = postID;
             UserID = userID;

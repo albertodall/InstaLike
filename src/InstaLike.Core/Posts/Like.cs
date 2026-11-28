@@ -12,7 +12,7 @@ namespace InstaLike.Core.Posts
         protected Like() { }
 #pragma warning restore CS8618
 
-        internal Like(Post post, Guid memberID)
+        internal Like(Post post, MemberId memberID)
             : this()
         {
             Post = post;
@@ -22,7 +22,7 @@ namespace InstaLike.Core.Posts
 
         public virtual Post Post { get; protected set; }
 
-        public virtual Guid MemberID { get; protected set; }
+        public virtual MemberId MemberID { get; protected set; }
 
         public virtual DateTimeOffset LikeDate { get; protected set; }
     }

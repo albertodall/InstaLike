@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using InstaLike.Core.Posts;
@@ -13,11 +12,11 @@ namespace InstaLike.Web.Posts
 {
     public sealed class SuggestPictureTagsQuery : IRequest<Result<string[]>>
     {
-        public Guid CurrentUserID { get; }
+        public MemberId CurrentUserID { get; }
         public PostId? PostID { get; }
         public byte[]? NewPictureRawBytes { get; }
 
-        public SuggestPictureTagsQuery(Guid currentUserID, PostId? postID, byte[]? newPictureRawBytes)
+        public SuggestPictureTagsQuery(MemberId currentUserID, PostId? postID, byte[]? newPictureRawBytes)
         {
             CurrentUserID = currentUserID;
             PostID = postID;
@@ -69,7 +68,7 @@ namespace InstaLike.Web.Posts
             return await _imageRecognition.AutoTagImage(newPicture);
         }
 
-        private async Task<Result<string[]>> SuggestTagsForPictureOfPost(PostId postID, Guid currentUserID, CancellationToken cancellationToken)
+        private async Task<Result<string[]>> SuggestTagsForPictureOfPost(PostId postID, MemberId currentUserID, CancellationToken cancellationToken)
         {
             var picture = await PictureOfPostEditableBy(postID, currentUserID, cancellationToken);
             if (picture.IsFailure)
@@ -86,7 +85,7 @@ namespace InstaLike.Web.Posts
             return await _imageRecognition.AutoTagImage(storedPicture);
         }
 
-        private async Task<Result<PictureId>> PictureOfPostEditableBy(PostId postID, Guid currentUserID, CancellationToken cancellationToken)
+        private async Task<Result<PictureId>> PictureOfPostEditableBy(PostId postID, MemberId currentUserID, CancellationToken cancellationToken)
         {
             using (_session.BeginTransaction())
             {

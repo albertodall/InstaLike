@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Extensions;
 using MediatR;
@@ -30,7 +29,7 @@ namespace InstaLike.Web.Posts
         {
             if (ModelState.IsValid)
             {
-                var command = new PublishPostCommand(User.GetIdentifier(), newPost.Text, await newPost.PictureFile!.ToByteArrayAsync());
+                var command = new PublishPostCommand(User.GetMemberID(), newPost.Text, await newPost.PictureFile!.ToByteArrayAsync());
                 var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {
@@ -45,7 +44,7 @@ namespace InstaLike.Web.Posts
 
         public async Task<IActionResult> Detail(PostId id)
         {
-            var postQuery = new PostDetailQuery(id, User.GetIdentifier());
+            var postQuery = new PostDetailQuery(id, User.GetMemberID());
             var queryResult = await _dispatcher.Send(postQuery);
 
             return queryResult.IsSuccess ? View(queryResult.Value) : NotFound();
@@ -53,7 +52,7 @@ namespace InstaLike.Web.Posts
 
         public async Task<IActionResult> Edit(PostId id)
         {
-            var editPostQuery = new EditPostQuery(id, User.GetIdentifier());
+            var editPostQuery = new EditPostQuery(id, User.GetMemberID());
             var queryResult = await _dispatcher.Send(editPostQuery);
 
             if (queryResult.IsSuccess)
@@ -70,7 +69,7 @@ namespace InstaLike.Web.Posts
             if (ModelState.IsValid)
             {
                 var newPictureRawBytes = editedPost.PictureFile is null ? null : await editedPost.PictureFile.ToByteArrayAsync();
-                var command = new EditPostCommand(User.GetIdentifier(), editedPost.PostID, editedPost.Text, newPictureRawBytes);
+                var command = new EditPostCommand(User.GetMemberID(), editedPost.PostID, editedPost.Text, newPictureRawBytes);
                 var commandResult = await _dispatcher.Send(command);
                 if (commandResult.IsSuccess)
                 {
@@ -101,7 +100,7 @@ namespace InstaLike.Web.Posts
                 return BadRequest(MissingPost);
             }
 
-            var command = new DeletePostCommand(User.GetIdentifier(), id);
+            var command = new DeletePostCommand(User.GetMemberID(), id);
             var commandResult = await _dispatcher.Send(command);
             if (commandResult.IsSuccess)
             {
@@ -119,7 +118,7 @@ namespace InstaLike.Web.Posts
                 return BadRequest(MissingPost);
             }
 
-            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetIdentifier());
+            var command = new PublishCommentCommand(newComment.PostID, newComment.CommentText, User.GetMemberID());
             await _dispatcher.Send(command);
 
             var commentsQuery = new PostCommentsQuery(newComment.PostID);
@@ -136,7 +135,7 @@ namespace InstaLike.Web.Posts
                 return BadRequest(MissingPost);
             }
 
-            var command = new LikePostCommand(like.PostID, User.GetIdentifier());
+            var command = new LikePostCommand(like.PostID, User.GetMemberID());
             var commandResult = await _dispatcher.Send(command);
 
             return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error.Description);
@@ -150,7 +149,7 @@ namespace InstaLike.Web.Posts
                 return BadRequest(MissingPost);
             }
 
-            var command = new DislikePostCommand(like.PostID, User.GetIdentifier());
+            var command = new DislikePostCommand(like.PostID, User.GetMemberID());
             var commandResult = await _dispatcher.Send(command);
 
             return commandResult.IsSuccess ? Ok() : BadRequest(commandResult.Error.Description);
@@ -160,7 +159,7 @@ namespace InstaLike.Web.Posts
         public async Task<IActionResult> Autotag(IFormFile? pictureFile, PostId? postID)
         {
             var newPictureRawBytes = pictureFile is null ? null : await pictureFile.ToByteArrayAsync();
-            var query = new SuggestPictureTagsQuery(User.GetIdentifier(), postID, newPictureRawBytes);
+            var query = new SuggestPictureTagsQuery(User.GetMemberID(), postID, newPictureRawBytes);
             var queryResult = await _dispatcher.Send(query);
 
             return queryResult.IsSuccess ? Ok(queryResult.Value) : BadRequest(queryResult.Error.Description);

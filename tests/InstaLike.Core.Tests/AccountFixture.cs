@@ -2,6 +2,7 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Accounts;
+using InstaLike.Core.SharedKernel;
 using Xunit;
 
 namespace InstaLike.Core.Tests
@@ -11,13 +12,13 @@ namespace InstaLike.Core.Tests
         [Fact]
         public void An_Account_Should_Share_The_Identifier_Of_Its_Member()
         {
-            var memberID = Guid.NewGuid();
+            var memberID = MemberId.New();
 
             var sut = Account.Create(memberID, (Username)"user1", Password.Create("password").Value, (Email)"user1@acme.com");
 
             using (new AssertionScope())
             {
-                sut.ID.Should().Be(AccountId.From(memberID));
+                sut.ID.Should().Be(AccountId.From(memberID.Value));
                 sut.DomainEvents.Should().BeEmpty();
             }
         }
@@ -181,7 +182,7 @@ namespace InstaLike.Core.Tests
         /// </summary>
         private static Account CreateAccountWithPassword(string password)
         {
-            return Account.Create(Guid.NewGuid(), (Username)"user1", Password.Create(password).Value, (Email)"user1@acme.com");
+            return Account.Create(MemberId.New(), (Username)"user1", Password.Create(password).Value, (Email)"user1@acme.com");
         }
     }
 }

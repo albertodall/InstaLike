@@ -21,7 +21,7 @@ namespace InstaLike.Web.Notifications
         public async Task Handle(PostDeletedEvent notification, CancellationToken cancellationToken)
         {
             await _session.Query<Notification>()
-                .Where(n => n.PostID == notification.PostID.Value)
+                .Where(n => n.PostID == notification.PostID)
                 .DeleteAsync(cancellationToken);
         }
     }

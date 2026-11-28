@@ -37,7 +37,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         public static Account NewAccountWithPassword(Member member, string password)
         {
-            return Account.Create(member.ID.Value, (Username)member.Nickname.Value, Password.Create(password).Value, (Email)$"{member.Nickname.Value}@acme.com");
+            return Account.Create(member.ID, (Username)member.Nickname.Value, Password.Create(password).Value, (Email)$"{member.Nickname.Value}@acme.com");
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         public static Account NewAccountWithEmail(Member member, string email)
         {
-            return Account.Create(member.ID.Value, (Username)member.Nickname.Value, Password.Create(DefaultPassword).Value, (Email)email);
+            return Account.Create(member.ID, (Username)member.Nickname.Value, Password.Create(DefaultPassword).Value, (Email)email);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         public static Post NewPost(Member author, string text, PictureId picture)
         {
-            return new Post(author.ID.Value, picture, (PostText)text);
+            return new Post(author.ID, picture, (PostText)text);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         public static Comment CommentOn(Post post, Member author, string text)
         {
-            return post.CommentBy(author.ID.Value, (CommentText)text);
+            return post.CommentBy(author.ID, (CommentText)text);
         }
 
         /// <summary>
@@ -85,8 +85,8 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         public static Follower Following(Member member, Member followed)
         {
-            var follower = new Follower(member.ID.Value);
-            follower.Follow(followed.ID.Value);
+            var follower = new Follower(member.ID);
+            follower.Follow(followed.ID);
             return follower;
         }
     }

@@ -35,7 +35,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new PublishPostCommand(testUser.ID.Value, "test post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
+            var command = new PublishPostCommand(testUser.ID, "test post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var publishCommandResult = await SendAsync(command);
 
             using (new AssertionScope())
@@ -60,7 +60,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new PublishPostCommand(author.ID.Value, "post without a picture", []);
+            var command = new PublishPostCommand(author.ID, "post without a picture", []);
             (await SendAsync(command)).IsSuccess.Should().BeFalse();
         }
 
@@ -79,7 +79,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new PublishCommentCommand(post.ID, "test comment", commenter.ID.Value);
+            var command = new PublishCommentCommand(post.ID, "test comment", commenter.ID);
             var commentPostResult = await SendAsync(command);
 
             using (new AssertionScope())
@@ -113,7 +113,7 @@ namespace InstaLike.IntegrationTests
             using (var session = Infrastructure.OpenSession())
             {
                 var sut = new TestMediatorBuilder(session, Infrastructure.PictureStore).Build();
-                commentPostResult = await sut.Send(new PublishCommentCommand(post.ID, "second comment", reader.ID.Value), TestContext.Current.CancellationToken);
+                commentPostResult = await sut.Send(new PublishCommentCommand(post.ID, "second comment", reader.ID), TestContext.Current.CancellationToken);
 
                 using (new AssertionScope())
                 {
@@ -143,7 +143,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new LikePostCommand(post.ID, reader.ID.Value);
+            var command = new LikePostCommand(post.ID, reader.ID);
             var likeResult = await SendAsync(command);
 
             using (new AssertionScope())
@@ -167,7 +167,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(author, TestContext.Current.CancellationToken);
                 await session.SaveAsync(reader, TestContext.Current.CancellationToken);
                 post = TestDataHelper.NewPost(author);
-                post.LikeBy(reader.ID.Value);
+                post.LikeBy(reader.ID);
                 await session.SaveAsync(post, TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
@@ -175,7 +175,7 @@ namespace InstaLike.IntegrationTests
             using (var session = Infrastructure.OpenSession())
             {
                 var storedPost = await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken);
-                storedPost.IsLikedBy(reader.ID.Value).Should().BeTrue();
+                storedPost.IsLikedBy(reader.ID).Should().BeTrue();
             }
         }
 
@@ -191,11 +191,11 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(reader, TestContext.Current.CancellationToken);
                 post = TestDataHelper.NewPost(author);
                 await session.SaveAsync(post, TestContext.Current.CancellationToken);
-                post.LikeBy(reader.ID.Value);
+                post.LikeBy(reader.ID);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new DislikePostCommand(post.ID, reader.ID.Value);
+            var command = new DislikePostCommand(post.ID, reader.ID);
             var likeResult = await SendAsync(command);
 
             using (new AssertionScope())
@@ -223,7 +223,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new DislikePostCommand(post.ID, reader.ID.Value);
+            var command = new DislikePostCommand(post.ID, reader.ID);
             var likeResult = await SendAsync(command);
 
             likeResult.IsSuccess.Should().BeFalse("the reader has not liked this post");
@@ -245,7 +245,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new LikePostCommand(post.ID, reader.ID.Value);
+            var command = new LikePostCommand(post.ID, reader.ID);
             using (var session = Infrastructure.OpenSession())
             {
                 var sut = new TestMediatorBuilder(session, Infrastructure.PictureStore).Build();
@@ -269,7 +269,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new LikePostCommand(post.ID, author.ID.Value);
+            var command = new LikePostCommand(post.ID, author.ID);
             var likeResult = await SendAsync(command);
 
             likeResult.IsSuccess.Should().BeFalse("authors cannot like their own posts");
@@ -286,7 +286,7 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(author, TestContext.Current.CancellationToken);
                 post = TestDataHelper.NewPost(author);
                 await session.SaveAsync(post, TestContext.Current.CancellationToken);
-                post.CommentBy(author.ID.Value, CommentText.Create("First comment").Value);
+                post.CommentBy(author.ID, CommentText.Create("First comment").Value);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
@@ -314,7 +314,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new EditPostQuery(post.ID, author.ID.Value);
+            var query = new EditPostQuery(post.ID, author.ID);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new EditPostQueryHandler(session, Log.Logger);
@@ -346,7 +346,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new EditPostQuery(post.ID, reader.ID.Value);
+            var query = new EditPostQuery(post.ID, reader.ID);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new EditPostQueryHandler(session, Log.Logger);
@@ -362,7 +362,7 @@ namespace InstaLike.IntegrationTests
             Result<EditPostModel> result;
             var missingPostID = PostId.New();
 
-            var query = new EditPostQuery(missingPostID, Guid.NewGuid());
+            var query = new EditPostQuery(missingPostID, MemberId.New());
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new EditPostQueryHandler(session, Log.Logger);
@@ -378,7 +378,7 @@ namespace InstaLike.IntegrationTests
             var newPicture = Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64());
             var imageRecognition = new FakeImageRecognitionService();
 
-            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), null, newPicture), imageRecognition);
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(MemberId.New(), null, newPicture), imageRecognition);
 
             using (new AssertionScope())
             {
@@ -404,7 +404,7 @@ namespace InstaLike.IntegrationTests
             }
 
             var imageRecognition = new FakeImageRecognitionService();
-            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(author.ID.Value, post.ID, null), imageRecognition);
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(author.ID, post.ID, null), imageRecognition);
 
             using (new AssertionScope())
             {
@@ -429,7 +429,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(reader.ID.Value, post.ID, null), new FakeImageRecognitionService());
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(reader.ID, post.ID, null), new FakeImageRecognitionService());
 
             result.Error.Should().Be(PostErrors.EditNotAllowed);
         }
@@ -439,7 +439,7 @@ namespace InstaLike.IntegrationTests
         {
             var missingPostID = PostId.New();
 
-            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), missingPostID, null), new FakeImageRecognitionService());
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(MemberId.New(), missingPostID, null), new FakeImageRecognitionService());
 
             result.Error.Should().Be(PostErrors.NotFound(missingPostID));
         }
@@ -457,7 +457,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(author.ID.Value, post.ID, null), new FakeImageRecognitionService());
+            var result = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(author.ID, post.ID, null), new FakeImageRecognitionService());
 
             result.Error.Should().Be(PostErrors.PictureNotFound);
         }
@@ -465,8 +465,8 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Not_Suggest_Tags_Without_A_Picture()
         {
-            var withoutPicture = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), null, null), new FakeImageRecognitionService());
-            var withEmptyPicture = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(Guid.NewGuid(), PostId.New(), []), new FakeImageRecognitionService());
+            var withoutPicture = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(MemberId.New(), null, null), new FakeImageRecognitionService());
+            var withEmptyPicture = await SuggestPictureTagsAsync(new SuggestPictureTagsQuery(MemberId.New(), PostId.New(), []), new FakeImageRecognitionService());
 
             using (new AssertionScope())
             {
@@ -488,13 +488,13 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(author, TestContext.Current.CancellationToken);
                 post = TestDataHelper.NewPost(author);
                 await session.SaveAsync(post, TestContext.Current.CancellationToken);
-                post.CommentBy(reader.ID.Value, CommentText.Create("My comment").Value);
+                post.CommentBy(reader.ID, CommentText.Create("My comment").Value);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
-                post.LikeBy(reader.ID.Value);
+                post.LikeBy(reader.ID);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new PostDetailQuery(post.ID, reader.ID.Value);
+            var query = new PostDetailQuery(post.ID, reader.ID);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new PostDetailQueryHandler(session, Log.Logger);
@@ -518,7 +518,7 @@ namespace InstaLike.IntegrationTests
             Result<PostModel> result;
             var missingPostID = PostId.New();
 
-            var query = new PostDetailQuery(missingPostID, Guid.NewGuid());
+            var query = new PostDetailQuery(missingPostID, MemberId.New());
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new PostDetailQueryHandler(session, Log.Logger);
@@ -551,12 +551,12 @@ namespace InstaLike.IntegrationTests
                 await session.SaveAsync(post3, TestContext.Current.CancellationToken);
                 await session.SaveAsync(TestDataHelper.Following(reader, author1), TestContext.Current.CancellationToken);
                 TestDataHelper.CommentOn(post1, reader, "nice picture");
-                post1.LikeBy(reader.ID.Value);
+                post1.LikeBy(reader.ID);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new TimelineQuery(reader.ID.Value, 5);
+            var query = new TimelineQuery(reader.ID, 5);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new TimelineQueryHandler(session, Log.Logger);
@@ -640,7 +640,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new EditPostCommand(author.ID.Value, post.ID, "edited text on post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
+            var command = new EditPostCommand(author.ID, post.ID, "edited text on post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var editResult = await SendAsync(command);
 
             using (var session = Infrastructure.OpenSession())
@@ -669,7 +669,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new EditPostCommand(author.ID.Value, post.ID, "edited text", null);
+            var command = new EditPostCommand(author.ID, post.ID, "edited text", null);
             var editResult = await SendAsync(command);
 
             using (var session = Infrastructure.OpenSession())
@@ -701,7 +701,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new EditPostCommand(reader.ID.Value, post.ID, "edited text on post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
+            var command = new EditPostCommand(reader.ID, post.ID, "edited text on post 1", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var editResult = await SendAsync(command);
 
             editResult.Error.Should().Be(PostErrors.EditNotAllowed);
@@ -717,7 +717,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new PublishPostCommand(author.ID.Value, new string('x', 501), Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
+            var command = new PublishPostCommand(author.ID, new string('x', 501), Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var publishResult = await SendAsync(command);
 
             using (new AssertionScope())
@@ -740,7 +740,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new EditPostCommand(author.ID.Value, post.ID, new string('x', 501), Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
+            var command = new EditPostCommand(author.ID, post.ID, new string('x', 501), Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var editResult = await SendAsync(command);
 
             using (new AssertionScope())
@@ -767,7 +767,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new EditPostCommand(author.ID.Value, missingPostID, "edited text", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
+            var command = new EditPostCommand(author.ID, missingPostID, "edited text", Convert.FromBase64String(TestInfrastructureFactory.GetTestPictureBase64()));
             var editResult = await SendAsync(command);
 
             editResult.IsFailure.Should().BeTrue();
@@ -790,12 +790,12 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            await SendAsync(new LikePostCommand(deletedPost.ID, reader.ID.Value));
-            await SendAsync(new PublishCommentCommand(deletedPost.ID, "comment on the deleted post", reader.ID.Value));
-            await SendAsync(new LikePostCommand(keptPost.ID, reader.ID.Value));
-            await SendAsync(new PublishCommentCommand(keptPost.ID, "comment on the kept post", reader.ID.Value));
+            await SendAsync(new LikePostCommand(deletedPost.ID, reader.ID));
+            await SendAsync(new PublishCommentCommand(deletedPost.ID, "comment on the deleted post", reader.ID));
+            await SendAsync(new LikePostCommand(keptPost.ID, reader.ID));
+            await SendAsync(new PublishCommentCommand(keptPost.ID, "comment on the kept post", reader.ID));
 
-            var deleteResult = await SendAsync(new DeletePostCommand(author.ID.Value, deletedPost.ID));
+            var deleteResult = await SendAsync(new DeletePostCommand(author.ID, deletedPost.ID));
 
             using (var session = Infrastructure.OpenSession())
             {
@@ -805,10 +805,10 @@ namespace InstaLike.IntegrationTests
                     (await session.GetAsync<Post>(deletedPost.ID, TestContext.Current.CancellationToken)).Should().BeNull();
                     session.Query<Comment>().Count(c => c.Post.ID == deletedPost.ID).Should().Be(0);
                     session.Query<Like>().Count(l => l.Post.ID == deletedPost.ID).Should().Be(0);
-                    session.Query<Notification>().Count(n => n.PostID == deletedPost.ID.Value).Should().Be(0);
+                    session.Query<Notification>().Count(n => n.PostID == deletedPost.ID).Should().Be(0);
                     session.Query<Comment>().Count(c => c.Post.ID == keptPost.ID).Should().Be(1);
                     session.Query<Like>().Count(l => l.Post.ID == keptPost.ID).Should().Be(1);
-                    session.Query<Notification>().Count(n => n.PostID == keptPost.ID.Value).Should().Be(2);
+                    session.Query<Notification>().Count(n => n.PostID == keptPost.ID).Should().Be(2);
                 }
             }
         }
@@ -827,7 +827,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var deleteResult = await SendAsync(new DeletePostCommand(reader.ID.Value, post.ID));
+            var deleteResult = await SendAsync(new DeletePostCommand(reader.ID, post.ID));
 
             using (new AssertionScope())
             {
@@ -847,7 +847,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var deleteResult = await SendAsync(new DeletePostCommand(author.ID.Value, missingPostID));
+            var deleteResult = await SendAsync(new DeletePostCommand(author.ID, missingPostID));
 
             deleteResult.Error.Should().Be(PostErrors.NotFound(missingPostID));
         }
@@ -891,8 +891,8 @@ namespace InstaLike.IntegrationTests
             using (var session = Infrastructure.SessionFactory.WithOptions().Interceptor(statements).OpenSession())
             {
                 var storedPost = await session.GetAsync<Post>(post.ID, TestContext.Current.CancellationToken);
-                storedPost.LikeBy(reader.ID.Value);
-                storedPost.CommentBy(reader.ID.Value, (CommentText)"test comment");
+                storedPost.LikeBy(reader.ID);
+                storedPost.CommentBy(reader.ID, (CommentText)"test comment");
                 var statementsBeforeFlush = statements.Statements.Count;
 
                 await session.FlushAsync(TestContext.Current.CancellationToken);
@@ -950,13 +950,13 @@ namespace InstaLike.IntegrationTests
             const int BatchSize = 2;
             var batches = new List<TimelineModel>
             {
-                await ReadWithTimelineHandler(sut => sut.Handle(new TimelineQuery(reader.ID.Value, BatchSize), TestContext.Current.CancellationToken))
+                await ReadWithTimelineHandler(sut => sut.Handle(new TimelineQuery(reader.ID, BatchSize), TestContext.Current.CancellationToken))
             };
 
             while (batches[^1].HasOlderPosts)
             {
                 var lastPostShownID = batches[^1].Posts[^1].PostID;
-                batches.Add(await ReadWithTimelineHandler(sut => sut.Handle(new OlderTimelinePostsQuery(reader.ID.Value, lastPostShownID, BatchSize), TestContext.Current.CancellationToken)));
+                batches.Add(await ReadWithTimelineHandler(sut => sut.Handle(new OlderTimelinePostsQuery(reader.ID, lastPostShownID, BatchSize), TestContext.Current.CancellationToken)));
             }
 
             return batches.ToArray();

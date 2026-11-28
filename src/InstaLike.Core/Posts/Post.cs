@@ -11,7 +11,7 @@ namespace InstaLike.Core.Posts
         protected Post() { }
 #pragma warning restore CS8618
 
-        public Post(Guid authorID, PictureId picture, PostText text)
+        public Post(MemberId authorID, PictureId picture, PostText text)
             : base(PostId.New())
         {
             AuthorID = authorID;
@@ -21,7 +21,7 @@ namespace InstaLike.Core.Posts
             PostDate = DateTimeOffset.UtcNow;
         }
 
-        public virtual Guid AuthorID { get; protected set; }
+        public virtual MemberId AuthorID { get; protected set; }
 
         public virtual PictureId Picture { get; protected set; }
 
@@ -46,7 +46,7 @@ namespace InstaLike.Core.Posts
             _text = text.Value;
         }
 
-        public virtual Result LikeBy(Guid memberID)
+        public virtual Result LikeBy(MemberId memberID)
         {
             if (!CanBeLikedBy(memberID))
             {
@@ -63,7 +63,7 @@ namespace InstaLike.Core.Posts
             return Result.Ok();
         }
 
-        public virtual Result DislikeBy(Guid memberID)
+        public virtual Result DislikeBy(MemberId memberID)
         {
             var like = _likes.SingleOrDefault(l => l.MemberID == memberID);
             if (like is null)
@@ -75,17 +75,17 @@ namespace InstaLike.Core.Posts
             return Result.Ok();
         }
 
-        public virtual bool CanBeLikedBy(Guid memberID)
+        public virtual bool CanBeLikedBy(MemberId memberID)
         {
             return AuthorID != memberID;
         }
 
-        public virtual bool IsLikedBy(Guid memberID)
+        public virtual bool IsLikedBy(MemberId memberID)
         {
             return _likes.Any(l => l.MemberID == memberID);
         }
 
-        public virtual Comment CommentBy(Guid authorID, CommentText text)
+        public virtual Comment CommentBy(MemberId authorID, CommentText text)
         {
             var comment = new Comment(this, authorID, text);
             _comments.Add(comment);
@@ -93,12 +93,12 @@ namespace InstaLike.Core.Posts
             return comment;
         }
 
-        public virtual bool CanBeEditedBy(Guid memberID)
+        public virtual bool CanBeEditedBy(MemberId memberID)
         {
             return AuthorID == memberID;
         }
 
-        public virtual Result DeleteBy(Guid memberID)
+        public virtual Result DeleteBy(MemberId memberID)
         {
             if (!CanBeEditedBy(memberID))
             {

@@ -34,9 +34,9 @@ namespace InstaLike.Web.Posts
     public sealed class PostDetailQuery : IRequest<Result<PostModel>>
     {
         public PostId PostID { get; }
-        public Guid CurrentUserID { get; }
+        public MemberId CurrentUserID { get; }
 
-        public PostDetailQuery(PostId postID, Guid currentUserID)
+        public PostDetailQuery(PostId postID, MemberId currentUserID)
         {
             PostID = postID;
             CurrentUserID = currentUserID;

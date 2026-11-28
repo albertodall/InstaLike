@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Data.SqlTypes;
 using System.Linq;
 using FluentAssertions;
-using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 using Xunit;
 
 namespace InstaLike.Core.Tests

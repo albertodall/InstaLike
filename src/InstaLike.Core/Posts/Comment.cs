@@ -12,7 +12,7 @@ namespace InstaLike.Core.Posts
         protected Comment() { }
 #pragma warning restore CS8618
 
-        internal Comment(Post post, Guid authorID, CommentText text)
+        internal Comment(Post post, MemberId authorID, CommentText text)
             : this()
         {
             Post = post;
@@ -23,7 +23,7 @@ namespace InstaLike.Core.Posts
 
         public virtual Post Post { get; protected set; }
 
-        public virtual Guid AuthorID { get; protected set; }
+        public virtual MemberId AuthorID { get; protected set; }
 
         private readonly string _text;
         public virtual CommentText Text => (CommentText)_text;

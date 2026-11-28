@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Membership;
@@ -38,7 +37,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new MemberProfileQuery(follower.ID.Value, author.Nickname, 3);
+            var query = new MemberProfileQuery(follower.ID, author.Nickname, 3);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new MemberProfileQueryHandler(session, Log.Logger);
@@ -61,7 +60,7 @@ namespace InstaLike.IntegrationTests
         {
             Result<MemberProfileModel> result;
 
-            var query = new MemberProfileQuery(Guid.NewGuid(), "nobody", 3);
+            var query = new MemberProfileQuery(MemberId.New(), "nobody", 3);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new MemberProfileQueryHandler(session, Log.Logger);

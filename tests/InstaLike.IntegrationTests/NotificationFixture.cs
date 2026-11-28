@@ -20,9 +20,9 @@ namespace InstaLike.IntegrationTests
             int result;
             var sender = TestDataHelper.NewMember("sender");
             var recipient = TestDataHelper.NewMember("recipient");
-            var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-            var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var not1 = Notification.Followed(sender.ID, recipient.ID);
+            var not2 = Notification.Followed(sender.ID, recipient.ID);
+            var not3 = Notification.Followed(sender.ID, recipient.ID);
             using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
@@ -33,7 +33,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new MarkNotificationsReadCommand(recipient.ID.Value, [not1.ID.Value, not2.ID.Value]);
+            var command = new MarkNotificationsReadCommand(recipient.ID, [not1.ID.Value, not2.ID.Value]);
             result = await SendAsync(command);
 
             using (new AssertionScope())
@@ -53,7 +53,7 @@ namespace InstaLike.IntegrationTests
             int result;
             var sender = TestDataHelper.NewMember("sender");
             var recipient = TestDataHelper.NewMember("recipient");
-            var notification = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+            var notification = Notification.Followed(sender.ID, recipient.ID);
             using (var session = Infrastructure.OpenSession())
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
@@ -62,7 +62,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var command = new MarkNotificationsReadCommand(sender.ID.Value, [notification.ID.Value]);
+            var command = new MarkNotificationsReadCommand(sender.ID, [notification.ID.Value]);
             result = await SendAsync(command);
 
             result.Should().Be(0);
@@ -78,9 +78,9 @@ namespace InstaLike.IntegrationTests
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-                var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-                var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-                var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not1 = Notification.Followed(sender.ID, recipient.ID);
+                var not2 = Notification.Followed(sender.ID, recipient.ID);
+                var not3 = Notification.Followed(sender.ID, recipient.ID);
                 not1.MarkAsRead();
                 await session.SaveAsync(not1, TestContext.Current.CancellationToken);
                 await session.SaveAsync(not2, TestContext.Current.CancellationToken);
@@ -88,7 +88,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new UnreadNotificationsQuery(recipient.ID.Value);
+            var query = new UnreadNotificationsQuery(recipient.ID);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new UnreadNotificationsQueryHandler(session, Log.Logger);
@@ -108,9 +108,9 @@ namespace InstaLike.IntegrationTests
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-                var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-                var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-                var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not1 = Notification.Followed(sender.ID, recipient.ID);
+                var not2 = Notification.Followed(sender.ID, recipient.ID);
+                var not3 = Notification.Followed(sender.ID, recipient.ID);
                 not1.MarkAsRead();
                 await session.SaveAsync(not1, TestContext.Current.CancellationToken);
                 await session.SaveAsync(not2, TestContext.Current.CancellationToken);
@@ -118,7 +118,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new NotificationsQuery(recipient.ID.Value, true);
+            var query = new NotificationsQuery(recipient.ID, true);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new NotificationsQueryHandler(session, Log.Logger);
@@ -142,9 +142,9 @@ namespace InstaLike.IntegrationTests
             {
                 await session.SaveAsync(sender, TestContext.Current.CancellationToken);
                 await session.SaveAsync(recipient, TestContext.Current.CancellationToken);
-                var not1 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-                var not2 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
-                var not3 = Notification.Followed(sender.ID.Value, recipient.ID.Value);
+                var not1 = Notification.Followed(sender.ID, recipient.ID);
+                var not2 = Notification.Followed(sender.ID, recipient.ID);
+                var not3 = Notification.Followed(sender.ID, recipient.ID);
                 not1.MarkAsRead();
                 await session.SaveAsync(not1, TestContext.Current.CancellationToken);
                 await session.SaveAsync(not2, TestContext.Current.CancellationToken);
@@ -152,7 +152,7 @@ namespace InstaLike.IntegrationTests
                 await session.FlushAsync(TestContext.Current.CancellationToken);
             }
 
-            var query = new NotificationsQuery(recipient.ID.Value, false);
+            var query = new NotificationsQuery(recipient.ID, false);
             using (var session = Infrastructure.OpenStatelessSession())
             {
                 var sut = new NotificationsQueryHandler(session, Log.Logger);

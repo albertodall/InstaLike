@@ -15,8 +15,8 @@ namespace InstaLike.Core.Accounts
         protected Account() { }
 #pragma warning restore CS8618
 
-        private Account(Guid memberID, Username username, Password password, Email email)
-            : base(AccountId.From(memberID))
+        private Account(MemberId memberID, Username username, Password password, Email email)
+            : base(AccountId.From(memberID.Value))
         {
             _username = username;
             _password = password;
@@ -39,7 +39,7 @@ namespace InstaLike.Core.Accounts
 
         public virtual DateTimeOffset? LockedOutUntil { get; protected set; }
 
-        public static Account Create(Guid memberID, Username username, Password password, Email email) =>
+        public static Account Create(MemberId memberID, Username username, Password password, Email email) =>
             new(memberID, username, password, email);
 
         public virtual Result LogIn(string password)

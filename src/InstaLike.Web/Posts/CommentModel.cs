@@ -1,5 +1,5 @@
 ﻿using System;
-using InstaLike.Core.Posts;
+using InstaLike.Core.SharedKernel;
 
 namespace InstaLike.Web.Posts
 {
