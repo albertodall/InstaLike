@@ -45,8 +45,9 @@ namespace InstaLike.Web.Notifications
 
             var unreadNotifications = await _session.QueryOver<Notification>()
                 .Where(n => n.RecipientID == request.RecipientID)
-                .AndNot(n => n.HasBeenReadByRecipient)
-                .AndRestrictionOn(n => n.ID).IsIn(request.NotificationIDs.Select(NotificationId.From).ToArray())
+                    .AndNot(n => n.HasBeenReadByRecipient)
+                    .AndRestrictionOn(n => n.ID)
+                        .IsIn([.. request.NotificationIDs.Select(NotificationId.From)])
                 .ListAsync(cancellationToken);
 
             foreach (var notification in unreadNotifications)

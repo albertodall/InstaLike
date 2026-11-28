@@ -136,8 +136,9 @@ namespace InstaLike.Web.Posts
                 // Posts liked by current user
                 var postsLikedByCurrentUserQuery = _session.QueryOver<Like>()
                     .WithSubquery
-                        .WhereProperty(l => l.Post.ID).In(postIdsToShowInTimelineQuery)
-                        .And(l => l.MemberID == userID)
+                        .WhereProperty(l => l.Post.ID)
+                            .In(postIdsToShowInTimelineQuery)
+                            .And(l => l.MemberID == userID)
                     .Select(l => l.Post.ID)
                     .Future<PostId>();
 
@@ -145,7 +146,8 @@ namespace InstaLike.Web.Posts
                 var authorsQuery = _session.QueryOver<Member>()
                     .WithSubquery
                         .WhereProperty(u => u.ID).In(QueryOver.Of<Post>()
-                            .WithSubquery.WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
+                            .WithSubquery
+                                .WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
                             .Select(p => p.AuthorID))
                     .SelectList(fields => fields
                         .Select(u => u.ID).WithAlias(() => author.ID)
@@ -164,7 +166,8 @@ namespace InstaLike.Web.Posts
 
                 var posts = (await timelineQuery.GetEnumerableAsync(cancellationToken)).ToArray();
 
-                // Each query above reads the rows of all the posts at once: index them by post to map each post.
+                // Each query above reads the rows of all the posts at once:
+                // index them by post to map each post.
                 var authorsByID = authorsQuery.ToDictionary(a => a.ID);
                 var likesCountByPostID = postLikesCountQuery.ToDictionary(l => l.PostID, l => l.Count);
                 var postIDsLikedByCurrentUser = postsLikedByCurrentUserQuery.ToHashSet();
@@ -172,7 +175,7 @@ namespace InstaLike.Web.Posts
 
                 timeline = new TimelineModel
                 {
-                    Posts = [.. posts.Take(numberOfPosts).Select(p => new PostModel
+                    Posts = posts.Take(numberOfPosts).Select(p => new PostModel
                     {
                         PostID = p.ID,
                         AuthorNickName = authorsByID[p.AuthorID].Nickname,
@@ -180,12 +183,12 @@ namespace InstaLike.Web.Posts
                         Picture = p.Picture,
                         PostDate = p.PostDate,
                         Text = p.Text,
-                        Comments = [.. commentsByPostID[p.ID].OrderByDescending(c => c.CommentDate)],
+                        Comments = commentsByPostID[p.ID].OrderByDescending(c => c.CommentDate).ToArray(),
                         LikesCount = likesCountByPostID.GetValueOrDefault(p.ID),
                         IsLikedByCurrentUser = postIDsLikedByCurrentUser.Contains(p.ID),
                         CanBeLikedByCurrentUser = p.CanBeLikedBy(userID),
                         CanBeEditedByCurrentUser = p.CanBeEditedBy(userID)
-                    })],
+                    }).ToArray(),
                     HasOlderPosts = posts.Length > numberOfPosts
                 };
 
