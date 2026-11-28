@@ -81,7 +81,7 @@ namespace InstaLike.Web.Posts
                 Post post = null!;
 
                 var followedUserIdsQuery = QueryOver.Of<Follow>()
-                    .Where(f => f.Follower.ID == FollowerId.From(userID.Value))
+                    .Where(f => f.Follower.ID == userID)
                     .Select(f => f.FollowedID);
 
                 // Post to show in the timeline (user's own posts and posts published by followed users)

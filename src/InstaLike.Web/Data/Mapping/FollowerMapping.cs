@@ -1,5 +1,6 @@
 ﻿using FluentNHibernate.Mapping;
 using InstaLike.Core.Social;
+using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Data.Types;
 
 namespace InstaLike.Web.Data.Mapping
@@ -10,7 +11,7 @@ namespace InstaLike.Web.Data.Mapping
         {
             Table("[Follower]");
 
-            Id(p => p.ID).CustomType<TypedIdType<FollowerId>>().GeneratedBy.Assigned();
+            Id(p => p.ID).CustomType<TypedIdType<MemberId>>().GeneratedBy.Assigned();
 
             HasMany(p => p.Follows)
                 .Access.CamelCaseField(Prefix.Underscore)

@@ -260,7 +260,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         private static Task<int> CountFollowsAsync(ISession session, MemberId followerID, MemberId followedID) =>
             session.QueryOver<Follow>()
-                .Where(f => f.Follower.ID == FollowerId.From(followerID.Value) && f.FollowedID == followedID)
+                .Where(f => f.Follower.ID == followerID && f.FollowedID == followedID)
                 .RowCountAsync();
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace InstaLike.IntegrationTests
         /// </summary>
         private static Task<int> CountFollowersAsync(ISession session, MemberId memberID) =>
             session.QueryOver<Follower>()
-                .Where(f => f.ID == FollowerId.From(memberID.Value))
+                .Where(f => f.ID == memberID)
                 .RowCountAsync();
     }
 }

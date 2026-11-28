@@ -118,14 +118,14 @@ namespace InstaLike.Web.Membership
 
                 // Number of followed members
                 var followingCountQuery = _session.QueryOver<Follow>()
-                    .Where(f => f.Follower.ID == FollowerId.From(profile.MemberID.Value))
+                    .Where(f => f.Follower.ID == profile.MemberID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 
                 // Is the current member following the selected member?
                 var isFollowedByCurrentMemberQuery = _session.QueryOver<Follow>()
                     .Where(f => f.FollowedID == profile.MemberID)
-                    .And(f => f.Follower.ID == FollowerId.From(request.CurrentMemberID.Value))
+                    .And(f => f.Follower.ID == request.CurrentMemberID)
                     .Select(Projections.Count<Follow>(f => f.ID))
                     .FutureValue<int>();
 

@@ -45,7 +45,7 @@ namespace InstaLike.Web.Social
                 return Result.Failure(MemberErrors.NotFound(request.FollowedNickname));
             }
 
-            var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID.Value), cancellationToken);
+            var follower = await _session.GetAsync<Follower>(request.FollowerID, cancellationToken);
             var isFirstFollow = follower is null;
             follower ??= new Follower(request.FollowerID);
 

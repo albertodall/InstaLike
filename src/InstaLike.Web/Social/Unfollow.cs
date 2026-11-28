@@ -45,7 +45,7 @@ namespace InstaLike.Web.Social
                 return Result.Failure(MemberErrors.NotFound(request.UnfollowedNickname));
             }
 
-            var follower = await _session.GetAsync<Follower>(FollowerId.From(request.FollowerID.Value), cancellationToken);
+            var follower = await _session.GetAsync<Follower>(request.FollowerID, cancellationToken);
             var result = follower?.Unfollow(unfollowedID) ?? Result.Failure(FollowerErrors.NotFollowing);
             if (result.IsFailure)
             {

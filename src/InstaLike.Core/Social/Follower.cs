@@ -10,12 +10,12 @@ namespace InstaLike.Core.Social
     /// <remarks>
     /// A member becomes a follower with their first follow; members who never followed anyone have no follower.
     /// </remarks>
-    public class Follower : AggregateRoot<FollowerId>
+    public class Follower : AggregateRoot<MemberId>
     {
         protected Follower() { }
 
         public Follower(MemberId memberID)
-            : base(FollowerId.From(memberID.Value))
+            : base(memberID)
         {
         }
 
@@ -24,7 +24,7 @@ namespace InstaLike.Core.Social
 
         public virtual Result Follow(MemberId followedID)
         {
-            if (followedID.Value == ID.Value)
+            if (followedID == ID)
             {
                 return Result.Failure(FollowerErrors.SelfFollow);
             }
@@ -35,7 +35,7 @@ namespace InstaLike.Core.Social
             }
 
             _follows.Add(new Follow(this, followedID));
-            RaiseDomainEvent(new MemberFollowedEvent(MemberId.From(ID.Value), followedID));
+            RaiseDomainEvent(new MemberFollowedEvent(ID, followedID));
             return Result.Ok();
         }
 

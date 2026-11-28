@@ -21,7 +21,7 @@ namespace InstaLike.Core.Tests
             using (new AssertionScope())
             {
                 result.IsSuccess.Should().BeTrue();
-                follower.ID.Should().Be(FollowerId.From(MemberID.Value));
+                follower.ID.Should().Be(MemberID);
                 follower.IsFollowing(FollowedID).Should().BeTrue();
                 follower.Follows.Should().ContainSingle()
                     .Which.Follower.Should().BeSameAs(follower);
