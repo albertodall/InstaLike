@@ -476,7 +476,7 @@ namespace InstaLike.IntegrationTests
         [Fact]
         public async Task Should_Load_All_Details_For_A_Post()
         {
-            PostModel result;
+            Result<PostModel> result;
             var author = TestDataHelper.NewMember("author7");
             var reader = TestDataHelper.NewMember("reader1");
             Post post;
@@ -501,13 +501,29 @@ namespace InstaLike.IntegrationTests
 
             using (new AssertionScope())
             {
-                result.Should().NotBeNull();
-                result.AuthorNickName.Should().Be(author.Nickname);
-                result.LikesCount.Should().Be(1);
-                result.Comments.Length.Should().Be(1);
-                result.IsLikedByCurrentUser.Should().BeTrue();
-                result.CanBeLikedByCurrentUser.Should().BeTrue();
+                result.IsSuccess.Should().BeTrue();
+                result.Value.AuthorNickName.Should().Be(author.Nickname);
+                result.Value.LikesCount.Should().Be(1);
+                result.Value.Comments.Length.Should().Be(1);
+                result.Value.IsLikedByCurrentUser.Should().BeTrue();
+                result.Value.CanBeLikedByCurrentUser.Should().BeTrue();
             }
+        }
+
+        [Fact]
+        public async Task Details_Of_A_Missing_Post_Should_Not_Be_Found()
+        {
+            Result<PostModel> result;
+            var missingPostID = PostId.New();
+
+            var query = new PostDetailQuery(missingPostID, Guid.NewGuid());
+            using (var session = Infrastructure.OpenStatelessSession())
+            {
+                var sut = new PostDetailQueryHandler(session, Log.Logger);
+                result = await sut.Handle(query, TestContext.Current.CancellationToken);
+            }
+
+            result.Error.Should().Be(PostErrors.NotFound(missingPostID));
         }
 
         [Fact]

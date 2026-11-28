@@ -46,9 +46,9 @@ namespace InstaLike.Web.Posts
         public async Task<IActionResult> Detail(PostId id)
         {
             var postQuery = new PostDetailQuery(id, User.GetIdentifier());
-            var model = await _dispatcher.Send(postQuery);
+            var queryResult = await _dispatcher.Send(postQuery);
 
-            return View(model);
+            return queryResult.IsSuccess ? View(queryResult.Value) : NotFound();
         }
 
         public async Task<IActionResult> Edit(PostId id)

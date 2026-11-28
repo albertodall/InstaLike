@@ -31,7 +31,7 @@ namespace InstaLike.Web.Posts
         public bool CanBeEditedByCurrentUser { get; set; }
     }
 
-    public sealed class PostDetailQuery : IRequest<PostModel>
+    public sealed class PostDetailQuery : IRequest<Result<PostModel>>
     {
         public PostId PostID { get; }
         public Guid CurrentUserID { get; }
@@ -43,7 +43,7 @@ namespace InstaLike.Web.Posts
         }
     }
 
-    internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, PostModel>
+    internal sealed class PostDetailQueryHandler : IRequestHandler<PostDetailQuery, Result<PostModel>>
     {
         private readonly IStatelessSession _session;
         private readonly ILogger _logger;
@@ -54,7 +54,7 @@ namespace InstaLike.Web.Posts
             _logger = logger.ForContext<PostDetailQuery>();
         }
 
-        public async Task<PostModel> Handle(PostDetailQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PostModel>> Handle(PostDetailQuery request, CancellationToken cancellationToken)
         {
             _logger.Debug("Reading details for post {PostID} with parameters {@Request}", request.PostID, request);
 
@@ -106,9 +106,14 @@ namespace InstaLike.Web.Posts
                     .FutureValue<object[]>();
 
                 var post = await postQuery.GetValueAsync(cancellationToken);
+                if (post is null)
+                {
+                    return Result.Failure<PostModel>(PostErrors.NotFound(request.PostID));
+                }
+
                 var author = await authorQuery.GetValueAsync(cancellationToken);
 
-                return new PostModel
+                return Result.Ok(new PostModel
                 {
                     PostID = post.ID,
                     AuthorNickName = (string)author[0],
@@ -121,7 +126,7 @@ namespace InstaLike.Web.Posts
                     IsLikedByCurrentUser = await isLikedByCurrentUserQuery.GetValueAsync(cancellationToken) > 0,
                     CanBeLikedByCurrentUser = post.CanBeLikedBy(request.CurrentUserID),
                     CanBeEditedByCurrentUser = post.CanBeEditedBy(request.CurrentUserID)
-                };
+                });
             }
         }
     }
