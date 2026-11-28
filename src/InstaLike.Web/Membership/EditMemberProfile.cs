@@ -49,17 +49,16 @@ namespace InstaLike.Web.Membership
 
             using (var tx = _session.BeginTransaction())
             {
-                EditMemberProfileModel memberDetails = null!;
                 result = await _session.QueryOver<Member>()
                     .Where(m => m.ID == request.MemberID)
-                    .SelectList(list => list
-                        .Select(m => m.Nickname).WithAlias(() => memberDetails.Nickname)
-                        .Select(m => m.FullName.Name).WithAlias(() => memberDetails.Name)
-                        .Select(m => m.FullName.Surname).WithAlias(() => memberDetails.Surname)
-                        .Select(m => m.Biography).WithAlias(() => memberDetails.Bio)
-                        .Select(m => m.ProfilePicture).WithAlias(() => memberDetails.ProfilePicture)
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<EditMemberProfileModel>())
+                    .SelectInto(m => new EditMemberProfileModel
+                    {
+                        Nickname = m.Nickname,
+                        Name = m.FullName.Name,
+                        Surname = m.FullName.Surname,
+                        Bio = m.Biography,
+                        ProfilePicture = m.ProfilePicture
+                    })
                     .SingleOrDefaultAsync<EditMemberProfileModel>(cancellationToken);
 
                 await tx.CommitAsync(cancellationToken);
