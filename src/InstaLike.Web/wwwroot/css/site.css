@@ -590,6 +590,17 @@ textarea {
         display: none;
     }
 
+/* Publish and edit post buttons */
+.form_post .post-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+    .form_post .post-actions .autotag-button {
+        margin-right: auto;
+    }
+
 /* Post comments */
 .form_comment {
     display: flex;
