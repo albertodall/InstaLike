@@ -56,6 +56,13 @@ $(function () {
     showDatesInLocalTime();
 });
 
+// Asks for a confirmation before deleting a post
+$('.form_delete_post').submit(function (e) {
+    if (!confirm('Delete this post? Its comments and likes will be deleted too.')) {
+        e.preventDefault();
+    }
+});
+
 // Displays user's profile picture after choosing it
 $(".user-details-profile-picture input").change(function (e) {
     if (e.target.files && e.target.files[0]) {

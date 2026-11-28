@@ -10,6 +10,9 @@ namespace InstaLike.Core.Posts
         public static readonly Error EditNotAllowed =
             Error.Forbidden("Post.EditNotAllowed", "You're not allowed to edit this post.");
 
+        public static readonly Error DeleteNotAllowed =
+            Error.Forbidden("Post.DeleteNotAllowed", "You're not allowed to delete this post.");
+
         public static readonly Error PictureMissing =
             Error.Validation("Picture.Missing", "Please select a picture to share together with your post.");
 

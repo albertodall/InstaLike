@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using InstaLike.Core.Membership;
+using InstaLike.Core.Notifications;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Web.Media;
 using InstaLike.Web.Posts;
 using NHibernate;
 using NHibernate.Collection;
+using NHibernate.Linq;
 using Serilog;
 using Xunit;
 
@@ -770,6 +772,84 @@ namespace InstaLike.IntegrationTests
 
             editResult.IsFailure.Should().BeTrue();
             editResult.Error.Should().Be(PostErrors.NotFound(missingPostID));
+        }
+
+        [Fact]
+        public async Task Author_Should_Delete_A_Post_With_Its_Comments_Likes_And_Notifications()
+        {
+            var author = TestDataHelper.NewMember("deleteauthor");
+            var reader = TestDataHelper.NewMember("deletereader");
+            var deletedPost = TestDataHelper.NewPost(author, "post to delete");
+            var keptPost = TestDataHelper.NewPost(author, "post to keep");
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+                await session.SaveAsync(deletedPost, TestContext.Current.CancellationToken);
+                await session.SaveAsync(keptPost, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            await SendAsync(new LikePostCommand(deletedPost.ID, reader.ID.Value));
+            await SendAsync(new PublishCommentCommand(deletedPost.ID, "comment on the deleted post", reader.ID.Value));
+            await SendAsync(new LikePostCommand(keptPost.ID, reader.ID.Value));
+            await SendAsync(new PublishCommentCommand(keptPost.ID, "comment on the kept post", reader.ID.Value));
+
+            var deleteResult = await SendAsync(new DeletePostCommand(author.ID.Value, deletedPost.ID));
+
+            using (var session = Infrastructure.OpenSession())
+            {
+                using (new AssertionScope())
+                {
+                    deleteResult.IsSuccess.Should().BeTrue();
+                    (await session.GetAsync<Post>(deletedPost.ID, TestContext.Current.CancellationToken)).Should().BeNull();
+                    session.Query<Comment>().Count(c => c.Post.ID == deletedPost.ID).Should().Be(0);
+                    session.Query<Like>().Count(l => l.Post.ID == deletedPost.ID).Should().Be(0);
+                    session.Query<Notification>().Count(n => n.PostID == deletedPost.ID.Value).Should().Be(0);
+                    session.Query<Comment>().Count(c => c.Post.ID == keptPost.ID).Should().Be(1);
+                    session.Query<Like>().Count(l => l.Post.ID == keptPost.ID).Should().Be(1);
+                    session.Query<Notification>().Count(n => n.PostID == keptPost.ID.Value).Should().Be(2);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task User_Cannot_Delete_Post_Published_By_Another_User()
+        {
+            var author = TestDataHelper.NewMember("deleteauthor");
+            var reader = TestDataHelper.NewMember("deletereader");
+            var post = TestDataHelper.NewPost(author);
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                await session.SaveAsync(reader, TestContext.Current.CancellationToken);
+                await session.SaveAsync(post, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var deleteResult = await SendAsync(new DeletePostCommand(reader.ID.Value, post.ID));
+
+            using (new AssertionScope())
+            {
+                deleteResult.Error.Should().Be(PostErrors.DeleteNotAllowed);
+                (await CountPostsAsync(post.ID)).Should().Be(1);
+            }
+        }
+
+        [Fact]
+        public async Task Cannot_Delete_A_Post_That_Does_Not_Exist()
+        {
+            var missingPostID = PostId.New();
+            var author = TestDataHelper.NewMember("deleteauthor");
+            using (var session = Infrastructure.OpenSession())
+            {
+                await session.SaveAsync(author, TestContext.Current.CancellationToken);
+                await session.FlushAsync(TestContext.Current.CancellationToken);
+            }
+
+            var deleteResult = await SendAsync(new DeletePostCommand(author.ID.Value, missingPostID));
+
+            deleteResult.Error.Should().Be(PostErrors.NotFound(missingPostID));
         }
 
         [Fact]

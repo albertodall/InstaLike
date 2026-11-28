@@ -601,6 +601,17 @@ textarea {
         margin-right: auto;
     }
 
+.form_post .delete-post-button[type=submit] {
+    --icon: url(../lib/fontawesome/svgs/solid/trash-can.svg);
+    border-color: var(--color-error);
+    background-color: var(--color-error);
+}
+
+    .form_post .delete-post-button[type=submit]:hover {
+        border-color: color-mix(in srgb, var(--color-error) 80%, black);
+        background-color: color-mix(in srgb, var(--color-error) 80%, black);
+    }
+
 /* Post comments */
 .form_comment {
     display: flex;

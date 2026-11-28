@@ -15,6 +15,7 @@ namespace InstaLike.Web.EndToEndTests
     public sealed class PostFixture : EndToEndTestFixture
     {
         private const string AutotagUrl = "/Post/Autotag";
+        private const string PostDeleteUrl = "/Post/Delete/";
 
         public PostFixture(InstaLikeApplicationFactory application)
             : base(application)
@@ -197,6 +198,45 @@ namespace InstaLike.Web.EndToEndTests
                 response.StatusCode.Should().Be(HttpStatusCode.Redirect);
                 response.Headers.Location?.OriginalString.Should().StartWith("https://localhost/Account/AccessDenied");
                 (await tamperer.OpenAsync(PostDetailUrl + postID)).QuerySelector(".post-author-comment")?.TextContent.Should().Be("Original text");
+            }
+        }
+
+        [Fact]
+        public async Task Author_Should_Delete_The_Post_From_The_Edit_Page()
+        {
+            using var browser = await RegisterAndLogInAsync("deleter");
+            var postID = await PublishPostAsync(browser, "Short-lived");
+            var edit = await browser.OpenAsync(PostEditUrl + postID);
+
+            var response = await browser.SubmitAsync(Form(edit, "form.form_delete_post"));
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                (await browser.GetAsync(PostDetailUrl + postID)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+                (await browser.GetAsync(PostEditUrl + postID)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+            }
+        }
+
+        [Fact]
+        public async Task Other_Members_Should_Not_Delete_The_Post()
+        {
+            string postID;
+            using (var author = await RegisterAndLogInAsync("deleteauthor"))
+            {
+                postID = await PublishPostAsync(author, "Still here");
+            }
+
+            using var tamperer = await RegisterAndLogInAsync("deleteintruder");
+            var detail = await tamperer.OpenAsync(PostDetailUrl + postID);
+
+            var response = await tamperer.PostFromScriptAsync(detail, PostDeleteUrl + postID, new Dictionary<string, string>());
+
+            using (new AssertionScope())
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+                response.Headers.Location?.OriginalString.Should().StartWith("https://localhost/Account/AccessDenied");
+                (await tamperer.OpenAsync(PostDetailUrl + postID)).QuerySelector(".post-author-comment")?.TextContent.Should().Be("Still here");
             }
         }
 

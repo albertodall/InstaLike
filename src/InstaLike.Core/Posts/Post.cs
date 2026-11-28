@@ -97,5 +97,16 @@ namespace InstaLike.Core.Posts
         {
             return AuthorID == memberID;
         }
+
+        public virtual Result DeleteBy(Guid memberID)
+        {
+            if (!CanBeEditedBy(memberID))
+            {
+                return Result.Failure(PostErrors.DeleteNotAllowed);
+            }
+
+            RaiseDomainEvent(new PostDeletedEvent(ID, AuthorID));
+            return Result.Ok();
+        }
     }
 }

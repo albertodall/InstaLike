@@ -18,4 +18,11 @@ namespace InstaLike.Core.Posts
     /// <param name="CommentAuthorID">The identifier of the comment's author.</param>
     /// <param name="PostAuthorID">The identifier of the post's author.</param>
     public sealed record CommentPublishedEvent(PostId PostID, Guid CommentAuthorID, Guid PostAuthorID) : IDomainEvent;
+
+    /// <summary>
+    /// Represents an event raised when a post is deleted by its author.
+    /// </summary>
+    /// <param name="PostID">The identifier of the deleted post.</param>
+    /// <param name="PostAuthorID">The identifier of the post's author.</param>
+    public sealed record PostDeletedEvent(PostId PostID, Guid PostAuthorID) : IDomainEvent;
 }

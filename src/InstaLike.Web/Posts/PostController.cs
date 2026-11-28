@@ -94,6 +94,24 @@ namespace InstaLike.Web.Posts
         }
 
         [HttpPost]
+        public async Task<IActionResult> Delete(PostId id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(MissingPost);
+            }
+
+            var command = new DeletePostCommand(User.GetIdentifier(), id);
+            var commandResult = await _dispatcher.Send(command);
+            if (commandResult.IsSuccess)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return commandResult.Error.Type == ErrorType.Forbidden ? Forbid() : NotFound();
+        }
+
+        [HttpPost]
         public async Task<IActionResult> PublishComment(PublishCommentModel newComment)
         {
             if (ModelState.GetFieldValidationState(nameof(PublishCommentModel.PostID)) == ModelValidationState.Invalid)

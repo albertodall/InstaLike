@@ -1,4 +1,4 @@
-﻿@using InstaLike.Web.Extensions
+@using InstaLike.Web.Extensions
 
 @model EditPostModel
 
@@ -38,10 +38,12 @@
 
             <div class="post-actions">
                 <button type="button" class="autotag-button" title="Suggest tags that describe the picture">Suggest tags</button>
+                <button type="submit" form="delete-post" class="delete-post-button" title="Delete this post together with its comments and likes">Delete</button>
                 <button type="submit" title="Save">Save</button>
             </div>
         </div>
     </form>
+    <form id="delete-post" class="form_delete_post" method="post" asp-action="Delete" asp-controller="Post" asp-route-id="@Model.PostID" asp-antiforgery="true"></form>
 </div>
 
 @section Scripts {

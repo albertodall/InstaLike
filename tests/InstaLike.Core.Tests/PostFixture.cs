@@ -161,5 +161,34 @@ namespace InstaLike.Core.Tests
 
             sut.CanBeEditedBy(Guid.NewGuid()).Should().BeFalse();
         }
+
+        [Fact]
+        public void Author_Should_Delete_His_Own_Post()
+        {
+            var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+
+            var result = sut.DeleteBy(PostAuthorID);
+
+            using (new AssertionScope())
+            {
+                result.IsSuccess.Should().BeTrue();
+                sut.DomainEvents.Should().ContainSingle()
+                    .Which.Should().Be(new PostDeletedEvent(sut.ID, PostAuthorID));
+            }
+        }
+
+        [Fact]
+        public void User_Cannot_Delete_Post_Authored_By_Other_Users()
+        {
+            var sut = new Post(PostAuthorID, PictureId.New(), (PostText)"test post");
+
+            var result = sut.DeleteBy(Guid.NewGuid());
+
+            using (new AssertionScope())
+            {
+                result.Error.Should().Be(PostErrors.DeleteNotAllowed);
+                sut.DomainEvents.Should().BeEmpty();
+            }
+        }
     }
 }
