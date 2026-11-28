@@ -64,7 +64,7 @@ namespace InstaLike.Web.Membership
 
         public async Task<Result<MemberProfileModel>> Handle(MemberProfileQuery request, CancellationToken cancellationToken)
         {
-            MemberProfileModel profile = null!;
+            MemberProfileModel profile;
 
             _logger.Debug("Reading profile of member {MemberID} with parameters {@Request}.", request.CurrentMemberID, request);
 
@@ -72,15 +72,15 @@ namespace InstaLike.Web.Membership
             {
                 var memberProfileQuery = _session.QueryOver<Member>()
                     .Where(Restrictions.Eq("Nickname", request.Nickname))
-                    .SelectList(list => list
-                        .Select(m => m.ID).WithAlias(() => profile.MemberID)
-                        .Select(m => m.Nickname).WithAlias(() => profile.Nickname)
-                        .Select(m => m.FullName.Name).WithAlias(() => profile.Name)
-                        .Select(m => m.FullName.Surname).WithAlias(() => profile.Surname)
-                        .Select(m => m.Biography).WithAlias(() => profile.Bio)
-                        .Select(m => m.ProfilePicture).WithAlias(() => profile.ProfilePicture)
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<MemberProfileModel>());
+                    .SelectInto(m => new MemberProfileModel
+                    {
+                        MemberID = m.ID,
+                        Nickname = m.Nickname,
+                        Name = m.FullName.Name,
+                        Surname = m.FullName.Surname,
+                        Bio = m.Biography,
+                        ProfilePicture = m.ProfilePicture
+                    });
 
                 // Load the member's information
                 profile = await memberProfileQuery.SingleOrDefaultAsync<MemberProfileModel>(cancellationToken);
@@ -92,41 +92,38 @@ namespace InstaLike.Web.Membership
                 // Number of posts published by this author. 
                 var postCountQuery = _session.QueryOver<Post>()
                     .Where(p => p.AuthorID == profile.MemberID)
-                    .Select(Projections.Count<Post>(p => p.ID))
+                    .ToRowCountQuery()
                     .FutureValue<int>();
 
                 // Thumbnails of the latest published posts.
-                PostThumbnailModel thumbnailModel = null!;
                 var thumbnailsQuery = _session.QueryOver<Post>()
                     .Where(p => p.AuthorID == profile.MemberID)
                     .OrderBy(p => p.PostDate).Desc()
-                    .Select(Projections.ProjectionList()
-                        .Add(Projections.Property<Post>(p => p.ID)
-                            .WithAlias(() => thumbnailModel.PostID))
-                        .Add(Projections.Property<Post>(p => p.Picture)
-                            .WithAlias(() => thumbnailModel.Picture))
-                    )
-                    .TransformUsing(new EntityToModelResultTransformer<PostThumbnailModel>())
+                    .SelectInto(p => new PostThumbnailModel
+                    {
+                        PostID = p.ID,
+                        Picture = p.Picture
+                    })
                     .Take(request.NumberOfThumbnails)
                     .Future<PostThumbnailModel>();
 
                 // Number of followers
                 var followersCountQuery = _session.QueryOver<Follow>()
                     .Where(f => f.FollowedID == profile.MemberID)
-                    .Select(Projections.Count<Follow>(f => f.ID))
+                    .ToRowCountQuery()
                     .FutureValue<int>();
 
                 // Number of followed members
                 var followingCountQuery = _session.QueryOver<Follow>()
                     .Where(f => f.Follower.ID == profile.MemberID)
-                    .Select(Projections.Count<Follow>(f => f.ID))
+                    .ToRowCountQuery()
                     .FutureValue<int>();
 
                 // Is the current member following the selected member?
                 var isFollowedByCurrentMemberQuery = _session.QueryOver<Follow>()
                     .Where(f => f.FollowedID == profile.MemberID)
                     .And(f => f.Follower.ID == request.CurrentMemberID)
-                    .Select(Projections.Count<Follow>(f => f.ID))
+                    .ToRowCountQuery()
                     .FutureValue<int>();
 
                 profile.NumberOfPosts = await postCountQuery.GetValueAsync(cancellationToken);

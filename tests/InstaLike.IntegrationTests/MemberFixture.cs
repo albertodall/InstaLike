@@ -47,11 +47,17 @@ namespace InstaLike.IntegrationTests
             using (new AssertionScope())
             {
                 result.IsSuccess.Should().BeTrue();
+                result.Value.MemberID.Should().Be(author.ID);
+                result.Value.Nickname.Should().Be(author.Nickname);
+                result.Value.Name.Should().Be(author.FullName.Name);
+                result.Value.Surname.Should().Be(author.FullName.Surname);
+                result.Value.Bio.Should().Be(author.Biography);
                 result.Value.IsCurrentMemberProfile.Should().BeFalse();
+                result.Value.Following.Should().BeTrue();
                 result.Value.NumberOfFollowers.Should().Be(1);
                 result.Value.NumberOfFollows.Should().Be(1);
                 result.Value.NumberOfPosts.Should().Be(1);
-                result.Value.RecentPosts.Length.Should().Be(1);
+                result.Value.RecentPosts.Should().ContainSingle().Which.PostID.Should().Be(post.ID);
             }
         }
 
