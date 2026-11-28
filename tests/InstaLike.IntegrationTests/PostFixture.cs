@@ -297,7 +297,12 @@ namespace InstaLike.IntegrationTests
                 comments = await sut.Handle(query, TestContext.Current.CancellationToken);
             }
 
-            comments.Length.Should().Be(1);
+            using (new AssertionScope())
+            {
+                comments.Length.Should().Be(1);
+                comments[0].AuthorNickName.Should().Be(author.Nickname);
+                comments[0].Text.Should().Be("First comment");
+            }
         }
 
         [Fact]

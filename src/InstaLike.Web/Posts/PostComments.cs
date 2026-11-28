@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
+using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.SqlCommand;
-using NHibernate.Transform;
 using Serilog;
 
 namespace InstaLike.Web.Posts
@@ -42,19 +42,18 @@ namespace InstaLike.Web.Posts
 
             using (var tx = _session.BeginTransaction())
             {
-                CommentModel comment = null!;
                 Comment commentEntity = null!;
                 Member commentAuthor = null!;
                 var commentsQuery = _session.QueryOver(() => commentEntity)
                     .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                     .Where(() => commentEntity.Post.ID == request.PostID)
                     .OrderBy(() => commentEntity.CommentDate).Asc
-                    .SelectList(list => list
-                        .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
-                        .Select(() => commentEntity.Text).WithAlias(() => comment.Text)
-                        .Select(() => commentEntity.CommentDate).WithAlias(() => comment.CommentDate)
-                    )
-                    .TransformUsing(Transformers.AliasToBean<CommentModel>());
+                    .SelectInto(() => new CommentModel
+                    {
+                        AuthorNickName = commentAuthor.Nickname,
+                        Text = commentEntity.Text,
+                        CommentDate = commentEntity.CommentDate
+                    });
 
                 result = (await commentsQuery.ListAsync<CommentModel>(cancellationToken)).ToArray();
             }
