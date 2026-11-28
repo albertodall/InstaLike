@@ -6,6 +6,7 @@ using InstaLike.Core.Membership;
 using InstaLike.Core.Posts;
 using InstaLike.Core.SharedKernel;
 using InstaLike.Core.Social;
+using InstaLike.Web.Data;
 using MediatR;
 using NHibernate;
 using NHibernate.Criterion;
@@ -107,18 +108,17 @@ namespace InstaLike.Web.Posts
                 // Comments for all posts included in the timeline.
                 Comment commentEntity = null!;
                 Member commentAuthor = null!;
-                CommentModel comment = null!;
                 var commentsQuery = _session.QueryOver(() => commentEntity)
                     .JoinEntityAlias(() => commentAuthor, Restrictions.EqProperty(Projections.Property(() => commentAuthor.ID), Projections.Property(() => commentEntity.AuthorID)), JoinType.InnerJoin)
                     .WithSubquery
                         .WhereProperty(() => commentEntity.Post.ID).In(postIdsToShowInTimelineQuery)
-                    .SelectList(list => list
-                        .Select(() => commentEntity.Post.ID).WithAlias(() => comment.PostID)
-                        .Select(() => commentAuthor.Nickname).WithAlias(() => comment.AuthorNickName)
-                        .Select(() => commentEntity.Text).WithAlias(() => comment.Text)
-                        .Select(() => commentEntity.CommentDate).WithAlias(() => comment.CommentDate)
-                    )
-                    .TransformUsing(Transformers.AliasToBean<CommentModel>())
+                    .SelectInto(() => new CommentModel
+                    {
+                        PostID = commentEntity.Post.ID,
+                        AuthorNickName = commentAuthor.Nickname,
+                        Text = commentEntity.Text,
+                        CommentDate = commentEntity.CommentDate
+                    })
                     .Future<CommentModel>();
 
                 // Number of likes for each post that has likes.
@@ -142,19 +142,18 @@ namespace InstaLike.Web.Posts
                     .Select(l => l.Post.ID)
                     .Future<PostId>();
 
-                PostAuthor author = null!;
                 var authorsQuery = _session.QueryOver<Member>()
                     .WithSubquery
                         .WhereProperty(u => u.ID).In(QueryOver.Of<Post>()
                             .WithSubquery
                                 .WhereProperty(p => p.ID).In(postIdsToShowInTimelineQuery)
                             .Select(p => p.AuthorID))
-                    .SelectList(fields => fields
-                        .Select(u => u.ID).WithAlias(() => author.ID)
-                        .Select(u => u.Nickname).WithAlias(() => author.Nickname)
-                        .Select(u => u.ProfilePicture).WithAlias(() => author.ProfilePicture)
-                    )
-                    .TransformUsing(Transformers.AliasToBean<PostAuthor>())
+                    .SelectInto(u => new PostAuthor
+                    {
+                        ID = u.ID,
+                        Nickname = u.Nickname,
+                        ProfilePicture = u.ProfilePicture
+                    })
                     .Future<PostAuthor>();
 
                 var timelineQuery = _session.QueryOver(() => post)
